@@ -17,10 +17,13 @@
   "dependencies": {
     "babel-core": "^5.8.22",
     "babel-plugin-dead-code-elimination": "^1.0.2",
+    "babel-plugin-member-expression-literals": "^1.0.1",
     "babel-plugin-merge-sibling-variables": "^1.0.2",
     "babel-plugin-minify-booleans": "^1.0.2",
+    "babel-plugin-property-literals": "^1.0.1",
     "babel-plugin-simplify-comparison-operators": "^1.0.2",
     "bytes": "^2.1.0",
+    "closure-compiler": "^0.2.7",
     "uglify-js": "^2.4.24"
   }
 }

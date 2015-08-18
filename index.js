@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var child = require("child_process");
 var uglify = require("uglify-js");
 var bytes = require("bytes");
 var babel = require("babel-core");
@@ -22,21 +23,74 @@ function test(name, callback) {
 
   var gzipped = zlib.gzipSync(result);
 
-  console.log(name, now + "ms", bytes(result.length) + " raw", bytes(gzipped.length) + " gzipped");
+  console.log(name, bytes(result.length) + " raw", bytes(gzipped.length) + " gzipped");
 }
 
-test("babel", function (code) {
+test("normal", function (code) {
+  return code;
+});
+
+var miscPlugin = new babel.Plugin("dead-code-elimination", {
+  metadata: {
+    group: "builtin-pre"
+  },
+
+  visitor: {
+    // remove side effectless statement
+    ExpressionStatement: function () {
+      if (this.get("expression").isStatic() && !this.isCompletionRecord()) {
+        this.dangerouslyRemove();
+      }
+    },
+
+    // turn blocked ifs into single statements
+    IfStatement: function (node) {
+      coerceIf("consequent");
+      coerceIf("alternate");
+
+      function coerceIf(key) {
+        var body = node[key];
+        if (!body || body.length !== 1) return;
+
+        var first = body[0];
+        if (first.type === "VariableDeclaration" && first.kind !== "var") return;
+
+        node[key] = first;
+      }
+    }
+  }
+});
+
+test("babel", function (code, callback) {
   return babel.transform(code, {
-    blacklist: ["strict"],
-    plugins: ["merge-sibling-variables", "simplify-comparison-operators", "minify-booleans"],
+    experimental: true,
+    whitelist: ["minification.deadCodeElimination"],
+    plugins: [
+      "merge-sibling-variables",
+      "simplify-comparison-operators",
+      "minify-booleans",
+      "member-expression-literals",
+      //"dead-code-elimination",
+      "property-literals",
+      //"constant-folding",
+      miscPlugin
+    ],
     compact: true,
     comments: false
   }).code;
 });
 
-test("uglify", function (code) {
+test("fb jsmin", function (code, callback) {
+  return fs.readFileSync("fb-jsmin.js");
+});
+
+test("closure", function (code, callback) {
+  return child.execSync("java -jar gcc.jar --js " + filename);
+});
+
+test("uglify", function (code, callback) {
   return uglify.minify(code, {
     fromString: true,
-    mangle: false
+    //mangle: false
   }).code;
 });
