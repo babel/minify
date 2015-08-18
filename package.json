@@ -23,6 +23,8 @@
     "babel-plugin-property-literals": "^1.0.1",
     "babel-plugin-simplify-comparison-operators": "^1.0.2",
     "bytes": "^2.1.0",
+    "chalk": "^1.1.0",
+    "cli-table": "^0.3.1",
     "closure-compiler": "^0.2.7",
     "uglify-js": "^2.4.24"
   }
