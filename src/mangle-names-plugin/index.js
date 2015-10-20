@@ -35,7 +35,7 @@ module.exports = ({ Plugin, types: t }) => {
     },
   };
 
-  return new Plugin('base54', {
+  return new Plugin('mangle-names', {
     pre(state) {
       state.set('base54', new Base54());
       state.set('refs', new Map());
