@@ -262,6 +262,36 @@ function canUse(name, scope) {
   return true;
 }
 
+  function flipNegation(node) {
+    if (!node.consequent || !node.alternate) return;
+
+    var test = node.test;
+    var flip = false;
+
+    if (t.isBinaryExpression(test)) {
+      if (test.operator === "!==") {
+        test.operator = "===";
+        flip = true;
+      }
+
+      if (test.operator === "!=") {
+        test.operator = "==";
+        flip = true;
+      }
+    }
+
+    if (t.isUnaryExpression(test.type, { operator: "!" })) {
+      node.test = test.argument;
+      flip = true;
+    }
+
+    if (flip) {
+      var consequent = node.consequent;
+      node.consequent = node.alternate;
+      node.alternate = consequent;
+    }
+  }
+
 var miscPlugin = new babel.Plugin("dead-code-elimination", {
   metadata: {
     group: "builtin-pre"
@@ -272,6 +302,268 @@ var miscPlugin = new babel.Plugin("dead-code-elimination", {
     ReferencedIdentifier: function (node) {
       if (node.name === "undefined") {
         return t.unaryExpression("void", t.literal(0), true);
+      }
+    },
+
+    // { "foo": "bar" } -> { foo: "bar" }
+    Property: {
+      exit: function (node) {
+        var key = node.key;
+        if (t.isLiteral(key) && t.isValidIdentifier(key.value)) {
+          // "foo": "bar" -> foo: "bar"
+          node.key = t.identifier(key.value);
+          node.computed = false;
+        }
+      }
+    },
+
+    // foo["bar"] -> foo.bar
+    MemberExpression: {
+      exit: function (node) {
+        var prop = node.property;
+        if (node.computed && t.isLiteral(prop) && t.isValidIdentifier(prop.value)) {
+          // foo["bar"] => foo.bar
+          node.property = t.identifier(prop.value);
+          node.computed = false;
+        }
+      }
+    },
+
+    // Number(foo) -> +foo
+    CallExpression: function (node) {
+      if (t.isIdentifier(node.callee, { name: "Number" }) && node.arguments.length === 1) {
+        return t.unaryExpression("+", node.arguments[0], true);
+      }
+    },
+
+    // !foo && bar -> foo || bar
+    LogicalExpression: function (node) {
+      if (node.operator === "&&" && t.isUnaryExpression(node.left, { operator: "!" })) {
+        node.operator = "||";
+        node.left = node.left.argument;
+      }
+    },
+
+    // shorten booleans to a negation
+    // true -> !0
+    // false -> !1
+    Literal: function (node) {
+      if (typeof node.value === "boolean") {
+        return t.unaryExpression("!", t.literal(+!node.value), true);
+      }
+    },
+
+    BinaryExpression: {
+      enter: [
+        // flip comparisons with a pure right hand value, this ensures consistency with comparisons
+        // and increases the length of strings that gzip can match
+        // typeof blah === "function" -> "function" === typeof blah
+        function (node) {
+          if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 && this.get("right").isPure()) {
+            var left = node.left;
+            node.left = node.right;
+            node.right = left;
+          }
+        },
+
+        // simplify comparison operations if we're 100% certain that each value will always be of the
+        // same type
+        function (node) {
+          var op = node.operator;
+          if (op !== "===" && op !== "!==") return;
+
+          var left  = this.get("left");
+          var right = this.get("right");
+          if (left.baseTypeStrictlyMatches(right)) {
+            node.operator = node.operator.slice(0, -1);
+          }
+        }
+      ]
+    },
+
+    // !foo ? "foo" : "bar" -> foo ? "bar" : "foo"
+    // foo !== "lol" ? "foo" : "bar" -> foo === "lol" ? "bar" : "foo"
+    ConditionalExpression: function (node) {
+      flipNegation(node);
+    },
+
+    // mangle names
+    Scope: {
+      enter: function (node, parent, scope) {
+        for (var name in scope.bindings) {
+          var binding = scope.bindings[name];
+          if (binding.references !== 1) continue;
+          if (!binding.constant) continue;
+          if (!binding.path.isVariableDeclarator()) continue;
+
+          var init = binding.path.get("init");
+          if (!init.isPure()) continue;
+
+          binding.path.dangerouslyRemove();
+          binding.referencePaths[0].replaceWith(init.node);
+          delete scope.bindings[name];
+        }
+      },
+
+      exit: function (node, parent, scope) {
+        var bindings = scope.bindings;
+        scope.bindings = {};
+
+        var names = Object.keys(bindings);
+        names = names.sort(function (a, b) {
+          return bindings[a].references < bindings[b].references;
+        });
+
+        for (var k = 0; k < names.length; k++) {
+          var name = names[k];
+          var binding = bindings[name];
+          var refs = binding._renameRefs;
+          if (!refs) continue;
+
+          var newName;
+          var i = 0;
+          do {
+            newName = base54(++i);
+          } while(!t.isValidIdentifier(newName) || !canUseVariable(newName, scope));
+          scope.bindings[newName] = binding;
+
+          for (var i = 0; i < refs.length; i++) {
+            var ref = refs[i];
+            ref.name = newName;
+          }
+        }
+      }
+    },
+
+    "ReferencedIdentifier|BindingIdentifier": function (node, parent, scope) {
+      var renamed = scope.getBinding(node.name);
+      if (renamed) {
+        renamed._renameRefs = renamed._renameRefs || [];
+        renamed._renameRefs.push(node);
+      }
+    },
+
+    // remove side effectless statement
+    ExpressionStatement: function () {
+      if (this.get("expression").isPure() && !this.isCompletionRecord()) {
+        this.dangerouslyRemove();
+      }
+    },
+
+    // hoist all function declarations
+    Block: function (node) {
+      var top = [];
+      var bottom = [];
+
+      for (var i = 0; i < node.body.length; i++) {
+        var bodyNode = node.body[i];
+        if (t.isFunctionDeclaration(bodyNode)) {
+          top.push(bodyNode);
+        } else {
+          bottom.push(bodyNode);
+        }
+      }
+
+      node.body = top.concat(bottom);
+    },
+
+    // concat
+    VariableDeclaration: {
+      enter: [
+        // concat variale declarations next to for loops with it's initialisers if they're of the same variable kind
+        function (node) {
+          if (!this.inList) return;
+
+          var next = this.getSibling(this.key + 1);
+          if (!next.isForStatement()) return;
+
+          var init = next.get("init");
+          if (!init.isVariableDeclaration({ kind: node.kind })) return;
+
+          init.node.declarations = node.declarations.concat(init.node.declarations);
+          this.dangerouslyRemove();
+        },
+
+        // concat variables of the same kind with their siblings
+        function (node) {
+          if (!this.inList) return;
+
+          while (true) {
+            var sibling = this.getSibling(this.key + 1);
+            if (!sibling.isVariableDeclaration({ kind: node.kind })) break;
+
+            node.declarations = node.declarations.concat(sibling.node.declarations);
+            sibling.dangerouslyRemove();
+          }
+        }
+      ]
+    },
+
+    // turn a for loop block block with single statement loops into just the single statement
+    For: function (node) {
+      var block = node.body;
+      if (!block || !t.isBlockStatement(block)) return;
+
+      var body = block.body;
+      if (body.length !== 1) return;
+
+      var first = body[0];
+      node.body = first;
+    },
+
+    // turn block statements into sequence expression
+    BlockStatement: function (node, parent, scope) {
+      if (t.isFunction(parent) && node === parent.body) return;
+      if (t.isTryStatement(parent) || t.isCatchClause(parent)) return;
+
+      var seq = t.toSequenceExpression(node.body, scope);
+      if (seq) return t.expressionStatement(seq);
+    },
+
+    // turn program body into sequence expression
+    Program: function (node, parent, scope) {
+      var seq = t.toSequenceExpression(node.body, scope);
+      if (seq) node.body = [seq];
+    },
+
+    // turn blocked ifs into single statements
+    IfStatement: {
+      exit: function (node) {
+        coerceIf("consequent");
+        coerceIf("alternate");
+        flipNegation(node);
+
+        if (node.consequent && node.alternate &&
+          (
+            t.isReturnStatement(node.consequent) ||
+            (t.isBlockStatement(node.consequent) && t.isReturnStatement(node.consequent.body[node.consequent.body.length - 1]))
+          )
+        ) {
+          this.insertAfter(t.isBlockStatement(node.alternate) ? node.alternate.body : node.alternate);
+          node.alternate = null;
+          return;
+        }
+
+        if (node.consequent && !node.alternate && node.consequent.type === "ExpressionStatement" && !this.isCompletionRecord()) {
+          return t.expressionStatement(t.logicalExpression("&&", node.test, node.consequent.expression));
+        }
+
+        if (t.isExpressionStatement(node.consequent) && t.isExpressionStatement(node.alternate)) {
+          return t.conditionalExpression(node.test, node.consequent.expression, node.alternate.expression);
+        }
+
+        function coerceIf(key) {
+          var block = node[key];
+          if (!block || !t.isBlockStatement(block)) return;
+
+          var body = block.body;
+          if (body.length !== 1) return;
+
+          var first = body[0];
+          if (t.isVariableDeclaration(first) && first.kind !== "var") return;
+
+          node[key] = first;
+        }
       }
     },
 
@@ -306,44 +598,6 @@ var miscPlugin = new babel.Plugin("dead-code-elimination", {
         }
       }
     },
-
-    "ReferencedIdentifier|BindingIdentifier": function (node, parent, scope) {
-      var renamed = scope.getBinding(node.name);
-      if (renamed) {
-        renamed._renameRefs = renamed._renameRefs || [];
-        renamed._renameRefs.push(node);
-      }
-    },
-
-    // remove side effectless statement
-    ExpressionStatement: function (node) {
-      if (this.scope.isStatic(node.expression) && !this.isCompletionRecord()) {
-        this.dangerouslyRemove();
-      }
-    },
-
-    // turn blocked ifs into single statements
-    IfStatement: function (node) {
-      coerceIf("consequent");
-      coerceIf("alternate");
-
-      if (node.consequent && !node.alternate && node.consequent.type === "ExpressionStatement" && !this.isCompletionRecord()) {
-        return t.expressionStatement(t.binaryExpression("&&", node.test, node.consequent.expression));
-      }
-
-      function coerceIf(key) {
-        var block = node[key];
-        if (!block || block.type !== "BlockStatement") return;
-
-        var body = block.body;
-        if (body.length !== 1) return;
-
-        var first = body[0];
-        if (first.type === "VariableDeclaration" && first.kind !== "var") return;
-
-        node[key] = first;
-      }
-    }
   }
 });
 
