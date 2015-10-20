@@ -240,6 +240,7 @@ var base54Plugin = new babel.Plugin("base54", {
 
 function canUse(name, scope) {
   var binding = scope.getBinding(name);
+  return true;
   if (binding) {
     var refs = binding.referencePaths;
 
@@ -315,8 +316,8 @@ var miscPlugin = new babel.Plugin("dead-code-elimination", {
     },
 
     // remove side effectless statement
-    ExpressionStatement: function () {
-      if (this.get("expression").isStatic() && !this.isCompletionRecord()) {
+    ExpressionStatement: function (node) {
+      if (this.scope.isStatic(node.expression) && !this.isCompletionRecord()) {
         this.dangerouslyRemove();
       }
     },
@@ -350,13 +351,17 @@ test("babel", function (code, callback) {
   return babel.transform(code, {
     experimental: true,
     whitelist: [],
+    optional: [
+      'minification.memberExpressionLiterals',
+      'minification.propertyLiterals',
+    ],
     plugins: [
       "merge-sibling-variables",
       "simplify-comparison-operators",
       "minify-booleans",
-      "member-expression-literals",
+//      "member-expression-literals",
       //"dead-code-elimination",
-      "property-literals",
+//      "property-literals",
       //"constant-folding",
       base54Plugin,
       miscPlugin
