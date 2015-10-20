@@ -46,6 +46,11 @@ module.exports = ({ Plugin, types: t }) => {
           node.arguments.length === 1) {
           return t.unaryExpression('+', node.arguments[0], true);
         }
+
+        if (t.isIdentifier(node.callee, { name: 'String' }) &&
+          node.arguments.length === 1) {
+          return t.binaryExpression('+', node.arguments[0], t.literal(''));
+        }
       },
 
       // !foo && bar -> foo || bar
@@ -124,8 +129,8 @@ module.exports = ({ Plugin, types: t }) => {
       // concat
       VariableDeclaration: {
         enter: [
-          // concat letiale declarations next to for loops with it's
-          // initialisers if they're of the same letiable kind
+          // concat variable declarations next to for loops with it's
+          // initialisers if they're of the same variable kind
           function (node) {
             if (!this.inList) {
               return;
@@ -137,7 +142,7 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             let init = next.get('init');
-            if (!init.isLetiableDeclaration({ kind: node.kind })) {
+            if (!init.isVariableDeclaration({ kind: node.kind })) {
               return;
             }
 
@@ -147,7 +152,7 @@ module.exports = ({ Plugin, types: t }) => {
             this.dangerouslyRemove();
           },
 
-          // concat letiables of the same kind with their siblings
+          // concat variables of the same kind with their siblings
           function (node) {
             if (!this.inList) {
               return;
@@ -155,7 +160,7 @@ module.exports = ({ Plugin, types: t }) => {
 
             while (true) {
               let sibling = this.getSibling(this.key + 1);
-              if (!sibling.isLetiableDeclaration({ kind: node.kind })) {
+              if (!sibling.isVariableDeclaration({ kind: node.kind })) {
                 break;
               }
 
@@ -200,6 +205,8 @@ module.exports = ({ Plugin, types: t }) => {
         }
       },
 
+/*
+      // TODO: this doesn't take into account variable declerations
       // turn program body into sequence expression
       Program: function (node, parent, scope) {
         let seq = t.toSequenceExpression(node.body, scope);
@@ -207,7 +214,7 @@ module.exports = ({ Plugin, types: t }) => {
           node.body = [seq];
         }
       },
-
+*/
       // turn blocked ifs into single statements
       IfStatement: {
         exit: function (node) {
@@ -228,7 +235,7 @@ module.exports = ({ Plugin, types: t }) => {
             this.insertAfter(
               t.isBlockStatement(node.alternate)
                 ? node.alternate.body
-            : node.alternate
+                : node.alternate
             );
             node.alternate = null;
             return;
@@ -261,7 +268,7 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             let first = body[0];
-            if (t.isLetiableDeclaration(first) && first.kind !== 'let') {
+            if (t.isVariableDeclaration(first) && first.kind !== 'let') {
               return;
             }
 
@@ -293,7 +300,7 @@ module.exports = ({ Plugin, types: t }) => {
       }
     }
 
-    if (t.isUnaryExpression(test.type, { operator: '!' })) {
+    if (t.isUnaryExpression(test, { operator: '!' })) {
       node.test = test.argument;
       flip = true;
     }
