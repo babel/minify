@@ -387,54 +387,6 @@ var miscPlugin = new babel.Plugin("dead-code-elimination", {
       flipNegation(node);
     },
 
-    // mangle names
-    Scope: {
-      enter: function (node, parent, scope) {
-        for (var name in scope.bindings) {
-          var binding = scope.bindings[name];
-          if (binding.references !== 1) continue;
-          if (!binding.constant) continue;
-          if (!binding.path.isVariableDeclarator()) continue;
-
-          var init = binding.path.get("init");
-          if (!init.isPure()) continue;
-
-          binding.path.dangerouslyRemove();
-          binding.referencePaths[0].replaceWith(init.node);
-          delete scope.bindings[name];
-        }
-      },
-
-      exit: function (node, parent, scope) {
-        var bindings = scope.bindings;
-        scope.bindings = {};
-
-        var names = Object.keys(bindings);
-        names = names.sort(function (a, b) {
-          return bindings[a].references < bindings[b].references;
-        });
-
-        for (var k = 0; k < names.length; k++) {
-          var name = names[k];
-          var binding = bindings[name];
-          var refs = binding._renameRefs;
-          if (!refs) continue;
-
-          var newName;
-          var i = 0;
-          do {
-            newName = base54(++i);
-          } while(!t.isValidIdentifier(newName) || !canUseVariable(newName, scope));
-          scope.bindings[newName] = binding;
-
-          for (var i = 0; i < refs.length; i++) {
-            var ref = refs[i];
-            ref.name = newName;
-          }
-        }
-      }
-    },
-
     "ReferencedIdentifier|BindingIdentifier": function (node, parent, scope) {
       var renamed = scope.getBinding(node.name);
       if (renamed) {
@@ -569,6 +521,24 @@ var miscPlugin = new babel.Plugin("dead-code-elimination", {
 
     // mangle names
     Scope: {
+      enter: function (node, parent, scope) {
+        // TODO: fix referencPaths
+        return;
+        for (var name in scope.bindings) {
+          var binding = scope.bindings[name];
+          if (binding.references !== 1) continue;
+          if (!binding.constant) continue;
+          if (!binding.path.isVariableDeclarator()) continue;
+
+          var init = binding.path.get("init");
+          if (!init.isPure()) continue;
+
+          binding.path.dangerouslyRemove();
+          binding.referencePaths[0].replaceWith(init.node);
+          delete scope.bindings[name];
+        }
+      },
+
       exit: function (node, parent, scope) {
         var bindings = scope.bindings;
         scope.bindings = {};
