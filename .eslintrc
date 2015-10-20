@@ -1,19 +1,16 @@
 {
   "parser": "babel-eslint",
-  "plugins": [
-    "react"
-  ],
   "env": {
     "browser": true,
     "es6": true,
-    "node": true
+    "node": true,
+    "jest": true,
   },
   "rules": {
     "strict": 0,
     "quotes": [2, "single"],
     "comma-dangle": [2, "always-multiline"],
     "camelcase": [2, {"properties": "never"}],
-    "react/jsx-uses-vars": 2,
     "new-cap": 2,                    // require a capital letter for constructors
     "no-var": 2,
     "no-cond-assign": 1,             // disallow assignment in conditional expressions
@@ -140,7 +137,7 @@
     "no-mixed-spaces-and-tabs": 1,   // disallow mixed spaces and tabs for indentation
     "quotes": [1, "single", "avoid-escape"],         // specify whether double or single quotes should be used
     "quote-props": 0,                // require quotes around object literal property names (off by default)
-    "semi": 1,                       // require or disallow use of semicolons instead of ASI
+    "semi": 2,                       // require or disallow use of semicolons instead of ASI
     "sort-vars": 0,                  // sort variables within the same declaration block (off by default)
     "space-after-keywords": 1,       // require a space after certain keywords (off by default)
     "space-in-brackets": 0,          // require or disallow spaces inside brackets (off by default)

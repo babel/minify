@@ -13,6 +13,9 @@
   "bugs": {
     "url": "https://github.com/facebook/babel-minify/issues"
   },
+  "scripts": {
+    "test": "eslint src/ && jest"
+  },
   "homepage": "https://github.com/facebook/babel-minify#readme",
   "dependencies": {
     "babel-core": "^5.8.22",
