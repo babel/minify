@@ -54,85 +54,96 @@ module.exports = ({ Plugin, types: t }) => {
 
       'ReferencedIdentifier|BindingIdentifier'(node, parent, scope, state) {
         const refs = state.get('refs');
-        const binding = scope.getBinding(node.name);
-        if (!refs.has(binding)) {
-          refs.set(binding, []);
-        }
-        refs.get(binding).push(this);
+        recordRef(refs, scope.getBinding(node.name), this);
       },
 
-      'FunctionExpression|FunctionDeclaration'(node, path, scope, state) {
+      'FunctionExpression|FunctionDeclaration'(node, parent, scope, state) {
         state.get('base54').consider('function');
       },
 
-      'ClassExpression|ClassDeclaration'(node, path, scope, state) {
+      'ClassExpression|ClassDeclaration'(node, parent, scope, state) {
         state.get('base54').consider('class');
       },
 
-      Identifier(node, path, scope, state) {
-        state.get('base54').consider(node.name);
+      Identifier(node, parent, scope, state) {
+        // Don't consider lexical bindings as they will be renamed.
+        if (!scope.getBinding(node.name)) {
+          state.get('base54').consider(node.name);
+        }
+
+        // For some reason ReferencedIdentifier|BindingIdentifier are not
+        // capturing params.
+        if (t.isFunction(parent)) {
+          for (let param of parent.params) {
+            if (param === node) {
+              const refs = state.get('refs');
+              recordRef(refs, scope.getBinding(node.name), this);
+              return;
+            }
+          }
+        }
       },
 
-      ReturnStatement(node, path, scope, state) {
+      ReturnStatement(node, parent, scope, state) {
         state.get('base54').consider('return');
       },
 
-      ThrowStatement(node, path, scope, state) {
+      ThrowStatement(node, parent, scope, state) {
         state.get('base54').consider('throw');
       },
 
-      ContinueStatement(node, path, scope, state) {
+      ContinueStatement(node, parent, scope, state) {
         state.get('base54').consider('continue');
       },
 
-      BreakStatement(node, path, scope, state) {
+      BreakStatement(node, parent, scope, state) {
         state.get('base54').consider('break');
       },
 
-      DebuggerStatement(node, path, scope, state) {
+      DebuggerStatement(node, parent, scope, state) {
         state.get('base54').consider('debugger');
       },
 
-      WhileStatement(node, path, scope, state) {
+      WhileStatement(node, parent, scope, state) {
         state.get('base54').consider('while');
       },
 
-      DoWhileStatement(node, path, scope, state) {
+      DoWhileStatement(node, parent, scope, state) {
         state.get('base54').consider('do while');
       },
 
-      For(node, path, scope, state) {
+      For(node, parent, scope, state) {
         state.get('base54').consider('for');
       },
 
-      ForInStatement(node, path, scope, state) {
+      ForInStatement(node, parent, scope, state) {
         state.get('base54').consider('in');
       },
 
-      ForOfStatement(node, path, scope, state) {
+      ForOfStatement(node, parent, scope, state) {
         state.get('base54').consider('of');
       },
 
-      IfStatement(node, path, scope, state) {
+      IfStatement(node, parent, scope, state) {
         state.get('base54').consider('if');
         if (node.alternate) {
           state.get('base54').consider('else');
         }
       },
 
-      VariableDeclaration(node, path, scope, state) {
+      VariableDeclaration(node, parent, scope, state) {
         state.get('base54').consider(node.kind);
       },
 
-      NewExpression(node, path, scope, state) {
+      NewExpression(node, parent, scope, state) {
         state.get('base54').consider('new');
       },
 
-      ThisExpression(node, path, scope, state) {
+      ThisExpression(node, parent, scope, state) {
         state.get('base54').consider('this');
       },
 
-      TryStatement(node, path, scope, state) {
+      TryStatement(node, parent, scope, state) {
         state.get('base54').consider('try');
       },
     },
@@ -160,5 +171,12 @@ module.exports = ({ Plugin, types: t }) => {
       } while (myScope);
     }
     return true;
+  }
+
+  function recordRef(refs, binding, refPath) {
+    if (!refs.has(binding)) {
+      refs.set(binding, []);
+    }
+    refs.get(binding).push(refPath);
   }
 };

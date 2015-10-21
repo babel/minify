@@ -9,13 +9,13 @@ function transform(code) {
   }).code;
 }
 
-describe('base54', () => {
+describe('mangle-names', () => {
   it('should mangle names', () => {
     const expected = unpad(`
       function foo() {
-        var x = 1;
-        if (x) {
-          console.log(x);
+        var o = 1;
+        if (o) {
+          console.log(o);
         }
       }
     `);
@@ -34,10 +34,10 @@ describe('base54', () => {
   it('should handle name collisions', () => {
     const expected = unpad(`
       function foo() {
-        var o = 2;
-        var x = 1;
-        if (x) {
-          console.log(x + o);
+        var n = 2;
+        var o = 1;
+        if (o) {
+          console.log(o + n);
         }
       }
     `);
@@ -56,18 +56,37 @@ describe('base54', () => {
 
   it('should be fine with shadowing', () => {
     const expected = unpad(`
-      var x = 1;
+      var o = 1;
       function foo() {
-        var x = 1;
-        if (x) {
-          console.log(x);
+        var o = 1;
+        if (o) {
+          console.log(o);
         }
       }
     `);
     const source = unpad(`
-      var x = 1;
+      var o = 1;
       function foo() {
         var xxx = 1;
+        if (xxx) {
+          console.log(xxx);
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should mangle args', () => {
+    const expected = unpad(`
+      function foo(o) {
+        if (o) {
+          console.log(o);
+        }
+      }
+    `);
+    const source = unpad(`
+      function foo(xxx) {
         if (xxx) {
           console.log(xxx);
         }
