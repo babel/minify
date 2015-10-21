@@ -240,9 +240,8 @@ var base54Plugin = new babel.Plugin("base54", {
 
 function canUse(name, scope) {
   var binding = scope.getBinding(name);
-  return true;
   if (binding) {
-    var refs = binding.referencePaths;
+    var refs = binding._renameRefs;
 
     // go through all references
     for (var i = 0; i < refs.length; i++) {
@@ -391,7 +390,7 @@ var miscPlugin = new babel.Plugin("dead-code-elimination", {
       var renamed = scope.getBinding(node.name);
       if (renamed) {
         renamed._renameRefs = renamed._renameRefs || [];
-        renamed._renameRefs.push(node);
+        renamed._renameRefs.push(this);
       }
     },
 
@@ -562,7 +561,7 @@ var miscPlugin = new babel.Plugin("dead-code-elimination", {
           scope.bindings[newName] = binding;
 
           for (var i = 0; i < refs.length; i++) {
-            var ref = refs[i];
+            var ref = refs[i].node;
             ref.name = newName;
           }
         }
@@ -584,9 +583,9 @@ test("babel", function (code, callback) {
       "simplify-comparison-operators",
       "minify-booleans",
 //      "member-expression-literals",
-      //"dead-code-elimination",
+//      "dead-code-elimination",
 //      "property-literals",
-      //"constant-folding",
+//      "constant-folding",
       base54Plugin,
       miscPlugin
     ],
