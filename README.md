@@ -24,3 +24,12 @@ fb jsmin 235.99kB 80%     57.84kB 40%      18ms
 ```
 
 Major bug was that a variable name might've been used everywhere which is amazing for gzip.
+
+After a better job with the variable encoding and fixing a bug not renaming the params:
+```
+        raw      raw win gzip    gzip win parse time
+uglify  213.49kB 98%     54.02kB 50%      18ms
+closure 209.5kB  102%    54.45kB 49%      17ms
+babel   216.96kB 95%     54.92kB 47%      18ms
+jsxmin  235.99kB 80%     57.84kB 40%      17ms
+```
