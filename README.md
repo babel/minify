@@ -33,3 +33,12 @@ closure 209.5kB  102%    54.45kB 49%      17ms
 babel   216.96kB 95%     54.92kB 47%      18ms
 jsxmin  235.99kB 80%     57.84kB 40%      17ms
 ```
+
+TODOS:
+
+- Convert whiles to fors
+- Do a better job at joining vars into the init part of the for
+- Join statements into sequence expressions at the closest oppurtinity
+  - in return statements for example
+- avoid semicolons at the close of the function
+- use `!` for self-executing functions

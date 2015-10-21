@@ -50,4 +50,41 @@ describe('dce-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should work with multiple scopes', () => {
+    const expected = unpad(`
+      function x() {
+        function y() {
+          console.log(1);
+        }
+      }
+    `);
+    const source = unpad(`
+      function x() {
+        var i = 1;
+        function y() {
+          console.log(i);
+        }
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should not inline function expressions', () => {
+    const expected = unpad(`
+      var x = function x() {
+        return 1;
+      };
+      x();
+    `);
+    const source = unpad(`
+      var x = function() {
+        return 1;
+      };
+      x();
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
 });

@@ -18,6 +18,10 @@ module.exports = ({ Plugin, types: t }) => {
       group: 'builtin-pre',
     },
 
+    pre(state) {
+      state.set('bindingsToReplace', new Map());
+    },
+
     visitor: {
       // remove side effectless statement
       ExpressionStatement: function () {
@@ -38,20 +42,21 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             let init = binding.path.get('init');
-            if (!init.isPure()) {
+            if (!init.isPure() || t.isFunction(init.node)) {
               continue;
             }
+
             binding.path.dangerouslyRemove();
             bindingsToReplace[name] = init.node;
             delete scope.bindings[name];
           }
 
-          state.set('bindingsToReplace', bindingsToReplace);
+          state.get('bindingsToReplace').set(scope, bindingsToReplace);
         },
 
         exit(node, parent, scope, state) {
           this.traverse(removeReferenceVisitor, {
-            bindingsToReplace: state.get('bindingsToReplace'),
+            bindingsToReplace: state.get('bindingsToReplace').get(scope),
           });
         },
       },
