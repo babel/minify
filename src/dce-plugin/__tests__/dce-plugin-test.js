@@ -87,4 +87,28 @@ describe('dce-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  // bug in babel https://github.com/babel/babel/issues/2570
+  it('should not inline vars with multiple references', () => {
+    const expected = unpad(`
+      var x = function() {
+        if (!y) {
+          y = 1;
+        }
+      };
+      x();
+      var y = null;
+    `);
+    const source = unpad(`
+      var x = function() {
+        if (!y) {
+          y = 1;
+        }
+      };
+      x();
+      var y = null;
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
 });
