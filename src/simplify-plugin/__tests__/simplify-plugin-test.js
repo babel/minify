@@ -326,4 +326,18 @@ describe('simplify-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should merge statements into the init part of for', () => {
+    const source = unpad(`
+      x();
+      y();
+      for (z(); i < 10; i++) z();
+    `);
+
+    const expected = unpad(`
+      for (x(), y(), z(); i < 10; i++) z();
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
 });

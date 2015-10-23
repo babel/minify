@@ -201,14 +201,22 @@ module.exports = ({ Plugin, types: t }) => {
           },
 
           function(node, parent, scope) {
-            if (!this.inList || node.init) {
+            if (!this.inList || (node.init && !t.isExpression(node.init))) {
               return;
             }
 
-            const seq = priorStatementsToSequence(this, scope);
+            let seq = priorStatementsToSequence(this, scope);
 
             if (!seq) {
               return;
+            }
+
+            if (node.init) {
+              if (t.isSequenceExpression(seq)) {
+                seq.expressions.push(node.init);
+              } else {
+                seq = t.sequenceExpression([seq, node.init]);
+              }
             }
 
             node.init = seq;
