@@ -69,6 +69,15 @@ babel   216.18kB 96%     54.83kB 48%      0ms
 jsxmin  235.99kB 80%     57.84kB 40%      0ms
 ```
 
+for merging:
+```
+        raw      raw win gzip    gzip win parse time
+uglify  213.49kB 98%     54.02kB 50%      0ms
+babel   214.5kB  98%     54.32kB 49%      0ms
+closure 209.5kB  102%    54.45kB 49%      0ms
+jsxmin  235.99kB 80%     57.84kB 40%      0ms
+```
+
 TODOS:
 
 - Convert whiles to fors
@@ -113,7 +122,6 @@ TODOS:
 
 - multiple conditionals should add an "&&" between them
 - why is this even real code? :/
-
 ```
 var symbolIterator=typeof Symbol === 'function'?typeof Symbol === 'function'?
     Symbol.iterator:'@@iterator':
