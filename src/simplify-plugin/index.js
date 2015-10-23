@@ -9,7 +9,7 @@ module.exports = ({ Plugin, types: t }) => {
 
     visitor: {
       // undefined -> void 0
-      ReferencedIdentifier: function (node) {
+      ReferencedIdentifier(node) {
         if (node.name === 'undefined') {
           return t.unaryExpression('void', t.literal(0), true);
         }
@@ -17,7 +17,7 @@ module.exports = ({ Plugin, types: t }) => {
 
       // { 'foo': 'bar' } -> { foo: 'bar' }
       Property: {
-        exit: function (node) {
+        exit(node) {
           let key = node.key;
           if (t.isLiteral(key) && t.isValidIdentifier(key.value)) {
             // 'foo': 'bar' -> foo: 'bar'
@@ -29,7 +29,7 @@ module.exports = ({ Plugin, types: t }) => {
 
       // foo['bar'] -> foo.bar
       MemberExpression: {
-        exit: function (node) {
+        exit(node) {
           let prop = node.property;
           if (node.computed && t.isLiteral(prop) &&
             t.isValidIdentifier(prop.value)) {
@@ -41,7 +41,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       // Number(foo) -> +foo
-      CallExpression: function (node, parent) {
+      CallExpression(node, parent) {
         if (t.isIdentifier(node.callee, { name: 'Number' }) &&
           node.arguments.length === 1) {
           return t.unaryExpression('+', node.arguments[0], true);
@@ -62,7 +62,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       // !foo && bar -> foo || bar
-      LogicalExpression: function (node) {
+      LogicalExpression(node) {
         if (node.operator === '&&' &&
           t.isUnaryExpression(node.left, { operator: '!' })) {
           node.operator = '||';
@@ -73,7 +73,7 @@ module.exports = ({ Plugin, types: t }) => {
       // shorten booleans to a negation
       // true -> !0
       // false -> !1
-      Literal: function (node) {
+      Literal(node) {
         if (typeof node.value === 'boolean') {
           return t.unaryExpression('!', t.literal(+!node.value), true);
         }
@@ -113,12 +113,12 @@ module.exports = ({ Plugin, types: t }) => {
 
       // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
       // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
-      ConditionalExpression: function (node) {
+      ConditionalExpression(node) {
         flipNegation(node);
       },
 
       // hoist all function declarations
-      Block: function (node) {
+      Block(node) {
         let top = [];
         let bottom = [];
 
@@ -183,7 +183,7 @@ module.exports = ({ Plugin, types: t }) => {
 
       // turn a for loop block block with single statement
       // loops into just the single statement
-      For: function (node) {
+      For(node) {
         let block = node.body;
         if (!block || !t.isBlockStatement(block)) {
           return;
@@ -237,7 +237,7 @@ module.exports = ({ Plugin, types: t }) => {
 /*
       // TODO: this doesn't take into account variable declerations
       // turn program body into sequence expression
-      Program: function (node, parent, scope) {
+      Program(node, parent, scope) {
         let seq = t.toSequenceExpression(node.body, scope);
         if (seq) {
           node.body = [seq];
@@ -246,7 +246,7 @@ module.exports = ({ Plugin, types: t }) => {
 */
       // turn blocked ifs into single statements
       IfStatement: {
-        exit: function (node) {
+        exit(node) {
           coerceIf('consequent');
           coerceIf('alternate');
           flipNegation(node);

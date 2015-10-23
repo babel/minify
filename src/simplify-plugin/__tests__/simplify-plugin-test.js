@@ -265,4 +265,21 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should merge blocks into a return with sequence expr', () => {
+    const source = unpad(`
+      function foo() {
+        x();
+        return 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return x(), 1;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
