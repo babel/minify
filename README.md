@@ -64,7 +64,42 @@ TODOS:
 
 - Convert whiles to fors
 - Do a better job at joining vars into the init part of the for
-- Join statements into sequence expressions at the closest oppurtinity
-  - in return statements for example
 - avoid semicolons at the close of the function
 - use `!` for self-executing functions
+- convert early if returns to if with negated condition
+- bug in turning for body (with a var decl) into a sequence
+- if statement consequent is a return remove the else statement
+- doing a better job at merging into return statements may present more oppurntities for other optimization like the one above.
+- needlessly parenthesising sequence expressions
+
+
+- Here is a place were uglify is crushing it making it into two fors and one if with no blocks:
+
+```
+  // taken from require.js
+ function _debugUnresolvedDependencies(names) {
+    var unresolved = Array.prototype.slice.call(names);
+    var visited = {};
+    var ii, name, module, dependency;
+
+    while (unresolved.length) {
+      name = unresolved.shift();
+      if (visited[name]) {
+        continue;
+      }
+      visited[name] = true;
+
+      module = modulesMap[name];
+      if (!module || !module.waiting) {
+        continue;
+      }
+
+      for (ii = 0; ii < module.dependencies.length; ii++) {
+        dependency = module.dependencies[ii];
+        if (!modulesMap[dependency] || modulesMap[dependency].waiting) {
+          unresolved.push(dependency);
+        }
+      }
+    }
+}
+```
