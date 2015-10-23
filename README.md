@@ -110,3 +110,18 @@ TODOS:
     }
 }
 ```
+
+- multiple conditionals should add an "&&" between them
+- why is this even real code? :/
+
+```
+var symbolIterator=typeof Symbol === 'function'?typeof Symbol === 'function'?
+    Symbol.iterator:'@@iterator':
+    '@@iterator'
+```
+
+should compile to
+
+```
+l = "function" == typeof Symbol && "function" == typeof Symbol ? Symbol.iterator : "@@iterator",
+```
