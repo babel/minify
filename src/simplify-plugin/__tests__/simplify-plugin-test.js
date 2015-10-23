@@ -283,4 +283,32 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should merge blocks into a return with sequence expr', () => {
+    const source = unpad(`
+      function foo() {
+        try {
+          x();
+        } catch (e) {
+          1;
+        }
+        y();
+        return 1;
+      }
+    `);
+
+    // TODO shouldn't print those parens (yuck).
+    const expected = unpad(`
+      function foo() {
+        try {
+          x();
+        } catch (e) {
+          1;
+        }
+        return (y(), 1);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

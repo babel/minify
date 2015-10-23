@@ -198,45 +198,44 @@ module.exports = ({ Plugin, types: t }) => {
         node.body = first;
       },
 
-      // turn block statements into sequence expression
-      BlockStatement: {
-        exit(node, parent, scope) {
-          let needsBlock = false;
-          if ((t.isFunction(parent) && node === parent.body) ||
-              t.isTryStatement(parent) || t.isCatchClause(parent)) {
-            needsBlock = true;
-          }
+      BlockStatement(node, parent, scope) {
+        if (t.isFunction(parent) && node === parent.body) {
+          return;
+        }
+        if (t.isTryStatement(parent) || t.isCatchClause(parent)) {
+          return;
+        }
 
-          // If a return statement is the last one we maybe able to
-          // get away with making the sequence expression the argument
-          // to the return statement.
-          let ret = false;
-          let lastNode = node.body[node.body.length - 1];
-          if (t.isReturnStatement(lastNode)) {
-            ret = true;
-            node.body[node.body.length - 1] =
-              t.expressionStatement(lastNode.argument);
-          }
-
-          let seq = t.toSequenceExpression(node.body, scope);
-          if (seq && ret) {
-            return needsBlock
-                 ? t.blockStatement([t.returnStatement(seq)])
-                 : t.returnStatement(seq);
-          }
-
-          if (seq) {
-            return needsBlock
-                 ? t.blockStatement([t.expressionStatement(seq)])
-                 : t.expressionStatement(seq);
-          }
-
-          if (ret) {
-            node.body.splice(node.body.length - 1, 1, lastNode);
-          }
-        },
+        let seq = t.toSequenceExpression(node.body, scope);
+        if (seq) {
+          return t.expressionStatement(seq);
+        }
       },
 
+      // Try to merge previous statements into a sequence
+      ReturnStatement(node, parent, scope) {
+        let i = 0;
+        let seq;
+        while (!seq && i < this.key) {
+          seq = t.toSequenceExpression(this.container.slice(i, this.key), scope);
+          if (!seq) {
+            i += 1;
+          }
+        }
+        if (!seq) {
+          return;
+        }
+
+        this.container.splice(i, this.key - i);
+        if (seq.length) {
+          seq.push(node.argument);
+        } else {
+          seq = t.sequenceExpression([seq, node.argument]);
+        }
+        if (seq) {
+          return t.returnStatement(seq);
+        }
+      },
 /*
       // TODO: this doesn't take into account variable declerations
       // turn program body into sequence expression
