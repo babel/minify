@@ -91,7 +91,7 @@ describe('dce-plugin', () => {
   // bug in babel https://github.com/babel/babel/issues/2570
   it('should not inline vars with multiple references', () => {
     const expected = unpad(`
-      var x = function() {
+      var x = function x() {
         if (!y) {
           y = 1;
         }
