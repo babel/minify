@@ -201,11 +201,10 @@ module.exports = ({ Plugin, types: t }) => {
       // turn block statements into sequence expression
       BlockStatement: {
         exit(node, parent, scope) {
-          if (t.isFunction(parent) && node === parent.body) {
-            return;
-          }
-          if (t.isTryStatement(parent) || t.isCatchClause(parent)) {
-            return;
+          let needsBlock = false;
+          if ((t.isFunction(parent) && node === parent.body) ||
+              t.isTryStatement(parent) || t.isCatchClause(parent)) {
+            needsBlock = true;
           }
 
           // If a return statement is the last one we maybe able to
@@ -221,11 +220,15 @@ module.exports = ({ Plugin, types: t }) => {
 
           let seq = t.toSequenceExpression(node.body, scope);
           if (seq && ret) {
-            return t.returnStatement(seq);
+            return needsBlock
+                 ? t.blockStatement([t.returnStatement(seq)])
+                 : t.returnStatement(seq);
           }
 
           if (seq) {
-            return t.expressionStatement(seq);
+            return needsBlock
+                 ? t.blockStatement([t.expressionStatement(seq)])
+                 : t.expressionStatement(seq);
           }
 
           if (ret) {

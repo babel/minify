@@ -274,9 +274,10 @@ describe('simplify-plugin', () => {
       }
     `);
 
+    // TODO shouldn't print those parens (yuck).
     const expected = unpad(`
       function foo() {
-        return x(), 1;
+        return (x(), 1);
       }
     `);
 
