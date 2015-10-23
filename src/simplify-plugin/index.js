@@ -41,7 +41,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       // Number(foo) -> +foo
-      CallExpression: function (node) {
+      CallExpression: function (node, parent) {
         if (t.isIdentifier(node.callee, { name: 'Number' }) &&
           node.arguments.length === 1) {
           return t.unaryExpression('+', node.arguments[0], true);
@@ -50,6 +50,14 @@ module.exports = ({ Plugin, types: t }) => {
         if (t.isIdentifier(node.callee, { name: 'String' }) &&
           node.arguments.length === 1) {
           return t.binaryExpression('+', node.arguments[0], t.literal(''));
+        }
+
+        if (t.isFunctionExpression(node.callee)
+            && t.isExpressionStatement(parent)) {
+          return t.callExpression(
+            t.unaryExpression('!', node.callee),
+            node.arguments
+          );
         }
       },
 

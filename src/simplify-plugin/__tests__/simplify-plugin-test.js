@@ -223,5 +223,24 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should turn IIFE to negation', () => {
+    const source = unpad(`
+      (function() {
+        x();
+      })();
+      y = (function() {
+        x();
+      })();
+    `);
+    const expected = unpad(`
+      !function () {
+        x();
+      }();
+      y = (function () {
+        x();
+      })();
+    `);
 
+    expect(transform(source)).toBe(expected);
+  });
 });
