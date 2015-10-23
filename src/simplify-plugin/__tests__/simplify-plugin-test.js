@@ -269,6 +269,7 @@ describe('simplify-plugin', () => {
   it('should merge blocks into a return with sequence expr', () => {
     const source = unpad(`
       function foo() {
+        y();
         x();
         return 1;
       }
@@ -277,7 +278,7 @@ describe('simplify-plugin', () => {
     // TODO shouldn't print those parens (yuck).
     const expected = unpad(`
       function foo() {
-        return (x(), 1);
+        return (y(), x(), 1);
       }
     `);
 
@@ -310,5 +311,19 @@ describe('simplify-plugin', () => {
     `);
 
     expect(transform(source)).toBe(expected);
+  });
+
+  it('should merge statements into sequence expressions into the init part of for', () => {
+    const source = unpad(`
+      x();
+      y();
+      for (; i < 10; i++) z();
+    `);
+
+    const expected = unpad(`
+      for (x(), y(); i < 10; i++) z();
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
   });
 });

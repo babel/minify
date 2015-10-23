@@ -183,20 +183,39 @@ module.exports = ({ Plugin, types: t }) => {
 
       // turn a for loop block block with single statement
       // loops into just the single statement
-      For(node) {
-        let block = node.body;
-        if (!block || !t.isBlockStatement(block)) {
-          return;
-        }
+      For: {
+        enter: [
+          function(node, parent, scope) {
+            let block = node.body;
+            if (!block || !t.isBlockStatement(block)) {
+              return;
+            }
 
-        let body = block.body;
-        if (body.length !== 1) {
-          return;
-        }
+            let body = block.body;
+            if (body.length !== 1) {
+              return;
+            }
 
-        let first = body[0];
-        node.body = first;
+            let first = body[0];
+            node.body = first;
+          },
+
+          function(node, parent, scope) {
+            if (!this.inList || node.init) {
+              return;
+            }
+
+            const seq = priorStatementsToSequence(this, scope);
+
+            if (!seq) {
+              return;
+            }
+
+            node.init = seq;
+          },
+        ],
       },
+
 
       BlockStatement(node, parent, scope) {
         if (t.isFunction(parent) && node === parent.body) {
@@ -214,21 +233,13 @@ module.exports = ({ Plugin, types: t }) => {
 
       // Try to merge previous statements into a sequence
       ReturnStatement(node, parent, scope) {
-        let i = 0;
-        let seq;
-        while (!seq && i < this.key) {
-          seq = t.toSequenceExpression(this.container.slice(i, this.key), scope);
-          if (!seq) {
-            i += 1;
-          }
-        }
+        let seq = priorStatementsToSequence(this, scope);
         if (!seq) {
           return;
         }
 
-        this.container.splice(i, this.key - i);
-        if (seq.length) {
-          seq.push(node.argument);
+        if (t.isSequenceExpression(seq)) {
+          seq.expressions.push(node.argument);
         } else {
           seq = t.sequenceExpression([seq, node.argument]);
         }
@@ -360,5 +371,27 @@ module.exports = ({ Plugin, types: t }) => {
       node.consequent = node.alternate;
       node.alternate = consequent;
     }
+  }
+
+  function priorStatementsToSequence(path, scope) {
+    if (!path.inList) {
+      return;
+    }
+
+    let i = 0;
+    let seq;
+    while (!seq && i < path.key) {
+      seq = t.toSequenceExpression(path.container.slice(i, path.key), scope);
+      if (!seq) {
+        i += 1;
+      }
+    }
+
+    if (!seq) {
+      return;
+    }
+
+    path.container.splice(i, path.key - i);
+    return seq;
   }
 };
