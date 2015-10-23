@@ -87,7 +87,7 @@ TODOS:
 - bug in turning for body (with a var decl) into a sequence
 - doing a better job at merging into return statements may present more oppurntities for other optimization like the one above.
 - needlessly parenthesising sequence expressions
-
+- remove needless returns.
 
 - Here is a place were uglify is crushing it making it into two fors and one if with no blocks:
 
