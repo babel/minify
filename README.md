@@ -67,7 +67,6 @@ TODOS:
 - avoid semicolons at the close of the function
 - convert early if returns to if with negated condition
 - bug in turning for body (with a var decl) into a sequence
-- if statement consequent is a return remove the else statement
 - doing a better job at merging into return statements may present more oppurntities for other optimization like the one above.
 - needlessly parenthesising sequence expressions
 

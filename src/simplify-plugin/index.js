@@ -289,12 +289,12 @@ module.exports = ({ Plugin, types: t }) => {
           }
 
           if (node.consequent && node.alternate &&
-              t.isReturnStatement(node.consequent) || (
+              (t.isReturnStatement(node.consequent) || (
                 t.isBlockStatement(node.consequent)
                 && t.isReturnStatement(
                      node.consequent.body[node.consequent.body.length - 1]
                    )
-                )
+                ))
           ) {
             this.insertAfter(
               t.isBlockStatement(node.alternate)
