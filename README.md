@@ -65,7 +65,6 @@ TODOS:
 - Convert whiles to fors
 - Do a better job at joining vars into the init part of the for
 - avoid semicolons at the close of the function
-- use `!` for self-executing functions
 - convert early if returns to if with negated condition
 - bug in turning for body (with a var decl) into a sequence
 - if statement consequent is a return remove the else statement

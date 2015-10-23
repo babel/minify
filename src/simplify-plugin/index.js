@@ -254,7 +254,6 @@ module.exports = ({ Plugin, types: t }) => {
           if (node.consequent && !node.alternate &&
               node.consequent.type === 'ExpressionStatement' &&
               !this.isCompletionRecord()) {
-
               return t.expressionStatement(
                 t.logicalExpression('&&', node.test, node.consequent.expression)
               );
@@ -287,6 +286,23 @@ module.exports = ({ Plugin, types: t }) => {
                 node.test, node.consequent.argument, nextArg
               )
             );
+          }
+
+          if (node.consequent && node.alternate &&
+              t.isReturnStatement(node.consequent) || (
+                t.isBlockStatement(node.consequent)
+                && t.isReturnStatement(
+                     node.consequent.body[node.consequent.body.length - 1]
+                   )
+                )
+          ) {
+            this.insertAfter(
+              t.isBlockStatement(node.alternate)
+                ? node.alternate.body
+                : node.alternate
+            );
+            node.alternate = null;
+            return;
           }
 
           function coerceIf(key) {

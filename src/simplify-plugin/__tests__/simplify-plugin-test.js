@@ -243,4 +243,26 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should remove the else block if early return', () => {
+    const source = unpad(`
+    function foo() {
+      if (1) {
+        return 2;
+      } else {
+        lol(1);
+        lol(2);
+      }
+    }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        if (1) return 2;
+        lol(1), lol(2);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
