@@ -340,4 +340,47 @@ describe('simplify-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should merge into return with no arg', () => {
+     const source = unpad(`
+       function foo() {
+         if (x) {
+           bar();
+           return;
+         }
+         lol();
+       }
+     `);
+
+     const expected = unpad(`
+       function foo() {
+         if (x) return void bar();
+         lol();
+       }
+     `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should merge if statements with following expressions using void', () => {
+     const source = unpad(`
+       function foo() {
+         if(window.self != window.top) {
+           if(__DEV__) {
+             console.log('lol', name);
+           }
+           return;
+         }
+         lol();
+       }
+     `);
+
+     const expected = unpad(`
+       function foo() {
+         return window.self!=window.top?void(__DEV__&&console.log("lol",name)):void lol()
+       }
+     `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

@@ -246,11 +246,21 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
-        if (t.isSequenceExpression(seq)) {
-          seq.expressions.push(node.argument);
+        if (node.argument) {
+          if (t.isSequenceExpression(seq)) {
+            seq.expressions.push(node.argument);
+          } else {
+            seq = t.sequenceExpression([seq, node.argument]);
+          }
         } else {
-          seq = t.sequenceExpression([seq, node.argument]);
+          if (t.isSequenceExpression(seq)) {
+            const lastExpr = seq.expressions[seq.expressions.length - 1];
+            seq.expressions[seq.expressions.length - 1] = t.unaryExpression('void', lastExpr);
+          } else {
+            seq = t.unaryExpression('void', seq);
+          }
         }
+
         if (seq) {
           return t.returnStatement(seq);
         }
