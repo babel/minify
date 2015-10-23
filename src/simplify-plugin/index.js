@@ -219,6 +219,10 @@ module.exports = ({ Plugin, types: t }) => {
           if (seq) {
             return t.expressionStatement(seq);
           }
+
+          if (ret) {
+            node.body.splice(node.body.length - 1, 1, lastNode);
+          }
         },
       },
 
