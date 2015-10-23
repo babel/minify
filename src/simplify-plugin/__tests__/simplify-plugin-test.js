@@ -92,7 +92,7 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('concat vars in for loops', () => {
+  it('concat vars', () => {
     const source = unpad(`
       var i = 0;
       var x = 0;
@@ -127,27 +127,6 @@ describe('simplify-plugin', () => {
     `);
     const expected =
       'for (var x = 0; x < 10; x++) console.log(x), console.log(x);';
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it('should get rid of the else part if early return', () => {
-    const source = unpad(`
-      function foo() {
-        if (x) {
-          return 1;
-        } else {
-          return 2;
-        }
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        if (x) return 1;
-
-        return 2;
-      }
-    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
@@ -243,4 +222,6 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+
 });

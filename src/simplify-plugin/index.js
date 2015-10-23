@@ -239,25 +239,6 @@ module.exports = ({ Plugin, types: t }) => {
           coerceIf('alternate');
           flipNegation(node);
 
-          if (node.consequent && node.alternate &&
-            (
-              t.isReturnStatement(node.consequent) ||
-              (t.isBlockStatement(node.consequent) &&
-                t.isReturnStatement(
-                  node.consequent.body[node.consequent.body.length - 1]
-                )
-              )
-            )
-          ) {
-            this.insertAfter(
-              t.isBlockStatement(node.alternate)
-                ? node.alternate.body
-                : node.alternate
-            );
-            node.alternate = null;
-            return;
-          }
-
           if (node.consequent && !node.alternate &&
               node.consequent.type === 'ExpressionStatement' &&
               !this.isCompletionRecord()) {
@@ -272,6 +253,16 @@ module.exports = ({ Plugin, types: t }) => {
               return t.conditionalExpression(
                 node.test, node.consequent.expression, node.alternate.expression
               );
+          }
+
+          if (t.isReturnStatement(node.consequent)
+              && t.isReturnStatement(node.alternate)
+              && !this.getSibling(this.key + 1).node) {
+            return t.returnStatement(
+              t.conditionalExpression(
+                node.test, node.consequent.argument, node.alternate.argument
+              )
+            );
           }
 
           const next = this.getSibling(this.key + 1);
