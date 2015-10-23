@@ -182,4 +182,65 @@ describe('simplify-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should turn this into a conditional', () => {
+    const source = unpad(`
+      function foo(a) {
+        if (a && a.b != null) {
+          if ((a.c--) === 1) {
+            delete a.c;
+          }
+          return a.b;
+        }
+        return bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        return a && null != a.b ? (1 == a.c-- && delete a.c, a.b) : bar(a);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should turn this into a conditional', () => {
+    const source = unpad(`
+      function foo(a) {
+        if (a && a.b != null) {
+          if ((a.c--) === 1) {
+            delete a.c;
+          }
+          return a.b;
+        }
+        return bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        return a && null != a.b ? (1 == a.c-- && delete a.c, a.b) : bar(a);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should turn this into a conditional', () => {
+    const source = unpad(`
+      function foo(a) {
+        if (a) {
+          return a.b;
+        } else {
+          return bar(a);
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        return a ? a.b : bar(a);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

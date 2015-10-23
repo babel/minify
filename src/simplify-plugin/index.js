@@ -191,18 +191,35 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       // turn block statements into sequence expression
-      BlockStatement: function (node, parent, scope) {
-        if (t.isFunction(parent) && node === parent.body) {
-          return;
-        }
-        if (t.isTryStatement(parent) || t.isCatchClause(parent)) {
-          return;
-        }
+      BlockStatement: {
+        exit(node, parent, scope) {
+          if (t.isFunction(parent) && node === parent.body) {
+            return;
+          }
+          if (t.isTryStatement(parent) || t.isCatchClause(parent)) {
+            return;
+          }
 
-        let seq = t.toSequenceExpression(node.body, scope);
-        if (seq) {
-          return t.expressionStatement(seq);
-        }
+          // If a return statement is the last one we maybe able to
+          // get away with making the sequence expression the argument
+          // to the return statement.
+          let ret = false;
+          let lastNode = node.body[node.body.length - 1];
+          if (t.isReturnStatement(lastNode)) {
+            ret = true;
+            node.body[node.body.length - 1] =
+              t.expressionStatement(lastNode.argument);
+          }
+
+          let seq = t.toSequenceExpression(node.body, scope);
+          if (seq && ret) {
+            return t.returnStatement(seq);
+          }
+
+          if (seq) {
+            return t.expressionStatement(seq);
+          }
+        },
       },
 
 /*
@@ -242,18 +259,31 @@ module.exports = ({ Plugin, types: t }) => {
           }
 
           if (node.consequent && !node.alternate &&
-            node.consequent.type === 'ExpressionStatement' &&
-            !this.isCompletionRecord()) {
+              node.consequent.type === 'ExpressionStatement' &&
+              !this.isCompletionRecord()) {
+
               return t.expressionStatement(
                 t.logicalExpression('&&', node.test, node.consequent.expression)
               );
           }
 
           if (t.isExpressionStatement(node.consequent) &&
-            t.isExpressionStatement(node.alternate)) {
+              t.isExpressionStatement(node.alternate)) {
               return t.conditionalExpression(
                 node.test, node.consequent.expression, node.alternate.expression
               );
+          }
+
+          const next = this.getSibling(this.key + 1);
+          if (t.isReturnStatement(node.consequent) &&
+              !node.alternate && next.isReturnStatement()) {
+            const nextArg = next.node.argument;
+            next.dangerouslyRemove();
+            return t.returnStatement(
+              t.conditionalExpression(
+                node.test, node.consequent.argument, nextArg
+              )
+            );
           }
 
           function coerceIf(key) {
@@ -278,7 +308,6 @@ module.exports = ({ Plugin, types: t }) => {
       },
     },
   });
-
 
   function flipNegation(node) {
     if (!node.consequent || !node.alternate) {
