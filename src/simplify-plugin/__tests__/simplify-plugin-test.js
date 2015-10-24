@@ -447,4 +447,39 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should convert whiles to fors', () => {
+    const source = unpad(`
+      function foo(a) {
+        while(true) {
+          bar();
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        for (; !0;) bar();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it.only('should convert whiles to fors and merge vars', () => {
+    const source = unpad(`
+      function foo(a) {
+        var bar = baz;
+        while(true) {
+          bar();
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        for (bar = baz; !0;) bar();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

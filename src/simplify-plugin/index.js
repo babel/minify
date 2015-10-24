@@ -208,7 +208,6 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             let seq = priorStatementsToSequence(this, scope);
-
             if (!seq) {
               return;
             }
@@ -387,6 +386,10 @@ module.exports = ({ Plugin, types: t }) => {
           }
         },
       },
+
+      WhileStatement(node) {
+        return t.forStatement(null, node.test, null, node.body);
+      },
     },
   });
 
@@ -429,6 +432,7 @@ module.exports = ({ Plugin, types: t }) => {
 
     let i = 0;
     let seq;
+
     while (!seq && i < path.key) {
       seq = t.toSequenceExpression(path.container.slice(i, path.key), scope);
       if (!seq) {
@@ -440,6 +444,14 @@ module.exports = ({ Plugin, types: t }) => {
       return;
     }
 
+    // Babel returns an undefined as the last expression. (angry)
+    // Maybe to respect completion record.
+    if (t.isSequenceExpression(seq)) {
+      const lastExpr = seq.expressions[seq.expressions.length - 1];
+      if (t.isIdentifier(lastExpr)) {
+        seq.expressions.pop();
+      }
+    }
     path.container.splice(i, path.key - i);
     return seq;
   }
