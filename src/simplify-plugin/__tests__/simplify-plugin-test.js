@@ -134,6 +134,7 @@ describe('simplify-plugin', () => {
   it('should turn blocks and seqeunce but maintain vars', () => {
     const source = unpad(`
       function foo() {
+        wow();
         for (var x = 0; x < 10; x++) {
           var z = bar;
           z();
@@ -142,6 +143,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo() {
+        wow();
         for (var z, x = 0; x < 10; x++) z = bar, z();
       }
     `);
