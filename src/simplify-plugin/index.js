@@ -2,6 +2,8 @@
 
 module.exports = ({ Plugin, types: t }) => {
 
+  const VOID_0 = t.unaryExpression('void', t.literal(0), true);
+
   return new Plugin('simplify', {
     metadata: {
       group: 'builtin-pre',
@@ -11,7 +13,7 @@ module.exports = ({ Plugin, types: t }) => {
       // undefined -> void 0
       ReferencedIdentifier(node) {
         if (node.name === 'undefined') {
-          return t.unaryExpression('void', t.literal(0), true);
+          return VOID_0;
         }
       },
 
@@ -303,9 +305,12 @@ module.exports = ({ Plugin, types: t }) => {
           if (t.isReturnStatement(node.consequent)
               && t.isReturnStatement(node.alternate)
               && !this.getSibling(this.key + 1).node) {
+
             return t.returnStatement(
               t.conditionalExpression(
-                node.test, node.consequent.argument, node.alternate.argument
+                node.test,
+                node.consequent.argument || VOID_0,
+                node.alternate.argument
               )
             );
           }
@@ -320,7 +325,7 @@ module.exports = ({ Plugin, types: t }) => {
             next.dangerouslyRemove();
             return t.returnStatement(
               t.conditionalExpression(
-                node.test, node.consequent.argument, nextArg
+                node.test, node.consequent.argument || VOID_0, nextArg
               )
             );
           }

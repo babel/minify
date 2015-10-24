@@ -427,4 +427,24 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should handle returns with no args', () => {
+    const source = unpad(`
+      function foo(a) {
+        if (a && a.b != null) {
+          if ((a.c--) === 1) {
+            return;
+          }
+          return a.b;
+        }
+        return bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        return a && null != a.b ? 1 == a.c-- ? void 0 : a.b : bar(a);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
