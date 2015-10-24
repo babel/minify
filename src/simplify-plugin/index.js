@@ -232,6 +232,10 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
+        while (scope && !(t.isFunction(scope.block) || t.isProgram(scope.block))) {
+          scope = scope.parent;
+        }
+
         let seq = t.toSequenceExpression(node.body, scope);
         if (seq) {
           return t.expressionStatement(seq);
