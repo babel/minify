@@ -81,12 +81,6 @@ test('babel', function (code, callback) {
       'minification.propertyLiterals',
     ],
     plugins: [
-      'merge-sibling-variables',
-      'simplify-comparison-operators',
-      'minify-booleans',
-//      'member-expression-literals',
-      //'dead-code-elimination',
-//      'property-literals',
 //      'constant-folding',
       require('../src/mangle-names-plugin'),
       require('../src/simplify-plugin'),

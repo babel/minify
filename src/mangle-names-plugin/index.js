@@ -36,6 +36,10 @@ module.exports = ({ Plugin, types: t }) => {
   };
 
   return new Plugin('mangle-names', {
+    metadata: {
+      group: 'builtin-pre',
+    },
+
     pre(state) {
       state.set('base54', new Base54());
       state.set('refs', new Map());
