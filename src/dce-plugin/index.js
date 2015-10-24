@@ -18,10 +18,6 @@ module.exports = ({ Plugin, types: t }) => {
       group: 'builtin-pre',
     },
 
-    pre(state) {
-      state.set('bindingsToReplace', new Map());
-    },
-
     visitor: {
       // remove side effectless statement
       ExpressionStatement: function () {
@@ -30,35 +26,27 @@ module.exports = ({ Plugin, types: t }) => {
         }
       },
 
-      Scope: {
-        enter(node, parent, scope, state) {
-          const bindingsToReplace = Object.create(null);
-          for (let name in scope.bindings) {
-            let binding = scope.bindings[name];
+      Scope(node, parent, scope) {
+        const bindingsToReplace = Object.create(null);
+        for (let name in scope.bindings) {
+          let binding = scope.bindings[name];
 
-            if (binding.references > 1 || !binding.constant ||
-                !binding.path.isVariableDeclarator()) {
-              continue;
-            }
-
-            let init = binding.path.get('init');
-            if (!init.isPure() || t.isFunction(init.node)) {
-              continue;
-            }
-
-            binding.path.dangerouslyRemove();
-            bindingsToReplace[name] = init.node;
-            delete scope.bindings[name];
+          if (binding.references > 1 || !binding.constant ||
+              !binding.path.isVariableDeclarator()) {
+                continue;
           }
 
-          state.get('bindingsToReplace').set(scope, bindingsToReplace);
-        },
+          let init = binding.path.get('init');
+          if (!init.isPure() || t.isFunction(init.node)) {
+            continue;
+          }
 
-        exit(node, parent, scope, state) {
-          this.traverse(removeReferenceVisitor, {
-            bindingsToReplace: state.get('bindingsToReplace').get(scope),
-          });
-        },
+          binding.path.dangerouslyRemove();
+          bindingsToReplace[name] = init.node;
+          delete scope.bindings[name];
+        }
+
+        this.traverse(removeReferenceVisitor, {bindingsToReplace});
       },
 
       // Remove return statements that have no semantic meaning
