@@ -70,18 +70,6 @@ module.exports = ({ Plugin, types: t }) => {
         if (!scope.getBinding(node.name)) {
           state.get('base54').consider(node.name);
         }
-
-        // For some reason ReferencedIdentifier|BindingIdentifier are not
-        // capturing params.
-        if (t.isFunction(parent)) {
-          for (let param of parent.params) {
-            if (param === node) {
-              const refs = state.get('refs');
-              recordRef(refs, scope.getBinding(node.name), this);
-              return;
-            }
-          }
-        }
       },
 
       ReturnStatement(node, parent, scope, state) {
