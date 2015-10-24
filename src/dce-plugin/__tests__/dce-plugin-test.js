@@ -195,4 +195,21 @@ describe('dce-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should remove code unreachable after return', () => {
+    const source = unpad(`
+      function foo() {
+        z();
+        return;
+        x();
+      };
+    `);
+    const expected = unpad(`
+      function foo() {
+        z();
+      };
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
 });
