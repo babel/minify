@@ -60,7 +60,7 @@ function test(name, callback) {
 
   const parseStart = Date.now();
   // disable for now we have a failing test in dce
-  //new Function(result);
+  new Function(result);
   const parseEnd = Date.now();
   const parseNow = parseEnd - parseStart;
 
@@ -92,7 +92,7 @@ test('babel', function (code, callback) {
       require('../src/simplify-plugin'),
       require('../src/dce-plugin'),
     ],
-    compact: true,
+    compact: false,
     comments: false,
   }).code;
 });

@@ -282,6 +282,7 @@ module.exports = ({ Plugin, types: t }) => {
           coerceIf('alternate');
           flipNegation(node);
 
+          // No alternate, make into a guarded expression
           if (node.consequent && !node.alternate &&
               node.consequent.type === 'ExpressionStatement' &&
               !this.isCompletionRecord()) {
@@ -290,6 +291,7 @@ module.exports = ({ Plugin, types: t }) => {
               );
           }
 
+          // Easy, both are expressions, turn into ternary
           if (t.isExpressionStatement(node.consequent) &&
               t.isExpressionStatement(node.alternate)) {
               return t.conditionalExpression(
@@ -297,6 +299,7 @@ module.exports = ({ Plugin, types: t }) => {
               );
           }
 
+          // Alternate and consequent are returns turn into a return conditional
           if (t.isReturnStatement(node.consequent)
               && t.isReturnStatement(node.alternate)
               && !this.getSibling(this.key + 1).node) {
@@ -308,6 +311,9 @@ module.exports = ({ Plugin, types: t }) => {
           }
 
           const next = this.getSibling(this.key + 1);
+
+          // No alternate but the next statement is a return
+          // also turn into a return conditional
           if (t.isReturnStatement(node.consequent) &&
               !node.alternate && next.isReturnStatement()) {
             const nextArg = next.node.argument;
@@ -316,6 +322,26 @@ module.exports = ({ Plugin, types: t }) => {
               t.conditionalExpression(
                 node.test, node.consequent.argument, nextArg
               )
+            );
+          }
+
+          // Next is the last expression, turn into a return while void'ing the exprs
+          if (!this.getSibling(this.key + 2).node && t.isReturnStatement(node.consequent) &&
+              !node.alternate && next.isExpressionStatement()) {
+            const nextExpr = next.node.expression;
+            next.dangerouslyRemove();
+            if (node.consequent.argument) {
+              return t.returnStatement(
+                t.conditionalExpression(
+                  node.test,
+                  node.consequent.argument,
+                  t.unaryExpression('void', nextExpr)
+                )
+              );
+            }
+
+            return t.returnStatement(
+              t.binaryExpression('||', node.test, nextExpr)
             );
           }
 

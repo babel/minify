@@ -341,20 +341,16 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should merge into return with no arg', () => {
+  xit('should remove empty returns', () => {
      const source = unpad(`
        function foo() {
-         if (x) {
-           bar();
-           return;
-         }
          lol();
+         return;
        }
      `);
 
      const expected = unpad(`
        function foo() {
-         if (x) return void bar();
          lol();
        }
      `);
@@ -377,10 +373,58 @@ describe('simplify-plugin', () => {
 
      const expected = unpad(`
        function foo() {
-         return window.self!=window.top?void(__DEV__&&console.log("lol",name)):void lol()
+         return window.self == window.top ? void lol() : void (__DEV__ && console.log('lol', name));
        }
      `);
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not try to merge `if` when there are multiple statements to follow', () => {
+     const source = unpad(`
+       function foo() {
+         if(window.self != window.top) {
+           if(__DEV__) {
+             console.log('lol', name);
+           }
+           return;
+         }
+         lol();
+         try { lol() } catch (e) {}
+       }
+     `);
+
+     const expected = unpad(`
+       function foo() {
+         if (window.self != window.top) return void (__DEV__ && console.log('lol', name));
+         lol();
+         try {
+           lol();
+         } catch (e) {}
+       }
+     `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle missing return arg when merging if statements', () => {
+    const source = unpad(`
+      function foo() {
+        if (a) {
+          return;
+        }
+
+        b = true;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return a || (b = !0);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
 });
