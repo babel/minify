@@ -92,7 +92,7 @@ test('babel', function (code, callback) {
       require('../src/simplify-plugin'),
       require('../src/dce-plugin'),
     ],
-    compact: false,
+    compact: true,
     comments: false,
   }).code;
 });
