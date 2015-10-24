@@ -207,11 +207,10 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            let seq = priorStatementsToSequence(this, scope);
+            let seq = priorStatementsToSequence(this, scope.parent);
             if (!seq) {
               return;
             }
-
             if (node.init) {
               if (t.isSequenceExpression(seq)) {
                 seq.expressions.push(node.init);
@@ -224,7 +223,6 @@ module.exports = ({ Plugin, types: t }) => {
           },
         ],
       },
-
 
       BlockStatement(node, parent, scope) {
         if (t.isFunction(parent) && node === parent.body) {
@@ -266,16 +264,6 @@ module.exports = ({ Plugin, types: t }) => {
           return t.returnStatement(seq);
         }
       },
-/*
-      // TODO: this doesn't take into account variable declerations
-      // turn program body into sequence expression
-      Program(node, parent, scope) {
-        let seq = t.toSequenceExpression(node.body, scope);
-        if (seq) {
-          node.body = [seq];
-        }
-      },
-*/
       // turn blocked ifs into single statements
       IfStatement: {
         exit(node) {
@@ -432,9 +420,10 @@ module.exports = ({ Plugin, types: t }) => {
 
     let i = 0;
     let seq;
-
+    let statements;
     while (!seq && i < path.key) {
-      seq = t.toSequenceExpression(path.container.slice(i, path.key), scope);
+      statements = path.container.slice(i, path.key);
+      seq = t.toSequenceExpression(statements, scope);
       if (!seq) {
         i += 1;
       }
@@ -452,7 +441,23 @@ module.exports = ({ Plugin, types: t }) => {
         seq.expressions.pop();
       }
     }
-    path.container.splice(i, path.key - i);
+
+    // We need to make sure we're removing the declerations pushed
+    // to scope.
+    const start = path.key - statements.length;
+    path.container.splice(start, statements.length);
+
     return seq;
   }
 };
+
+/*
+      // TODO: this doesn't take into account variable declerations
+      // turn program body into sequence expression
+      Program(node, parent, scope) {
+        let seq = t.toSequenceExpression(node.body, scope);
+        if (seq) {
+          node.body = [seq];
+        }
+      },
+*/

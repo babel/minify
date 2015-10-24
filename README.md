@@ -78,6 +78,15 @@ closure 209.5kB  102%    54.45kB 49%      0ms
 jsxmin  235.99kB 80%     57.84kB 40%      0ms
 ```
 
+Fixing a bug in not pushing var decl when merging into seq expr :(
+```
+        raw      raw win gzip    gzip win parse time
+uglify  213.49kB 98%     54.02kB 50%      14ms
+closure 209.5kB  102%    54.45kB 49%      21ms
+babel   218.78kB 94%     55.57kB 46%      18ms
+jsxmin  235.99kB 80%     57.84kB 40%      15ms
+```
+
 TODOS:
 
 - Convert whiles to fors

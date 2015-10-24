@@ -4,8 +4,8 @@ const babel = require('babel-core');
 
 function transform(code) {
   return babel.transform(code,  {
+    whitelist: [],
     plugins: [require('../index')],
-    blacklist: ['strict'],
   }).code;
 }
 
@@ -465,7 +465,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it.only('should convert whiles to fors and merge vars', () => {
+  it('should convert whiles to fors and merge vars', () => {
     const source = unpad(`
       function foo(a) {
         var bar = baz;
@@ -476,6 +476,8 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
+        var bar;
+
         for (bar = baz; !0;) bar();
       }
     `);
