@@ -111,4 +111,88 @@ describe('dce-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should remove redundant returns' , () => {
+    const source = unpad(`
+      function foo() {
+        if (1) {
+          y();
+          return;
+        }
+      };
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (1) {
+          y();
+        }
+      };
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should remove redundant returns part 2' , () => {
+    const source = unpad(`
+      function foo() {
+        y();
+        return;
+      };
+    `);
+    const expected = unpad(`
+      function foo() {
+        y();
+      };
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should remove redundant returns complex' , () => {
+    const source = unpad(`
+      function foo() {
+        if (1) {
+          y();
+          if (b) {
+            return;
+          }
+          return;
+        }
+        return;
+      };
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (1) {
+          y();
+          if (b) {}
+        }
+      };
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should keep needed returns' , () => {
+    const source = unpad(`
+      function foo() {
+        if (1) {
+          y();
+          return;
+        }
+        x();
+      };
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (1) {
+          y();
+          return;
+        }
+        x();
+      };
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
 });

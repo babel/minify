@@ -60,6 +60,39 @@ module.exports = ({ Plugin, types: t }) => {
           });
         },
       },
+
+      // Remove return statements that have no semantic meaning
+      ReturnStatement(node, parent, scope) {
+        if (node.argument || !this.inList) {
+          return;
+        }
+
+        let noNext = true;
+        let parentPath = this.parentPath;
+        while (parentPath && !parentPath.isFunction() && noNext) {
+          const nextPath = parentPath.getSibling(parentPath.key + 1);
+          if (nextPath.node) {
+            if (nextPath.isReturnStatement()) {
+              nextPath.unshiftContext(this.context);
+              nextPath.visit();
+              nextPath.shiftContext();
+              if (parentPath.getSibling(parentPath.key + 1).node) {
+                noNext = false;
+                break;
+              }
+            } else {
+              noNext = false;
+              break;
+            }
+          }
+
+          parentPath = parentPath.parentPath;
+        }
+
+        if (noNext) {
+          this.dangerouslyRemove();
+        }
+      },
     },
   });
 };
