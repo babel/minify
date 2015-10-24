@@ -1,2 +1,4 @@
 node_modules
 .test_gen_*
+uglify.js
+babel.js
