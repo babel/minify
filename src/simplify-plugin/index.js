@@ -207,10 +207,19 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            let seq = priorStatementsToSequence(this, scope.parent);
-            if (!seq) {
+            let res = priorStatementsToSequence(this);
+            if (!res) {
               return;
             }
+
+            if (res.declars.length) {
+              this.insertBefore(
+                t.variableDeclaration('var', res.declars)
+              );
+            }
+            res.spliceOut();
+            let seq = res.seq;
+
             if (node.init) {
               if (t.isSequenceExpression(seq)) {
                 seq.expressions.push(node.init);
@@ -232,22 +241,30 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
-        while (scope && !(t.isFunction(scope.block) || t.isProgram(scope.block))) {
-          scope = scope.parent;
+        let res = toSequenceExpression(node.body);
+        if (!res) {
+          return;
         }
 
-        let seq = t.toSequenceExpression(node.body, scope);
-        if (seq) {
-          return t.expressionStatement(seq);
+        if (res.declars.length) {
+          this.parentPath.insertBefore(t.variableDeclaration('var', res.declars));
         }
+
+        return t.expressionStatement(res.seq);
       },
 
       // Try to merge previous statements into a sequence
       ReturnStatement(node, parent, scope) {
-        let seq = priorStatementsToSequence(this, scope);
-        if (!seq) {
+        let res = priorStatementsToSequence(this);
+        if (!res) {
           return;
         }
+
+        if (res.declars.length) {
+          this.insertBefore(t.variableDeclaration('var', res.declars));
+        }
+        res.spliceOut();
+        let seq = res.seq;
 
         if (node.argument) {
           if (t.isSequenceExpression(seq)) {
@@ -417,43 +434,109 @@ module.exports = ({ Plugin, types: t }) => {
     }
   }
 
-  function priorStatementsToSequence(path, scope) {
+  function priorStatementsToSequence(path) {
     if (!path.inList) {
       return;
     }
 
     let i = 0;
-    let seq;
+    let res;
     let statements;
-    while (!seq && i < path.key) {
+    while (!res && i < path.key) {
       statements = path.container.slice(i, path.key);
-      seq = t.toSequenceExpression(statements, scope);
-      if (!seq) {
+      res = toSequenceExpression(statements);
+      if (!res) {
         i += 1;
       }
     }
 
-    if (!seq) {
+    if (!res) {
       return;
-    }
-
-    // Babel returns an undefined as the last expression. (angry)
-    // Maybe to respect completion record.
-    if (t.isSequenceExpression(seq)) {
-      const lastExpr = seq.expressions[seq.expressions.length - 1];
-      if (t.isIdentifier(lastExpr)) {
-        seq.expressions.pop();
-      }
     }
 
     // We need to make sure we're removing the declerations pushed
     // to scope.
     const start = path.key - statements.length;
-    path.container.splice(start, statements.length);
-
-    return seq;
+    return {
+      spliceOut: () => {
+        path.container.splice(start, statements.length);
+        path.updateSiblingKeys();
+      },
+      seq: res.seq,
+      declars: res.declars,
+    };
   }
+
+  // Adapted from babel's converters. Differences is that it doesn't
+  // automatically push to the scope and it doesn't care about
+  // completion records.
+  function toSequenceExpression(statements) {
+    const declars = [];
+    let bailed = false;
+
+    let seq = convert(statements);
+    if (bailed) {
+      return;
+    }
+
+    return { seq, declars };
+
+    function convert(nodes) {
+      let exprs = [];
+
+      for (let node of nodes) {
+        if (t.isExpression(node)) {
+          exprs.push(node);
+        } else if (t.isExpressionStatement(node)) {
+          exprs.push(node.expression);
+        } else if (t.isVariableDeclaration(node)) {
+          if (node.kind !== 'var') {
+            bailed = true;
+            return;
+          }
+
+          for (let declar of node.declarations) {
+            let bindings = t.getBindingIdentifiers(declar);
+            for (let key in bindings) {
+              declars.push(t.variableDeclarator(bindings[key]));
+            }
+
+            if (declar.init) {
+              exprs.push(
+                t.assignmentExpression('=', declar.id, declar.init)
+              );
+            }
+          }
+
+          continue;
+        } else if (t.isIfStatement(node)) {
+          const consequent = node.consequent ? convert([node.consequent]) : VOID_0;
+          const alternate = node.alternate ? convert([node.alternate]) : VOID_0;
+          if (!consequent || !alternate) {
+            bailed = true;
+            return;
+          }
+
+          exprs.push(t.conditionalExpression(node.test, consequent, alternate));
+        } else if (t.isBlockStatement(node)) {
+          exprs.push(convert(node.body));
+        } else {
+          // bailed, we can't turn this statement into an expression
+          bailed = true;
+          return;
+        }
+      }
+
+      if (exprs.length === 1) {
+        return exprs[0];
+      } else {
+        return t.sequenceExpression(exprs);
+      }
+    }
+  }
+
 };
+
 
 /*
       // TODO: this doesn't take into account variable declerations
