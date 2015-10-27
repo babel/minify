@@ -287,113 +287,155 @@ module.exports = ({ Plugin, types: t }) => {
       },
       // turn blocked ifs into single statements
       IfStatement: {
-        exit(node) {
-          coerceIf('consequent');
-          coerceIf('alternate');
-          flipNegation(node);
+        exit: [
+          function(node) {
+            coerceIf('consequent');
+            coerceIf('alternate');
+            flipNegation(node);
 
-          // No alternate, make into a guarded expression
-          if (node.consequent && !node.alternate &&
+            // No alternate, make into a guarded expression
+            if (node.consequent && !node.alternate &&
               node.consequent.type === 'ExpressionStatement' &&
               !this.isCompletionRecord()) {
-              return t.expressionStatement(
-                t.logicalExpression('&&', node.test, node.consequent.expression)
-              );
-          }
-
-          // Easy, both are expressions, turn into ternary
-          if (t.isExpressionStatement(node.consequent) &&
-              t.isExpressionStatement(node.alternate)) {
-              return t.conditionalExpression(
-                node.test, node.consequent.expression, node.alternate.expression
-              );
-          }
-
-          // Alternate and consequent are returns turn into a return conditional
-          if (t.isReturnStatement(node.consequent)
-              && t.isReturnStatement(node.alternate)
-              && !this.getSibling(this.key + 1).node) {
-
-            return t.returnStatement(
-              t.conditionalExpression(
-                node.test,
-                node.consequent.argument || VOID_0,
-                node.alternate.argument
-              )
-            );
-          }
-
-          const next = this.getSibling(this.key + 1);
-
-          // No alternate but the next statement is a return
-          // also turn into a return conditional
-          if (t.isReturnStatement(node.consequent) &&
-              !node.alternate && next.isReturnStatement()) {
-            const nextArg = next.node.argument;
-            next.dangerouslyRemove();
-            return t.returnStatement(
-              t.conditionalExpression(
-                node.test, node.consequent.argument || VOID_0, nextArg
-              )
-            );
-          }
-
-          // Next is the last expression, turn into a return while void'ing the exprs
-          if (!this.getSibling(this.key + 2).node && t.isReturnStatement(node.consequent) &&
-              !node.alternate && next.isExpressionStatement()) {
-            const nextExpr = next.node.expression;
-            next.dangerouslyRemove();
-            if (node.consequent.argument) {
-              return t.returnStatement(
-                t.conditionalExpression(
-                  node.test,
-                  node.consequent.argument,
-                  t.unaryExpression('void', nextExpr)
-                )
-              );
+                return t.expressionStatement(
+                  t.logicalExpression('&&', node.test, node.consequent.expression)
+                );
             }
 
-            return t.returnStatement(
-              t.binaryExpression('||', node.test, nextExpr)
-            );
-          }
+            // Easy, both are expressions, turn into ternary
+            if (t.isExpressionStatement(node.consequent) &&
+              t.isExpressionStatement(node.alternate)) {
+                return t.conditionalExpression(
+                  node.test, node.consequent.expression, node.alternate.expression
+                );
+            }
 
-          if (node.consequent && node.alternate &&
+            // Alternate and consequent are returns turn into a return conditional
+            if (t.isReturnStatement(node.consequent)
+                && t.isReturnStatement(node.alternate)
+                && !this.getSibling(this.key + 1).node) {
+
+                  return t.returnStatement(
+                    t.conditionalExpression(
+                      node.test,
+                      node.consequent.argument || VOID_0,
+                      node.alternate.argument
+                    )
+                  );
+            }
+
+            const next = this.getSibling(this.key + 1);
+
+            // No alternate but the next statement is a return
+            // also turn into a return conditional
+            if (t.isReturnStatement(node.consequent) &&
+              !node.alternate && next.isReturnStatement()) {
+                const nextArg = next.node.argument;
+                next.dangerouslyRemove();
+                return t.returnStatement(
+                  t.conditionalExpression(
+                    node.test, node.consequent.argument || VOID_0, nextArg
+                  )
+                );
+            }
+
+            // Next is the last expression, turn into a return while void'ing the exprs
+            if (!this.getSibling(this.key + 2).node && t.isReturnStatement(node.consequent) &&
+              !node.alternate && next.isExpressionStatement()) {
+                const nextExpr = next.node.expression;
+                next.dangerouslyRemove();
+                if (node.consequent.argument) {
+                  return t.returnStatement(
+                    t.conditionalExpression(
+                      node.test,
+                      node.consequent.argument,
+                      t.unaryExpression('void', nextExpr)
+                    )
+                  );
+                }
+
+                return t.returnStatement(
+                  t.binaryExpression('||', node.test, nextExpr)
+                );
+            }
+
+            if (node.consequent && node.alternate &&
               (t.isReturnStatement(node.consequent) || (
                 t.isBlockStatement(node.consequent)
-                && t.isReturnStatement(
-                     node.consequent.body[node.consequent.body.length - 1]
-                   )
-                ))
-          ) {
-            this.insertAfter(
-              t.isBlockStatement(node.alternate)
-                ? node.alternate.body
-                : node.alternate
-            );
-            node.alternate = null;
-            return;
-          }
-
-          function coerceIf(key) {
-            let block = node[key];
-            if (!block || !t.isBlockStatement(block)) {
+                  && t.isReturnStatement(
+                    node.consequent.body[node.consequent.body.length - 1]
+                  )
+              ))
+            ) {
+              this.insertAfter(
+                t.isBlockStatement(node.alternate)
+                  ? node.alternate.body
+              : node.alternate
+              );
+              node.alternate = null;
               return;
             }
 
-            let body = block.body;
-            if (body.length !== 1) {
+            function coerceIf(key) {
+              let block = node[key];
+              if (!block || !t.isBlockStatement(block)) {
+                return;
+              }
+
+              let body = block.body;
+              if (body.length !== 1) {
+                return;
+              }
+
+              let first = body[0];
+              if (t.isVariableDeclaration(first) && first.kind !== 'let') {
+                return;
+              }
+
+              node[key] = first;
+            }
+          },
+
+          function(node, parent) {
+            if (!this.inList || node.alternate ||
+                !(t.isReturnStatement(node.consequent) && !node.consequent.argument) ||
+                !this.parentPath.parentPath.isFunction()) {
               return;
             }
 
-            let first = body[0];
-            if (t.isVariableDeclaration(first) && first.kind !== 'let') {
+
+            const test = node.test;
+            if (t.isBinaryExpression(test)) {
+              if (test.operator === '!==') {
+                test.operator = '===';
+              } else if (test.operator === '!=') {
+                test.operator = '==';
+              }
+            } else if (t.isUnaryExpression(test, { operator: '!' })) {
+              node.test = test.argument;
+            } else {
+              node.test = t.unaryExpression('!', node.test);
+            }
+
+            const statements = this.container.slice(this.key + 1);
+            if (!statements.length) {
+              this.dangerouslyRemove();
               return;
             }
 
-            node[key] = first;
-          }
-        },
+            let l = statements.length;
+            while (l-- > 0) {
+              this.getSibling(this.key + 1).dangerouslyRemove();
+            }
+
+            if (statements.length === 1) {
+              node.consequent = statements[0];
+            } else {
+              node.consequent = t.blockStatement(statements);
+            }
+            this.visit();
+          },
+        ],
       },
 
       WhileStatement(node) {

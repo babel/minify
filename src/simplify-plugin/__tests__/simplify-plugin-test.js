@@ -504,4 +504,63 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  xit('should combine returns', () => {
+
+    function shit() {
+  if(bl){
+    if(bl.indexOf){
+      if(typeof bl.indexOf == 'function'){
+        if(bl.indexOf(route) != -1){
+        return;
+        }
+      }
+    }
+  }
+}
+
+  });
+
+  it('should convert early returns to negated if blocks', () => {
+    const source = unpad(`
+      function foo(a) {
+        if (lol) return;
+        doThings();
+        doOtherThings();
+      }
+      function bar(a) {
+        if (lol) {
+          return;
+        }
+        try {
+          doThings();
+        } catch (e) {
+          doOtherThings();
+        }
+      }
+      function baz() {
+        while (wow) if (lol) return;
+        boo();
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        lol || (doThings(), doOtherThings());
+      }
+      function bar(a) {
+        if (!lol) try {
+          doThings();
+        } catch (e) {
+          doOtherThings();
+        }
+      }
+      function baz() {
+        for (; wow;) if (lol) return;
+
+        boo();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
