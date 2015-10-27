@@ -11,6 +11,7 @@ module.exports = ({ Plugin, types: t }) => {
           (a, b) => bindings[a].references < bindings[b].references
         );
 
+        let i = 0;
         for (let name of names) {
           let binding = bindings[name];
           let bindingRefs = state.refs.get(binding);
@@ -19,7 +20,7 @@ module.exports = ({ Plugin, types: t }) => {
           }
 
           let newName;
-          let i = 0;
+
           do {
             newName = state.base54.name(i);
             i += 1;
@@ -137,7 +138,22 @@ module.exports = ({ Plugin, types: t }) => {
 
       TryStatement(node, parent, scope, state) {
         state.get('base54').consider('try');
+        if (node.finalizer) {
+          state.get('base54').consider('finally');
+        }
       },
+
+      CatchClause(node, parent, scope, state) {
+        state.get('base54').consider('catch');
+      },
+
+      Literal(node, parent, scope, state) {
+        state.get('base54').consider(String(node.value));
+      },
+
+      'UnaryExpression|BinaryExpression'(node, parent, scope, state) {
+        state.get('base54').consider(node.operator);
+      }
     },
   });
 
