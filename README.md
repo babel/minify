@@ -89,14 +89,12 @@ jsxmin  235.99kB 80%     57.84kB 40%      15ms
 
 TODOS:
 
-- Convert whiles to fors
-- Do a better job at joining vars into the init part of the for
-- avoid semicolons at the close of the function
-- convert early if returns to if with negated condition
-- bug in turning for body (with a var decl) into a sequence
-- doing a better job at merging into return statements may present more oppurntities for other optimization like the one above.
-- needlessly parenthesising sequence expressions
 
+- convert early if returns to if with negated condition (babel)
+- needlessly parenthesising expressions (babel)
+- understand and optimize continue
+- some conditionals (with void 0) maybe turned into logical exprs
+- should merge more blocks into sequence expressions
 
 - Here is a place were uglify is crushing it making it into two fors and one if with no blocks:
 

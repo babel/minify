@@ -335,29 +335,37 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge statements into sequence expressions into the init part of for', () => {
+  it('should merge expressions into the init part of for', () => {
     const source = unpad(`
-      x();
-      y();
-      for (; i < 10; i++) z();
+      function foo() {
+        x();
+        y();
+        for (; i < 10; i++) z();
+      }
     `);
 
     const expected = unpad(`
-      for (x(), y(); i < 10; i++) z();
+      function foo() {
+        for (x(), y(); i < 10; i++) z();
+      }
     `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should merge statements into the init part of for', () => {
+  it('should merge statements into the init part of for even when there are others', () => {
     const source = unpad(`
-      x();
-      y();
-      for (z(); i < 10; i++) z();
+      function foo() {
+        x();
+        y();
+        for (z(); i < 10; i++) z();
+      }
     `);
 
     const expected = unpad(`
-      for (x(), y(), z(); i < 10; i++) z();
+      function foo() {
+        for (x(), y(), z(); i < 10; i++) z();
+      }
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -499,9 +507,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        var bar;
-
-        for (bar = baz; !0;) bar();
+        for (var bar = baz; !0;) bar();
       }
     `);
 
@@ -611,9 +617,9 @@ describe('simplify-plugin', () => {
         try {
           y();
         } catch (e) {}
-        var z;
+        var z = x();
 
-        for (z = x(), z(); a;) b();
+        for (z(); a;) b();
 
         c(), z();
       }

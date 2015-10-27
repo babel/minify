@@ -207,28 +207,30 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            let res = priorStatementsToSequence(this);
-            if (!res) {
-              return;
-            }
-
-            if (res.declars.length) {
-              this.insertBefore(
-                t.variableDeclaration('var', res.declars)
-              );
-            }
-            res.spliceOut();
-            let seq = res.seq;
-
-            if (node.init) {
-              if (t.isSequenceExpression(seq)) {
-                seq.expressions.push(node.init);
-              } else {
-                seq = t.sequenceExpression([seq, node.init]);
+            const prev = this.getSibling(this.key - 1);
+            let consumed = false;
+            if (prev.isVariableDeclaration()) {
+              if (!node.init) {
+                node.init = prev.node;
+                consumed = true;
               }
+            } else if (prev.isExpressionStatement()) {
+              const expr = prev.node.expression;
+              if (node.init) {
+                if (t.isSequenceExpression(expr)) {
+                  expr.expressions.push(node.init);
+                  node.init = expr;
+                } else {
+                  node.init = t.sequenceExpression([expr, node.init]);
+                }
+              } else {
+                node.init = expr;
+              }
+              consumed = true;
             }
-
-            node.init = seq;
+            if (consumed) {
+              prev.dangerouslyRemove();
+            }
           },
         ],
       },
