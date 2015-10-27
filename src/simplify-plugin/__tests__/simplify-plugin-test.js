@@ -594,7 +594,10 @@ describe('simplify-plugin', () => {
       }
       function bar() {
         x();
-        try { y() } catch (e) {}
+        while (x) {
+          if (x) x();
+        }
+        try { y(); } catch (e) {}
         var z = x();
         z();
         while (a) b();
@@ -612,7 +615,7 @@ describe('simplify-plugin', () => {
         b(x), this.d = x;
       }
       function bar() {
-        x();
+        for (x(); x;) x && x();
 
         try {
           y();

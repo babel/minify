@@ -236,24 +236,20 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       BlockStatement(node, parent, scope) {
-        if (t.isFunction(parent) && node === parent.body) {
-          const statements = toMultipleSequenceExpressions(node.body);
+        const statements = toMultipleSequenceExpressions(node.body);
+        if (!statements.length) {
+          return;
+        }
+
+        if (statements.length > 1 || (t.isFunction(parent) && node === parent.body) ||
+            t.isTryStatement(parent) || t.isCatchClause(parent)) {
           return t.blockStatement(statements);
         }
-        if (t.isTryStatement(parent) || t.isCatchClause(parent)) {
-          return;
-        }
 
-        let res = toSequenceExpression(node.body);
-        if (!res) {
-          return;
-        }
 
-        if (res.declars.length) {
-          this.parentPath.insertBefore(t.variableDeclaration('var', res.declars));
+        if (statements.length) {
+          return statements[0];
         }
-
-        return t.expressionStatement(res.seq);
       },
 
       // Try to merge previous statements into a sequence
@@ -674,7 +670,7 @@ module.exports = ({ Plugin, types: t }) => {
       let seq;
       if (exprs.length === 1) {
         seq = exprs[0];
-      } else {
+      } else if (exprs.length) {
         seq = t.sequenceExpression(exprs);
       }
 
