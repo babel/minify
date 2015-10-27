@@ -7,9 +7,7 @@ module.exports = ({ Plugin, types: t }) => {
         const bindings = scope.bindings;
         scope.bindings = {};
 
-        const names = Object.keys(bindings).sort(
-          (a, b) => bindings[a].references < bindings[b].references
-        );
+        const names = Object.keys(bindings);
 
         let i = 0;
         for (let name of names) {

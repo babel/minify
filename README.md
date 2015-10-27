@@ -87,6 +87,16 @@ babel   218.78kB 94%     55.57kB 46%      18ms
 jsxmin  235.99kB 80%     57.84kB 40%      15ms
 ```
 
+
+mangling enhancement:
+```
+        raw      raw win gzip    gzip win parse time
+uglify  213.49kB 98%     54.02kB 50%      15ms
+babel   218.66kB 94%     54.06kB 50%      17ms
+closure 209.5kB  102%    54.45kB 49%      17ms
+jsxmin  235.99kB 80%     57.84kB 40%      14ms
+```
+
 TODOS:
 
 
