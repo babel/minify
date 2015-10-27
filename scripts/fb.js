@@ -1,6 +1,6 @@
-/*!CK:995955236!*//*1439825661,*/
+/*!CK:2733322612!*//*1445543270,*/
 
-if (self.CavalryLogger) { CavalryLogger.start_js(["hr1Z6"]); }
+if (self.CavalryLogger) { CavalryLogger.start_js(["0TYEf"]); }
 
 /** Path: html/js/downstream/polyfill/Array.es6.js */
 /**
@@ -127,7 +127,7 @@ throw new Error(
 self.__BOOTSTRAPPED__ = true;}
 /** Path: html/js/downstream/polyfill/Array.prototype.es6.js */
 /**
- * @generated SignedSource<<c801d96cdcbd85be20a0c7af24dd7a48>>
+ * @generated SignedSource<<c845a46fa24efe4665c6d8b6289804e3>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -146,6 +146,8 @@ self.__BOOTSTRAPPED__ = true;}
  * @polyfill
  * @requires __DEV__
  */
+
+
 
 
 
@@ -240,7 +242,35 @@ if(this == null){
 throw new TypeError('Array.prototype.find called on null or undefined');}
 
 var index=findIndex.call(this,predicate,context);
-return index === -1?undefined:this[index];};}})();
+return index === -1?undefined:this[index];};}
+
+
+
+
+if(!Array.prototype.fill){
+Array.prototype.fill = function(value){
+if(this == null){
+throw new TypeError('Array.prototype.fill called on null or undefined');}
+
+var O=Object(this);
+var len=O.length >>> 0;
+var start=arguments[1];
+var relativeStart=start >> 0;
+var k=relativeStart < 0?
+Math.max(len + relativeStart,0):
+Math.min(relativeStart,len);
+var end=arguments[2];
+var relativeEnd=end === undefined?
+len:
+end >> 0;
+var cinal=relativeEnd < 0?
+Math.max(len + relativeEnd,0):
+Math.min(relativeEnd,len);
+while(k < cinal) {
+O[k] = value;
+k++;}
+
+return O;};}})();
 /** Path: html/js/downstream/polyfill/Array.prototype.js */
 
 /** Path: html/js/downstream/polyfill/Date.js */
@@ -423,7 +453,7 @@ __bodyWrapper = noopBodyWrapper;}}})();
 
 /** Path: html/js/downstream/polyfill/JSON-shield.js */
 /**
- * @generated SignedSource<<84043f6cf7bf1fafa84c900737b55d16>>
+ * @generated SignedSource<<37a026ba5b6604b83834fa39e335d349>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -435,6 +465,8 @@ __bodyWrapper = noopBodyWrapper;}}})();
  * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
  * !!    static_upstream.                                        !!
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @provides JSON-shield
  * @requires JSON
@@ -459,7 +491,7 @@ JSON.stringify = (function(stringify){
 var u2028=/\u2028/g,
 u2029=/\u2029/g;
 
-return function(any,replacer,space){
+return function JSONShildedStringify(any,replacer,space){
 var json=stringify.call(this,any,replacer,space);
 if(json){
 if(-1 < json.indexOf('\u2028')){
@@ -478,46 +510,9 @@ JSON.stringify);}
 
 /** Path: html/js/downstream/polyfill/Number.es6.js */
 
-/** Path: html/js/downstream/polyfill/Object.js */
-
-/** Path: html/js/downstream/polyfill/Object-shield.js */
-/**
- * @generated SignedSource<<697bafbe703a6036e33b93ce236439b2>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * @provides Object-shield
- * @requires __DEV__ Object
- * @polyfill
- */
-
-
-
-
-
-if(__DEV__){
-if(!Object.create.__fb){
-Object.create = (function(original){
-function create(proto){
-if(arguments.length > 1){
-throw new Error(
-'Object.create implementation supports only the first parameter');}
-
-return original.call(this,proto);}
-
-create.__fb = true;
-return create;})(
-Object.create);}}
 /** Path: html/js/downstream/polyfill/Object.enumFix.js */
+
+/** Path: html/js/downstream/polyfill/Object.js */
 
 /** Path: html/js/downstream/polyfill/Object.es6.js */
 /**
@@ -587,6 +582,8 @@ _assign(to,Object(nextSource));}}
 
 
 return to;};})();
+/** Path: html/js/downstream/polyfill/Object.is.js */
+
 /** Path: html/js/downstream/polyfill/Object.prototype.js */
 
 /** Path: html/js/downstream/polyfill/SourceMetaAnnotator.js */
@@ -1229,11 +1226,9 @@ return fn;}
 
 __t = check;
 __w = annotate;})();
-/** Path: html/js/downstream/polyfill/console.js */
-
-/** Path: html/js/downstream/polyfill/require.js */
+/** Path: html/js/downstream/polyfill/babelHelpers.js */
 /**
- * @generated SignedSource<<2985f30d30763ced9287a0efc5c77b1f>>
+ * @generated SignedSource<<cf8117c4c04d0953521536a0b5937d41>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -1246,6 +1241,85 @@ __w = annotate;})();
  * !!    static_upstream.                                        !!
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @provides babelHelpers
+ * @requires Function.prototype
+ * @requires Object.es6
+ * @polyfill
+ */
+
+
+
+
+(function(global){
+
+var babelHelpers=global.babelHelpers = {};
+var hasOwn=Object.prototype.hasOwnProperty;
+
+
+
+
+babelHelpers.inherits = function(subClass,superClass){
+Object.assign(subClass,superClass);
+subClass.prototype = Object.create(superClass && superClass.prototype);
+subClass.prototype.constructor = subClass;
+subClass.__superConstructor__ = superClass;
+return superClass;};
+
+
+
+
+
+babelHelpers._extends = Object.assign;
+
+
+
+
+babelHelpers.objectWithoutProperties = function(obj,keys){
+var target={};
+for(var i in obj) {
+if(!hasOwn.call(obj,i) || keys.indexOf(i) >= 0){
+continue;}
+
+target[i] = obj[i];}
+
+return target;};
+
+
+
+
+
+babelHelpers.taggedTemplateLiteralLoose = function(strings,raw){
+strings.raw = raw;
+return strings;};
+
+
+
+
+
+babelHelpers.bind = Function.prototype.bind;})(
+
+typeof global === 'undefined'?self:global);
+/** Path: html/js/downstream/polyfill/console.js */
+
+/** Path: html/js/downstream/polyfill/require.js */
+/**
+ * @generated SignedSource<<8fb80f847fae01e6b45ca3f45bed8a92>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
  * @provides commonjs-require
  * @requires Date
  *           Function.prototype
@@ -1254,7 +1328,7 @@ __w = annotate;})();
  *           __DEV__
  * @polyfill
  */
-(function(global){
+(function requireModule(global){
 
 
 if(global.require){
@@ -1373,21 +1447,24 @@ this.framesToPop = 2;}
 ModuleError.prototype = Object.create(Error.prototype);
 ModuleError.prototype.constructor = ModuleError;
 
-var _now;
-var _absoluteNow;
-_now = _absoluteNow = Date.now.bind(Date);
-
 var _performance=
 global.performance ||
 global.msPerformance ||
 global.webkitPerformance || {};
+var _absoluteNow;
 
-if(_performance.now){
-_now = _performance.now.bind(_performance);
-var navigationStart=
-_performance.timing && _performance.timing.navigationStart;
-if(navigationStart){
-_absoluteNow = function(){return _now() + navigationStart;};}}
+if(
+_performance.now &&
+_performance.timing &&
+_performance.timing.navigationStart)
+{
+var navigationStart=_performance.timing.navigationStart;
+_absoluteNow = function(){
+return _performance.now() + navigationStart;};}else
+
+{
+_absoluteNow = function(){
+return Date.now();};}
 
 
 
@@ -1458,7 +1535,7 @@ var module=modulesMap[id];
 if(module && module.exports != null){
 
 
-if((module.refcount--) === 1){
+if(module.refcount-- === 1){
 delete modulesMap[id];}
 
 return module.exports;}
@@ -1517,10 +1594,10 @@ throwErrorWithModuleID(e,id);}
 var args=[];
 for(var i=0;args.length < length;i++) {
 var dep=dependencies[i];
-if(!module.inlineRequires[dep]){
+
 args.push(dep === 'module'?module:
 dep === 'exports'?exports:
-require.call(null,dep));}}
+require.call(null,dep));}
 
 
 
@@ -1581,14 +1658,14 @@ module.exports = factory;}
 
 
 
-var rid=id + ':__required__';
+var rid='__isRequired__' + id;
 if(dependencyMap[rid]){
 define(rid,DUMMY_EXPORTS);}
 
 
 
 
-if((module.refcount--) === 1){
+if(module.refcount-- === 1){
 delete modulesMap[id];}
 
 return module.exports;}
@@ -1707,15 +1784,14 @@ return clone;};
 
 
 
-function define(id,dependencies,factory,
-_special,_context,_refCount,_inlineRequires){
-if(global.TimeSlice && !global.TimeSlice.inGuard()){
-return global.TimeSlice.guard(function(){
-define(id,dependencies,factory,
-_special,_context,_refCount,_inlineRequires);},
-'define ' + id)();}
-
-
+function define(
+id,
+dependencies,
+factory,
+_special,
+_context,
+_refCount)
+{
 if(dependencies === undefined){
 
 dependencies = [];
@@ -1785,12 +1861,13 @@ null,
 factory,
 dependencies,
 _context,
-_special,
-_inlineRequires || {});
+_special);
 
 modulesMap[id] = record;
 modulesTimeMap[id] = {
 id:id,
+dependencies:dependencies,
+category:_special,
 compileTime:null,
 factoryTime:null,
 compileEnd:null,
@@ -1802,8 +1879,13 @@ return canceler;}
 
 
 function ModuleRecord(
-id,refcount,exports,factory,dependencies,context,special,
-inlineRequires)
+id,
+refcount,
+exports,
+factory,
+dependencies,
+context,
+special)
 {
 this.id = id;
 this.refcount = refcount;
@@ -1812,7 +1894,6 @@ this.factory = factory;
 this.dependencies = dependencies;
 this.context = context;
 this.special = special || 0;
-this.inlineRequires = inlineRequires;
 this.waitingMap = {};
 this.waiting = 0;
 this.hasError = false;
@@ -1837,7 +1918,7 @@ delete dependencyMap[dep][id];}}
 for(var ii=0;ii < module.dependencies.length;ii++) {
 dep = module.dependencies[ii];
 if(modulesMap[dep]){
-if((modulesMap[dep].refcount--) === 1){
+if(modulesMap[dep].refcount-- === 1){
 _undefine(dep);}}else
 
 if(predefinedRefCounts[dep]){
@@ -1888,10 +1969,11 @@ predefinedRefCounts[dep]--;}}}
 
 
 function requireLazy(dependencies,factory,context){
+
 return define(
 '__requireLazy__' + (
-dependencies.length > 0?dependencies.join(',') + '__':'') + (
-_counter++),
+dependencies.length > 0?dependencies.join(',') + '__':'') +
+_counter++,
 dependencies,
 factory,
 REQUIRE_WHEN_READY,
@@ -1903,7 +1985,7 @@ context,
 
 
 function _uid(desc){
-return '__mod__' + (desc?desc + '__':'') + (_counter++);}
+return '__mod__' + (desc?desc + '__':'') + _counter++;}
 
 
 function _addDependency(module,dep){
@@ -2015,6 +2097,8 @@ function _register(id,exports){
 modulesMap[id] = new ModuleRecord(id,0,exports);
 modulesTimeMap[id] = {
 id:id,
+dependencies:[],
+category:0,
 compileTime:null,
 factoryTime:null,
 compileEnd:null,
@@ -2054,12 +2138,14 @@ id = id[0];}
 
 
 
+
 ifRequired.call(null,id,function(module){
 cb(module);},
 function(){
+
 define(
-'__requireWeak__' + id + '__' + (_counter++),
-[id + ':__required__'],
+'__requireWeak__' + id + '__' + _counter++,
+['__isRequired__' + id],
 function(){
 cb(modulesMap[id].exports);},
 
@@ -2095,8 +2181,9 @@ if(!global.console){
 return;}
 
 var names=Object.keys(require.__debug.deps);
-global.console.log(_debugUnresolvedDependencies(names));}};
+global.console.log(_debugUnresolvedDependencies(names));},
 
+debugUnresolvedDependencies:_debugUnresolvedDependencies};
 
 
 if(__DEV__){
@@ -2196,14 +2283,14 @@ exclusiveTime:module.factoryTime};});};
 
 var calculateParseTime=function(factory){
 
-var start=_now();
+var start=_absoluteNow();
 
 new Function(
 'var factory = ' + factory.toString() + ';' +
 'var random = ' + Math.random() + ';');
 
 
-return _now() - start;};
+return _absoluteNow() - start;};
 
 
 var getParseTimes=function(){
@@ -2335,20 +2422,44 @@ printTable('factory times',times,count);};}
 
 
 
+function tsFallback(cb){
+return cb;}
 
 
 
 
 
 
-global.__d = function(id,deps,factory,_special,_inlineRequires){
+
+
+global.__d = function(id,deps,factory,_special){
 var defaultDeps=['global','require','requireDynamic','requireLazy',
 'module','exports'];
-define(id,defaultDeps.concat(deps),factory,_special || USED_AS_TRANSPORT,
-null,null,_inlineRequires);};})(
+
+var guard=global.TimeSlice && global.TimeSlice.guard || tsFallback;
+guard(function guardedDefine(){
+define(
+id,
+defaultDeps.concat(deps),
+factory,
+_special || USED_AS_TRANSPORT,
+null,
+null);},
+
+'define ' + id,{root:true})();};})(
 
 
 this);
+/** Path: html/__static_js_modules__/pageleteventconstsjs.js */
+/**
+ * @providesModule PageletEventConstsJS
+ * @lightSyntaxTransform
+ */
+__d("PageletEventConstsJS",[],function $module_PageletEventConstsJS(global,require,requireDynamic,requireLazy,module,exports){require.__markCompiled && require.__markCompiled();
+
+module.exports = {"ARRIVE_START":"prearrive","ARRIVE_END":"arrive","CSS_START":"css","CSS_END":"css_load","DISPLAY_START":"display_start","DISPLAY_END":"display","JS_START":"jsstart","JS_END":"jsdone","ONLOAD_START":"preonload","ONLOAD_END":"onload","SETUP":"setup"};
+
+/* uBvVriBvyVU */},null,{});
 /** Path: html/js/downstream/error/eprintf.js */
 /**
  * @generated SignedSource<<3009c9496f1f1237d0c5577747fa07a6>>
@@ -2419,7 +2530,7 @@ module.exports = eprintf;},{'module':'eprintf','line':0,'column':0,'name':'$modu
  * @providesModule ex
  * @typechecks
  * @nostacktrace
- */__d('ex',['eprintf'],__annotator(function $module_ex(global,require,requireDynamic,requireLazy,module,exports,eprintf){if(require.__markCompiled)require.__markCompiled();
+ */__d('ex',['eprintf'],__annotator(function $module_ex(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -2445,7 +2556,7 @@ return ex('ex args number mismatch: %s',JSON.stringify(args));}
 
 
 if(__DEV__){
-return eprintf.apply(null,args);}else
+return require('eprintf').apply(null,args);}else
 {
 return ex._prefix + JSON.stringify(args) + ex._suffix;}},{'module':'ex','line':38,'column':9});
 
@@ -2475,7 +2586,7 @@ module.exports = ex;},{'module':'ex','line':0,'column':0,'name':'$module_ex'}),n
  *
  * @providesModule $
  * @typechecks
- */__d('$',['ex'],__annotator(function $module__(global,require,requireDynamic,requireLazy,module,exports,ex){if(require.__markCompiled)require.__markCompiled();
+ */__d('$',['ex'],__annotator(function $module__(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -2491,7 +2602,7 @@ module.exports = ex;},{'module':'ex','line':0,'column':0,'name':'$module_ex'}),n
 function getRequiredElement(id){
 var element=typeof id === 'string'?document.getElementById(id):id;
 if(!element){
-throw new Error(ex(
+throw new Error(require('ex')(
 'Tried to get element with id of "%s" but it is not present on the page.',
 id));}
 
@@ -2557,7 +2668,7 @@ return format.replace(/%s/g,__annotator(function(match){return args[index++];},{
 module.exports = sprintf;},{"module":"sprintf","line":0,"column":0,"name":"$module_sprintf"}),null);
 /** Path: html/js/downstream/core/invariant.js */
 /**
- * @generated SignedSource<<34572bd1767119a8bb8b872b43cbc1b8>>
+ * @generated SignedSource<<d0f3b1152933160dce8be893846279d5>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -2585,18 +2696,18 @@ module.exports = sprintf;},{"module":"sprintf","line":0,"column":0,"name":"$modu
  * limitations under the License.
  *
  * @providesModule invariant
- */__d('invariant',['ex','sprintf'],__annotator(function $module_invariant(global,require,requireDynamic,requireLazy,module,exports,ex,sprintf){if(require.__markCompiled)require.__markCompiled();
+ */__d('invariant',['ex','sprintf'],__annotator(function $module_invariant(global,require,requireDynamic,requireLazy,module,exports){
 
 
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
 
-var printingFunction=ex;
+var printingFunction=require('ex');
 if(__DEV__){
-printingFunction = sprintf;}
+printingFunction = require('sprintf');}
 
 
 
@@ -2609,8 +2720,7 @@ printingFunction = sprintf;}
 
 
 
-
-var invariant=__annotator(function(condition,format){
+function invariant(condition,format){
 if(__DEV__){
 if(format === undefined){
 throw new Error('invariant requires an error message argument');}}
@@ -2625,16 +2735,17 @@ error = new Error(
 'for the full error message and additional helpful warnings.');}else
 
 {
-var messageWithParams=['Invariant Violation: ' + format];
+var messageWithParams=[format];
 for(var i=2,l=arguments.length;i < l;i++) {
 messageWithParams.push(arguments[i]);}
 
 error = new Error(printingFunction.apply(null,messageWithParams));
+error.name = 'Invariant Violation';
 error.messageWithParams = messageWithParams;}
 
 
 error.framesToPop = 1;
-throw error;}},{'module':'invariant','line':55,'column':16});
+throw error;}}__annotator(invariant,{'module':'invariant','line':54,'column':0,'name':'invariant'});
 
 
 
@@ -2762,7 +2873,7 @@ module.exports = CSSCore;},{'module':'CSSCore','line':0,'column':0,'name':'$modu
  *
  * @providesModule CSS
  * @typechecks
- */__d('CSS',['CSSCore','$'],__annotator(function $module_CSS(global,require,requireDynamic,requireLazy,module,exports,CSSCore){if(require.__markCompiled)require.__markCompiled();
+ */__d('CSS',['$','CSSCore'],__annotator(function $module_CSS(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 var $=require('$').unsafe;
 
@@ -2801,7 +2912,7 @@ return element;},{params:[[element,'HTMLElement|string','element'],[className,'?
 
 
 hasClass:__annotator(function(element,className){return __bodyWrapper(this,arguments,function(){
-return CSSCore.hasClass($(element),className);},{params:[[element,'HTMLElement|DOMTextNode|DOMDocument|string','element'],[className,'string','className']],returns:'boolean'});},{'module':'CSS','line':44,'column':12},{params:['HTMLElement|DOMTextNode|DOMDocument|string','string'],returns:'boolean'}),
+return require('CSSCore').hasClass($(element),className);},{params:[[element,'HTMLElement|DOMTextNode|DOMDocument|string','element'],[className,'string','className']],returns:'boolean'});},{'module':'CSS','line':44,'column':12},{params:['HTMLElement|DOMTextNode|DOMDocument|string','string'],returns:'boolean'}),
 
 
 
@@ -2812,7 +2923,7 @@ return CSSCore.hasClass($(element),className);},{params:[[element,'HTMLElement|D
 
 
 addClass:__annotator(function(element,className){return __bodyWrapper(this,arguments,function(){
-return CSSCore.addClass($(element),className);},{params:[[element,'HTMLElement|string','element'],[className,'string','className']],returns:'HTMLElement'});},{'module':'CSS','line':55,'column':12},{params:['HTMLElement|string','string'],returns:'HTMLElement'}),
+return require('CSSCore').addClass($(element),className);},{params:[[element,'HTMLElement|string','element'],[className,'string','className']],returns:'HTMLElement'});},{'module':'CSS','line':55,'column':12},{params:['HTMLElement|string','string'],returns:'HTMLElement'}),
 
 
 
@@ -2823,7 +2934,7 @@ return CSSCore.addClass($(element),className);},{params:[[element,'HTMLElement|s
 
 
 removeClass:__annotator(function(element,className){return __bodyWrapper(this,arguments,function(){
-return CSSCore.removeClass($(element),className);},{params:[[element,'HTMLElement|string','element'],[className,'string','className']],returns:'HTMLElement'});},{'module':'CSS','line':66,'column':15},{params:['HTMLElement|string','string'],returns:'HTMLElement'}),
+return require('CSSCore').removeClass($(element),className);},{params:[[element,'HTMLElement|string','element'],[className,'string','className']],returns:'HTMLElement'});},{'module':'CSS','line':66,'column':15},{params:['HTMLElement|string','string'],returns:'HTMLElement'}),
 
 
 
@@ -2835,7 +2946,7 @@ return CSSCore.removeClass($(element),className);},{params:[[element,'HTMLElemen
 
 
 conditionClass:__annotator(function(element,className,bool){return __bodyWrapper(this,arguments,function(){
-return CSSCore.conditionClass($(element),className,bool);},{params:[[element,'HTMLElement|string','element'],[className,'string','className']],returns:'HTMLElement'});},{'module':'CSS','line':78,'column':18},{params:['HTMLElement|string','string'],returns:'HTMLElement'}),
+return require('CSSCore').conditionClass($(element),className,bool);},{params:[[element,'HTMLElement|string','element'],[className,'string','className']],returns:'HTMLElement'});},{'module':'CSS','line':78,'column':18},{params:['HTMLElement|string','string'],returns:'HTMLElement'}),
 
 
 
@@ -3018,7 +3129,7 @@ global.ge = require('ge');},{'module':'legacy:dom-core','line':0,'column':0,'nam
  *
  * @providesModule Parent
  * @typechecks
- */__d('Parent',['CSSCore'],__annotator(function $module_Parent(global,require,requireDynamic,requireLazy,module,exports,CSSCore){if(require.__markCompiled)require.__markCompiled();
+ */__d('Parent',['CSSCore'],__annotator(function $module_Parent(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -3043,7 +3154,7 @@ return element;},{params:[[tagName,'string','tagName']]});},{'module':'Parent','
 
 
 byClass:__annotator(function(node,className){return __bodyWrapper(this,arguments,function(){
-while(node && !CSSCore.hasClass(node,className)) {
+while(node && !require('CSSCore').hasClass(node,className)) {
 node = node.parentNode;}
 
 return node;},{params:[[className,'string','className']]});},{'module':'Parent','line':43,'column':11},{params:['string']}),
@@ -3113,7 +3224,7 @@ module.exports = Env;},{"module":"Env","line":0,"column":0,"name":"$module_Env"}
  * @providesModule erx
  * @typechecks
  * @nostacktrace
- */__d('erx',['ex'],__annotator(function $module_erx(global,require,requireDynamic,requireLazy,module,exports,ex){if(require.__markCompiled)require.__markCompiled();
+ */__d('erx',['ex'],__annotator(function $module_erx(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -3139,15 +3250,15 @@ if(typeof transformedMessage !== 'string'){
 return transformedMessage;}
 
 
-var prefixLeft=transformedMessage.indexOf(ex._prefix);
-var suffixLeft=transformedMessage.lastIndexOf(ex._suffix);
+var prefixLeft=transformedMessage.indexOf(require('ex')._prefix);
+var suffixLeft=transformedMessage.lastIndexOf(require('ex')._suffix);
 if(prefixLeft < 0 || suffixLeft < 0){
 
 return [transformedMessage];}
 
 
-var prefixRight=prefixLeft + ex._prefix.length;
-var suffixRight=suffixLeft + ex._suffix.length;
+var prefixRight=prefixLeft + require('ex')._prefix.length;
+var suffixRight=suffixLeft + require('ex')._suffix.length;
 if(prefixRight >= suffixLeft){
 return ['erx slice failure: %s',transformedMessage];}
 
@@ -3169,9 +3280,42 @@ return messageWithParams;},{params:[[transformedMessage,'string|array<string>','
 
 
 module.exports = erx;},{'module':'erx','line':0,'column':0,'name':'$module_erx'}),null);
+/** Path: html/js/downstream/core/removeFromArray.js */
+/**
+ * @generated SignedSource<<46e112d844437d84e3e5c8025aa73bf7>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule removeFromArray
+ * @typechecks
+ *
+ */__d("removeFromArray",[],__annotator(function $module_removeFromArray(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
+
+
+function removeFromArray(array,element){return __bodyWrapper(this,arguments,function(){
+var index=array.indexOf(element);
+if(index !== -1){
+array.splice(index,1);}},{params:[[array,"array","array"]]});}__annotator(removeFromArray,{"module":"removeFromArray","line":25,"column":0,"name":"removeFromArray"},{params:["array"]});
+
+
+
+module.exports = removeFromArray;},{"module":"removeFromArray","line":0,"column":0,"name":"$module_removeFromArray"}),null);
 /** Path: html/js/downstream/error/ErrorUtils.js */
 /**
- * @generated SignedSource<<8320225fd8c50b1ce02f583a2a53ae98>>
+ * @generated SignedSource<<6dd703e667c86844c8b2bdd215c4528a>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -3188,11 +3332,13 @@ module.exports = erx;},{'module':'erx','line':0,'column':0,'name':'$module_erx'}
  *
  * @providesModule ErrorUtils
  * @has-side-effects
- */__d('ErrorUtils',['Env','eprintf','erx'],__annotator(function $module_ErrorUtils(global,require,requireDynamic,requireLazy,module,exports,Env,eprintf,erx){if(require.__markCompiled)require.__markCompiled();
+ * @runWhenReady_DEPRECATED
+ */__d('ErrorUtils',['Env','eprintf','erx','removeFromArray'],__annotator(function $module_ErrorUtils(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
 var ErrorUtilsConfig={};
+
 
 
 
@@ -3215,6 +3361,8 @@ var IE_STACK_TRACE_REFERENCES=[
 
 var IE_STACK_FRAME_PATTERN=
 new RegExp('(.*?)(\\s)(?:' + IE_STACK_TRACE_REFERENCES.join('|') + ')$');
+
+var IE_AND_OTHER_FRAME_PATTERN=/(.*)(@|\s)[^\s]+$/;
 
 
 var listeners=[];
@@ -3264,7 +3412,7 @@ frame = frame.slice(0,-RegExp.$1.length);}
 
 if(
 IE_STACK_FRAME_PATTERN.test(frame) ||
-/(.*)(@|\s)[^\s]+$/.test(frame))
+IE_AND_OTHER_FRAME_PATTERN.test(frame))
 {
 frame = frame.substring(RegExp.$1.length + 1);
 identifier =
@@ -3290,10 +3438,10 @@ stackFrame.line?':' + stackFrame.line:'') + (
 stackFrame.column?':' + stackFrame.column:'') + (
 stackFrame.identifier?')':'');
 
-return stackFrame;},{'module':'ErrorUtils','line':81,'column':11}));
+return stackFrame;},{'module':'ErrorUtils','line':85,'column':11}));
 
 
-return stack;}__annotator(normalizeStack,{'module':'ErrorUtils','line':74,'column':0,'name':'normalizeStack'});
+return stack;}__annotator(normalizeStack,{'module':'ErrorUtils','line':78,'column':0,'name':'normalizeStack'});
 
 
 
@@ -3356,7 +3504,7 @@ script:
 err.fileName ||
 err.sourceURL ||
 err.script,
-stack:stackData.map(__annotator(function(frame){return frame.text;},{'module':'ErrorUtils','line':187,'column':25})).join('\n'),
+stack:stackData.map(__annotator(function(frame){return frame.text;},{'module':'ErrorUtils','line':191,'column':25})).join('\n'),
 stackFrames:stackData,
 guard:err.guard,
 guardList:err.guardList,
@@ -3365,8 +3513,8 @@ snapshot:err.snapshot};
 
 
 if(typeof info.message === 'string' && !info.messageWithParams){
-info.messageWithParams = erx(info.message);
-info.message = eprintf.apply(global,info.messageWithParams);}else
+info.messageWithParams = require('erx')(info.message);
+info.message = require('eprintf').apply(global,info.messageWithParams);}else
 {
 info.messageObject = info.message;
 info.message = String(info.message);}
@@ -3400,7 +3548,7 @@ info._originalError = err;
 for(var k in info) {
 info[k] == null && delete info[k];}
 
-return info;}__annotator(normalizeError,{'module':'ErrorUtils','line':134,'column':0,'name':'normalizeError'});
+return info;}__annotator(normalizeError,{'module':'ErrorUtils','line':138,'column':0,'name':'normalizeError'});
 
 
 
@@ -3446,22 +3594,22 @@ console.error('Error thrown from listener during error processing',e);}}
 
 
 isReporting = false;
-return true;}__annotator(reportError,{'module':'ErrorUtils','line':238,'column':0,'name':'reportError'});
+return true;}__annotator(reportError,{'module':'ErrorUtils','line':242,'column':0,'name':'reportError'});
 
 
 
 function inGuard(){
-return isGuarding;}__annotator(inGuard,{'module':'ErrorUtils','line':281,'column':0,'name':'inGuard'});
+return isGuarding;}__annotator(inGuard,{'module':'ErrorUtils','line':285,'column':0,'name':'inGuard'});
 
 
 function pushGuard(name){
 guardList.unshift(name);
-isGuarding = true;}__annotator(pushGuard,{'module':'ErrorUtils','line':285,'column':0,'name':'pushGuard'});
+isGuarding = true;}__annotator(pushGuard,{'module':'ErrorUtils','line':289,'column':0,'name':'pushGuard'});
 
 
 function popGuard(){
 guardList.shift();
-isGuarding = guardList.length !== 0;}__annotator(popGuard,{'module':'ErrorUtils','line':290,'column':0,'name':'popGuard'});
+isGuarding = guardList.length !== 0;}__annotator(popGuard,{'module':'ErrorUtils','line':294,'column':0,'name':'popGuard'});
 
 
 
@@ -3484,7 +3632,7 @@ var returnValue;
 
 
 
-if(Env.nocatch){
+if(require('Env').nocatch){
 nocatch = true;}
 
 
@@ -3533,7 +3681,7 @@ applyWithGuard.warned = true;}}
 
 reportError(err);}finally
 {
-popGuard();}}__annotator(applyWithGuard,{'module':'ErrorUtils','line':307,'column':0,'name':'applyWithGuard'});
+popGuard();}}__annotator(applyWithGuard,{'module':'ErrorUtils','line':311,'column':0,'name':'applyWithGuard'});
 
 
 
@@ -3550,7 +3698,7 @@ popGuard();}}__annotator(applyWithGuard,{'module':'ErrorUtils','line':307,'colum
 function guard(f,name,context){
 name = name || f.name || GENERATED_GUARD_TAG;
 function guarded(){
-return applyWithGuard(f,context || this,arguments,null,name);}__annotator(guarded,{'module':'ErrorUtils','line':380,'column':2,'name':'guarded'});
+return applyWithGuard(f,context || this,arguments,null,name);}__annotator(guarded,{'module':'ErrorUtils','line':384,'column':2,'name':'guarded'});
 
 if(f.__SMmeta){
 guarded.__SMmeta = f.__SMmeta;}
@@ -3560,7 +3708,7 @@ if(__DEV__){
 guarded.toString = f.toString.bind(f);}
 
 
-return guarded;}__annotator(guard,{'module':'ErrorUtils','line':378,'column':0,'name':'guard'});
+return guarded;}__annotator(guard,{'module':'ErrorUtils','line':382,'column':0,'name':'guard'});
 
 
 
@@ -3581,7 +3729,7 @@ error.line = error.line || line;
 error.column = error.column || column;
 error.guard = GLOBAL_ERROR_HANDLER_TAG;
 error.guardList = [GLOBAL_ERROR_HANDLER_TAG];
-reportError(error,true);}__annotator(onerror,{'module':'ErrorUtils','line':404,'column':0,'name':'onerror'});
+reportError(error,true);}__annotator(onerror,{'module':'ErrorUtils','line':408,'column':0,'name':'onerror'});
 
 window.onerror = onerror;
 
@@ -3597,8 +3745,17 @@ function addListener(listener,noPlayback){
 listeners.push(listener);
 
 if(!noPlayback){
-history.forEach(listener);}}__annotator(addListener,{'module':'ErrorUtils','line':424,'column':0,'name':'addListener'});
+history.forEach(listener);}}__annotator(addListener,{'module':'ErrorUtils','line':428,'column':0,'name':'addListener'});
 
+
+
+
+
+
+
+
+function removeListener(listener){
+require('removeFromArray')(listeners,listener);}__annotator(removeListener,{'module':'ErrorUtils','line':441,'column':0,'name':'removeListener'});
 
 
 
@@ -3607,7 +3764,7 @@ history.forEach(listener);}}__annotator(addListener,{'module':'ErrorUtils','line
 
 
 function setSourceResolver(resolver){
-sourceResolver = resolver;}__annotator(setSourceResolver,{'module':'ErrorUtils','line':437,'column':0,'name':'setSourceResolver'});
+sourceResolver = resolver;}__annotator(setSourceResolver,{'module':'ErrorUtils','line':450,'column':0,'name':'setSourceResolver'});
 
 
 var ErrorUtils={
@@ -3615,6 +3772,7 @@ ANONYMOUS_GUARD_TAG:ANONYMOUS_GUARD_TAG,
 GENERATED_GUARD_TAG:GENERATED_GUARD_TAG,
 GLOBAL_ERROR_HANDLER_TAG:GLOBAL_ERROR_HANDLER_TAG,
 addListener:addListener,
+removeListener:removeListener,
 setSourceResolver:setSourceResolver,
 applyWithGuard:applyWithGuard,
 guard:guard,
@@ -3629,7 +3787,7 @@ module.exports = global.ErrorUtils = ErrorUtils;
 
 
 if(typeof __t === 'function' && __t.setHandler){
-__t.setHandler(reportError);}},{'module':'ErrorUtils','line':0,'column':0,'name':'$module_ErrorUtils'}),6);
+__t.setHandler(reportError);}},{'module':'ErrorUtils','line':0,'column':0,'name':'$module_ErrorUtils'}),3);
 /** Path: html/js/downstream/callback_manager/CallbackDependencyManager.js */
 /**
  * @generated SignedSource<<ef284e44ba84ac907779894992a45086>>
@@ -3683,7 +3841,7 @@ __t.setHandler(reportError);}},{'module':'ErrorUtils','line':0,'column':0,'name'
  *    callbackManager.satisfyPersistentDependency('file2');
  *  });
  *
- */__d('CallbackDependencyManager',['ErrorUtils'],__annotator(function $module_CallbackDependencyManager(global,require,requireDynamic,requireLazy,module,exports,ErrorUtils){if(require.__markCompiled)require.__markCompiled();
+ */__d('CallbackDependencyManager',['ErrorUtils'],__annotator(function $module_CallbackDependencyManager(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -3741,7 +3899,7 @@ this.$CallbackDependencyManager_callbacks[callbackID].$CallbackDependencyManager
 if(this.$CallbackDependencyManager_callbacks[callbackID].$CallbackDependencyManager_pendingDepCount <= 0){
 var callback=this.$CallbackDependencyManager_callbacks[callbackID].$CallbackDependencyManager_callback;
 delete this.$CallbackDependencyManager_callbacks[callbackID];
-ErrorUtils.applyWithGuard(callback);}}},{params:[[depName,'string','depName']]});},{'module':'CallbackDependencyManager','line':96,'column':32},{params:['string']});CallbackDependencyManager.prototype.
+require('ErrorUtils').applyWithGuard(callback);}}},{params:[[depName,'string','depName']]});},{'module':'CallbackDependencyManager','line':96,'column':32},{params:['string']});CallbackDependencyManager.prototype.
 
 
 
@@ -3810,7 +3968,7 @@ var pendingDepCount=this.$CallbackDependencyManager_addDependenciesToCallback(ca
 
 
 if(pendingDepCount === 0){
-ErrorUtils.applyWithGuard(callback);
+require('ErrorUtils').applyWithGuard(callback);
 return null;}
 
 
@@ -3850,9 +4008,9 @@ module.exports = CallbackDependencyManager;},{'module':'CallbackDependencyManage
  *
  * @providesModule EventSubscription
  * @typechecks
- */__d('EventSubscription',[],__annotator(function $module_EventSubscription(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+ */__d('EventSubscription',[],__annotator(function $module_EventSubscription(global,require,requireDynamic,requireLazy,module,exports){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -3901,16 +4059,16 @@ module.exports = EventSubscription;},{'module':'EventSubscription','line':0,'col
  *
  * @providesModule EmitterSubscription
  * @typechecks
- */__d('EmitterSubscription',['EventSubscription'],__annotator(function $module_EmitterSubscription(global,require,requireDynamic,requireLazy,module,exports,EventSubscription){if(require.__markCompiled)require.__markCompiled();var _EventSubscription,_superProto;
+ */__d('EmitterSubscription',['EventSubscription'],__annotator(function $module_EmitterSubscription(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();var _EventSubscription,_superProto;
 
-'use strict';_EventSubscription =
-
-
+'use strict';_EventSubscription = babelHelpers.inherits(
 
 
 
 
-EventSubscription;_superProto = _EventSubscription && _EventSubscription.prototype;Object.assign(EmitterSubscription,_EventSubscription);EmitterSubscription.prototype = Object.create(_EventSubscription.prototype);EmitterSubscription.prototype.constructor = EmitterSubscription;EmitterSubscription.__superConstructor__ = _EventSubscription;
+
+
+EmitterSubscription,require('EventSubscription'));_superProto = _EventSubscription && _EventSubscription.prototype;
 
 
 
@@ -3947,9 +4105,9 @@ module.exports = EmitterSubscription;},{'module':'EmitterSubscription','line':0,
  *
  * @providesModule EventSubscriptionVendor
  * @typechecks
- */__d('EventSubscriptionVendor',['invariant'],__annotator(function $module_EventSubscriptionVendor(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('EventSubscriptionVendor',['invariant'],__annotator(function $module_EventSubscriptionVendor(global,require,requireDynamic,requireLazy,module,exports,invariant){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -4076,7 +4234,7 @@ emptyFunction.thatReturnsArgument = __annotator(function(arg){return arg;},{"mod
 module.exports = emptyFunction;},{"module":"emptyFunction","line":0,"column":0,"name":"$module_emptyFunction"}),null);
 /** Path: html/js/downstream/emitter/BaseEventEmitter.js */
 /**
- * @generated SignedSource<<90a17ed852f8b85239acd3ec767aa667>>
+ * @generated SignedSource<<c9bbed3db86c7a42e55e09afdc7c7468>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -4093,7 +4251,7 @@ module.exports = emptyFunction;},{"module":"emptyFunction","line":0,"column":0,"
  *
  * @providesModule BaseEventEmitter
  * @typechecks
- */__d('BaseEventEmitter',['EmitterSubscription','EventSubscriptionVendor','emptyFunction','invariant'],__annotator(function $module_BaseEventEmitter(global,require,requireDynamic,requireLazy,module,exports,EmitterSubscription,EventSubscriptionVendor,emptyFunction,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('BaseEventEmitter',['invariant','EmitterSubscription','EventSubscriptionVendor','emptyFunction'],__annotator(function $module_BaseEventEmitter(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -4119,7 +4277,7 @@ module.exports = emptyFunction;},{"module":"emptyFunction","line":0,"column":0,"
 
 
 function BaseEventEmitter(){'use strict';
-this.$BaseEventEmitter_subscriber = new EventSubscriptionVendor();
+this.$BaseEventEmitter_subscriber = new (require('EventSubscriptionVendor'))();
 this.$BaseEventEmitter_currentSubscription = null;}__annotator(BaseEventEmitter,{'module':'BaseEventEmitter','line':44,'column':2,'name':'BaseEventEmitter'});BaseEventEmitter.prototype.
 
 
@@ -4141,7 +4299,7 @@ addListener = __annotator(function(
 eventType,listener,context){return __bodyWrapper(this,arguments,function(){'use strict';
 return this.$BaseEventEmitter_subscriber.addSubscription(
 eventType,
-new EmitterSubscription(this.$BaseEventEmitter_subscriber,listener,context));},{params:[[eventType,'string','eventType'],[listener,'function','listener'],[context,'?object','context']],returns:'EmitterSubscription'});},{'module':'BaseEventEmitter','line':63,'column':13},{params:['string','function','?object'],returns:'EmitterSubscription'});BaseEventEmitter.prototype.
+new (require('EmitterSubscription'))(this.$BaseEventEmitter_subscriber,listener,context));},{params:[[eventType,'string','eventType'],[listener,'function','listener'],[context,'?object','context']],returns:'EmitterSubscription'});},{'module':'BaseEventEmitter','line':63,'column':13},{params:['string','function','?object'],returns:'EmitterSubscription'});BaseEventEmitter.prototype.
 
 
 
@@ -4212,7 +4370,7 @@ this.$BaseEventEmitter_subscriber.removeSubscription(this.$BaseEventEmitter_curr
 listeners = __annotator(function(eventType){return __bodyWrapper(this,arguments,function(){'use strict';
 var subscriptions=this.$BaseEventEmitter_subscriber.getSubscriptionsForType(eventType);
 return subscriptions?
-subscriptions.filter(emptyFunction.thatReturnsTrue).map(__annotator(
+subscriptions.filter(require('emptyFunction').thatReturnsTrue).map(__annotator(
 function(subscription){
 return subscription.listener;},{'module':'BaseEventEmitter','line':139,'column':10})):
 
@@ -4237,16 +4395,22 @@ emit = __annotator(function(eventType){return __bodyWrapper(this,arguments,funct
 var subscriptions=this.$BaseEventEmitter_subscriber.getSubscriptionsForType(eventType);
 if(subscriptions){
 var keys=Object.keys(subscriptions);
+var args;
 for(var ii=0;ii < keys.length;ii++) {
 var key=keys[ii];
 var subscription=subscriptions[key];
 
 if(subscription){
 this.$BaseEventEmitter_currentSubscription = subscription;
-this.__emitToSubscription.apply(
-this,
-[subscription].concat(Array.prototype.slice.call(arguments)));}}
+if(args == null){
+args = [subscription];
+for(var i=0,len=arguments.length;i < len;i++) {
+args[i + 1] = arguments[i];}}else
 
+{
+args[0] = subscription;}
+
+this.__emitToSubscription.apply(this,args);}}
 
 
 this.$BaseEventEmitter_currentSubscription = null;}},{params:[[eventType,'string','eventType']]});},{'module':'BaseEventEmitter','line':159,'column':6},{params:['string']});BaseEventEmitter.prototype.
@@ -4262,9 +4426,8 @@ this.$BaseEventEmitter_currentSubscription = null;}},{params:[[eventType,'string
 
 
 
-__emitToSubscription = __annotator(function(subscription,eventType){return __bodyWrapper(this,arguments,function(){'use strict';
-var args=Array.prototype.slice.call(arguments,2);
-subscription.listener.apply(subscription.context,args);},{params:[[subscription,'EmitterSubscription','subscription'],[eventType,'string','eventType']]});},{'module':'BaseEventEmitter','line':188,'column':22},{params:['EmitterSubscription','string']});
+__emitToSubscription = __annotator(function(subscription,eventType){for(var _len=arguments.length,args=Array(_len > 2?_len - 2:0),_key=2;_key < _len;_key++) {args[_key - 2] = arguments[_key];}return __bodyWrapper(this,arguments,function(){'use strict';
+subscription.listener.apply(subscription.context,args);},{params:[[subscription,'EmitterSubscription','subscription'],[eventType,'string','eventType']]});},{'module':'BaseEventEmitter','line':194,'column':22},{params:['EmitterSubscription','string']});
 
 
 
@@ -4346,7 +4509,7 @@ module.exports = CircularBuffer;},{'module':'CircularBuffer','line':0,'column':0
  *
  * @providesModule LogBuffer
  * @nostacktrace
- */__d('LogBuffer',['CircularBuffer'],__annotator(function $module_LogBuffer(global,require,requireDynamic,requireLazy,module,exports,CircularBuffer){if(require.__markCompiled)require.__markCompiled();
+ */__d('LogBuffer',['CircularBuffer'],__annotator(function $module_LogBuffer(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -4398,7 +4561,7 @@ var LogBuffer={
 write:__annotator(function(category,log){
 var buffer=
 buffers[category] =
-buffers[category] || new CircularBuffer(DEFAULT_RETENTION);
+buffers[category] || new (require('CircularBuffer'))(DEFAULT_RETENTION);
 
 buffer.write(log);
 
@@ -4471,9 +4634,9 @@ module.exports = LogBuffer;},{'module':'LogBuffer','line':0,'column':0,'name':'$
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ExecutionEnvironment
- */__d('ExecutionEnvironment',[],__annotator(function $module_ExecutionEnvironment(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+ */__d('ExecutionEnvironment',[],__annotator(function $module_ExecutionEnvironment(global,require,requireDynamic,requireLazy,module,exports){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 var canUseDOM=!!(
 typeof window !== 'undefined' &&
@@ -4522,15 +4685,15 @@ module.exports = ExecutionEnvironment;},{'module':'ExecutionEnvironment','line':
  *
  * @providesModule performance
  * @typechecks
- */__d('performance',['ExecutionEnvironment'],__annotator(function $module_performance(global,require,requireDynamic,requireLazy,module,exports,ExecutionEnvironment){if(require.__markCompiled)require.__markCompiled();
+ */__d('performance',['ExecutionEnvironment'],__annotator(function $module_performance(global,require,requireDynamic,requireLazy,module,exports){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
 var performance;
 
-if(ExecutionEnvironment.canUseDOM){
+if(require('ExecutionEnvironment').canUseDOM){
 performance =
 window.performance ||
 window.msPerformance ||
@@ -4540,7 +4703,7 @@ window.webkitPerformance;}
 module.exports = performance || {};},{'module':'performance','line':0,'column':0,'name':'$module_performance'}),null);
 /** Path: html/js/downstream/performance/performanceNow.js */
 /**
- * @generated SignedSource<<27e04dbbfe3fac24d389bf47eeec07cd>>
+ * @generated SignedSource<<853829375fd63037a841051c4d1db59e>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -4557,26 +4720,27 @@ module.exports = performance || {};},{'module':'performance','line':0,'column':0
  *
  * @providesModule performanceNow
  * @typechecks
- */__d('performanceNow',['performance'],__annotator(function $module_performanceNow(global,require,requireDynamic,requireLazy,module,exports,performance){if(require.__markCompiled)require.__markCompiled();
-
-
-var curPerformance=performance;
+ */__d('performanceNow',['performance'],__annotator(function $module_performanceNow(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
+var performanceNow;
 
 
 
-if(!curPerformance || !curPerformance.now){
-curPerformance = Date;}
 
 
-var performanceNow=curPerformance.now.bind(curPerformance);
+
+if(require('performance').now){
+performanceNow = __annotator(function(){return require('performance').now();},{'module':'performanceNow','line':31,'column':19});}else
+{
+performanceNow = __annotator(function(){return Date.now();},{'module':'performanceNow','line':33,'column':19});}
+
 
 module.exports = performanceNow;},{'module':'performanceNow','line':0,'column':0,'name':'$module_performanceNow'}),null);
 /** Path: html/js/downstream/emitter/internal/EventEmitter.js */
 /**
- * @generated SignedSource<<ff22376c568c3fc65a840c751490006c>>
+ * @generated SignedSource<<adacda151497615ab8949205c8ba9bd2>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -4593,7 +4757,7 @@ module.exports = performanceNow;},{'module':'performanceNow','line':0,'column':0
  *
  * @providesModule EventEmitter
  * @typechecks
- */__d('EventEmitter',['BaseEventEmitter','ErrorUtils','LogBuffer','performanceNow'],__annotator(function $module_EventEmitter(global,require,requireDynamic,requireLazy,module,exports,BaseEventEmitter,ErrorUtils,LogBuffer,performanceNow){if(require.__markCompiled)require.__markCompiled();var _BaseEventEmitter,_superProto;_BaseEventEmitter =
+ */__d('EventEmitter',['BaseEventEmitter','ErrorUtils','LogBuffer','performanceNow'],__annotator(function $module_EventEmitter(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();var _BaseEventEmitter,_superProto;_BaseEventEmitter = babelHelpers.inherits(
 
 
 
@@ -4605,23 +4769,23 @@ module.exports = performanceNow;},{'module':'performanceNow','line':0,'column':0
 
 
 
-BaseEventEmitter;_superProto = _BaseEventEmitter && _BaseEventEmitter.prototype;Object.assign(EventEmitter,_BaseEventEmitter);EventEmitter.prototype = Object.create(_BaseEventEmitter.prototype);EventEmitter.prototype.constructor = EventEmitter;EventEmitter.__superConstructor__ = _BaseEventEmitter;EventEmitter.prototype.
+EventEmitter,require('BaseEventEmitter'));_superProto = _BaseEventEmitter && _BaseEventEmitter.prototype;EventEmitter.prototype.
 __emitToSubscription = __annotator(function(subscription,eventType){'use strict';
 var functionMeta=
 subscription.listener.__SMmeta ||
 {
 name:subscription.listener.name || '<anonymous function>'};
 
-var start=performanceNow();
-ErrorUtils.applyWithGuard(
+var start=require('performanceNow')();for(var _len=arguments.length,args=Array(_len > 2?_len - 2:0),_key=2;_key < _len;_key++) {args[_key - 2] = arguments[_key];}
+require('ErrorUtils').applyWithGuard(
 subscription.listener,
 subscription.context,
-Array.prototype.slice.call(arguments,2),
+args,
 null,
 'EventEmitter:' + eventType);
 
-var time=performanceNow() - start;
-LogBuffer.write('event_handler_performance',{
+var time=require('performanceNow')() - start;
+require('LogBuffer').write('event_handler_performance',{
 functionMeta:functionMeta,
 time:time,
 context:eventType});},{'module':'EventEmitter','line':32,'column':22});function EventEmitter(){'use strict';_BaseEventEmitter.apply(this,arguments);}__annotator(EventEmitter,{'module':'EventEmitter','line':0,'column':0,'name':'EventEmitter'});
@@ -4649,9 +4813,9 @@ module.exports = EventEmitter;},{'module':'EventEmitter','line':0,'column':0,'na
  *
  * @providesModule EventEmitterWithHolding
  * @typechecks
- */__d('EventEmitterWithHolding',[],__annotator(function $module_EventEmitterWithHolding(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+ */__d('EventEmitterWithHolding',[],__annotator(function $module_EventEmitterWithHolding(global,require,requireDynamic,requireLazy,module,exports){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -4832,9 +4996,9 @@ module.exports = EventEmitterWithHolding;},{'module':'EventEmitterWithHolding','
  *
  * @providesModule EventHolder
  * @typechecks
- */__d('EventHolder',['invariant'],__annotator(function $module_EventHolder(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('EventHolder',['invariant'],__annotator(function $module_EventHolder(global,require,requireDynamic,requireLazy,module,exports,invariant){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -5033,7 +5197,7 @@ module.exports = toArray;},{'module':'toArray','line':0,'column':0,'name':'$modu
  *
  * @providesModule createArrayFromMixed
  * @typechecks
- */__d('createArrayFromMixed',['toArray'],__annotator(function $module_createArrayFromMixed(global,require,requireDynamic,requireLazy,module,exports,toArray){if(require.__markCompiled)require.__markCompiled();
+ */__d('createArrayFromMixed',['toArray'],__annotator(function $module_createArrayFromMixed(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -5103,7 +5267,7 @@ return [obj];}else
 if(Array.isArray(obj)){
 return obj.slice();}else
 {
-return toArray(obj);}},{returns:'array'});}__annotator(createArrayFromMixed,{'module':'createArrayFromMixed','line':83,'column':0,'name':'createArrayFromMixed'},{returns:'array'});
+return require('toArray')(obj);}},{returns:'array'});}__annotator(createArrayFromMixed,{'module':'createArrayFromMixed','line':83,'column':0,'name':'createArrayFromMixed'},{returns:'array'});
 
 
 
@@ -5114,7 +5278,7 @@ module.exports = createArrayFromMixed;},{'module':'createArrayFromMixed','line':
  *
  * @providesModule Arbiter
  * @typechecks
- */__d('Arbiter',['CallbackDependencyManager','ErrorUtils','EventEmitter','EventEmitterWithHolding','EventHolder','createArrayFromMixed','invariant'],__annotator(function $module_Arbiter(global,require,requireDynamic,requireLazy,module,exports,CallbackDependencyManager,ErrorUtils,EventEmitter,EventEmitterWithHolding,EventHolder,createArrayFromMixed,invariant){if(require.__markCompiled)require.__markCompiled();var _EventHolder,_superProto;
+ */__d('Arbiter',['invariant','CallbackDependencyManager','ErrorUtils','EventEmitter','EventEmitterWithHolding','EventHolder','createArrayFromMixed'],__annotator(function $module_Arbiter(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();var _EventHolder,_superProto;
 
 'use strict';
 
@@ -5141,10 +5305,10 @@ module.exports = createArrayFromMixed;},{'module':'createArrayFromMixed','line':
 
 
 function Arbiter(){
-var emitter=new EventEmitter();
+var emitter=new (require('EventEmitter'))();
 this.$Arbiter_holder = new ArbiterEventHolder();
-this.$Arbiter_emitter = new EventEmitterWithHolding(emitter,this.$Arbiter_holder);
-this.$Arbiter_callbackManager = new CallbackDependencyManager();
+this.$Arbiter_emitter = new (require('EventEmitterWithHolding'))(emitter,this.$Arbiter_holder);
+this.$Arbiter_callbackManager = new (require('CallbackDependencyManager'))();
 
 
 this.$Arbiter_returnValueStack = [];}__annotator(Arbiter,{'module':'Arbiter','line':32,'column':2,'name':'Arbiter'});Arbiter.prototype.
@@ -5167,7 +5331,7 @@ this.$Arbiter_returnValueStack = [];}__annotator(Arbiter,{'module':'Arbiter','li
 
 
 subscribe = __annotator(function(types,callback,policy){return __bodyWrapper(this,arguments,function(){
-types = createArrayFromMixed(types);
+types = require('createArrayFromMixed')(types);
 types.forEach(__annotator(function(type){
 !(type && typeof type === 'string')?invariant(0,'Invalid type: %s',type):undefined;},{'module':'Arbiter','line':60,'column':18}));
 
@@ -5201,7 +5365,7 @@ if(returnValues[type] === false){
 return;}
 
 
-var value=ErrorUtils.applyWithGuard(callback,null,[type,data]);
+var value=require('ErrorUtils').applyWithGuard(callback,null,[type,data]);
 if(value === false){
 this.$Arbiter_emitter.releaseCurrentEvent();}
 
@@ -5258,7 +5422,7 @@ token.unsubscribe();},{params:[[token,'ArbiterToken','token']]});},{'module':'Ar
 
 inform = __annotator(function(types,data,behavior){return __bodyWrapper(this,arguments,function(){
 var expectsArrayReturn=Array.isArray(types);
-types = createArrayFromMixed(types);
+types = require('createArrayFromMixed')(types);
 
 behavior = behavior || Arbiter.BEHAVIOR_EVENT;
 var isPersistentEvent=
@@ -5336,12 +5500,12 @@ return;}
 if(isPersistentEvent){
 this.$Arbiter_callbackManager.satisfyPersistentDependency(type);}else
 {
-this.$Arbiter_callbackManager.satisfyNonPersistentDependency(type);}},{'module':'Arbiter','line':221,'column':18});_EventHolder =
+this.$Arbiter_callbackManager.satisfyNonPersistentDependency(type);}},{'module':'Arbiter','line':221,'column':18});_EventHolder = babelHelpers.inherits(
 
 
 
 
-EventHolder;_superProto = _EventHolder && _EventHolder.prototype;Object.assign(ArbiterEventHolder,_EventHolder);ArbiterEventHolder.prototype = Object.create(_EventHolder.prototype);ArbiterEventHolder.prototype.constructor = ArbiterEventHolder;ArbiterEventHolder.__superConstructor__ = _EventHolder;
+ArbiterEventHolder,require('EventHolder'));_superProto = _EventHolder && _EventHolder.prototype;
 function ArbiterEventHolder(){
 _superProto.constructor.call(this);
 this.$ArbiterEventHolder_holdingBehaviors = {};}__annotator(ArbiterEventHolder,{'module':'Arbiter','line':234,'column':2,'name':'ArbiterEventHolder'});ArbiterEventHolder.prototype.
@@ -5444,7 +5608,7 @@ Arbiter.call(Arbiter);
 module.exports = Arbiter;},{'module':'Arbiter','line':0,'column':0,'name':'$module_Arbiter'}),null);
 /** Path: html/js/downstream/core/CookieCore.js */
 /**
- * @generated SignedSource<<0e00855206a20919d869c09171ec97c9>>
+ * @generated SignedSource<<c1eaf6101a8f26d89a4beac8883293ef>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -5474,9 +5638,20 @@ if(__DEV__){
 _verifyName(cookieName);}
 
 
+var now=Date.now();
+if(nMilliSecs > now){
+if(__DEV__){
+console.warn(
+'%s is being set with an outrageous expiration, assuming you passed ' +
+'in the actual timestamp, and not the desired time period',cookieName);}
+
+
+nMilliSecs -= now;}
+
+
 document.cookie = cookieName + '=' + encodeURIComponent(cookieValue) +
 '; ' + (nMilliSecs?'expires=' +
-new Date(Date.now() + nMilliSecs).toGMTString() + '; ':'') +
+new Date(now + nMilliSecs).toGMTString() + '; ':'') +
 'path=' + (path || '/') + '; domain=' +
 window.location.hostname.replace(DOMAIN_REGEX,'$1') + (
 secure?'; secure':'');},{'module':'CookieCore','line':27,'column':7}),
@@ -5487,7 +5662,7 @@ path = path || '/';
 document.cookie =
 cookieName + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' +
 'path=' + path + '; domain=' +
-window.location.hostname.replace(DOMAIN_REGEX,'$1');},{'module':'CookieCore','line':40,'column':9}),
+window.location.hostname.replace(DOMAIN_REGEX,'$1');},{'module':'CookieCore','line':51,'column':9}),
 
 
 get:__annotator(function(name){
@@ -5495,7 +5670,7 @@ if(__DEV__){
 _verifyName(name);}
 
 var match=document.cookie.match('(?:^|;\\s*)' + name + '=(.*?)(?:;|$)');
-return match?decodeURIComponent(match[1]):match;},{'module':'CookieCore','line':48,'column':7})};
+return match?decodeURIComponent(match[1]):match;},{'module':'CookieCore','line':59,'column':7})};
 
 
 
@@ -5505,7 +5680,7 @@ _verifyName = __annotator(function _verifyName(name){
 var pattern=/[*+?^=$()[\\|.{}]/;
 if(pattern.test(name)){
 throw new Error('Your cookie name contains invalid characters. ' +
-'Please do not use any of the following *+?^=$()[\\|.{}');}},{'module':'CookieCore','line':59,'column':16,'name':'_verifyName'});}
+'Please do not use any of the following *+?^=$()[\\|.{}');}},{'module':'CookieCore','line':70,'column':16,'name':'_verifyName'});}
 
 
 
@@ -5516,7 +5691,7 @@ module.exports = CookieCore;},{'module':'CookieCore','line':0,'column':0,'name':
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule Cookie
- */__d('Cookie',['CookieCore','Env'],__annotator(function $module_Cookie(global,require,requireDynamic,requireLazy,module,exports,CookieCore,Env){if(require.__markCompiled)require.__markCompiled();var _extends=Object.assign || __annotator(function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;},{'module':'Cookie','line':0,'column':0});
+ */__d('Cookie',['CookieCore','Env'],__annotator(function $module_Cookie(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -5530,11 +5705,11 @@ function set(cookieName,cookieValue,nMilliSecs,path,secure){
 
 
 
-if(Env.no_cookies && cookieName != 'tpa'){
+if(require('Env').no_cookies && cookieName != 'tpa'){
 return;}
 
 
-CookieCore.set(cookieName,cookieValue,nMilliSecs,path,secure);}__annotator(set,{'module':'Cookie','line':14,'column':0,'name':'set'});
+require('CookieCore').set(cookieName,cookieValue,nMilliSecs,path,secure);}__annotator(set,{'module':'Cookie','line':14,'column':0,'name':'set'});
 ;
 
 function setIfFirstPartyContext(name,value,nMilliSecs,path,secure){
@@ -5550,8 +5725,8 @@ return;}
 set(name,value,nMilliSecs,path,secure);}__annotator(setIfFirstPartyContext,{'module':'Cookie','line':26,'column':0,'name':'setIfFirstPartyContext'});
 
 
-module.exports = _extends({},
-CookieCore,{
+module.exports = babelHelpers._extends({},require('CookieCore'),{
+
 set:set,
 setIfFirstPartyContext:setIfFirstPartyContext});},{'module':'Cookie','line':0,'column':0,'name':'$module_Cookie'}),null);
 /** Path: html/js/downstream/env/CurrentUser.js */
@@ -5573,7 +5748,7 @@ setIfFirstPartyContext:setIfFirstPartyContext});},{'module':'Cookie','line':0,'c
  *
  * @providesModule CurrentUser
  * @typechecks
- */__d('CurrentUser',['Cookie','CurrentUserInitialData'],__annotator(function $module_CurrentUser(global,require,requireDynamic,requireLazy,module,exports,Cookie,CurrentUserInitialData){if(require.__markCompiled)require.__markCompiled();
+ */__d('CurrentUser',['Cookie','CurrentUserInitialData'],__annotator(function $module_CurrentUser(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -5590,7 +5765,7 @@ var CurrentUser={
 
 
 getID:__annotator(function(){
-return CurrentUserInitialData.USER_ID;},{'module':'CurrentUser','line':35,'column':9}),
+return require('CurrentUserInitialData').USER_ID;},{'module':'CurrentUser','line':35,'column':9}),
 
 
 
@@ -5599,15 +5774,15 @@ return CurrentUserInitialData.USER_ID;},{'module':'CurrentUser','line':35,'colum
 
 
 getAccountID:__annotator(function(){
-return CurrentUserInitialData.ACCOUNT_ID;},{'module':'CurrentUser','line':44,'column':16}),
+return require('CurrentUserInitialData').ACCOUNT_ID;},{'module':'CurrentUser','line':44,'column':16}),
 
 
 
 
 
 isLoggedIn:__annotator(function(){
-return CurrentUserInitialData.USER_ID &&
-CurrentUserInitialData.USER_ID !== '0';},{'module':'CurrentUser','line':51,'column':14}),
+return require('CurrentUserInitialData').USER_ID &&
+require('CurrentUserInitialData').USER_ID !== '0';},{'module':'CurrentUser','line':51,'column':14}),
 
 
 
@@ -5624,23 +5799,23 @@ return false;}
 
 
 
-if(CurrentUserInitialData.IS_INTERN_SITE){
+if(require('CurrentUserInitialData').IS_INTERN_SITE){
 return true;}
 
 
 
-if(CurrentUserInitialData.ORIGINAL_USER_ID){
-return CurrentUserInitialData.ORIGINAL_USER_ID === Cookie.get('c_user');}
+if(require('CurrentUserInitialData').ORIGINAL_USER_ID){
+return require('CurrentUserInitialData').ORIGINAL_USER_ID === require('Cookie').get('c_user');}
 
 
-return CurrentUserInitialData.USER_ID === Cookie.get('c_user');},{'module':'CurrentUser','line':62,'column':17}),
+return require('CurrentUserInitialData').USER_ID === require('Cookie').get('c_user');},{'module':'CurrentUser','line':62,'column':17}),
 
 
 
 
 
 isEmployee:__annotator(function(){
-return !!CurrentUserInitialData.IS_EMPLOYEE;},{'module':'CurrentUser','line':85,'column':14}),
+return !!require('CurrentUserInitialData').IS_EMPLOYEE;},{'module':'CurrentUser','line':85,'column':14}),
 
 
 
@@ -5649,14 +5824,14 @@ return !!CurrentUserInitialData.IS_EMPLOYEE;},{'module':'CurrentUser','line':85,
 
 
 hasWorkUser:__annotator(function(){
-return !!CurrentUserInitialData.HAS_WORK_USER;},{'module':'CurrentUser','line':94,'column':15}),
+return !!require('CurrentUserInitialData').HAS_WORK_USER;},{'module':'CurrentUser','line':94,'column':15}),
 
 
 
 
 
 isGray:__annotator(function(){
-return !!CurrentUserInitialData.IS_GRAY;},{'module':'CurrentUser','line':101,'column':10})};
+return !!require('CurrentUserInitialData').IS_GRAY;},{'module':'CurrentUser','line':101,'column':10})};
 
 
 
@@ -5674,89 +5849,47 @@ module.exports = CurrentUser;},{'module':'CurrentUser','line':0,'column':0,'name
  */__d('Miny',[],__annotator(function $module_Miny(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 var MAGIC='Miny1';
-
-
-var _indexMap={encode:[],decode:{}};
 var LO='wxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_'.split('');
-function getIndexMap(length){
-for(var i=_indexMap.encode.length;i < length;i++) {
 
-var s=i.toString(32).split('');
-s[s.length - 1] = LO[parseInt(s[s.length - 1],32)];
-s = s.join('');
+var Miny={
 
-_indexMap.encode[i] = s;
-_indexMap.decode[s] = i;}
+encode:__annotator(function(s){
+if(/^$|[~\\]|__proto__/.test(s)){
+return s;}
 
-
-return _indexMap;}__annotator(getIndexMap,{'module':'Miny','line':16,'column':0,'name':'getIndexMap'});
-
-
-
-function encode(s){
-if(/^$|[~\\]|__proto__/.test(s))return s;
 
 
 var parts=s.match(/\w+|\W+/g);
 
+var i;
 
 
-var dict={};
-for(var i=0;i < parts.length;i++) {
+var dict=Object.create(null);
+for(i = 0;i < parts.length;i++) {
 dict[parts[i]] = (dict[parts[i]] || 0) + 1;}
 
 
 
 
-var byCount=Object.keys(dict);
-byCount.sort(__annotator(function(a,b){
-return dict[a] < dict[b]?1:dict[b] < dict[a]?-1:0;},{'module':'Miny','line':47,'column':15}));
+var keys=Object.keys(dict);
+keys.sort(__annotator(function(a,b){return dict[b] - dict[a];},{'module':'Miny','line':35,'column':14}));
+
+
+for(i = 0;i < keys.length;i++) {
+var n=(i - i % 32) / 32;
+dict[keys[i]] = n?n.toString(32) + LO[i % 32]:LO[i % 32];}
 
 
 
-var encodeMap=getIndexMap(byCount.length).encode;
-for(i = 0;i < byCount.length;i++) {
-dict[byCount[i]] = encodeMap[i];}
-
-
-
-var codes=[];
+var codes='';
 for(i = 0;i < parts.length;i++) {
-codes[i] = dict[parts[i]];}
+codes += dict[parts[i]];}
 
 
-return [MAGIC,byCount.length].
-concat(byCount).
-concat(codes.join('')).
-join('~');}__annotator(encode,{'module':'Miny','line':31,'column':0,'name':'encode'});
+keys.unshift(MAGIC,keys.length);
+keys.push(codes);
+return keys.join('~');},{'module':'Miny','line':16,'column':8})};
 
-
-
-function decode(s){
-var fields=s.split('~');
-
-if(fields.shift() != MAGIC){
-
-return s;}
-
-var nKeys=parseInt(fields.shift(),10);
-var codes=fields.pop();
-codes = codes.match(/[0-9a-v]*[\-w-zA-Z_]/g);
-
-var dict=fields;
-
-var decodeMap=getIndexMap(nKeys).decode;
-var parts=[];
-for(var i=0;i < codes.length;i++) {
-parts[i] = dict[decodeMap[codes[i]]];}
-
-
-return parts.join('');}__annotator(decode,{'module':'Miny','line':70,'column':0,'name':'decode'});
-
-
-var Miny={
-encode:encode,
-decode:decode};
 
 
 module.exports = Miny;},{'module':'Miny','line':0,'column':0,'name':'$module_Miny'}),null);
@@ -5912,30 +6045,9 @@ AJAXPIPE_SEND:'ajaxpipe/send'};
 
 
 module.exports = PageEvents;},{'module':'PageEvents','line':0,'column':0,'name':'$module_PageEvents'}),null);
-/** Path: html/js/modules/createCancelableFunction.js */
-/**
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule createCancelableFunction
- * @typechecks
- */__d('createCancelableFunction',['emptyFunction'],__annotator(function $module_createCancelableFunction(global,require,requireDynamic,requireLazy,module,exports,emptyFunction){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-function createCancelableFunction(func){return __bodyWrapper(this,arguments,function(){
-var newFunction=__annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}return func.apply(null,args);},{'module':'createCancelableFunction','line':15,'column':20});
-newFunction.cancel = __annotator(function(){func = emptyFunction;},{'module':'createCancelableFunction','line':16,'column':23});
-return newFunction;},{params:[[func,'function','func']],returns:'function'});}__annotator(createCancelableFunction,{'module':'createCancelableFunction','line':14,'column':0,'name':'createCancelableFunction'},{params:['function'],returns:'function'});
-
-
-module.exports = createCancelableFunction;},{'module':'createCancelableFunction','line':0,'column':0,'name':'$module_createCancelableFunction'}),null);
 /** Path: html/js/downstream/performance/performanceAbsoluteNow.js */
 /**
- * @generated SignedSource<<28bb18e48a9334d2df8321e0a874e585>>
+ * @generated SignedSource<<fe3d75dedfb398ceb60d8cbb5134d6a3>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -5961,32 +6073,307 @@ module.exports = createCancelableFunction;},{'module':'createCancelableFunction'
  * the spec requires for high resolution timestamp. Chrome provides higher
  * precision, but the limit of double precision floating point number cuts that
  * down to 1/1000 milliseconds when representing absolute time.
- */__d('performanceAbsoluteNow',['performance'],__annotator(function $module_performanceAbsoluteNow(global,require,requireDynamic,requireLazy,module,exports,performance){if(require.__markCompiled)require.__markCompiled();
+ */__d('performanceAbsoluteNow',['performance'],__annotator(function $module_performanceAbsoluteNow(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
 var performanceAbsoluteNow;
 
 if(
-performance.now &&
-performance.timing &&
-performance.timing.navigationStart)
+require('performance').now &&
+require('performance').timing &&
+require('performance').timing.navigationStart)
+{var
+navigationStart=require('performance').timing.navigationStart;
+performanceAbsoluteNow = __annotator(function(){return require('performance').now() + navigationStart;},{'module':'performanceAbsoluteNow','line':40,'column':27});}else
 {
-var navigationStart=performance.timing.navigationStart;
-performanceAbsoluteNow = __annotator(function(){
-return performance.now.apply(performance,arguments) + navigationStart;},{'module':'performanceAbsoluteNow','line':40,'column':27});}else
-
-{
-performanceAbsoluteNow = Date.now.bind(Date);}
+performanceAbsoluteNow = __annotator(function(){return Date.now();},{'module':'performanceAbsoluteNow','line':42,'column':27});}
 
 
 module.exports = performanceAbsoluteNow;},{'module':'performanceAbsoluteNow','line':0,'column':0,'name':'$module_performanceAbsoluteNow'}),null);
+/** Path: html/js/downstream/error/wrapFunction.js */
+/**
+ * @generated SignedSource<<8f7c8d142fb7f53d5f7a5b63e2904a79>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule wrapFunction
+ * @typechecks
+ *
+ * This module has a very generic purpose, to either act as an identity
+ * function, or to return a function that when invoked will invoke the
+ * original function wrapped inside a handler.
+ *
+ * Typical use of this is when you want to inject a layer of error handling,
+ * logging, or similar around the invokation of a function, but don't want
+ * the calling module to be coupled to the implementation.
+ */__d('wrapFunction',[],__annotator(function $module_wrapFunction(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+var wrappers={};
+function wrapFunction(fn,type,source){return __bodyWrapper(this,arguments,function()
+{
+type = type || 'default';
+
+return __annotator(function(){
+var callee=type in wrappers?
+wrappers[type](fn,source):
+fn;
+
+return callee.apply(this,arguments);},{'module':'wrapFunction','line':34,'column':9});},{params:[[fn,'function','fn'],[type,'?string','type'],[source,'?string','source']],returns:'function'});}__annotator(wrapFunction,{'module':'wrapFunction','line':30,'column':0,'name':'wrapFunction'},{params:['function','?string','?string'],returns:'function'});
+
+
+
+wrapFunction.setWrapper = __annotator(function(fn,type){return __bodyWrapper(this,arguments,function(){
+type = type || 'default';
+wrappers[type] = fn;},{params:[[fn,'function','fn'],[type,'?string','type']]});},{'module':'wrapFunction','line':43,'column':26},{params:['function','?string']});
+
+
+module.exports = wrapFunction;},{'module':'wrapFunction','line':0,'column':0,'name':'$module_wrapFunction'}),null);
+/** Path: html/js/downstream/core/TimeSlice.js */
+/**
+ * @generated SignedSource<<205e3b5f11a27414b60b1245907ccabf>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule TimeSlice
+ * @has-side-effects
+ * @runWhenReady_DEPRECATED
+ */__d('TimeSlice',['invariant','CircularBuffer','ErrorUtils','LogBuffer','performanceAbsoluteNow','wrapFunction'],__annotator(function $module_TimeSlice(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
+
+
+
+
+
+
+
+
+
+
+var idCounter=1;
+
+
+var guarded=false;
+var contextID=0;
+var contextName;
+var tasks=[];
+var taskDepth;
+
+
+var LOGGING_UNSET=0;
+var LOGGING_ENABLED=1;
+var LOGGING_DISABLED=2;
+var loggingState=LOGGING_UNSET;
+var loggingBuffer=new (require('CircularBuffer'))(100);
+var samplingRate=0;
+
+
+
+
+
+var TimeSlice={
+
+
+
+
+
+guard:__annotator(function(fn,name,meta){
+!(typeof fn === 'function')?invariant(0,'Function fn is required'):undefined;
+!(typeof name === 'string')?invariant(0,'String name is required'):undefined;
+if(fn.__tsGuarded){
+
+return fn;}
+
+
+if(!meta || !meta.root){
+TimeSlice.checkCoverage();}
+
+
+var mainGuardName='TimeSlice' + (name?': ' + name:'');
+var taskGuardName='TimeSlice Task' + (name?': ' + name:'');
+var parentID;
+if(guarded){
+parentID = contextID;}
+
+
+var timeSliceGuarded=__annotator(function timeSliceGuarded(){
+if(guarded){
+
+return fn.apply(this,arguments);}
+
+
+var beginTime=require('performanceAbsoluteNow')();
+
+guarded = true;
+contextID = idCounter++;
+contextName = name;
+tasks.length = 0;
+taskDepth = 0;
+
+var result=require('ErrorUtils').
+applyWithGuard(fn,this,arguments,null,mainGuardName);
+
+while(tasks.length > 0) {
+var task=tasks.shift();
+taskDepth = task.depth;
+require('ErrorUtils').
+applyWithGuard(task.fn,global,null,null,taskGuardName);}
+
+
+guarded = false;
+
+var endTime=require('performanceAbsoluteNow')();
+
+require('LogBuffer').write('time_slice',babelHelpers._extends({
+begin:beginTime,
+end:endTime,
+id:contextID,
+parentID:parentID,
+guard:name},
+meta,
+fn.__SMmeta));
+
+
+
+return result;},{'module':'TimeSlice','line':77,'column':27,'name':'timeSliceGuarded'});
+
+
+timeSliceGuarded.__tsGuarded = true;
+return timeSliceGuarded;},{'module':'TimeSlice','line':58,'column':9}),
+
+
+
+enqueue:__annotator(function(fn){
+!
+guarded?invariant(0,
+'TimeSlice can\'t append tasks in non-guarded context'):undefined;
+
+!(
+taskDepth < 1000)?invariant(0,
+'TimeSlice shouldn\'t be used for infinite deferred recursion'):undefined;
+
+tasks.push({
+fn:fn,
+depth:taskDepth + 1});},{'module':'TimeSlice','line':124,'column':11}),
+
+
+
+
+inGuard:__annotator(function(){
+return guarded;},{'module':'TimeSlice','line':140,'column':11}),
+
+
+checkCoverage:__annotator(function(){
+if(loggingState !== LOGGING_DISABLED && !guarded){
+var error=new Error('Missing TimeSlice coverage');
+error.type = 'warn';
+if(loggingState === LOGGING_ENABLED && Math.random() < samplingRate){
+require('ErrorUtils').reportError(error);}else
+if(loggingState === LOGGING_UNSET){
+loggingBuffer.write(error);}}},{'module':'TimeSlice','line':144,'column':17}),
+
+
+
+
+setLogging:__annotator(function(enabled,rate){
+if(loggingState !== LOGGING_UNSET){
+return;}
+
+samplingRate = rate;
+if(enabled){
+loggingState = LOGGING_ENABLED;
+loggingBuffer.read().forEach(__annotator(function(error){
+if(Math.random() < samplingRate){
+require('ErrorUtils').reportError(error);}},{'module':'TimeSlice','line':163,'column':35}));}else
+
+
+{
+loggingState = LOGGING_DISABLED;}
+
+loggingBuffer.clear();
+loggingBuffer = undefined;},{'module':'TimeSlice','line':156,'column':14})};
+
+
+
+TimeSlice.getContext = __annotator(function(){
+if(!guarded){
+return null;}
+
+return {
+id:contextID,
+name:contextName,
+depth:taskDepth};},{'module':'TimeSlice','line':176,'column':23});
+
+
+
+require('wrapFunction').setWrapper(TimeSlice.guard,'entry');
+global.TimeSlice = TimeSlice;
+
+module.exports = TimeSlice;},{'module':'TimeSlice','line':0,'column':0,'name':'$module_TimeSlice'}),3);
+/** Path: html/js/downstream/core/createCancelableFunction.js */
+/**
+ * @generated SignedSource<<bde62c2cf59fd42ac0a2a178c059e3ff>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule createCancelableFunction
+ * @typechecks
+ */__d('createCancelableFunction',['emptyFunction'],__annotator(function $module_createCancelableFunction(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
+
+
+
+
+
+function createCancelableFunction(func){return __bodyWrapper(this,arguments,function(){
+var cancelableFunction=__annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}return func.apply(null,args);},{'module':'createCancelableFunction','line':28,'column':27});
+cancelableFunction.cancel = __annotator(function(){func = require('emptyFunction');},{'module':'createCancelableFunction','line':29,'column':30});
+return cancelableFunction;},{params:[[func,'function','func']],returns:'function'});}__annotator(createCancelableFunction,{'module':'createCancelableFunction','line':27,'column':0,'name':'createCancelableFunction'},{params:['function'],returns:'function'});
+
+
+module.exports = createCancelableFunction;},{'module':'createCancelableFunction','line':0,'column':0,'name':'$module_createCancelableFunction'}),null);
 /** Path: html/js/modules/Run.js */
 /**
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule Run
- */__d('Run',['Arbiter','ExecutionEnvironment','PageEvents','createCancelableFunction','emptyFunction','performanceAbsoluteNow'],__annotator(function $module_Run(global,require,requireDynamic,requireLazy,module,exports,Arbiter,ExecutionEnvironment,PageEvents,createCancelableFunction,emptyFunction,performanceAbsoluteNow){if(require.__markCompiled)require.__markCompiled();
+ */__d('Run',['Arbiter','ExecutionEnvironment','PageEvents','TimeSlice','createCancelableFunction','emptyFunction','performanceAbsoluteNow'],__annotator(function $module_Run(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
+
 
 
 
@@ -5998,10 +6385,10 @@ module.exports = performanceAbsoluteNow;},{'module':'performanceAbsoluteNow','li
 
 var UNLOAD_HOOK='onunloadhooks';
 var AFTER_UNLOAD_HOOK='onafterunloadhooks';
-var STATE=Arbiter.BEHAVIOR_STATE;
+var STATE=require('Arbiter').BEHAVIOR_STATE;
 function clog(name){
 var CavalryLogger=global.CavalryLogger;
-CavalryLogger && CavalryLogger.getInstance().setTimeStamp(name);}__annotator(clog,{'module':'Run','line':18,'column':0,'name':'clog'});
+CavalryLogger && CavalryLogger.getInstance().setTimeStamp(name);}__annotator(clog,{'module':'Run','line':21,'column':0,'name':'clog'});
 ;
 
 
@@ -6017,7 +6404,7 @@ CavalryLogger && CavalryLogger.getInstance().setTimeStamp(name);}__annotator(clo
 
 
 function _include_quickling_events_default(){
-return !window.loading_page_chrome;}__annotator(_include_quickling_events_default,{'module':'Run','line':35,'column':0,'name':'_include_quickling_events_default'});
+return !window.loading_page_chrome;}__annotator(_include_quickling_events_default,{'module':'Run','line':38,'column':0,'name':'_include_quickling_events_default'});
 
 
 
@@ -6046,9 +6433,9 @@ function domreadyRegister(handler){
 var PageHooks=global.PageHooks;
 if(window.domready && PageHooks){
 PageHooks.runHook(handler,'domreadyhooks:late');
-return {remove:emptyFunction};}else
+return {remove:require('emptyFunction')};}else
 {
-return _addHook('domreadyhooks',handler);}}__annotator(domreadyRegister,{'module':'Run','line':61,'column':0,'name':'domreadyRegister'});
+return _addHook('domreadyhooks',handler);}}__annotator(domreadyRegister,{'module':'Run','line':64,'column':0,'name':'domreadyRegister'});
 
 
 
@@ -6065,11 +6452,11 @@ function onloadRegister(handler){
 var PageHooks=global.PageHooks;
 if(window.loaded && PageHooks){
 var timeout=setTimeout(__annotator(function(){
-PageHooks.runHook(handler,'onloadhooks:late');},{'module':'Run','line':83,'column':29}),
+PageHooks.runHook(handler,'onloadhooks:late');},{'module':'Run','line':86,'column':29}),
 0);
-return {remove:__annotator(function(){return clearTimeout(timeout);},{'module':'Run','line':86,'column':20})};}else
+return {remove:__annotator(function(){return clearTimeout(timeout);},{'module':'Run','line':89,'column':20})};}else
 {
-return _addHook('onloadhooks',handler);}}__annotator(onloadRegister,{'module':'Run','line':80,'column':0,'name':'onloadRegister'});
+return _addHook('onloadhooks',handler);}}__annotator(onloadRegister,{'module':'Run','line':83,'column':0,'name':'onloadRegister'});
 
 
 
@@ -6107,7 +6494,7 @@ include_quickling_events = _include_quickling_events_default();}
 
 return include_quickling_events?
 _addHook('onbeforeleavehooks',handler):
-_addHook('onbeforeunloadhooks',handler);}__annotator(onbeforeunloadRegister,{'module':'Run','line':120,'column':0,'name':'onbeforeunloadRegister'});
+_addHook('onbeforeunloadhooks',handler);}__annotator(onbeforeunloadRegister,{'module':'Run','line':123,'column':0,'name':'onbeforeunloadRegister'});
 
 
 
@@ -6122,24 +6509,24 @@ function _onunloadRegister(hooks,handler){
 
 if(!window.onunload){
 window.onunload = __annotator(function(){
-Arbiter.inform(PageEvents.NATIVE_ONUNLOAD,true,STATE);},{'module':'Run','line':140,'column':22});}
+require('Arbiter').inform(require('PageEvents').NATIVE_ONUNLOAD,true,STATE);},{'module':'Run','line':143,'column':22});}
 
 
-return _addHook(hooks,handler);}__annotator(_onunloadRegister,{'module':'Run','line':135,'column':0,'name':'_onunloadRegister'});
+return _addHook(hooks,handler);}__annotator(_onunloadRegister,{'module':'Run','line':138,'column':0,'name':'_onunloadRegister'});
 
 
 
 
 
 function onunloadRegister(handler){
-return _onunloadRegister(UNLOAD_HOOK,handler);}__annotator(onunloadRegister,{'module':'Run','line':150,'column':0,'name':'onunloadRegister'});
+return _onunloadRegister(UNLOAD_HOOK,handler);}__annotator(onunloadRegister,{'module':'Run','line':153,'column':0,'name':'onunloadRegister'});
 
 
 
 
 
 function onafterunloadRegister(handler){
-return _onunloadRegister(AFTER_UNLOAD_HOOK,handler);}__annotator(onafterunloadRegister,{'module':'Run','line':157,'column':0,'name':'onafterunloadRegister'});
+return _onunloadRegister(AFTER_UNLOAD_HOOK,handler);}__annotator(onafterunloadRegister,{'module':'Run','line':160,'column':0,'name':'onafterunloadRegister'});
 
 
 
@@ -6147,7 +6534,7 @@ return _onunloadRegister(AFTER_UNLOAD_HOOK,handler);}__annotator(onafterunloadRe
 
 
 function onleaveRegister(handler){
-return _addHook('onleavehooks',handler);}__annotator(onleaveRegister,{'module':'Run','line':165,'column':0,'name':'onleaveRegister'});
+return _addHook('onleavehooks',handler);}__annotator(onleaveRegister,{'module':'Run','line':168,'column':0,'name':'onleaveRegister'});
 
 
 function _addHook(hooks,handler){
@@ -6157,24 +6544,25 @@ throw new Error('Undefined handler is not allowed');}}
 
 
 
-handler = createCancelableFunction(handler);
+handler = require('createCancelableFunction')(handler);
 window[hooks] = (window[hooks] || []).concat(handler);
 
 return {
 remove:__annotator(function(){
-handler.cancel();},{'module':'Run','line':180,'column':10})};}__annotator(_addHook,{'module':'Run','line':169,'column':0,'name':'_addHook'});
+handler.cancel();},{'module':'Run','line':183,'column':10})};}__annotator(_addHook,{'module':'Run','line':172,'column':0,'name':'_addHook'});
 
 
 
 
 function removeHook(hooks){
-window[hooks] = [];}__annotator(removeHook,{'module':'Run','line':186,'column':0,'name':'removeHook'});
+window[hooks] = [];}__annotator(removeHook,{'module':'Run','line':189,'column':0,'name':'removeHook'});
 
 
 
 
-function _domcontentready(){
-Arbiter.inform(PageEvents.NATIVE_DOMREADY,true,STATE);}__annotator(_domcontentready,{'module':'Run','line':192,'column':0,'name':'_domcontentready'});
+var _domcontentready=require('TimeSlice').guard(__annotator(function(){
+require('Arbiter').inform(require('PageEvents').NATIVE_DOMREADY,true,STATE);},{'module':'Run','line':195,'column':39}),
+'DOMContentLoaded');
 
 global._domcontentready = _domcontentready;
 
@@ -6193,7 +6581,7 @@ if(webkit && webkit[1] < 525){
 var timeout=setInterval(__annotator(function(){
 if(/loaded|complete/.test(d.readyState)){
 _domcontentready();
-clearInterval(timeout);}},{'module':'Run','line':209,'column':32}),
+clearInterval(timeout);}},{'module':'Run','line':213,'column':32}),
 
 10);}else
 {
@@ -6219,15 +6607,15 @@ d.write(
 
 
 var onload=w.onload;
-w.onload = __annotator(function(){
+w.onload = require('TimeSlice').guard(__annotator(function(){
 clog('t_layout');
 onload && onload();
-Arbiter.inform(PageEvents.NATIVE_ONLOAD,true,STATE);},{'module':'Run','line':238,'column':13});
+require('Arbiter').inform(require('PageEvents').NATIVE_ONLOAD,true,STATE);},{'module':'Run','line':242,'column':29}),
+'window.onload');
 
-
-w.onbeforeunload = __annotator(function(){
+w.onbeforeunload = require('TimeSlice').guard(__annotator(function(){
 var e={};
-Arbiter.inform(PageEvents.NATIVE_ONBEFOREUNLOAD,e,STATE);
+require('Arbiter').inform(require('PageEvents').NATIVE_ONBEFOREUNLOAD,e,STATE);
 
 
 
@@ -6235,33 +6623,33 @@ Arbiter.inform(PageEvents.NATIVE_ONBEFOREUNLOAD,e,STATE);
 
 
 if(!e.warn){
-Arbiter.inform(PageEvents.AJAXPIPE_ONUNLOAD,true);}
+require('Arbiter').inform(require('PageEvents').AJAXPIPE_ONUNLOAD,true);}
 
-return e.warn;},{'module':'Run','line':244,'column':21});}__annotator(_bootstrapEventHandlers,{'module':'Run','line':204,'column':0,'name':'_bootstrapEventHandlers'});
+return e.warn;},{'module':'Run','line':248,'column':37}),
+'window.onbeforeunload');}__annotator(_bootstrapEventHandlers,{'module':'Run','line':208,'column':0,'name':'_bootstrapEventHandlers'});
 
 
-
-var onload_callback=Arbiter.registerCallback(__annotator(function(){
+var onload_callback=require('Arbiter').registerCallback(__annotator(function(){
 clog('t_onload');
-Arbiter.inform(
-PageEvents.BIGPIPE_ONLOAD,
+require('Arbiter').inform(
+require('PageEvents').BIGPIPE_ONLOAD,
 {
-ts:performanceAbsoluteNow()},
+ts:require('performanceAbsoluteNow')()},
 
-STATE);},{'module':'Run','line':260,'column':47}),
+STATE);},{'module':'Run','line':264,'column':47}),
 
-[PageEvents.NATIVE_ONLOAD]);
+[require('PageEvents').NATIVE_ONLOAD]);
 
-var domcontent_callback=Arbiter.registerCallback(__annotator(function(){
+var domcontent_callback=require('Arbiter').registerCallback(__annotator(function(){
 clog('t_domcontent');
 
 
 
 var parameters={timeTriggered:Date.now()};
-Arbiter.inform(PageEvents.BIGPIPE_DOMREADY,parameters,STATE);},{'module':'Run','line':271,'column':51}),
-[PageEvents.NATIVE_DOMREADY]);
+require('Arbiter').inform(require('PageEvents').BIGPIPE_DOMREADY,parameters,STATE);},{'module':'Run','line':275,'column':51}),
+[require('PageEvents').NATIVE_DOMREADY]);
 
-if(ExecutionEnvironment.canUseDOM){
+if(require('ExecutionEnvironment').canUseDOM){
 _bootstrapEventHandlers();}
 
 
@@ -6298,9 +6686,9 @@ module.exports = Run;},{'module':'Run','line':0,'column':0,'name':'$module_Run'}
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule VersionRange
- */__d('VersionRange',['invariant'],__annotator(function $module_VersionRange(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('VersionRange',['invariant'],__annotator(function $module_VersionRange(global,require,requireDynamic,requireLazy,module,exports,invariant){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -6674,7 +7062,7 @@ return checkOrExpression(range.trim(),version.trim());},{'module':'VersionRange'
 
 
 module.exports = VersionRange;},{'module':'VersionRange','line':0,'column':0,'name':'$module_VersionRange'}),null);
-/** Path: html/js/downstream/functional/mapObject.js */
+/** Path: html/js/downstream/fbjs/functional/mapObject.js */
 /**
  * @generated SignedSource<<edc696285bdc8bd95cf16892cfbfc68b>>
  *
@@ -6692,9 +7080,9 @@ module.exports = VersionRange;},{'module':'VersionRange','line':0,'column':0,'na
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule mapObject
- */__d('mapObject',[],__annotator(function $module_mapObject(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+ */__d('mapObject',[],__annotator(function $module_mapObject(global,require,requireDynamic,requireLazy,module,exports){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 var hasOwnProperty=Object.prototype.hasOwnProperty;
 
@@ -6734,7 +7122,7 @@ return result;}__annotator(mapObject,{'module':'mapObject','line':46,'column':0,
 
 
 module.exports = mapObject;},{'module':'mapObject','line':0,'column':0,'name':'$module_mapObject'}),null);
-/** Path: html/js/downstream/react/shared/utils/memoizeStringOnly.js */
+/** Path: html/js/downstream/core/memoizeStringOnly.js */
 /**
  * @generated SignedSource<<e041528049adab1a2fd9da5d1314966a>>
  *
@@ -6758,9 +7146,9 @@ module.exports = mapObject;},{'module':'mapObject','line':0,'column':0,'name':'$
  *
  * @providesModule memoizeStringOnly
  * @typechecks static-only
- */__d('memoizeStringOnly',[],__annotator(function $module_memoizeStringOnly(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+ */__d('memoizeStringOnly',[],__annotator(function $module_memoizeStringOnly(global,require,requireDynamic,requireLazy,module,exports){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -6797,9 +7185,9 @@ module.exports = memoizeStringOnly;},{'module':'memoizeStringOnly','line':0,'col
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule UserAgent
- */__d('UserAgent',['UserAgentData','VersionRange','mapObject','memoizeStringOnly'],__annotator(function $module_UserAgent(global,require,requireDynamic,requireLazy,module,exports,UserAgentData,VersionRange,mapObject,memoizeStringOnly){if(require.__markCompiled)require.__markCompiled();
+ */__d('UserAgent',['UserAgentData','VersionRange','mapObject','memoizeStringOnly'],__annotator(function $module_UserAgent(global,require,requireDynamic,requireLazy,module,exports){
 
-'use strict';
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -6831,7 +7219,7 @@ return false;}
 var range=query.slice(name.length);
 if(version){
 range = normalizer?normalizer(range):range;
-return VersionRange.contains(range,version);}
+return require('VersionRange').contains(range,version);}
 
 
 return false;}__annotator(compare,{'module':'UserAgent','line':37,'column':0,'name':'compare'});
@@ -6847,7 +7235,7 @@ return false;}__annotator(compare,{'module':'UserAgent','line':37,'column':0,'na
 
 
 function normalizePlatformVersion(version){
-if(UserAgentData.platformName === 'Windows'){
+if(require('UserAgentData').platformName === 'Windows'){
 return version.replace(/^\s*NT/,'');}
 
 
@@ -6904,8 +7292,8 @@ var UserAgent={
 
 isBrowser:__annotator(function(query){
 return compare(
-UserAgentData.browserName,
-UserAgentData.browserFullVersion,
+require('UserAgentData').browserName,
+require('UserAgentData').browserFullVersion,
 query);},{'module':'UserAgent','line':123,'column':11}),
 
 
@@ -6920,7 +7308,7 @@ query);},{'module':'UserAgent','line':123,'column':11}),
 
 isBrowserArchitecture:__annotator(function(query){
 return compare(
-UserAgentData.browserArchitecture,
+require('UserAgentData').browserArchitecture,
 null,
 query);},{'module':'UserAgent','line':139,'column':23}),
 
@@ -6951,7 +7339,7 @@ query);},{'module':'UserAgent','line':139,'column':23}),
 
 
 isDevice:__annotator(function(query){
-return compare(UserAgentData.deviceName,null,query);},{'module':'UserAgent','line':171,'column':10}),
+return compare(require('UserAgentData').deviceName,null,query);},{'module':'UserAgent','line':171,'column':10}),
 
 
 
@@ -6978,8 +7366,8 @@ return compare(UserAgentData.deviceName,null,query);},{'module':'UserAgent','lin
 
 isEngine:__annotator(function(query){
 return compare(
-UserAgentData.engineName,
-UserAgentData.engineVersion,
+require('UserAgentData').engineName,
+require('UserAgentData').engineVersion,
 query);},{'module':'UserAgent','line':197,'column':10}),
 
 
@@ -7021,8 +7409,8 @@ query);},{'module':'UserAgent','line':197,'column':10}),
 
 isPlatform:__annotator(function(query){
 return compare(
-UserAgentData.platformName,
-UserAgentData.platformFullVersion,
+require('UserAgentData').platformName,
+require('UserAgentData').platformFullVersion,
 query,
 normalizePlatformVersion);},{'module':'UserAgent','line':240,'column':12}),
 
@@ -7038,7 +7426,7 @@ normalizePlatformVersion);},{'module':'UserAgent','line':240,'column':12}),
 
 isPlatformArchitecture:__annotator(function(query){
 return compare(
-UserAgentData.platformArchitecture,
+require('UserAgentData').platformArchitecture,
 null,
 query);},{'module':'UserAgent','line':257,'column':24})};
 
@@ -7046,7 +7434,7 @@ query);},{'module':'UserAgent','line':257,'column':24})};
 
 
 
-module.exports = mapObject(UserAgent,memoizeStringOnly);},{'module':'UserAgent','line':0,'column':0,'name':'$module_UserAgent'}),null);
+module.exports = require('mapObject')(UserAgent,require('memoizeStringOnly'));},{'module':'UserAgent','line':0,'column':0,'name':'$module_UserAgent'}),null);
 /** Path: html/js/downstream/env/CurrentCommunity.js */
 /**
  * @generated SignedSource<<cd271c194598b04eeec741d81d9f2208>>
@@ -7066,7 +7454,7 @@ module.exports = mapObject(UserAgent,memoizeStringOnly);},{'module':'UserAgent',
  *
  * @providesModule CurrentCommunity
  * @typechecks
- */__d('CurrentCommunity',['CurrentCommunityInitialData'],__annotator(function $module_CurrentCommunity(global,require,requireDynamic,requireLazy,module,exports,CurrentCommunityInitialData){if(require.__markCompiled)require.__markCompiled();
+ */__d('CurrentCommunity',['CurrentCommunityInitialData'],__annotator(function $module_CurrentCommunity(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -7079,7 +7467,7 @@ var CurrentCommunity={
 
 
 getID:__annotator(function(){
-return CurrentCommunityInitialData.COMMUNITY_ID || '0';},{'module':'CurrentCommunity','line':31,'column':9})};
+return require('CurrentCommunityInitialData').COMMUNITY_ID || '0';},{'module':'CurrentCommunity','line':31,'column':9})};
 
 
 
@@ -7103,11 +7491,11 @@ module.exports = CurrentCommunity;},{'module':'CurrentCommunity','line':0,'colum
  *
  * @providesModule DTSG
  * @typechecks
- */__d('DTSG',['DTSGInitialData'],__annotator(function $module_DTSG(global,require,requireDynamic,requireLazy,module,exports,DTSGInitialData){if(require.__markCompiled)require.__markCompiled();
+ */__d('DTSG',['DTSGInitialData'],__annotator(function $module_DTSG(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
-var token=DTSGInitialData.token || null;
+var token=require('DTSGInitialData').token || null;
 
 var DTSG={
 
@@ -7225,9 +7613,55 @@ return result;}__annotator(encodeBitString,{'module':'BitMap','line':91,'column'
 
 
 module.exports = BitMap;},{'module':'BitMap','line':0,'column':0,'name':'$module_BitMap'}),null);
+/** Path: html/js/downstream/core/memoize.js */
+/**
+ * @generated SignedSource<<e9d52c92bb36adb048c20cec5cbff15a>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule memoize
+ * @typechecks
+ */__d('memoize',['invariant'],__annotator(function $module_memoize(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
+
+
+
+
+
+
+
+
+
+
+function memoize(f){return __bodyWrapper(this,arguments,function(){
+var result;
+return __annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}
+!
+!args.length?invariant(0,
+'A memoized function cannot be called with arguments'):undefined;
+
+if(f){
+result = f();
+f = null;}
+
+return result;},{'module':'memoize','line':32,'column':9});},{params:[[f,'function','f']],returns:'function'});}__annotator(memoize,{'module':'memoize','line':30,'column':0,'name':'memoize'},{params:['function'],returns:'function'});
+
+
+
+module.exports = memoize;},{'module':'memoize','line':0,'column':0,'name':'$module_memoize'}),null);
 /** Path: html/js/downstream/serverjs/replaceTransportMarkers.js */
 /**
- * @generated SignedSource<<84b9ff56b8d16fb39d786f4ed534f412>>
+ * @generated SignedSource<<2e8849a2e9fd00a371726ddd0215cc09>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -7243,7 +7677,10 @@ module.exports = BitMap;},{'module':'BitMap','line':0,'column':0,'name':'$module
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule replaceTransportMarkers
- */__d('replaceTransportMarkers',['ge'],__annotator(function $module_replaceTransportMarkers(global,require,requireDynamic,requireLazy,module,exports,ge){if(require.__markCompiled)require.__markCompiled();
+ */__d('replaceTransportMarkers',['ge','memoize'],__annotator(function $module_replaceTransportMarkers(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
+
 
 
 
@@ -7269,16 +7706,23 @@ replaceTransportMarkers(relativeTo,obj,ii);}}else
 
 if(obj && typeof obj == 'object'){
 if(obj.__m){
+if(obj.__lazy){
 
 
-parent[index] = require.call(null,obj.__m);}else
+
+parent[index] = require('memoize')(require.bind(null,obj.__m));}else
+{
+
+
+parent[index] = require.call(null,obj.__m);}}else
+
 if(obj.__e){
-parent[index] = ge(obj.__e);}else
+parent[index] = require('ge')(obj.__e);}else
 if(obj.__rel){
 parent[index] = relativeTo;}else
 {
 for(var key in obj) {
-replaceTransportMarkers(relativeTo,obj,key);}}}}__annotator(replaceTransportMarkers,{'module':'replaceTransportMarkers','line':35,'column':0,'name':'replaceTransportMarkers'});
+replaceTransportMarkers(relativeTo,obj,key);}}}}__annotator(replaceTransportMarkers,{'module':'replaceTransportMarkers','line':38,'column':0,'name':'replaceTransportMarkers'});
 
 
 
@@ -7287,7 +7731,7 @@ replaceTransportMarkers(relativeTo,obj,key);}}}}__annotator(replaceTransportMark
 module.exports = replaceTransportMarkers;},{'module':'replaceTransportMarkers','line':0,'column':0,'name':'$module_replaceTransportMarkers'}),null);
 /** Path: html/js/downstream/serverjs/ServerJSDefine.js */
 /**
- * @generated SignedSource<<b870e3034c317f0c9e640cd5540e27d6>>
+ * @generated SignedSource<<462eeabe7a1448273fdee3486e431b1c>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -7303,34 +7747,38 @@ module.exports = replaceTransportMarkers;},{'module':'replaceTransportMarkers','
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ServerJSDefine
- */__d('ServerJSDefine',['BitMap','replaceTransportMarkers'],__annotator(function $module_ServerJSDefine(global,require,requireDynamic,requireLazy,module,exports,BitMap,replaceTransportMarkers){if(require.__markCompiled)require.__markCompiled();
+ */__d('ServerJSDefine',['BitMap','replaceTransportMarkers'],__annotator(function $module_ServerJSDefine(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
 
 
-var _dynamicModuleIndices=new BitMap();
+
+
+var USED_AS_TRANSPORT=0x2;
+
+var _dynamicModuleIndices=new (require('BitMap'))();
 
 var ServerJSDefine={
 
 getLoadedModuleHash:__annotator(function(){
-return _dynamicModuleIndices.toCompressedString();},{'module':'ServerJSDefine','line':28,'column':23}),
+return _dynamicModuleIndices.toCompressedString();},{'module':'ServerJSDefine','line':32,'column':21}),
 
 
 handleDefine:__annotator(function(moduleName,deps,data,index,relativeTo){
 _dynamicModuleIndices.set(index);
-define(moduleName,deps,__annotator(function(){
-replaceTransportMarkers(relativeTo,data);
-return data;},{'module':'ServerJSDefine','line':34,'column':29}));},{'module':'ServerJSDefine','line':32,'column':16}),
-
+define(moduleName,deps,__annotator(function ServerJSDefinedModule(){
+require('replaceTransportMarkers')(relativeTo,data);
+return data;},{'module':'ServerJSDefine','line':38,'column':29,'name':'ServerJSDefinedModule'}),
+USED_AS_TRANSPORT);},{'module':'ServerJSDefine','line':36,'column':14}),
 
 
 handleDefines:__annotator(function(defines,relativeTo){
-defines.map(__annotator(function(define){
+defines.forEach(__annotator(function(define){
 if(relativeTo){
 define.push(relativeTo);}
 
-ServerJSDefine.handleDefine.apply(null,define);},{'module':'ServerJSDefine','line':41,'column':16}));},{'module':'ServerJSDefine','line':40,'column':17})};
+ServerJSDefine.handleDefine.apply(null,define);},{'module':'ServerJSDefine','line':45,'column':20}));},{'module':'ServerJSDefine','line':44,'column':15})};
 
 
 
@@ -7506,11 +7954,11 @@ module.exports = createObjectFrom;},{'module':'createObjectFrom','line':0,'colum
  *
  * @providesModule URISchemes
  * @typechecks
- */__d('URISchemes',['createObjectFrom'],__annotator(function $module_URISchemes(global,require,requireDynamic,requireLazy,module,exports,createObjectFrom){if(require.__markCompiled)require.__markCompiled();
+ */__d('URISchemes',['createObjectFrom'],__annotator(function $module_URISchemes(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
-var defaultSchemes=createObjectFrom([
+var defaultSchemes=require('createObjectFrom')([
 'fb',
 'fb-ama',
 'fb-messenger',
@@ -7570,7 +8018,7 @@ module.exports = URISchemes;},{'module':'URISchemes','line':0,'column':0,'name':
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule URIBase
- */__d('URIBase',['URIRFC3986','URISchemes','ex','invariant'],__annotator(function $module_URIBase(global,require,requireDynamic,requireLazy,module,exports,URIRFC3986,URISchemes,ex,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('URIBase',['invariant','URIRFC3986','URISchemes','ex'],__annotator(function $module_URIBase(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -7629,8 +8077,8 @@ return true;}
 
 
 uriToParse = uriToParse.toString().trim();
-var components=URIRFC3986.parse(uriToParse) || {};
-if(!shouldThrow && !URISchemes.isAllowed(components.scheme)){
+var components=require('URIRFC3986').parse(uriToParse) || {};
+if(!shouldThrow && !require('URISchemes').isAllowed(components.scheme)){
 return false;}
 
 uri.setProtocol(components.scheme || '');
@@ -7658,7 +8106,7 @@ uri.setForceFragmentSeparator(true);}
 
 if(components.userinfo !== null){
 if(shouldThrow){
-throw new Error(ex(
+throw new Error(require('ex')(
 'URI.parse: invalid URI (userinfo is not allowed in a URI): %s',
 uri.toString()));}else
 
@@ -7671,7 +8119,7 @@ return false;}}
 
 if(!uri.getDomain() && uri.getPath().indexOf('\\') !== -1){
 if(shouldThrow){
-throw new Error(ex(
+throw new Error(require('ex')(
 'URI.parse: invalid URI (no domain but multiple back-slashes): %s',
 uri.toString()));}else
 
@@ -7684,7 +8132,7 @@ return false;}}
 
 if(!uri.getProtocol() && SECURITY_PATTERN.test(uriToParse)){
 if(shouldThrow){
-throw new Error(ex(
+throw new Error(require('ex')(
 'URI.parse: invalid URI (unsafe protocol-relative URLs): %s',
 uri.toString()));}else
 
@@ -7753,7 +8201,7 @@ parse(this,uri,true,serializer);}__annotator(URIBase,{'module':'URIBase','line':
 
 setProtocol = __annotator(function(protocol){'use strict';
 !
-URISchemes.isAllowed(protocol)?invariant(0,
+require('URISchemes').isAllowed(protocol)?invariant(0,
 '"%s" is not a valid protocol for a URI.',protocol):undefined;
 
 this.$URIBase_protocol = protocol;
@@ -7800,7 +8248,7 @@ setDomain = __annotator(function(domain){'use strict';
 
 
 if(UNSAFE_DOMAIN_PATTERN.test(domain)){
-throw new Error(ex(
+throw new Error(require('ex')(
 'URI.setDomain: unsafe domain specified: %s for url %s',
 domain,
 this.toString()));}
@@ -8086,7 +8534,7 @@ return parse(new URIBase(null,serializer),uri,false,serializer);},{'module':'URI
 module.exports = URIBase;},{'module':'URIBase','line':0,'column':0,'name':'$module_URIBase'}),null);
 /** Path: html/js/downstream/core/PHPQuerySerializer.js */
 /**
- * @generated SignedSource<<5b911bc04b30f4ccc5b1fb5715a1c303>>
+ * @generated SignedSource<<0229bd0df17ddd0fffd2d883e376fc17>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -8120,34 +8568,66 @@ function serialize(obj){
 return _serializeElement(obj,null);}__annotator(serialize,{'module':'PHPQuerySerializer','line':32,'column':0,'name':'serialize'});
 
 
-function _serializeElement(obj,name){
+function serializeForFormData(obj){
+return _serializeElementAsObject(obj,null,true);}__annotator(serializeForFormData,{'module':'PHPQuerySerializer','line':36,'column':0,'name':'serializeForFormData'});
 
-name = name || '';
+
+function _serializeElement(obj,name){
 var kv_pairs=[];
+var componentsObject=_serializeElementAsObject(obj,name);
+
+for(var component in componentsObject) {
+if(componentsObject.hasOwnProperty(component)){
+if(componentsObject[component] === undefined){
+kv_pairs.push(component);}else
+{
+kv_pairs.push(component + '=' + componentsObject[component]);}}}
+
+
+
+
+return kv_pairs.join('&');}__annotator(_serializeElement,{'module':'PHPQuerySerializer','line':40,'column':0,'name':'_serializeElement'});
+
+
+function _serializeElementAsObject(
+obj,
+name,
+skipEncoding,
+componentsObject)
+{
+name = name || '';
+componentsObject = componentsObject || {};
+var componentsObjectKey=skipEncoding?name:encodeComponent(name);
 
 if(obj === null || obj === undefined){
-kv_pairs.push(encodeComponent(name));}else
+componentsObject[componentsObjectKey] = undefined;}else
 if(typeof obj == 'object'){
 
-!
-!('nodeName' in obj || 'nodeType' in obj)?invariant(0,
-'PHPQuerySerializer serializing a DOM element, not good ...'):undefined;
-
+!(typeof obj.appendChild !== 'function')?invariant(0,
+'Trying to serialize a DOM node. Bad idea.'):undefined;
 
 for(var k in obj) {
+if(k === '$$typeof'){
+
+
+continue;}
+
 if(obj.hasOwnProperty(k) && obj[k] !== undefined){
-kv_pairs.push(_serializeElement(
+_serializeElementAsObject(
 obj[k],
-name?name + '[' + k + ']':k));}}}else
+name?name + '[' + k + ']':k,
+skipEncoding,
+componentsObject);}}}else
 
 
 
 
 {
-kv_pairs.push(encodeComponent(name) + '=' + encodeComponent(obj));}
+componentsObject[componentsObjectKey] =
+skipEncoding?obj:encodeComponent(obj);}
 
 
-return kv_pairs.join('&');}__annotator(_serializeElement,{'module':'PHPQuerySerializer','line':36,'column':0,'name':'_serializeElement'});
+return componentsObject;}__annotator(_serializeElementAsObject,{'module':'PHPQuerySerializer','line':57,'column':0,'name':'_serializeElementAsObject'});
 
 
 
@@ -8160,13 +8640,24 @@ return kv_pairs.join('&');}__annotator(_serializeElement,{'module':'PHPQuerySeri
 
 
 function encodeComponent(raw){
-return encodeURIComponent(raw).replace(/%5D/g,']').replace(/%5B/g,'[');}__annotator(encodeComponent,{'module':'PHPQuerySerializer','line':75,'column':0,'name':'encodeComponent'});
+return encodeURIComponent(raw).replace(/%5D/g,']').replace(/%5B/g,'[');}__annotator(encodeComponent,{'module':'PHPQuerySerializer','line':107,'column':0,'name':'encodeComponent'});
 
 
 
 
 
 var ARRAY_QUERY_PATTERN=/^([-_\w]+)((?:\[[-_\w]*\])+)=?(.*)/;
+
+function replaceBadKeys(key){
+if(key === 'hasOwnProperty' || key === '__proto__'){
+
+
+
+
+
+return '\ud83d\udf56';}
+
+return key;}__annotator(replaceBadKeys,{'module':'PHPQuerySerializer','line':116,'column':0,'name':'replaceBadKeys'});
 
 
 
@@ -8181,9 +8672,6 @@ return {};}
 
 
 var result={};
-
-
-
 
 
 q = q.replace(/%5B/ig,'[').replace(/%5D/ig,']');
@@ -8209,12 +8697,13 @@ indices[0] = name;
 
 var resultNode=result;
 for(var i=0;i < indices.length - 1;i++) {
-if(indices[i]){
-if(!hasOwnProp.call(resultNode,indices[i])){
+var key=replaceBadKeys(indices[i]);
+if(key){
+if(!hasOwnProp.call(resultNode,key)){
 var nv=indices[i + 1] && !indices[i + 1].match(/^\d{1,3}$/)?
 {}:[];
-resultNode[indices[i]] = nv;
-if(resultNode[indices[i]] !== nv){
+resultNode[key] = nv;
+if(resultNode[key] !== nv){
 
 
 
@@ -8223,7 +8712,7 @@ return result;}}
 
 
 
-resultNode = resultNode[indices[i]];}else
+resultNode = resultNode[key];}else
 {
 if(indices[i + 1] && !indices[i + 1].match(/^\d{1,3}$/)){
 resultNode.push({});}else
@@ -8237,11 +8726,11 @@ resultNode = resultNode[resultNode.length - 1];}}
 if(resultNode instanceof Array && indices[indices.length - 1] === ''){
 resultNode.push(value);}else
 {
-resultNode[indices[indices.length - 1]] = value;}}}
+resultNode[replaceBadKeys(indices[indices.length - 1])] = value;}}}
 
 
 
-return result;}__annotator(deserialize,{'module':'PHPQuerySerializer','line':91,'column':0,'name':'deserialize'});
+return result;}__annotator(deserialize,{'module':'PHPQuerySerializer','line':134,'column':0,'name':'deserialize'});
 
 
 
@@ -8254,11 +8743,19 @@ return result;}__annotator(deserialize,{'module':'PHPQuerySerializer','line':91,
 
 
 function decodeComponent(encoded_s){
-return decodeURIComponent(encoded_s.replace(/\+/g,' '));}__annotator(decodeComponent,{'module':'PHPQuerySerializer','line':169,'column':0,'name':'decodeComponent'});
+try{
+return decodeURIComponent(encoded_s.replace(/\+/g,' '));}
+catch(_) {
+if(__DEV__){
+console.error('Bad UTF8 in URL: ',encoded_s);}
+
+return encoded_s;}}__annotator(decodeComponent,{'module':'PHPQuerySerializer','line':210,'column':0,'name':'decodeComponent'});
+
 
 
 var PHPQuerySerializer={
 serialize:serialize,
+serializeForFormData:serializeForFormData,
 encodeComponent:encodeComponent,
 deserialize:deserialize,
 decodeComponent:decodeComponent};
@@ -8284,7 +8781,7 @@ module.exports = PHPQuerySerializer;},{'module':'PHPQuerySerializer','line':0,'c
  *
  * @providesModule getAsyncParams
  * @typechecks
- */__d('getAsyncParams',['CurrentCommunity','CurrentUser','DTSG','ISB','LSD','ServerJSDefine','SiteData','URIBase','PHPQuerySerializer'],__annotator(function $module_getAsyncParams(global,require,requireDynamic,requireLazy,module,exports,CurrentCommunity,CurrentUser,DTSG,ISB,LSD,ServerJSDefine,SiteData,URIBase,PHPQuerySerializer){if(require.__markCompiled)require.__markCompiled();
+ */__d('getAsyncParams',['CurrentCommunity','CurrentUser','DTSG','ISB','LSD','ServerJSDefine','SiteData','URIBase','PHPQuerySerializer'],__annotator(function $module_getAsyncParams(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -8306,13 +8803,13 @@ var _count=1;
 
 function getAsyncParams(method){return __bodyWrapper(this,arguments,function(){
 var params={
-__user:CurrentUser.getID(),
+__user:require('CurrentUser').getID(),
 __a:1,
 
 
 
 
-__dyn:ServerJSDefine.getLoadedModuleHash(),
+__dyn:require('ServerJSDefine').getLoadedModuleHash(),
 
 
 
@@ -8324,9 +8821,9 @@ __dyn:ServerJSDefine.getLoadedModuleHash(),
 __req:(_count++).toString(36)};
 
 
-var queryData=new URIBase(
-window.location.href,
-PHPQuerySerializer).
+var queryData=new (require('URIBase'))(
+window.location.href,require('PHPQuerySerializer')).
+
 getQueryData();
 
 for(var key in queryData) {
@@ -8340,8 +8837,8 @@ params[key] = queryData[key];}}}
 
 
 if(method == 'POST'){
-if(DTSG.getToken()){
-params.fb_dtsg = DTSG.getToken();
+if(require('DTSG').getToken()){
+params.fb_dtsg = require('DTSG').getToken();
 
 
 var numeric_dtsg_value='';
@@ -8351,23 +8848,23 @@ numeric_dtsg_value += params.fb_dtsg.charCodeAt(ii);}
 params.ttstamp = '2' + numeric_dtsg_value;}
 
 
-if(LSD.token){
-params.lsd = LSD.token;}}
+if(require('LSD').token){
+params.lsd = require('LSD').token;}}
 
 
 
 
 
-if(ISB.token){
-params.fb_isb = ISB.token;}
+if(require('ISB').token){
+params.fb_isb = require('ISB').token;}
 
 
-if(SiteData.revision){
-params.__rev = SiteData.revision;}
+if(require('SiteData').revision){
+params.__rev = require('SiteData').revision;}
 
 
-if(CurrentCommunity.getID() !== '0'){
-params.__cid = CurrentCommunity.getID();}
+if(require('CurrentCommunity').getID() !== '0'){
+params.__cid = require('CurrentCommunity').getID();}
 
 
 return params;},{params:[[method,'string','method']],returns:'object'});}__annotator(getAsyncParams,{'module':'getAsyncParams','line':39,'column':0,'name':'getAsyncParams'},{params:['string'],returns:'object'});
@@ -8392,7 +8889,7 @@ module.exports = getAsyncParams;},{'module':'getAsyncParams','line':0,'column':0
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule getSameOriginTransport
- */__d('getSameOriginTransport',['ex'],__annotator(function $module_getSameOriginTransport(global,require,requireDynamic,requireLazy,module,exports,ex){if(require.__markCompiled)require.__markCompiled();
+ */__d('getSameOriginTransport',['ex'],__annotator(function $module_getSameOriginTransport(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -8402,182 +8899,11 @@ return global.XMLHttpRequest?
 new global.XMLHttpRequest():
 new ActiveXObject("MSXML2.XMLHTTP.3.0");}
 catch(error) {
-throw new Error(ex('getSameOriginTransport: %s',error.message));}}__annotator(getSameOriginTransport,{'module':'getSameOriginTransport','line':22,'column':0,'name':'getSameOriginTransport'});
+throw new Error(require('ex')('getSameOriginTransport: %s',error.message));}}__annotator(getSameOriginTransport,{'module':'getSameOriginTransport','line':22,'column':0,'name':'getSameOriginTransport'});
 
 
 
 module.exports = getSameOriginTransport;},{'module':'getSameOriginTransport','line':0,'column':0,'name':'$module_getSameOriginTransport'}),null);
-/** Path: html/js/downstream/error/wrapFunction.js */
-/**
- * @generated SignedSource<<8f7c8d142fb7f53d5f7a5b63e2904a79>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule wrapFunction
- * @typechecks
- *
- * This module has a very generic purpose, to either act as an identity
- * function, or to return a function that when invoked will invoke the
- * original function wrapped inside a handler.
- *
- * Typical use of this is when you want to inject a layer of error handling,
- * logging, or similar around the invokation of a function, but don't want
- * the calling module to be coupled to the implementation.
- */__d('wrapFunction',[],__annotator(function $module_wrapFunction(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
-
-var wrappers={};
-function wrapFunction(fn,type,source){return __bodyWrapper(this,arguments,function()
-{
-type = type || 'default';
-
-return __annotator(function(){
-var callee=type in wrappers?
-wrappers[type](fn,source):
-fn;
-
-return callee.apply(this,arguments);},{'module':'wrapFunction','line':34,'column':9});},{params:[[fn,'function','fn'],[type,'?string','type'],[source,'?string','source']],returns:'function'});}__annotator(wrapFunction,{'module':'wrapFunction','line':30,'column':0,'name':'wrapFunction'},{params:['function','?string','?string'],returns:'function'});
-
-
-
-wrapFunction.setWrapper = __annotator(function(fn,type){return __bodyWrapper(this,arguments,function(){
-type = type || 'default';
-wrappers[type] = fn;},{params:[[fn,'function','fn'],[type,'?string','type']]});},{'module':'wrapFunction','line':43,'column':26},{params:['function','?string']});
-
-
-module.exports = wrapFunction;},{'module':'wrapFunction','line':0,'column':0,'name':'$module_wrapFunction'}),null);
-/** Path: html/js/downstream/core/TimeSlice.js */
-/**
- * @generated SignedSource<<a76c110c27193f39e21ae6dfa0fc1ac3>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule TimeSlice
- */__d('TimeSlice',['ErrorUtils','LogBuffer','invariant','performanceAbsoluteNow','wrapFunction'],__annotator(function $module_TimeSlice(global,require,requireDynamic,requireLazy,module,exports,ErrorUtils,LogBuffer,invariant,performanceAbsoluteNow,wrapFunction){if(require.__markCompiled)require.__markCompiled();var _extends=Object.assign || __annotator(function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;},{'module':'TimeSlice','line':0,'column':0});
-
-
-
-
-
-
-
-
-
-
-
-
-
-var guarded=false;
-var contextName;
-var tasks=[];
-var taskDepth;
-
-var TimeSlice={
-
-
-
-
-
-guard:__annotator(function(fn,name){
-var mainGuardName='TimeSlice' + (name?': ' + name:'');
-var taskGuardName='TimeSlice Task' + (name?': ' + name:'');
-
-return __annotator(function timeSliceGuarded(){
-if(guarded){
-
-return fn.apply(this,arguments);}
-
-
-var beginTime=performanceAbsoluteNow();
-
-guarded = true;
-contextName = name;
-tasks.length = 0;
-taskDepth = 0;
-
-var result=ErrorUtils.
-applyWithGuard(fn,this,arguments,null,mainGuardName);
-
-while(tasks.length > 0) {
-var task=tasks.shift();
-taskDepth = task.depth;
-ErrorUtils.
-applyWithGuard(task.fn,global,null,null,taskGuardName);}
-
-
-guarded = false;
-
-var endTime=performanceAbsoluteNow();
-
-LogBuffer.write('time_slice',_extends({
-begin:beginTime,
-end:endTime,
-guard:name},
-fn.__SMmeta));
-
-
-
-return result;},{'module':'TimeSlice','line':47,'column':11,'name':'timeSliceGuarded'});},{'module':'TimeSlice','line':43,'column':9}),
-
-
-
-
-enqueue:__annotator(function(fn){
-!
-guarded?invariant(0,
-'TimeSlice can\'t append tasks in non-guarded context'):undefined;
-
-!(
-taskDepth < 1000)?invariant(0,
-'TimeSlice shouldn\'t be used for infinite deferred recursion'):undefined;
-
-tasks.push({
-fn:fn,
-depth:taskDepth + 1});},{'module':'TimeSlice','line':87,'column':11}),
-
-
-
-
-inGuard:__annotator(function(){
-return guarded;},{'module':'TimeSlice','line':103,'column':11})};
-
-
-
-TimeSlice.getContext = __annotator(function(){
-if(!guarded){
-return null;}
-
-return {
-name:contextName,
-depth:taskDepth};},{'module':'TimeSlice','line':108,'column':23});
-
-
-
-wrapFunction.setWrapper(TimeSlice.guard,'entry');
-global.TimeSlice = TimeSlice;
-
-module.exports = TimeSlice;},{'module':'TimeSlice','line':0,'column':0,'name':'$module_TimeSlice'}),null);
 /** Path: html/js/downstream/page/setTimeoutAcrossTransitions.js */
 /**
  * @generated SignedSource<<992a0ae0b6882b88229db3bb0b4fa1fc>>
@@ -8596,7 +8922,7 @@ module.exports = TimeSlice;},{'module':'TimeSlice','line':0,'column':0,'name':'$
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule setTimeoutAcrossTransitions
- */__d('setTimeoutAcrossTransitions',['TimeSlice'],__annotator(function $module_setTimeoutAcrossTransitions(global,require,requireDynamic,requireLazy,module,exports,TimeSlice){if(require.__markCompiled)require.__markCompiled();
+ */__d('setTimeoutAcrossTransitions',['TimeSlice'],__annotator(function $module_setTimeoutAcrossTransitions(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -8608,7 +8934,7 @@ var setTimeout=global.setTimeout.nativeBackup || global.setTimeout;
 
 
 module.exports = __annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}
-args[0] = TimeSlice.guard(args[0],'setTimeout');
+args[0] = require('TimeSlice').guard(args[0],'setTimeout');
 
 return Function.prototype.apply.call(setTimeout,global,args);},{'module':'setTimeoutAcrossTransitions','line':29,'column':17});},{'module':'setTimeoutAcrossTransitions','line':0,'column':0,'name':'$module_setTimeoutAcrossTransitions'}),null);
 /** Path: html/js/logging/BanzaiAdapter.js */
@@ -8618,7 +8944,7 @@ return Function.prototype.apply.call(setTimeout,global,args);},{'module':'setTim
  * @providesModule BanzaiAdapter
  *
  * DO NOT REQUIRE THIS. The only module that should depend on this is Banzai.js.
- */__d('BanzaiAdapter',['Arbiter','CurrentUser','Miny','QueryString','Run','SiteData','UserAgent','getAsyncParams','getSameOriginTransport','setTimeoutAcrossTransitions','BanzaiConfig'],__annotator(function $module_BanzaiAdapter(global,require,requireDynamic,requireLazy,module,exports,Arbiter,CurrentUser,Miny,QueryString,Run,SiteData,UserAgent,getAsyncParams,getSameOriginTransport,setTimeoutAcrossTransitions,config){if(require.__markCompiled)require.__markCompiled();
+ */__d('BanzaiAdapter',['Arbiter','CurrentUser','Miny','QueryString','Run','SiteData','UserAgent','getAsyncParams','getSameOriginTransport','setTimeoutAcrossTransitions','BanzaiConfig'],__annotator(function $module_BanzaiAdapter(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -8633,7 +8959,7 @@ return Function.prototype.apply.call(setTimeout,global,args);},{'module':'setTim
 
 
 var inflight=[];
-var _arbiter=new Arbiter();
+var _arbiter=new (require('Arbiter'))();
 
 
 
@@ -8648,10 +8974,10 @@ var Banzai={};
 
 
 var adapter=Banzai.adapter = {
-config:config,
+config:require('BanzaiConfig'),
 
 getUserID:__annotator(function(){
-return CurrentUser.getID();},{'module':'BanzaiAdapter','line':39,'column':13}),
+return require('CurrentUser').getID();},{'module':'BanzaiAdapter','line':39,'column':13}),
 
 
 inform:__annotator(function(message){
@@ -8659,7 +8985,7 @@ _arbiter.inform(message);},{'module':'BanzaiAdapter','line':43,'column':10}),
 
 
 subscribe:__annotator(function(event_type,callback){
-_arbiter.subscribe(event_type,callback);},{'module':'BanzaiAdapter','line':47,'column':13}),
+return _arbiter.subscribe(event_type,callback);},{'module':'BanzaiAdapter','line':47,'column':13}),
 
 
 cleanup:__annotator(function(){
@@ -8675,12 +9001,12 @@ req.abort();}},{'module':'BanzaiAdapter','line':54,'column':17}));},{'module':'B
 readyToSend:__annotator(function(){
 
 
-return UserAgent.isBrowser('IE <= 8') || navigator.onLine;},{'module':'BanzaiAdapter','line':61,'column':15}),
+return require('UserAgent').isBrowser('IE <= 8') || navigator.onLine;},{'module':'BanzaiAdapter','line':61,'column':15}),
 
 
 send:__annotator(function(payload,onSuccess,onError,signal){
 var method='POST';
-var xhr=getSameOriginTransport();
+var xhr=require('getSameOriginTransport')();
 xhr.open(method,ENDPOINT,true);
 xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 
@@ -8725,7 +9051,7 @@ adapter.inform(Banzai.ERROR);}}}},{'module':'BanzaiAdapter','line':73,'column':2
 
 
 
-setTimeoutAcrossTransitions(__annotator(
+require('setTimeoutAcrossTransitions')(__annotator(
 function(){
 if(xhr.readyState < 4){
 xhr.abort();}},{'module':'BanzaiAdapter','line':115,'column':6}),
@@ -8737,10 +9063,10 @@ Banzai.SEND_TIMEOUT);
 inflight.push(xhr);
 
 
-var data=getAsyncParams(method);
+var data=require('getAsyncParams')(method);
 data.q = JSON.stringify(payload);
 data.ts = Date.now();
-data.ph = SiteData.push_phase;
+data.ph = require('SiteData').push_phase;
 
 if(Banzai.FBTRACE){
 data.fbtrace = Banzai.FBTRACE;}
@@ -8748,7 +9074,7 @@ data.fbtrace = Banzai.FBTRACE;}
 
 if(Banzai.isEnabled('miny_compression')){
 var start=Date.now();
-var encoded=Miny.encode(data.q);
+var encoded=require('Miny').encode(data.q);
 
 
 if(encoded.length < data.q.length){
@@ -8757,7 +9083,7 @@ data.miny_encode_ms = Date.now() - start;}}
 
 
 
-xhr.send(QueryString.encode(data));},{'module':'BanzaiAdapter','line':67,'column':8}),
+xhr.send(require('QueryString').encode(data));},{'module':'BanzaiAdapter','line':67,'column':8}),
 
 
 setHooks:__annotator(function(){
@@ -8770,11 +9096,11 @@ setHooks:__annotator(function(){
 
 
 
-Run.onAfterUnload(Banzai._unload);},{'module':'BanzaiAdapter','line':149,'column':12}),
+require('Run').onAfterUnload(Banzai._unload);},{'module':'BanzaiAdapter','line':149,'column':12}),
 
 
 onUnload:__annotator(function(callback){
-Run.onAfterUnload(callback);},{'module':'BanzaiAdapter','line':162,'column':12})};
+require('Run').onAfterUnload(callback);},{'module':'BanzaiAdapter','line':162,'column':12})};
 
 
 
@@ -8852,7 +9178,7 @@ module.exports = isEmpty;},{'module':'isEmpty','line':0,'column':0,'name':'$modu
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule setIntervalAcrossTransitions
- */__d('setIntervalAcrossTransitions',['TimeSlice'],__annotator(function $module_setIntervalAcrossTransitions(global,require,requireDynamic,requireLazy,module,exports,TimeSlice){if(require.__markCompiled)require.__markCompiled();
+ */__d('setIntervalAcrossTransitions',['TimeSlice'],__annotator(function $module_setIntervalAcrossTransitions(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -8864,12 +9190,12 @@ var setInterval=global.setInterval.nativeBackup || global.setInterval;
 
 
 module.exports = __annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}
-args[0] = TimeSlice.guard(args[0],'setInterval');
+args[0] = require('TimeSlice').guard(args[0],'setInterval');
 
 return Function.prototype.apply.call(setInterval,global,args);},{'module':'setIntervalAcrossTransitions','line':29,'column':17});},{'module':'setIntervalAcrossTransitions','line':0,'column':0,'name':'$module_setIntervalAcrossTransitions'}),null);
 /** Path: html/js/downstream/bootloader/CSSLoader.js */
 /**
- * @generated SignedSource<<acb1f22a023394980f5002be775f7f03>>
+ * @generated SignedSource<<5d410c28798ad2cb888b03f4184cfaa1>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -8885,7 +9211,7 @@ return Function.prototype.apply.call(setInterval,global,args);},{'module':'setIn
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule CSSLoader
- */__d('CSSLoader',['CSSLoaderConfig','TimeSlice','isEmpty','setIntervalAcrossTransitions'],__annotator(function $module_CSSLoader(global,require,requireDynamic,requireLazy,module,exports,CSSLoaderConfig,TimeSlice,isEmpty,setIntervalAcrossTransitions){if(require.__markCompiled)require.__markCompiled();
+ */__d('CSSLoader',['CSSLoaderConfig','TimeSlice','isEmpty','setIntervalAcrossTransitions'],__annotator(function $module_CSSLoader(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -8901,9 +9227,9 @@ return Function.prototype.apply.call(setInterval,global,args);},{'module':'setIn
 
 
 var CSS_POLL_INTERVAL=20;
-var CSS_POLL_TIMEOUT=CSSLoaderConfig.timeout;
+var CSS_POLL_TIMEOUT=require('CSSLoaderConfig').timeout;
 
-var _loadEventSupported=CSSLoaderConfig.loadEventSupported;
+var _loadEventSupported=require('CSSLoaderConfig').loadEventSupported;
 var _testingLoadEvent;
 
 
@@ -8971,14 +9297,14 @@ for(var ii=0;ii < finishedSignals.length;ii++) {
 finishedSignals[ii].parentNode.removeChild(finishedSignals[ii]);}
 
 
-if(!isEmpty(callbacks)){
+if(!require('isEmpty')(callbacks)){
 for(ii = 0;ii < callbacks.length;ii++) {
 callbacks[ii]();}
 
 _expirationTime = Date.now() + CSS_POLL_TIMEOUT;}
 
 
-return isEmpty(_activeCSSPolls);}__annotator(_runCSSPolls,{'module':'CSSLoader','line':75,'column':0,'name':'_runCSSPolls'});
+return require('isEmpty')(_activeCSSPolls);}__annotator(_runCSSPolls,{'module':'CSSLoader','line':75,'column':0,'name':'_runCSSPolls'});
 
 
 
@@ -8994,11 +9320,11 @@ var signal=document.createElement('meta');
 signal.id = 'bootloader_' + name.replace(/[^a-z0-9]/ig,'_');
 hardpoint.appendChild(signal);
 
-var alreadyPolling=!isEmpty(_activeCSSPolls);
+var alreadyPolling=!require('isEmpty')(_activeCSSPolls);
 _expirationTime = Date.now() + CSS_POLL_TIMEOUT;
 _activeCSSPolls[name] = {signal:signal,load:onLoad,error:onError};
 if(!alreadyPolling){
-var interval=setIntervalAcrossTransitions(__annotator(function _pollCSS(){
+var interval=require('setIntervalAcrossTransitions')(__annotator(function _pollCSS(){
 if(_runCSSPolls()){
 clearInterval(interval);}},{'module':'CSSLoader','line':131,'column':48,'name':'_pollCSS'}),
 
@@ -9063,13 +9389,13 @@ link.crossOrigin = 'anonymous';}
 _styleSheetMap[name] = {link:link};
 
 if(_loadEventSupported){
-link.onload = TimeSlice.guard(__annotator(function(){
+link.onload = require('TimeSlice').guard(__annotator(function CSSLoaderLinkLoad(){
 link.onload = link.onerror = null;
-onLoad();},{'module':'CSSLoader','line':196,'column':36}),
+onLoad();},{'module':'CSSLoader','line':196,'column':36,'name':'CSSLoaderLinkLoad'}),
 'CSSLoader link.onload');
-link.onerror = TimeSlice.guard(__annotator(function(){
+link.onerror = require('TimeSlice').guard(__annotator(function CSSLoaderLinkError(){
 link.onload = link.onerror = null;
-onError();},{'module':'CSSLoader','line':200,'column':37}),
+onError();},{'module':'CSSLoader','line':200,'column':37,'name':'CSSLoaderLinkError'}),
 'CSSLoader link.onerror');}else
 {
 
@@ -9103,10 +9429,10 @@ _styleSheetMap[name] = {link:link};},{'module':'CSSLoader','line':221,'column':2
 
 
 unloadStyleSheet:__annotator(function(name){
-if(!name in _styleSheetMap){
+var info=_styleSheetMap[name];
+if(info == null){
 return;}
 
-var info=_styleSheetMap[name];
 var link=info.link;
 if(link){
 link.onload = link.onerror = null;
@@ -9123,14 +9449,18 @@ break;}}}
 
 
 delete _activeCSSPolls[name];
-delete _styleSheetMap[name];},{'module':'CSSLoader','line':235,'column':20})};
+delete _styleSheetMap[name];},{'module':'CSSLoader','line':235,'column':20}),
+
+
+moduleName:__annotator(function(name){
+return require('CSSLoaderConfig').modulePrefix + name;},{'module':'CSSLoader','line':259,'column':14})};
 
 
 
 module.exports = CSSLoader;},{'module':'CSSLoader','line':0,'column':0,'name':'$module_CSSLoader'}),null);
 /** Path: html/js/downstream/bootloader/Bootloader.js */
 /**
- * @generated SignedSource<<499e10df64454d3e50b9178f255e4076>>
+ * @generated SignedSource<<f1a1d9876d4df6f869910948975c070d>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -9150,7 +9480,9 @@ module.exports = CSSLoader;},{'module':'CSSLoader','line':0,'column':0,'name':'$
  *
  * "Bootload" resources into a page dynamically.
  * https://our.intern.facebook.com/intern/dex/haste/bootloader/
- */__d('Bootloader',['CSSLoader','CallbackDependencyManager','TimeSlice','ErrorUtils','ex'],__annotator(function $module_Bootloader(global,require,requireDynamic,requireLazy,module,exports,CSSLoader,CallbackDependencyManager,TimeSlice,ErrorUtils,ex){if(require.__markCompiled)require.__markCompiled();
+ */__d('Bootloader',['CSSLoader','CallbackDependencyManager','TimeSlice','ErrorUtils','ex'],__annotator(function $module_Bootloader(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
 
 
 
@@ -9173,6 +9505,7 @@ var _loading={};
 var _loaded={};
 var _errors={};
 var _retries={};
+var _cssCancellers={};
 
 
 
@@ -9183,18 +9516,18 @@ var _pageScanned=false;
 var _bootloadEnabled=false;
 var _waitForBootloadEnabled=[];
 
-var _callbackManager=new CallbackDependencyManager();
+var _callbackManager=new (require('CallbackDependencyManager'))();
 
 var _startTime=Date.now();
 
-ErrorUtils.addListener(__annotator(function(err){
-err.loadingUrls = Object.keys(_loading);},{'module':'Bootloader','line':59,'column':23}),
+require('ErrorUtils').addListener(__annotator(function(err){
+err.loadingUrls = Object.keys(_loading);},{'module':'Bootloader','line':62,'column':23}),
 true);
 
 function _logError(msg){
 var err=new Error(msg);
 err.guard = 'Bootloader';
-ErrorUtils.reportError(err);}__annotator(_logError,{'module':'Bootloader','line':63,'column':0,'name':'_logError'});
+require('ErrorUtils').reportError(err);}__annotator(_logError,{'module':'Bootloader','line':66,'column':0,'name':'_logError'});
 
 
 
@@ -9202,13 +9535,13 @@ ErrorUtils.reportError(err);}__annotator(_logError,{'module':'Bootloader','line'
 
 function _isBrowserIE(){
 return document.documentMode ||
-+(/MSIE.(\d+)/.exec(navigator.userAgent) || [])[1];}__annotator(_isBrowserIE,{'module':'Bootloader','line':72,'column':0,'name':'_isBrowserIE'});
++(/MSIE.(\d+)/.exec(navigator.userAgent) || [])[1];}__annotator(_isBrowserIE,{'module':'Bootloader','line':75,'column':0,'name':'_isBrowserIE'});
 
 
 function objectToArray(
 obj){return __bodyWrapper(this,arguments,function()
 {
-return Array.isArray(obj)?obj:[obj];},{params:[[obj,'array<string>|array<object>|string|object','obj']],returns:'array<string>|array<object>'});}__annotator(objectToArray,{'module':'Bootloader','line':77,'column':0,'name':'objectToArray'},{params:['array<string>|array<object>|string|object'],returns:'array<string>|array<object>'});
+return Array.isArray(obj)?obj:[obj];},{params:[[obj,'array<string>|array<object>|string|object','obj']],returns:'array<string>|array<object>'});}__annotator(objectToArray,{'module':'Bootloader','line':80,'column':0,'name':'objectToArray'},{params:['array<string>|array<object>|string|object'],returns:'array<string>|array<object>'});
 
 
 function _getHardpoint(){
@@ -9216,7 +9549,7 @@ if(!_hardpoint){
 var heads=document.getElementsByTagName('head');
 _hardpoint = heads.length && heads[0] || document.body;}
 
-return _hardpoint;}__annotator(_getHardpoint,{'module':'Bootloader','line':83,'column':0,'name':'_getHardpoint'});
+return _hardpoint;}__annotator(_getHardpoint,{'module':'Bootloader','line':86,'column':0,'name':'_getHardpoint'});
 
 
 
@@ -9230,18 +9563,19 @@ var resource=_resources[name];
 if(resource && resource.crossOrigin){
 script.crossOrigin = 'anonymous';}
 
-script.onload = TimeSlice.guard(callback,'Bootloader script.onload');
-script.onerror = TimeSlice.guard(__annotator(function(){
+script.onload = require('TimeSlice').guard(callback,'Bootloader script.onload');
+script.onerror = require('TimeSlice').guard(__annotator(function(){
 _errors[source] = true;
-callback();},{'module':'Bootloader','line':103,'column':35}),
+_logError(require('ex')('JS loading error [%s] at %s',name,source));
+callback();},{'module':'Bootloader','line':106,'column':35}),
 'Bootloader script.onerror');
-script.onreadystatechange = TimeSlice.guard(__annotator(function(){
+script.onreadystatechange = require('TimeSlice').guard(__annotator(function(){
 if(this.readyState in {loaded:1,complete:1}){
-callback();}},{'module':'Bootloader','line':107,'column':46}),
+callback();}},{'module':'Bootloader','line':111,'column':46}),
 
 'Bootloader script.onreadystatechange');
 hardpoint.appendChild(script);
-return script;}__annotator(_loadJS,{'module':'Bootloader','line':94,'column':0,'name':'_loadJS'});
+return script;}__annotator(_loadJS,{'module':'Bootloader','line':97,'column':0,'name':'_loadJS'});
 
 
 
@@ -9265,11 +9599,11 @@ _loadJS(source,name,callback,hardpoint);}else
 if(type == 'css'){
 var resource=_resources[name];
 var crossOrigin=resource && resource.crossOrigin;
-CSSLoader.loadStyleSheet(name,source,hardpoint,crossOrigin,callback,__annotator(
+require('CSSLoader').loadStyleSheet(name,source,hardpoint,crossOrigin,callback,__annotator(
 function(){
-_logError(ex('CSS timeout [%s] at %s',name,source));
+_logError(require('ex')('CSS timeout [%s] at %s',name,source));
 _errors[source] = true;
-callback();},{'module':'Bootloader','line':138,'column':6}));}}__annotator(_requestResourceIntoHardpoint,{'module':'Bootloader','line':119,'column':0,'name':'_requestResourceIntoHardpoint'});
+callback();},{'module':'Bootloader','line':142,'column':6}));}}__annotator(_requestResourceIntoHardpoint,{'module':'Bootloader','line':123,'column':0,'name':'_requestResourceIntoHardpoint'});
 
 
 
@@ -9279,14 +9613,17 @@ callback();},{'module':'Bootloader','line':138,'column':6}));}}__annotator(_requ
 
 function _unloadResource(name){return __bodyWrapper(this,arguments,function(){
 if(!_resources[name]){
-_logError(ex('Missing unloading resource %s',name));
+_logError(require('ex')('Missing unloading resource %s',name));
 return;}
 
 
 if(_resources[name].type == 'css'){
-CSSLoader.unloadStyleSheet(name);
+require('CSSLoader').unloadStyleSheet(name);
 delete _requested[name];
-_callbackManager.unsatisfyPersistentDependency(name);}},{params:[[name,'string','name']]});}__annotator(_unloadResource,{'module':'Bootloader','line':149,'column':0,'name':'_unloadResource'},{params:['string']});
+_callbackManager.unsatisfyPersistentDependency(name);
+
+_cssCancellers[name].cancel();
+delete _cssCancellers[name];}},{params:[[name,'string','name']]});}__annotator(_unloadResource,{'module':'Bootloader','line':153,'column':0,'name':'_unloadResource'},{params:['string']});
 
 
 
@@ -9307,7 +9644,7 @@ components = objectToArray(components);
 var required_resources=[];
 for(var ii=0;ii < components.length;++ii) {
 if(!components[ii]){
-_logError(ex('Empty component!'));
+_logError(require('ex')('Empty component!'));
 continue;}
 
 
@@ -9323,7 +9660,7 @@ required_resources.push(component_resource_list[jj]);}}else
 
 
 
-Bootloader.loadResources(required_resources,callback);},{params:[[components,'array<string>|string','components'],[callback,'function|number','callback']]});}__annotator(_loadComponents,{'module':'Bootloader','line':166,'column':0,'name':'_loadComponents'},{params:['array<string>|string','function|number']});
+Bootloader.loadResources(required_resources,callback);},{params:[[components,'array<string>|string','components'],[callback,'function|number','callback']]});}__annotator(_loadComponents,{'module':'Bootloader','line':173,'column':0,'name':'_loadComponents'},{params:['array<string>|string','function|number']});
 
 
 
@@ -9340,14 +9677,32 @@ if(typeof resources[ii] == 'string'){
 if(resources[ii] in _resources){
 resolved.push(_resources[resources[ii]]);}else
 {
-_logError(ex('Unable to resolve resource %s.',resources[ii]));}}else
+_logError(require('ex')('Unable to resolve resource %s.',resources[ii]));}}else
 
 {
 resolved.push(resources[ii]);}}
 
 
-return resolved;},{params:[[resources,'array<string>|array<object>','resources']],returns:'array<object>'});}__annotator(_resolveResources,{'module':'Bootloader','line':202,'column':0,'name':'_resolveResources'},{params:['array<string>|array<object>'],returns:'array<object>'});
+return resolved;},{params:[[resources,'array<string>|array<object>','resources']],returns:'array<object>'});}__annotator(_resolveResources,{'module':'Bootloader','line':209,'column':0,'name':'_resolveResources'},{params:['array<string>|array<object>'],returns:'array<object>'});
 
+
+
+
+
+
+
+
+var _onScriptDone=require('TimeSlice').guard(__annotator(function(
+el,ondone,hash,hasError)
+{
+if(ondone){for(var _len=arguments.length,eventArgs=Array(_len > 4?_len - 4:0),_key=4;_key < _len;_key++) {eventArgs[_key - 4] = arguments[_key];}
+ondone.apply(el,eventArgs);}
+
+if(hasError){
+_logError(require('ex')('JS loading error [%s] at %s',hash,el.src));}
+
+Bootloader.done([hash]);},{'module':'Bootloader','line':234,'column':36}),
+'Bootloader _onScriptDone');
 
 
 
@@ -9371,7 +9726,7 @@ if(el.getAttribute('data-permanent')){
 _resources[hash].permanent = _permanent[hash] = true;}
 
 
-CSSLoader.registerLoadedStyleSheet(hash,el);
+require('CSSLoader').registerLoadedStyleSheet(hash,el);
 Bootloader.done([hash]);
 _earlyResources[hash] = true;}}
 
@@ -9388,18 +9743,15 @@ if(window._btldr && window._btldr[hash]){
 
 Bootloader.done([hash]);}else
 {
-
-el.setAttribute('onload',el.getAttribute('onload') +
-";require" + "('Bootloader').done(['" + hash + "']);");
-el.setAttribute('onerror',el.getAttribute('onerror') +
-";require" + "('Bootloader').done(['" + hash + "']);");
+el.onload = _onScriptDone.bind(null,el,el.onload,hash,false);
+el.onerror = _onScriptDone.bind(null,el,el.onerror,hash,true);
 _requested[hash] = true;}}else
 
 {
 
 Bootloader.done([hash]);}
 
-_earlyResources[hash] = true;}}}__annotator(_pickupPageResources,{'module':'Bootloader','line':225,'column':0,'name':'_pickupPageResources'});
+_earlyResources[hash] = true;}}}__annotator(_pickupPageResources,{'module':'Bootloader','line':250,'column':0,'name':'_pickupPageResources'});
 
 
 
@@ -9434,7 +9786,7 @@ var metadata=_componentMap[components[ii]];
 var legacy_component='legacy:' + components[ii];
 if(_componentMap[legacy_component]){
 if(metadata){
-_logError(ex('%s has a conflicting legacy component. ' +
+_logError(require('ex')('%s has a conflicting legacy component. ' +
 'That cannot happen and legacy won btw.',components[ii]));}
 
 components[ii] = legacy_component;
@@ -9442,17 +9794,17 @@ modules.push(legacy_component);
 continue;}
 
 if(!metadata){
-_logError(ex('loadComponents: %s is not in the component map.',
+_logError(require('ex')('loadComponents: %s is not in the component map.',
 components[ii]));}else
 if(metadata.module){
 modules.push(components[ii]);
-_logError(ex('loadComponents: Loading module %s!',components[ii]));}}
+_logError(require('ex')('loadComponents: Loading module %s!',components[ii]));}}
 
 
 
 _loadComponents(
 components,
-modules.length?requireLazy.bind(null,modules,callback):callback);},{params:[[components,'string|array<string>','components'],[callback,'function|number','callback']]});},{'module':'Bootloader','line':298,'column':18},{params:['string|array<string>','function|number']}),
+modules.length?requireLazy.bind(null,modules,callback):callback);},{params:[[components,'string|array<string>','components'],[callback,'function|number','callback']]});},{'module':'Bootloader','line':320,'column':18},{params:['string|array<string>','function|number']}),
 
 
 
@@ -9475,7 +9827,7 @@ var modules=[];
 for(var ii=0;ii < components.length;ii++) {
 var metadata=_componentMap[components[ii]];
 if(!metadata){
-_logError(ex('loadModules: %s is not in the component map.',
+_logError(require('ex')('loadModules: %s is not in the component map.',
 components[ii]));
 
 modules.push(components[ii]);}else
@@ -9490,13 +9842,13 @@ css = false;}}
 
 
 if(!css){
-_logError(ex('loadModules: %s is not a module!',
+_logError(require('ex')('loadModules: %s is not a module!',
 components[ii]));}}}
 
 
 
 
-_loadComponents(components,requireLazy.bind(null,modules,callback));},{params:[[components,'array<string>','components'],[callback,'function|number','callback']]});},{'module':'Bootloader','line':342,'column':15},{params:['array<string>','function|number']}),
+_loadComponents(components,requireLazy.bind(null,modules,callback));},{params:[[components,'array<string>','components'],[callback,'function|number','callback']]});},{'module':'Bootloader','line':364,'column':15},{params:['array<string>','function|number']}),
 
 
 
@@ -9602,7 +9954,7 @@ if(hardpoint !== batching_hardpoint){
 hardpoint.appendChild(batching_hardpoint);}
 
 
-return callbackID;},{params:[[resources,'object|array<string>|array<object>','resources'],[callbackOrCallbackID,'?function|number','callbackOrCallbackID'],[replace,'?boolean','replace'],[tag,'?string','tag']],returns:'?number'});},{'module':'Bootloader','line':384,'column':17},{params:['object|array<string>|array<object>','?function|number','?boolean','?string'],returns:'?number'}),
+return callbackID;},{params:[[resources,'object|array<string>|array<object>','resources'],[callbackOrCallbackID,'?function|number','callbackOrCallbackID'],[replace,'?boolean','replace'],[tag,'?string','tag']],returns:'?number'});},{'module':'Bootloader','line':406,'column':17},{params:['object|array<string>|array<object>','?function|number','?boolean','?string'],returns:'?number'}),
 
 
 
@@ -9616,7 +9968,7 @@ return callbackID;},{params:[[resources,'object|array<string>|array<object>','re
 
 requestJSResource:__annotator(function(source){return __bodyWrapper(this,arguments,function(){
 var hardpoint=_getHardpoint();
-_requestResourceIntoHardpoint('js',source,null,hardpoint);},{params:[[source,'string','source']]});},{'module':'Bootloader','line':486,'column':21},{params:['string']}),
+_requestResourceIntoHardpoint('js',source,null,hardpoint);},{params:[[source,'string','source']]});},{'module':'Bootloader','line':508,'column':21},{params:['string']}),
 
 
 
@@ -9654,15 +10006,24 @@ window.CavalryLogger.done_js(names);}
 
 
 
-for(var ii=0;ii < names.length;++ii) {
-var loaded_resource=names[ii];
+for(var _iterator=names,_isArray=Array.isArray(_iterator),_i=0,_iterator=_isArray?_iterator:_iterator[typeof Symbol === 'function'?Symbol.iterator:'@@iterator']();;) {var _ref;if(_isArray){if(_i >= _iterator.length)break;_ref = _iterator[_i++];}else {_i = _iterator.next();if(_i.done)break;_ref = _i.value;}var name=_ref;
 
 
 
+if(name){
+_requested[name] = true;
+_callbackManager.satisfyPersistentDependency(name);
 
-if(loaded_resource){
-_requested[loaded_resource] = true;
-_callbackManager.satisfyPersistentDependency(loaded_resource);}}},{params:[[names,'array<string>','names'],[url,'?string','url']]});},{'module':'Bootloader','line':502,'column':8},{params:['array<string>','?string']}),
+if(_resources[name] && _resources[name].type == 'css' && !_cssCancellers[name]){
+_cssCancellers[name] = define(
+require('CSSLoader').moduleName(name),
+[],
+'x',
+0x2,
+null,
+1);}}}},{params:[[names,'array<string>','names'],[url,'?string','url']]});},{'module':'Bootloader','line':524,'column':8},{params:['array<string>','?string']}),
+
+
 
 
 
@@ -9699,7 +10060,7 @@ _bootloadEnabled = true;
 for(var ii=0;ii < _waitForBootloadEnabled.length;ii++) {
 _loadComponents.apply(null,_waitForBootloadEnabled[ii]);}
 
-_waitForBootloadEnabled = [];}},{params:[[map,'object','map']]});},{'module':'Bootloader','line':547,'column':18},{params:['object']}),
+_waitForBootloadEnabled = [];}},{params:[[map,'object','map']]});},{'module':'Bootloader','line':578,'column':18},{params:['object']}),
 
 
 
@@ -9713,7 +10074,7 @@ setResourceMap:__annotator(function(resources){return __bodyWrapper(this,argumen
 for(var id in resources) {
 if(!_resources[id]){
 resources[id].name = id;
-_resources[id] = resources[id];}}},{params:[[resources,'object','resources']]});},{'module':'Bootloader','line':581,'column':18},{params:['object']}),
+_resources[id] = resources[id];}}},{params:[[resources,'object','resources']]});},{'module':'Bootloader','line':612,'column':18},{params:['object']}),
 
 
 
@@ -9729,7 +10090,7 @@ var url=_resources[id].src;
 resources[url] = id in _requested && !(url in _errors) &&
 !(url in _loading);}
 
-return resources;},{'module':'Bootloader','line':594,'column':19}),
+return resources;},{'module':'Bootloader','line':625,'column':19}),
 
 
 
@@ -9748,7 +10109,7 @@ if(!resource.permanent){
 _earlyResources[resource.name] = true;}}
 
 
-Bootloader.loadResources(resolve_map);},{params:[[resources,'object','resources']]});},{'module':'Bootloader','line':609,'column':22},{params:['object']}),
+Bootloader.loadResources(resolve_map);},{params:[[resources,'object','resources']]});},{'module':'Bootloader','line':640,'column':22},{params:['object']}),
 
 
 
@@ -9761,28 +10122,28 @@ var nowTime=Date.now();
 for(var url in _loading) {
 results[url] = nowTime - _loading[url];}
 
-return results;},{'module':'Bootloader','line':627,'column':18}),
+return results;},{'module':'Bootloader','line':658,'column':18}),
 
 
 
 
 
 getLoadedUrlTimes:__annotator(function(){
-return _loaded;},{'module':'Bootloader','line':639,'column':21}),
+return _loaded;},{'module':'Bootloader','line':670,'column':21}),
 
 
 
 
 
 getErrorUrls:__annotator(function(){
-return Object.keys(_errors);},{'module':'Bootloader','line':646,'column':16}),
+return Object.keys(_errors);},{'module':'Bootloader','line':677,'column':16}),
 
 
 
 
 
 getStartTime:__annotator(function(){
-return _startTime;},{'module':'Bootloader','line':653,'column':16}),
+return _startTime;},{'module':'Bootloader','line':684,'column':16}),
 
 
 
@@ -9856,7 +10217,7 @@ module.exports = JSCC;},{'module':'JSCC','line':0,'column':0,'name':'$module_JSC
  *
  * @providesModule PageletSet
  * @preventMunge
- */__d('PageletSet',['Arbiter'],__annotator(function $module_PageletSet(global,require,requireDynamic,requireLazy,module,exports,Arbiter){if(require.__markCompiled)require.__markCompiled();
+ */__d('PageletSet',['Arbiter'],__annotator(function $module_PageletSet(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -9916,7 +10277,7 @@ this._root = null;
 this._destructors = [];
 
 this.addDestructor(__annotator(function broadcastDemise(){
-Arbiter.inform('pagelet/destroy',{id:this.id,root:this._root});},{'module':'PageletSet','line':65,'column':23,'name':'broadcastDemise'}).
+require('Arbiter').inform('pagelet/destroy',{id:this.id,root:this._root});},{'module':'PageletSet','line':65,'column':23,'name':'broadcastDemise'}).
 bind(this));}__annotator(Pagelet,{'module':'PageletSet','line':60,'column':2,'name':'Pagelet'});Pagelet.prototype.
 
 
@@ -9980,426 +10341,6 @@ this._root.removeChild(this._root.firstChild);}}},{'module':'PageletSet','line':
 
 
 module.exports = PageletSet;},{'module':'PageletSet','line':0,'column':0,'name':'$module_PageletSet'}),null);
-/** Path: html/js/downstream/functional/forEachObject.js */
-/**
- * @generated SignedSource<<63d238473f2f7d1918fccf00f9ca824b>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule forEachObject
- * @typechecks
- */__d('forEachObject',[],__annotator(function $module_forEachObject(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
-
-'use strict';
-
-var hasOwnProperty=Object.prototype.hasOwnProperty;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function forEachObject(object,callback,context){return __bodyWrapper(this,arguments,function(){
-for(var name in object) {
-if(hasOwnProperty.call(object,name)){
-callback.call(context,object[name],name,object);}}},{params:[[object,'?object','object'],[callback,'function','callback']]});}__annotator(forEachObject,{'module':'forEachObject','line':43,'column':0,'name':'forEachObject'},{params:['?object','function']});
-
-
-
-
-module.exports = forEachObject;},{'module':'forEachObject','line':0,'column':0,'name':'$module_forEachObject'}),null);
-/** Path: html/js/downstream/page/TimerStorage.js */
-/**
- * @generated SignedSource<<6d120adb91dd9e5c4edfb129386f1c2b>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule TimerStorage
- */__d('TimerStorage',['forEachObject'],__annotator(function $module_TimerStorage(global,require,requireDynamic,requireLazy,module,exports,forEachObject){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-var _storageNames={
-TIMEOUT:'TIMEOUT',
-INTERVAL:'INTERVAL',
-IMMEDIATE:'IMMEDIATE',
-ANIMATION_FRAME:'ANIMATION_FRAME'};
-
-
-var _storages={};
-
-forEachObject(_storageNames,__annotator(function(_,name){return _storages[name] = [];},{'module':'TimerStorage','line':35,'column':29}));
-
-var TimerStorage={
-push:__annotator(function(name,id){
-_storages[name].push(id);},{'module':'TimerStorage','line':38,'column':6}),
-
-
-popAll:__annotator(function(name,callback){
-_storages[name].forEach(callback);
-_storages[name].length = 0;},{'module':'TimerStorage','line':42,'column':8})};
-
-
-
-Object.assign(TimerStorage,_storageNames);
-
-module.exports = TimerStorage;},{'module':'TimerStorage','line':0,'column':0,'name':'$module_TimerStorage'}),null);
-/** Path: html/js/downstream/core/nativeRequestAnimationFrame.js */
-/**
- * @generated SignedSource<<97623fb6b843426f368ddf3ff905a4d0>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule nativeRequestAnimationFrame
- */__d("nativeRequestAnimationFrame",[],__annotator(function $module_nativeRequestAnimationFrame(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
-
-var nativeRequestAnimationFrame=
-global.requestAnimationFrame ||
-global.webkitRequestAnimationFrame ||
-global.mozRequestAnimationFrame ||
-global.oRequestAnimationFrame ||
-global.msRequestAnimationFrame;
-
-module.exports = nativeRequestAnimationFrame;},{"module":"nativeRequestAnimationFrame","line":0,"column":0,"name":"$module_nativeRequestAnimationFrame"}),null);
-/** Path: html/js/downstream/core/requestAnimationFramePolyfill.js */
-/**
- * @generated SignedSource<<22e8e5a7aa45779803b7027e1c116a61>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule requestAnimationFramePolyfill
- */__d('requestAnimationFramePolyfill',['emptyFunction','nativeRequestAnimationFrame'],__annotator(function $module_requestAnimationFramePolyfill(global,require,requireDynamic,requireLazy,module,exports,emptyFunction,nativeRequestAnimationFrame){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-var lastTime=0;
-
-
-
-
-
-var requestAnimationFrame=
-nativeRequestAnimationFrame || __annotator(
-function(callback){
-var currTime=Date.now();
-var timeDelay=Math.max(0,16 - (currTime - lastTime));
-lastTime = currTime + timeDelay;
-return global.setTimeout(__annotator(function(){
-callback(Date.now());},{'module':'requestAnimationFramePolyfill','line':35,'column':29}),
-timeDelay);},{'module':'requestAnimationFramePolyfill','line':31,'column':2});
-
-
-
-requestAnimationFrame(emptyFunction);
-
-module.exports = requestAnimationFrame;},{'module':'requestAnimationFramePolyfill','line':0,'column':0,'name':'$module_requestAnimationFramePolyfill'}),null);
-/** Path: html/js/downstream/page/requestAnimationFrameAcrossTransitions.js */
-/**
- * @generated SignedSource<<84964d909d9f9bf6c23eec24d2df46f7>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule requestAnimationFrameAcrossTransitions
- */__d('requestAnimationFrameAcrossTransitions',['TimeSlice','requestAnimationFramePolyfill'],__annotator(function $module_requestAnimationFrameAcrossTransitions(global,require,requireDynamic,requireLazy,module,exports,TimeSlice,requestAnimationFramePolyfill){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-
-
-module.exports = __annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}
-args[0] = TimeSlice.guard(args[0],'requestAnimationFrame');
-return requestAnimationFramePolyfill.apply(global,args);},{'module':'requestAnimationFrameAcrossTransitions','line':28,'column':18});},{'module':'requestAnimationFrameAcrossTransitions','line':0,'column':0,'name':'$module_requestAnimationFrameAcrossTransitions'}),null);
-/** Path: html/js/downstream/page/requestAnimationFrame.js */
-/**
- * @generated SignedSource<<40742e37f4cec92e88cad7520daae8be>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule requestAnimationFrame
- */__d('requestAnimationFrame',['TimerStorage','requestAnimationFrameAcrossTransitions'],__annotator(function $module_requestAnimationFrame(global,require,requireDynamic,requireLazy,module,exports,TimerStorage,requestAnimationFrameAcrossTransitions){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-
-
-module.exports = __annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}
-var id=requestAnimationFrameAcrossTransitions.apply(global,args);
-TimerStorage.push(TimerStorage.ANIMATION_FRAME,id);
-return id;},{'module':'requestAnimationFrame','line':28,'column':17});},{'module':'requestAnimationFrame','line':0,'column':0,'name':'$module_requestAnimationFrame'}),null);
-/** Path: html/js/modules/ResourceLazyLoader.js */
-/**
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule ResourceLazyLoader
- * @has-side-effects
- */__d('ResourceLazyLoader',['requestAnimationFrame'],__annotator(function $module_ResourceLazyLoader(global,require,requireDynamic,requireLazy,module,exports,requestAnimationFrame){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-var doc=document.documentElement;
-
-var PIXEL=
-'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
-var ONLOAD='onload';
-var ONLOAD_FN='__RLZ';
-var DATA_KEY='data-lazy-src';
-var ONLOAD_KEY=DATA_KEY + '-' + ONLOAD;
-
-var canLazyLoad=!!(doc && doc.getBoundingClientRect);
-var imagesQueued={};
-var imageState={
-SHOWN:0,
-HIDDEN:1};
-
-
-var integrateWithReact=false;
-var stopLazyLoading=false;
-
-function lazifyResourcesInMarkup(markup){
-if(canLazyLoad){
-var div=document.createElement('div');
-div.innerHTML = markup;
-var resources=[].slice.call(div.getElementsByTagName('img'));
-for(var i=0,l=resources.length;i < l;i++) {
-var resource=resources[i];
-var src=resource.getAttribute('src');
-if(src && !/^data:image\//.test(src)){
-var onload=resource.getAttribute(ONLOAD);
-if(onload){
-resource.setAttribute(ONLOAD_KEY,onload);}
-
-resource.setAttribute(ONLOAD,ONLOAD_FN + '(this);');
-resource.setAttribute(DATA_KEY,src);
-resource.setAttribute('src',PIXEL);}}
-
-
-return div.innerHTML;}
-
-return markup;}__annotator(lazifyResourcesInMarkup,{'module':'ResourceLazyLoader','line':30,'column':0,'name':'lazifyResourcesInMarkup'});
-
-
-function showNode(node){
-var src;
-if(node.lazyLoad){
-node.lazyLoad();
-src = node.getSrc();}else
-{
-var onload=node.getAttribute(ONLOAD_KEY);
-node.setAttribute('onload',onload);
-src = node.getAttribute(DATA_KEY);
-node.setAttribute('src',src);
-node.removeAttribute(DATA_KEY);
-node.removeAttribute(ONLOAD_KEY);}
-
-imagesQueued[src] = imageState.SHOWN;}__annotator(showNode,{'module':'ResourceLazyLoader','line':53,'column':0,'name':'showNode'});
-
-
-function isInViewport(node){
-if(doc.contains(node)){
-var rect=node.getBoundingClientRect();
-var top=rect.top - doc.clientTop;
-return window.innerHeight > top && rect.bottom > 0;}
-
-return false;}__annotator(isInViewport,{'module':'ResourceLazyLoader','line':69,'column':0,'name':'isInViewport'});
-
-
-var requestedCheckOnLoadNodes=[];
-var scheduledCheckRecentlyLoadedNodes;
-function onLoad(node){
-requestedCheckOnLoadNodes.push(node);
-if(!scheduledCheckRecentlyLoadedNodes){
-scheduledCheckRecentlyLoadedNodes = true;
-requestAnimationFrame(checkRecentlyLoadedNodes);}}__annotator(onLoad,{'module':'ResourceLazyLoader','line':80,'column':0,'name':'onLoad'});
-
-
-
-var nodesToLazyLoad=[];
-var listening;
-function checkRecentlyLoadedNodes(){
-var nodesInViewportCheck=requestedCheckOnLoadNodes.map(isInViewport);
-for(var i=0,l=requestedCheckOnLoadNodes.length;i < l;i++) {
-var node=requestedCheckOnLoadNodes[i];
-if(nodesInViewportCheck[i]){
-showNode(node);}else
-{
-nodesToLazyLoad.push(node);
-if(!listening){
-listening = true;
-window.addEventListener('scroll',throttledCheckForVisibleNodes);
-doc.addEventListener('resize',throttledCheckForVisibleNodes);}
-
-var src;
-if(node.getSrc){
-src = node.getSrc();}else
-{
-src = node.getAttribute(DATA_KEY);}
-
-if(imagesQueued[src] !== imageState.SHOWN){
-imagesQueued[src] = imageState.HIDDEN;}}}
-
-
-
-requestedCheckOnLoadNodes = [];
-scheduledCheckRecentlyLoadedNodes = false;}__annotator(checkRecentlyLoadedNodes,{'module':'ResourceLazyLoader','line':90,'column':0,'name':'checkRecentlyLoadedNodes'});
-
-
-function checkForVisibleNodes(loadAll){
-if(loadAll){
-nodesToLazyLoad.forEach(showNode);
-nodesToLazyLoad = [];}else
-{
-var nodesInViewportCheck=nodesToLazyLoad.map(isInViewport);
-for(var i=0,j=0;i < nodesToLazyLoad.length;i++) {
-var node=nodesToLazyLoad[i - j];
-if(nodesInViewportCheck[i]){
-nodesToLazyLoad.splice(i - j,1);
-j += 1;
-showNode(node);}}}
-
-
-
-if(!nodesToLazyLoad.length){
-listening = false;
-window.removeEventListener('scroll',throttledCheckForVisibleNodes);
-doc.removeEventListener('resize',throttledCheckForVisibleNodes);}}__annotator(checkForVisibleNodes,{'module':'ResourceLazyLoader','line':118,'column':0,'name':'checkForVisibleNodes'});
-
-
-
-var lastTime=0;
-var hasTimeout;
-function throttledCheckForVisibleNodes(){
-var now=Date.now();
-var diff=now - lastTime;
-if(diff > 200){
-lastTime = now;
-clearTimeout(hasTimeout);
-hasTimeout = false;
-requestAnimationFrame(checkForVisibleNodes.bind(null,false));}else
-if(!hasTimeout){
-hasTimeout = setTimeout(throttledCheckForVisibleNodes,diff);}}__annotator(throttledCheckForVisibleNodes,{'module':'ResourceLazyLoader','line':142,'column':0,'name':'throttledCheckForVisibleNodes'});
-
-
-
-global[ONLOAD_FN] = onLoad;
-
-module.exports = {
-lazifyResourcesInMarkup:lazifyResourcesInMarkup,
-loadAllResourcesAndStopLazyLoading:__annotator(function(){
-stopLazyLoading = true;
-requestAnimationFrame(checkForVisibleNodes.bind(null,true));},{'module':'ResourceLazyLoader','line':159,'column':36}),
-
-getNotLoadedCount:__annotator(function(){
-var notLoadedCount=0;
-for(var key in imagesQueued) {
-notLoadedCount += imagesQueued[key];}
-
-return notLoadedCount;},{'module':'ResourceLazyLoader','line':163,'column':19}),
-
-integrateWithReact:__annotator(function(){
-integrateWithReact = true;},{'module':'ResourceLazyLoader','line':170,'column':20}),
-
-
-_isReactIntegrated:__annotator(function(){
-return integrateWithReact;},{'module':'ResourceLazyLoader','line':174,'column':20}),
-
-_didStopLazyLoading:__annotator(function(){
-return stopLazyLoading;},{'module':'ResourceLazyLoader','line':177,'column':21}),
-
-_onLoad:onLoad,
-PIXEL:PIXEL};},{'module':'ResourceLazyLoader','line':0,'column':0,'name':'$module_ResourceLazyLoader'}),6);
 /** Path: html/js/downstream/core/getMarkupWrap.js */
 /**
  * @generated SignedSource<<dfc29a94fb2a115212e3e76a01f56331>>
@@ -10418,7 +10359,7 @@ PIXEL:PIXEL};},{'module':'ResourceLazyLoader','line':0,'column':0,'name':'$modul
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule getMarkupWrap
- */__d('getMarkupWrap',['ExecutionEnvironment','invariant'],__annotator(function $module_getMarkupWrap(global,require,requireDynamic,requireLazy,module,exports,ExecutionEnvironment,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('getMarkupWrap',['invariant','ExecutionEnvironment'],__annotator(function $module_getMarkupWrap(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -10430,7 +10371,7 @@ PIXEL:PIXEL};},{'module':'ResourceLazyLoader','line':0,'column':0,'name':'$modul
 
 
 var dummyNode=
-ExecutionEnvironment.canUseDOM?document.createElement('div'):null;
+require('ExecutionEnvironment').canUseDOM?document.createElement('div'):null;
 
 
 
@@ -10542,7 +10483,7 @@ module.exports = getMarkupWrap;},{'module':'getMarkupWrap','line':0,'column':0,'
  *
  * @providesModule createNodesFromMarkup
  * @typechecks
- */__d('createNodesFromMarkup',['ExecutionEnvironment','createArrayFromMixed','getMarkupWrap','invariant'],__annotator(function $module_createNodesFromMarkup(global,require,requireDynamic,requireLazy,module,exports,ExecutionEnvironment,createArrayFromMixed,getMarkupWrap,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('createNodesFromMarkup',['invariant','ExecutionEnvironment','createArrayFromMixed','getMarkupWrap'],__annotator(function $module_createNodesFromMarkup(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -10556,7 +10497,7 @@ module.exports = getMarkupWrap;},{'module':'getMarkupWrap','line':0,'column':0,'
 
 
 var dummyNode=
-ExecutionEnvironment.canUseDOM?document.createElement('div'):null;
+require('ExecutionEnvironment').canUseDOM?document.createElement('div'):null;
 
 
 
@@ -10589,7 +10530,7 @@ var node=dummyNode;
 !!!dummyNode?invariant(0,'createNodesFromMarkup dummy not initialized'):undefined;
 var nodeName=getNodeName(markup);
 
-var wrap=nodeName && getMarkupWrap(nodeName);
+var wrap=nodeName && require('getMarkupWrap')(nodeName);
 if(wrap){
 node.innerHTML = wrap[1] + markup + wrap[2];
 
@@ -10607,10 +10548,10 @@ if(scripts.length){
 handleScript?invariant(0,
 'createNodesFromMarkup(...): Unexpected <script> element rendered.'):undefined;
 
-createArrayFromMixed(scripts).forEach(handleScript);}
+require('createArrayFromMixed')(scripts).forEach(handleScript);}
 
 
-var nodes=createArrayFromMixed(node.childNodes);
+var nodes=require('createArrayFromMixed')(node.childNodes);
 while(node.lastChild) {
 node.removeChild(node.lastChild);}
 
@@ -10687,7 +10628,7 @@ module.exports = evalGlobal;},{'module':'evalGlobal','line':0,'column':0,'name':
  *
  * @providesModule HTML
  * @preventMunge
- */__d('HTML',['Bootloader','createNodesFromMarkup','emptyFunction','evalGlobal','invariant'],__annotator(function $module_HTML(global,require,requireDynamic,requireLazy,module,exports,Bootloader,createNodesFromMarkup,emptyFunction,evalGlobal,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('HTML',['invariant','Bootloader','createNodesFromMarkup','emptyFunction','evalGlobal'],__annotator(function $module_HTML(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -10762,7 +10703,7 @@ this._markup = markup || '';
 this._defer = false;
 this._extraAction = '';
 this._nodes = null;
-this._inlineJS = emptyFunction;
+this._inlineJS = require('emptyFunction');
 this._rootNode = null;}__annotator(HTML,{'module':'HTML','line':65,'column':2,'name':'HTML'});HTML.prototype.
 
 
@@ -10844,7 +10785,7 @@ getAction = __annotator(function(){'use strict';
 this._fillCache();
 var evaluateJS=__annotator(function(){
 this._inlineJS();
-evalGlobal(this._extraAction);},{'module':'HTML','line':174,'column':21}).bind(this);
+require('evalGlobal')(this._extraAction);},{'module':'HTML','line':174,'column':21}).bind(this);
 
 return this._defer?__annotator(
 function(){setTimeout(evaluateJS,0);},{'module':'HTML','line':179,'column':6}):
@@ -10876,13 +10817,13 @@ front + '></' + tag + '>';},{'module':'HTML','line':199,'column':6}));
 
 var callbacks=null;
 
-var nodes=createNodesFromMarkup(markup,__annotator(function(scriptNode){
+var nodes=require('createNodesFromMarkup')(markup,__annotator(function(scriptNode){
 
 callbacks = callbacks || [];
 callbacks.push(
 scriptNode.src?
-Bootloader.requestJSResource.bind(Bootloader,scriptNode.src):
-evalGlobal.bind(null,scriptNode.innerHTML));
+require('Bootloader').requestJSResource.bind(require('Bootloader'),scriptNode.src):
+require('evalGlobal').bind(null,scriptNode.innerHTML));
 
 scriptNode.parentNode.removeChild(scriptNode);},{'module':'HTML','line':208,'column':46}));
 
@@ -10954,7 +10895,7 @@ return stub && stub.__html !== undefined?new HTML(stub.__html):stub;},{'module':
 module.exports = HTML;},{'module':'HTML','line':0,'column':0,'name':'$module_HTML'}),null);
 /** Path: html/js/downstream/serverjs/ServerJS.js */
 /**
- * @generated SignedSource<<1cc444a98921c3e60abababbd8e74edf>>
+ * @generated SignedSource<<5c17d81a8bc2d2962294677fa16c0eab>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -10970,7 +10911,7 @@ module.exports = HTML;},{'module':'HTML','line':0,'column':0,'name':'$module_HTM
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule ServerJS
- */__d('ServerJS',['ErrorUtils','ServerJSDefine','ex','ge','replaceTransportMarkers'],__annotator(function $module_ServerJS(global,require,requireDynamic,requireLazy,module,exports,ErrorUtils,ServerJSDefine,ex,ge,replaceTransportMarkers){if(require.__markCompiled)require.__markCompiled();
+ */__d('ServerJS',['ErrorUtils','ServerJSDefine','ex','ge','replaceTransportMarkers'],__annotator(function $module_ServerJS(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -10978,6 +10919,13 @@ module.exports = HTML;},{'module':'HTML','line':0,'column':0,'name':'$module_HTM
 
 
 
+
+
+
+
+
+var REQUIRE_WHEN_READY=0x1;
+var USED_AS_TRANSPORT=0x2;
 
 var _counter=0;
 
@@ -10991,7 +10939,7 @@ var _counter=0;
 function ServerJS(){'use strict';
 this.$ServerJS_moduleMap = {};
 this.$ServerJS_relativeTo = null;
-this.$ServerJS_moduleIDsToCleanup = {};}__annotator(ServerJS,{'module':'ServerJS','line':36,'column':2,'name':'ServerJS'});ServerJS.prototype.
+this.$ServerJS_moduleIDsToCleanup = {};}__annotator(ServerJS,{'module':'ServerJS','line':43,'column':2,'name':'ServerJS'});ServerJS.prototype.
 
 
 
@@ -11036,7 +10984,7 @@ return {
 cancel:__annotator(function(){
 for(var ii=0;ii < cancelers.length;ii++) {
 if(cancelers[ii]){
-cancelers[ii].cancel();}}},{'module':'ServerJS','line':81,'column':12})};},{'module':'ServerJS','line':62,'column':8});ServerJS.prototype.
+cancelers[ii].cancel();}}},{'module':'ServerJS','line':88,'column':12})};},{'module':'ServerJS','line':69,'column':8});ServerJS.prototype.
 
 
 
@@ -11060,7 +11008,7 @@ _addModuleName.bind(null,this.$ServerJS_moduleMap,2));
 (data.elements || []).forEach(
 _addModuleName.bind(null,this.$ServerJS_moduleMap,2));
 
-return this.handle(data);},{'module':'ServerJS','line':98,'column':15});ServerJS.prototype.
+return this.handle(data);},{'module':'ServerJS','line':105,'column':15});ServerJS.prototype.
 
 
 
@@ -11070,7 +11018,7 @@ return this.handle(data);},{'module':'ServerJS','line':98,'column':15});ServerJS
 
 setRelativeTo = __annotator(function(relativeElem){'use strict';
 this.$ServerJS_relativeTo = relativeElem;
-return this;},{'module':'ServerJS','line':116,'column':15});ServerJS.prototype.
+return this;},{'module':'ServerJS','line':123,'column':15});ServerJS.prototype.
 
 
 
@@ -11099,23 +11047,27 @@ delete this.$ServerJS_moduleIDsToCleanup[id];
 var fnCall=method?
 'JS::call("' + module + '", "' + method + '", ...)':
 'JS::requireModule("' + module + '")';
-var err=fnCall + ' did not fire because it has missing dependencies.';
+var err=require('ex')(
+'%s did not fire because it has missing dependencies.\n%s',
+fnCall,
+require.__debug.debugUnresolvedDependencies([module]));
+
 if(__DEV__){
-console.error(err + ' See http://fburl.com/jsdefine');
+console.error(err + '\nSee http://fburl.com/jsdefine');
 
 
 require.call(null,id);}
 
-throw new Error(err);}__annotator(thrower,{'module':'ServerJS','line':137,'column':4,'name':'thrower'});
+throw new Error(err);}__annotator(thrower,{'module':'ServerJS','line':144,'column':4,'name':'thrower'});
 
 
 for(var id in this.$ServerJS_moduleIDsToCleanup) {
-ErrorUtils.applyWithGuard(
+require('ErrorUtils').applyWithGuard(
 thrower,
 this,
 [id],
 null,
-'ServerJS:cleanup' + ' id: ' + id);}},{'module':'ServerJS','line':128,'column':9});ServerJS.prototype.
+'ServerJS:cleanup' + ' id: ' + id);}},{'module':'ServerJS','line':135,'column':9});ServerJS.prototype.
 
 
 
@@ -11125,12 +11077,12 @@ null,
 
 
 $ServerJS_handleDefine = __annotator(function(moduleName,deps,data,index){'use strict';
-return ErrorUtils.applyWithGuard(
-ServerJSDefine.handleDefine,
-ServerJSDefine,
+return require('ErrorUtils').applyWithGuard(
+require('ServerJSDefine').handleDefine,require('ServerJSDefine'),
+
 [moduleName,deps,data,index,this.$ServerJS_relativeTo],
 null,
-'JS::define');},{'module':'ServerJS','line':172,'column':15});ServerJS.prototype.
+'JS::define');},{'module':'ServerJS','line':183,'column':15});ServerJS.prototype.
 
 
 
@@ -11146,39 +11098,57 @@ null,
 
 
 
-$ServerJS_handleRequire = __annotator(function(moduleName,method,deps,args){'use strict';
-return ErrorUtils.applyWithGuard(
+$ServerJS_handleRequire = __annotator(function(moduleName,method,deps,args,cssDeps){'use strict';
+return require('ErrorUtils').applyWithGuard(
 this.$ServerJS_handleRequireUnguarded,
 this,
-[moduleName,method,deps,args],
+[moduleName,method,deps,args,cssDeps],
 null,
-method?'JS::call':'JS::requireModule');},{'module':'ServerJS','line':194,'column':16});ServerJS.prototype.
+method?'JS::call':'JS::requireModule');},{'module':'ServerJS','line':205,'column':16});ServerJS.prototype.
 
 
 
-$ServerJS_handleRequireUnguarded = __annotator(function(moduleName,method,deps,args){'use strict';
-var modules=[moduleName].concat(deps || []);
+$ServerJS_handleRequireUnguarded = __annotator(function(moduleName,method,deps,args,cssDeps){'use strict';
+
+
+
+
+if(typeof method == 'object'){
+cssDeps = method;
+method = undefined;}
+
+var modules=[moduleName].concat(deps || []).concat(cssDeps || []);
 var id;
+
 if(method){
 id = '__call__' + moduleName + '.' + method;}else
 {
 id = '__requireModule__' + moduleName;}
 
-id += '__' + (_counter++);
+id += '__' + _counter++;
 
 
 
 this.$ServerJS_moduleIDsToCleanup[id] = [moduleName,method];
 
-var tempFactory=ErrorUtils.guard(__annotator(function(module){
+var tempFactory=require('ErrorUtils').guard(__annotator(function ServerJSHandleRequire(module){
+
+
+
+
+
+
+
+var module=require.call(null,moduleName);
+
 
 
 delete this.$ServerJS_moduleIDsToCleanup[id];
 
-args && replaceTransportMarkers(this.$ServerJS_relativeTo,args);
+args && require('replaceTransportMarkers')(this.$ServerJS_relativeTo,args);
 if(method){
 if(!module[method]){
-throw new TypeError(ex(
+throw new TypeError(require('ex')(
 'Module %s has no method "%s"',
 moduleName,
 method));}
@@ -11189,20 +11159,35 @@ module[method].apply(module,args || []);
 
 tempFactory.__SMmeta = module[method].__SMmeta || {};
 tempFactory.__SMmeta.module = tempFactory.__SMmeta.module || moduleName;
-tempFactory.__SMmeta.name = tempFactory.__SMmeta.name || method;}},{'module':'ServerJS','line':218,'column':39}).bind(this),
+tempFactory.__SMmeta.name = tempFactory.__SMmeta.name || method;}},{'module':'ServerJS','line':238,'column':39,'name':'ServerJSHandleRequire'}).
 
-method?
+bind(this),method?
 "JS::call('" + moduleName + "', '" + method + "', ...)":
 "JS::requireModule('" + moduleName + "')");
+
+
+if(__DEV__){
+if(tempFactory.length > 1){
+throw new Error(
+'The module factory length is greater than 1 which will cause an ' +
+'extra require of its dependencies. It should be 0 but it can be 1 ' +
+'because static modules never get undefined but for everything ' +
+'else this will break the reference counting.');}}
+
+
+
+
+
+
 
 
 return define(
 id,
 modules,
 tempFactory,
-1,
+REQUIRE_WHEN_READY | USED_AS_TRANSPORT,
 this,
-1);},{'module':'ServerJS','line':204,'column':25});ServerJS.prototype.
+1);},{'module':'ServerJS','line':215,'column':25});ServerJS.prototype.
 
 
 
@@ -11224,23 +11209,30 @@ this,
 
 
 $ServerJS_handleInstance = __annotator(function(moduleName,deps,args,refCount){'use strict';
-return ErrorUtils.applyWithGuard(
+return require('ErrorUtils').applyWithGuard(
 this.$ServerJS_handleInstanceUnguarded,
 this,
 [moduleName,deps,args,refCount],
 null,
-'JS::instance');},{'module':'ServerJS','line':271,'column':17});ServerJS.prototype.
+'JS::instance');},{'module':'ServerJS','line':315,'column':17});ServerJS.prototype.
 
 
 
 $ServerJS_handleInstanceUnguarded = __annotator(function(moduleName,deps,args,refCount){'use strict';
 var constructor=null;
 if(deps){
-constructor = __annotator(function(dep){
+constructor = __annotator(function ServerJSHandleInstance(){
+
+
+
+
+
+var dep=require.call(null,deps[0]);
+
 if(__DEV__){
 var type=Object.prototype.toString.call(dep);
 if(type !== "[object Function]"){
-throw new Error(ex(
+throw new Error(require('ex')(
 '%s does not export a function (got %s)',
 deps[0],
 type));}}
@@ -11248,13 +11240,29 @@ type));}}
 
 
 
-replaceTransportMarkers(this.$ServerJS_relativeTo,args);
+require('replaceTransportMarkers')(this.$ServerJS_relativeTo,args);
 var instance=Object.create(dep.prototype);
 dep.apply(instance,args);
-return instance;},{'module':'ServerJS','line':284,'column':20}).bind(this);}
+return instance;},{'module':'ServerJS','line':328,'column':20,'name':'ServerJSHandleInstance'}).
+bind(this);}
 
 
-define(moduleName,deps,constructor,0,null,refCount);},{'module':'ServerJS','line':281,'column':26});ServerJS.prototype.
+if(__DEV__){
+if(constructor.length > 1){
+throw new Error(
+'The module factory length is greater than 1 which will cause an ' +
+'extra require of its dependencies. It should be 0 but it can be 1 ' +
+'because static modules never get undefined but for everything ' +
+'else this will break the reference counting.');}}
+
+
+
+
+
+
+
+
+define(moduleName,deps,constructor,USED_AS_TRANSPORT,null,refCount);},{'module':'ServerJS','line':325,'column':26});ServerJS.prototype.
 
 
 
@@ -11267,19 +11275,19 @@ define(moduleName,deps,constructor,0,null,refCount);},{'module':'ServerJS','line
 
 
 $ServerJS_handleMarkup = __annotator(function(moduleName,markup,refCount){'use strict';
-return ErrorUtils.applyWithGuard(
+return require('ErrorUtils').applyWithGuard(
 this.$ServerJS_handleMarkupUnguarded,
 this,
 [moduleName,markup,refCount],
 null,
-'JS::markup');},{'module':'ServerJS','line':314,'column':15});ServerJS.prototype.
+'JS::markup');},{'module':'ServerJS','line':381,'column':15});ServerJS.prototype.
 
 
 
 $ServerJS_handleMarkupUnguarded = __annotator(function(moduleName,markup,refCount){'use strict';
-define(moduleName,['HTML'],__annotator(function(HTML){
-return HTML.replaceJSONWrapper(markup).getRootNode();},{'module':'ServerJS','line':325,'column':33}),
-0,null,refCount);},{'module':'ServerJS','line':324,'column':24});ServerJS.prototype.
+define(moduleName,['HTML'],__annotator(function ServerJSMarkupModule(HTML){
+return HTML.replaceJSONWrapper(markup).getRootNode();},{'module':'ServerJS','line':392,'column':33,'name':'ServerJSMarkupModule'}),
+0,null,refCount);},{'module':'ServerJS','line':391,'column':24});ServerJS.prototype.
 
 
 
@@ -11289,12 +11297,12 @@ return HTML.replaceJSONWrapper(markup).getRootNode();},{'module':'ServerJS','lin
 
 
 $ServerJS_handleElement = __annotator(function(moduleName,elementID,refCount,markupDependency){'use strict';
-return ErrorUtils.applyWithGuard(
+return require('ErrorUtils').applyWithGuard(
 this.$ServerJS_handleElementUnguarded,
 this,
 [moduleName,elementID,refCount,markupDependency],
 null,
-'JS::element');},{'module':'ServerJS','line':336,'column':16});ServerJS.prototype.
+'JS::element');},{'module':'ServerJS','line':403,'column':16});ServerJS.prototype.
 
 
 
@@ -11329,29 +11337,29 @@ var special=0;
 
 if(markupDependency){
 deps.push(markupDependency);
-special = 1;
+special = REQUIRE_WHEN_READY;
 refCount++;}
 
 
-define(moduleName,deps,__annotator(function(rootNode){
-var elem=ge(elementID,rootNode);
+define(moduleName,deps,__annotator(function ServerJSElementModule(rootNode){
+var elem=require('ge')(elementID,rootNode);
 if(!elem){
-var msg='Could not find element "%s"';
+var extra='';
 if(__DEV__){
-msg +=
+extra =
 '. This usually means that the element was sent as a string ' +
 'instead of XHP or JS::markup, or never rendered.';}
 
-throw new Error(ex(msg,elementID));}
+throw new Error(require('ex')('Could not find element "%s"%s',elementID,extra));}
 
-return elem;},{'module':'ServerJS','line':381,'column':29}),
-special,null,refCount);},{'module':'ServerJS','line':346,'column':25});
-
-
+return elem;},{'module':'ServerJS','line':448,'column':29,'name':'ServerJSElementModule'}),
+special,null,refCount);},{'module':'ServerJS','line':413,'column':25});
 
 
 
-__annotator(function(){requireLazy(['HTML'],__annotator(function(HTML){},{'module':'ServerJS','line':399,'column':31}));},{'module':'ServerJS','line':399,'column':1});
+
+
+__annotator(function(){requireLazy(['HTML'],__annotator(function(HTML){},{'module':'ServerJS','line':466,'column':31}));},{'module':'ServerJS','line':466,'column':1});
 
 
 
@@ -11360,7 +11368,9 @@ __annotator(function(){requireLazy(['HTML'],__annotator(function(HTML){},{'modul
 
 
 function applyEach(arr,handler,context){
-return arr.map(__annotator(function(args){return handler.apply(context,args);},{'module':'ServerJS','line':408,'column':17}));}__annotator(applyEach,{'module':'ServerJS','line':407,'column':0,'name':'applyEach'});
+return arr.map(__annotator(function ServerJSApplyEach(args){
+return handler.apply(context,args);},{'module':'ServerJS','line':475,'column':17,'name':'ServerJSApplyEach'}));}__annotator(applyEach,{'module':'ServerJS','line':474,'column':0,'name':'applyEach'});
+
 
 
 
@@ -11372,11 +11382,11 @@ var moduleName=module[0];
 if(!(moduleName in moduleMap)){
 module[refCountIndex] = (module[refCountIndex] || 0) + 1;}
 
-moduleMap[moduleName] = true;}__annotator(_addModuleName,{'module':'ServerJS','line':415,'column':0,'name':'_addModuleName'});
+moduleMap[moduleName] = true;}__annotator(_addModuleName,{'module':'ServerJS','line':484,'column':0,'name':'_addModuleName'});
 
 
 function emptyModule(){
-return {};}__annotator(emptyModule,{'module':'ServerJS','line':423,'column':0,'name':'emptyModule'});
+return {};}__annotator(emptyModule,{'module':'ServerJS','line':492,'column':0,'name':'emptyModule'});
 
 
 module.exports = ServerJS;},{'module':'ServerJS','line':0,'column':0,'name':'$module_ServerJS'}),null);
@@ -11385,14 +11395,14 @@ module.exports = ServerJS;},{'module':'ServerJS','line':0,'column':0,'name':'$mo
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule invokeCallbacks
- */__d('invokeCallbacks',['ErrorUtils'],__annotator(function $module_invokeCallbacks(global,require,requireDynamic,requireLazy,module,exports,ErrorUtils){if(require.__markCompiled)require.__markCompiled();
+ */__d('invokeCallbacks',['ErrorUtils'],__annotator(function $module_invokeCallbacks(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
 function invokeCallbacks(hooks,obj){
 if(hooks){
 for(var ii=0;ii < hooks.length;ii++) {
-ErrorUtils.applyWithGuard(new Function(hooks[ii]),obj);}}}__annotator(invokeCallbacks,{'module':'invokeCallbacks','line':9,'column':0,'name':'invokeCallbacks'});
+require('ErrorUtils').applyWithGuard(new Function(hooks[ii]),obj);}}}__annotator(invokeCallbacks,{'module':'invokeCallbacks','line':9,'column':0,'name':'invokeCallbacks'});
 
 
 ;
@@ -11474,13 +11484,148 @@ warned = true;}}},{'module':'ix','line':54,'column':9});
 
 
 module.exports = ix;},{'module':'ix','line':0,'column':0,'name':'$module_ix'}),null);
+/** Path: html/js/downstream/fbjs/functional/forEachObject.js */
+/**
+ * @generated SignedSource<<63d238473f2f7d1918fccf00f9ca824b>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule forEachObject
+ * @typechecks
+ */__d('forEachObject',[],__annotator(function $module_forEachObject(global,require,requireDynamic,requireLazy,module,exports){
+
+'use strict';if(require.__markCompiled)require.__markCompiled();
+
+var hasOwnProperty=Object.prototype.hasOwnProperty;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function forEachObject(object,callback,context){return __bodyWrapper(this,arguments,function(){
+for(var name in object) {
+if(hasOwnProperty.call(object,name)){
+callback.call(context,object[name],name,object);}}},{params:[[object,'?object','object'],[callback,'function','callback']]});}__annotator(forEachObject,{'module':'forEachObject','line':43,'column':0,'name':'forEachObject'},{params:['?object','function']});
+
+
+
+
+module.exports = forEachObject;},{'module':'forEachObject','line':0,'column':0,'name':'$module_forEachObject'}),null);
+/** Path: html/js/downstream/page/TimerStorage.js */
+/**
+ * @generated SignedSource<<ed6b928770940a48be1912a11f44c6e8>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule TimerStorage
+ */__d('TimerStorage',['forEachObject'],__annotator(function $module_TimerStorage(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
+
+
+
+
+
+var _storageNames={
+ANIMATION_FRAME:'ANIMATION_FRAME',
+IDLE_CALLBACK:'IDLE_CALLBACK',
+IMMEDIATE:'IMMEDIATE',
+INTERVAL:'INTERVAL',
+TIMEOUT:'TIMEOUT'};
+
+
+var _storages={};
+
+require('forEachObject')(_storageNames,__annotator(function(_,name){return _storages[name] = [];},{'module':'TimerStorage','line':36,'column':29}));
+
+var TimerStorage={
+push:__annotator(function(name,id){
+_storages[name].push(id);},{'module':'TimerStorage','line':39,'column':6}),
+
+
+popAll:__annotator(function(name,callback){
+_storages[name].forEach(callback);
+_storages[name].length = 0;},{'module':'TimerStorage','line':43,'column':8})};
+
+
+
+Object.assign(TimerStorage,_storageNames);
+
+module.exports = TimerStorage;},{'module':'TimerStorage','line':0,'column':0,'name':'$module_TimerStorage'}),null);
+/** Path: html/js/downstream/page/setTimeout.js */
+/**
+ * @generated SignedSource<<6d0d32a3ccf30e3635a5ea8fce644c29>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule setTimeout
+ */__d('setTimeout',['TimerStorage','setTimeoutAcrossTransitions'],__annotator(function $module_setTimeout(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
+
+
+
+
+
+
+module.exports = __annotator(function(){for(var _len=arguments.length,args=Array(_len),_key=0;_key < _len;_key++) {args[_key] = arguments[_key];}
+var id=require('setTimeoutAcrossTransitions').apply(global,args);
+require('TimerStorage').push(require('TimerStorage').TIMEOUT,id);
+return id;},{'module':'setTimeout','line':27,'column':17});},{'module':'setTimeout','line':0,'column':0,'name':'$module_setTimeout'}),null);
 /** Path: html/js/modules/BigPipe.js */
 /**
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule BigPipe
  * @preventMunge
- */__d('BigPipe',['Arbiter','BigPipeExperiments','Bootloader','Env','ErrorUtils','JSCC','PageEvents','PageletSet','ResourceLazyLoader','Run','ServerJS','$','ge','invokeCallbacks','ix','performanceAbsoluteNow'],__annotator(function $module_BigPipe(global,require,requireDynamic,requireLazy,module,exports,Arbiter,BigPipeExperiments,Bootloader,Env,ErrorUtils,JSCC,PageEvents,PageletSet,ResourceLazyLoader,Run,ServerJS,$,ge,invokeCallbacks,ix,performanceAbsoluteNow){if(require.__markCompiled)require.__markCompiled();var _extends=Object.assign || __annotator(function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;},{'module':'BigPipe','line':0,'column':0});
+ */__d('BigPipe',['ix','Arbiter','BigPipeExperiments','Bootloader','Env','ErrorUtils','JSCC','PageEvents','PageletEventConstsJS','PageletSet','Run','ServerJS','TimeSlice','$','ge','invokeCallbacks','performanceAbsoluteNow','setTimeout'],__annotator(function $module_BigPipe(global,require,requireDynamic,requireLazy,module,exports,ix){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -11519,18 +11664,13 @@ module.exports = ix;},{'module':'ix','line':0,'column':0,'name':'$module_ix'}),n
 
 
 
-if(BigPipeExperiments.lazy_load_images){
-if(BigPipeExperiments.lazy_load_react_images){
-ResourceLazyLoader.integrateWithReact();}
-
-Run.onAfterLoad(ResourceLazyLoader.loadAllResourcesAndStopLazyLoading);}
 
 
 var ie=document.documentMode ||
 +(/MSIE.(\d+)/.exec(navigator.userAgent) || [])[1];
 
-var arbiter_state=Arbiter.BEHAVIOR_STATE;
-var arbiter_persistent=Arbiter.BEHAVIOR_PERSISTENT;
+var arbiter_state=require('Arbiter').BEHAVIOR_STATE;
+var arbiter_persistent=require('Arbiter').BEHAVIOR_PERSISTENT;
 
 var phaseTime=[];
 
@@ -11541,14 +11681,14 @@ window.location.search.indexOf('pagelet_ts=1') > 0;
 function BigPipe(options){'use strict';
 
 Object.assign(this,{
-arbiter:Arbiter,
+arbiter:require('Arbiter'),
 rootNodeID:'content',
 lid:0,
 isAjax:false,
-domContentCallback:Run.__domContentCallback,
-onloadCallback:Run.__onloadCallback,
-domContentEvt:PageEvents.BIGPIPE_DOMREADY,
-onloadEvt:PageEvents.BIGPIPE_ONLOAD,
+domContentCallback:require('Run').__domContentCallback,
+onloadCallback:require('Run').__onloadCallback,
+domContentEvt:require('PageEvents').BIGPIPE_DOMREADY,
+onloadEvt:require('PageEvents').BIGPIPE_ONLOAD,
 forceFinish:false,
 _phaseCSSEndCallbacks:[],
 _phaseDisplayEndCallbacks:[],
@@ -11563,12 +11703,12 @@ this._relevant_instance = BigPipe._current_instance;}else
 BigPipe._current_instance = this;}
 
 
-this._serverJS = new ServerJS();
+this._serverJS = new (require('ServerJS'))();
 
 
 
 
-Arbiter.inform(BigPipe.Events.init,{lid:this.lid,arbiter:this.arbiter},
+require('Arbiter').inform(BigPipe.Events.init,{lid:this.lid,arbiter:this.arbiter},
 arbiter_persistent);
 
 this.arbiter.registerCallback(this.domContentCallback,
@@ -11579,6 +11719,13 @@ this.arbiter.registerCallback(this.domContentCallback,
 
 this._prefetchPhase(0);
 this._beginPhase(0);
+
+this._loadedCallback = this.arbiter.registerCallback(__annotator(function(){
+this._informEventExternal(BigPipe.Events.loaded,{
+rid:this.rid,
+ajax:this.isAjax});},{'module':'BigPipe','line':101,'column':57}).bind(this),
+
+['pagelet_displayed_all']);
 
 this.onloadCallback =
 this.arbiter.registerCallback(this.onloadCallback,
@@ -11592,24 +11739,24 @@ this._serverJS.cleanup.bind(this._serverJS),
 [this.onloadEvt]);
 
 this._secondFlushPendingJS = [];
-this._secondFlushRan = false;}__annotator(BigPipe,{'module':'BigPipe','line':64,'column':2,'name':'BigPipe'});BigPipe.prototype.
+this._secondFlushRan = false;}__annotator(BigPipe,{'module':'BigPipe','line':59,'column':2,'name':'BigPipe'});BigPipe.prototype.
 
 
 _prefetchPhase = __annotator(function(phase){'use strict';
 this._informEventExternal('phase_prefetch',{phase:phase});
-this.arbiter.inform('phase_prefetch_' + phase,true,arbiter_state);},{'module':'BigPipe','line':121,'column':16});BigPipe.prototype.
+this.arbiter.inform('phase_prefetch_' + phase,true,arbiter_state);},{'module':'BigPipe','line':123,'column':16});BigPipe.prototype.
 
 
 _beginPhase = __annotator(function(phase){'use strict';
 this._informEventExternal('phase_begin',{phase:phase});
-this.arbiter.inform('phase_begin_' + phase,true,arbiter_state);},{'module':'BigPipe','line':126,'column':13});BigPipe.prototype.
+this.arbiter.inform('phase_begin_' + phase,true,arbiter_state);},{'module':'BigPipe','line':128,'column':13});BigPipe.prototype.
 
 
 _endPhase = __annotator(function(phase){'use strict';
 this.arbiter.inform('phase_arrived_' + phase,true,arbiter_state);
 if(!this.isAjax){
 
-phaseTime.push(Date.now());}},{'module':'BigPipe','line':131,'column':11});BigPipe.prototype.
+phaseTime.push(Date.now());}},{'module':'BigPipe','line':133,'column':11});BigPipe.prototype.
 
 
 
@@ -11617,7 +11764,7 @@ _displayPageletHandler = __annotator(function(pageletData){'use strict';
 if(this.displayCallback){
 this.displayCallback(this._displayPagelet.bind(this,pageletData));}else
 {
-this._displayPagelet(pageletData);}},{'module':'BigPipe','line':139,'column':24});BigPipe.prototype.
+this._displayPagelet(pageletData);}},{'module':'BigPipe','line':141,'column':24});BigPipe.prototype.
 
 
 
@@ -11625,8 +11772,9 @@ this._displayPagelet(pageletData);}},{'module':'BigPipe','line':139,'column':24}
 
 
 _displayPagelet = __annotator(function(pageletData){'use strict';
-this._informPageletEvent('display_start',pageletData);
+this._informPageletEvent(require('PageletEventConstsJS').DISPLAY_START,pageletData);
 var pagelet=this._getPagelet(pageletData);
+var injectedContainers=[];
 
 for(var target_id in pageletData.content) {
 var content=pageletData.content[target_id];
@@ -11634,7 +11782,7 @@ var content=pageletData.content[target_id];
 if(pageletData.append){
 target_id = this._getPageletRootID(pageletData);}
 
-var target=ge(target_id);
+var target=require('ge')(target_id);
 if(!target){
 console.error(
 'Root element %s is missing for pagelet %s',
@@ -11650,9 +11798,6 @@ pagelet.setRoot(target);}
 
 content = getContentMarkup(content);
 if(content){
-if(BigPipeExperiments.lazy_load_images && !this.isAjax){
-content = ResourceLazyLoader.lazifyResourcesInMarkup(content);}
-
 if(pageletData.append || ie < 8){
 
 
@@ -11662,9 +11807,11 @@ while(target.firstChild) {
 target.removeChild(target.firstChild);}}
 
 
-appendNodes(target,content);}else
+injectedContainers =
+injectedContainers.concat(appendNodes(target,content));}else
 {
-target.innerHTML = content;}}
+target.innerHTML = content;
+injectedContainers.push(target);}}
 
 
 
@@ -11692,7 +11839,7 @@ test(pageletCategories))
 pageletCategories =
 pageletCategories?
 pageletCategories + ' ' + category:
-category;}},{'module':'BigPipe','line':210,'column':41}));}
+category;}},{'module':'BigPipe','line':212,'column':41}));}
 
 
 
@@ -11701,7 +11848,7 @@ target.setAttribute('data-categories',pageletCategories);}}
 
 
 
-if(pageletData.cache_hit && Env.pc_debug){
+if(pageletData.cache_hit && require('Env').pc_debug){
 target.style.border = '1px red solid';}}
 
 
@@ -11712,13 +11859,27 @@ var serverJSCanceler=this._serverJS.handlePartial(jsmods);
 pagelet.addDestructor(serverJSCanceler.cancel.bind(serverJSCanceler));}
 
 
-this._informPageletEvent('display',pageletData);
-this.arbiter.inform(pageletData.id + '_displayed',true,arbiter_state);},{'module':'BigPipe','line':150,'column':17});BigPipe.prototype.
+var injectedImages=injectedContainers.reduce(__annotator(function(images,container){
+var containerImages=container.getElementsByTagName('img');
+return images.concat(
+Array.from(containerImages,__annotator(function(element){return element.src;},{'module':'BigPipe','line':243,'column':36})));},{'module':'BigPipe','line':240,'column':51}),
+
+[]);
+if(injectedImages.length > 0){
+this._informEventExternal('images_displayed',{
+pagelet:pageletData.id,
+timeslice:require('TimeSlice').getContext().id,
+images:injectedImages});}
+
+
+
+this._informPageletEvent(require('PageletEventConstsJS').DISPLAY_END,pageletData);
+this.arbiter.inform(pageletData.id + '_displayed',true,arbiter_state);},{'module':'BigPipe','line':152,'column':17});BigPipe.prototype.
 
 
 _onPhaseCSSEnd = __annotator(function(phase){'use strict';
 
-this._prefetchPhase(phase + 1);},{'module':'BigPipe','line':242,'column':16});BigPipe.prototype.
+this._prefetchPhase(phase + 1);},{'module':'BigPipe','line':258,'column':16});BigPipe.prototype.
 
 
 
@@ -11736,8 +11897,8 @@ this.arbiter.inform(
 
 
 if(this._currentPhase === this._ttiPhase){
-var ef=Bootloader.__debug.earlyResources;
-var requested=Bootloader.__debug.requested;
+var ef=require('Bootloader').__debug.earlyResources;
+var requested=require('Bootloader').__debug.requested;
 var rsrcs=0;
 for(var hash in requested) {
 rsrcs += !(hash in ef);}
@@ -11751,7 +11912,7 @@ var extraProfilingData={};
 
 var wrapper=window.__bodyWrapper;
 if(wrapper.getCodeUsage){
-extraProfilingData.js_calls_tti = _extends({},wrapper.getCodeUsage());
+extraProfilingData.js_calls_tti = babelHelpers._extends({},wrapper.getCodeUsage());
 extraProfilingData.tti_html = document.body.outerHTML;
 
 var tti_styleSheets={};
@@ -11797,9 +11958,9 @@ if(ie <= 8){
 
 
 
-setTimeout(this._beginPhase.bind(this,this._currentPhase),20);}else
+require('setTimeout')(this._beginPhase.bind(this,this._currentPhase),20);}else
 {
-this._beginPhase(this._currentPhase);}},{'module':'BigPipe','line':254,'column':20});BigPipe.prototype.
+this._beginPhase(this._currentPhase);}},{'module':'BigPipe','line':270,'column':20});BigPipe.prototype.
 
 
 
@@ -11808,9 +11969,11 @@ this._beginPhase(this._currentPhase);}},{'module':'BigPipe','line':254,'column':
 
 
 _downloadJsForPagelet = __annotator(function(pageletData){'use strict';
-this._informPageletEvent('jsstart',pageletData);
-Bootloader.loadResources(pageletData.js || [],__annotator(function(){
-this._informPageletEvent('jsdone',pageletData);
+this._informPageletEvent(require('PageletEventConstsJS').JS_START,pageletData);
+require('Bootloader').loadResources(
+pageletData.allResources || [],
+__annotator(function BigPipeBootloadJSForPagelet(){
+this._informPageletEvent(require('PageletEventConstsJS').JS_END,pageletData);
 pageletData.requires = pageletData.requires || [];
 
 
@@ -11825,35 +11988,38 @@ pageletData.requires.push('uipage_onload');}
 
 
 var fire_onloads=__annotator(function(){
-this._informPageletEvent('preonload',pageletData);
+this._informPageletEvent(require('PageletEventConstsJS').ONLOAD_START,pageletData);
 if(this._isRelevantPagelet(pageletData)){
-invokeCallbacks(pageletData.onload);}
+require('invokeCallbacks')(pageletData.onload);}
 
-this._informPageletEvent('onload',pageletData);
-
-
+this._informPageletEvent(require('PageletEventConstsJS').ONLOAD_END,pageletData);
 
 
 
-this.arbiter.inform('pagelet_onload',true,Arbiter.BEHAVIOR_EVENT);
+
+
+this.arbiter.inform('pagelet_onload',true,require('Arbiter').BEHAVIOR_EVENT);
 
 pageletData.provides &&
-this.arbiter.inform(pageletData.provides,true,arbiter_state);},{'module':'BigPipe','line':350,'column':25}).
+this.arbiter.inform(pageletData.provides,true,arbiter_state);},{'module':'BigPipe','line':368,'column':27}).
 bind(this);
 
 var fire_onafterloads=__annotator(function(){
 this._isRelevantPagelet(pageletData) &&
-invokeCallbacks(pageletData.onafterload);},{'module':'BigPipe','line':367,'column':30}).
+require('invokeCallbacks')(pageletData.onafterload);},{'module':'BigPipe','line':385,'column':32}).
 bind(this);
 
 this.arbiter.registerCallback(fire_onloads,pageletData.requires);
-this.arbiter.registerCallback(fire_onafterloads,[this.onloadEvt]);},{'module':'BigPipe','line':335,'column':51}).
-bind(this),false,pageletData.id);},{'module':'BigPipe','line':333,'column':23});BigPipe.prototype.
+this.arbiter.registerCallback(fire_onafterloads,[this.onloadEvt]);},{'module':'BigPipe','line':353,'column':6,'name':'BigPipeBootloadJSForPagelet'}).
+bind(this),
+false,
+pageletData.id);},{'module':'BigPipe','line':349,'column':23});BigPipe.prototype.
+
 
 
 _getPagelet = __annotator(function(pageletData){'use strict';
 var id=this._getPageletRootID(pageletData);
-return PageletSet.getPagelet(id);},{'module':'BigPipe','line':377,'column':13});BigPipe.prototype.
+return require('PageletSet').getPagelet(id);},{'module':'BigPipe','line':398,'column':13});BigPipe.prototype.
 
 
 _getPageletRootID = __annotator(function(pageletData){'use strict';
@@ -11861,7 +12027,7 @@ var appendTarget=pageletData.append;
 if(appendTarget){
 return appendTarget === 'bigpipe_root'?this.rootNodeID:appendTarget;}
 
-return Object.keys(pageletData.content)[0] || null;},{'module':'BigPipe','line':382,'column':19});BigPipe.prototype.
+return Object.keys(pageletData.content)[0] || null;},{'module':'BigPipe','line':403,'column':19});BigPipe.prototype.
 
 
 
@@ -11874,7 +12040,7 @@ this._relevant_instance == BigPipe._current_instance ||
 this.jsNonBlock ||
 this.forceFinish ||
 BigPipe._current_instance &&
-BigPipe._current_instance.allowIrrelevantRequests;},{'module':'BigPipe','line':393,'column':13});BigPipe.prototype.
+BigPipe._current_instance.allowIrrelevantRequests;},{'module':'BigPipe','line':414,'column':13});BigPipe.prototype.
 
 
 _isRelevantPagelet = __annotator(function(pageletData){'use strict';
@@ -11883,7 +12049,7 @@ if(!this._isRelevant()){
 return false;}
 
 var pageletID=this._getPageletRootID(pageletData);
-return !!this._livePagelets[pageletID];},{'module':'BigPipe','line':403,'column':20});BigPipe.prototype.
+return !!this._livePagelets[pageletID];},{'module':'BigPipe','line':424,'column':20});BigPipe.prototype.
 
 
 
@@ -11895,14 +12061,14 @@ return !!this._livePagelets[pageletID];},{'module':'BigPipe','line':403,'column'
 _informEventExternal = __annotator(function(evt_name,data){'use strict';
 data = data || {};
 
-data.ts = performanceAbsoluteNow();
+data.ts = require('performanceAbsoluteNow')();
 data.lid = this.lid;
 
 if(shouldPrintTimeStamp){
 console.timeStamp(evt_name + " " + JSON.stringify(data));}
 
 
-this.arbiter.inform(evt_name,data,arbiter_persistent);},{'module':'BigPipe','line':418,'column':22});BigPipe.prototype.
+this.arbiter.inform(evt_name,data,arbiter_persistent);},{'module':'BigPipe','line':439,'column':22});BigPipe.prototype.
 
 
 
@@ -11924,20 +12090,20 @@ if(pageletData.categories){
 data.categories = pageletData.categories;}
 
 
-this._informEventExternal('pagelet_event',data);},{'module':'BigPipe','line':438,'column':21});BigPipe.
+this._informEventExternal('pagelet_event',data);},{'module':'BigPipe','line':459,'column':21});BigPipe.
 
 
 getCurrentInstance = __annotator(function(){'use strict';
-return BigPipe._current_instance;},{'module':'BigPipe','line':453,'column':27});BigPipe.prototype.
+return BigPipe._current_instance;},{'module':'BigPipe','line':474,'column':27});BigPipe.prototype.
 
 
 loadSecondFlushResources = __annotator(function(resources){'use strict';
-Bootloader.loadEarlyResources(resources);
+require('Bootloader').loadEarlyResources(resources);
 if(this._secondFlushPendingJS.length){
-Bootloader.loadResources(this._secondFlushPendingJS);
+require('Bootloader').loadResources(this._secondFlushPendingJS);
 this._secondFlushPendingJS = [];}
 
-this._secondFlushRan = true;},{'module':'BigPipe','line':457,'column':26});
+this._secondFlushRan = true;},{'module':'BigPipe','line':478,'column':26});
 
 
 
@@ -11949,14 +12115,14 @@ Object.assign(BigPipe.prototype,{
 
 
 beforePageletArrive:__annotator(function(pageletId){
-this._informPageletEvent('prearrive',{id:pageletId});},{'module':'BigPipe','line':474,'column':24}),
+this._informPageletEvent(require('PageletEventConstsJS').ARRIVE_START,{id:pageletId});},{'module':'BigPipe','line':495,'column':24}),
 
 
 setSecondFlushResources:__annotator(function(resources){
 if(this._ttiPhase != undefined && this._currentPhase > this._ttiPhase){
 this.loadSecondFlushResources(resources);}else
 {
-this._secondFlushResources = resources;}},{'module':'BigPipe','line':478,'column':27}),
+this._secondFlushResources = resources;}},{'module':'BigPipe','line':499,'column':27}),
 
 
 
@@ -11966,8 +12132,8 @@ this._secondFlushResources = resources;}},{'module':'BigPipe','line':478,'column
 
 
 
-onPageletArrive:ErrorUtils.guard(__annotator(function(pageletData){
-this._informPageletEvent('arrive',pageletData);
+onPageletArrive:require('ErrorUtils').guard(__annotator(function(pageletData){
+this._informPageletEvent(require('PageletEventConstsJS').ARRIVE_END,pageletData);
 pageletData.content = pageletData.content || {};
 
 var phase=pageletData.phase;
@@ -11997,7 +12163,7 @@ this._phaseDisplayEndCallbacks[phase],
 
 
 var rootID=this._getPageletRootID(pageletData);
-var pagelet=PageletSet.getOrCreatePagelet(rootID);
+var pagelet=require('PageletSet').getOrCreatePagelet(rootID);
 
 if(pageletData.the_end){
 this._lastPhase = phase;}
@@ -12009,28 +12175,28 @@ this._ttiPhase = pageletData.tti_phase;}
 
 this._livePagelets[pagelet.id] = true;
 pagelet.addDestructor(__annotator(function(){
-delete this._livePagelets[pagelet.id];},{'module':'BigPipe','line':534,'column':26}).
+delete this._livePagelets[pagelet.id];},{'module':'BigPipe','line':555,'column':26}).
 bind(this));
 
 if(pageletData.jscc_map){
 var jsccMap=eval(pageletData.jscc_map);
-var jsccDestructor=JSCC.init(jsccMap);
+var jsccDestructor=require('JSCC').init(jsccMap);
 pagelet.addDestructor(jsccDestructor);}
 
 
 if(pageletData.resource_map){
-Bootloader.setResourceMap(pageletData.resource_map);}
+require('Bootloader').setResourceMap(pageletData.resource_map);}
 
 if(pageletData.bootloadable){
-Bootloader.enableBootload(pageletData.bootloadable);}
+require('Bootloader').enableBootload(pageletData.bootloadable);}
 
 ix.add(pageletData.ixData);
 
 
-this._informPageletEvent('setup',pageletData);
+this._informPageletEvent(require('PageletEventConstsJS').SETUP,pageletData);
 
 
-var pageletDisplayArbiter=new Arbiter();
+var pageletDisplayArbiter=new (require('Arbiter'))();
 pageletDisplayArbiter.registerCallback(
 this._displayPageletHandler.bind(this,pageletData),
 [
@@ -12041,19 +12207,19 @@ this._displayPageletHandler.bind(this,pageletData),
 
 
 this.arbiter.registerCallback(__annotator(function(){
-pageletDisplayArbiter.inform('phase_begin');},{'module':'BigPipe','line':566,'column':34}),
+pageletDisplayArbiter.inform('phase_begin');},{'module':'BigPipe','line':587,'column':34}),
 ['phase_begin_' + pageletData.phase]);
 
 var precedingPagelets=pageletData.display_dependency || [];
 var pageletDisplayedEvents=precedingPagelets.map(__annotator(function(id){
-return id + '_displayed';},{'module':'BigPipe','line':571,'column':55}));
+return id + '_displayed';},{'module':'BigPipe','line':592,'column':55}));
 
 this.arbiter.registerCallback(__annotator(function(){
-pageletDisplayArbiter.inform('preceding_pagelets_displayed');},{'module':'BigPipe','line':574,'column':34}),
+pageletDisplayArbiter.inform('preceding_pagelets_displayed');},{'module':'BigPipe','line':595,'column':34}),
 pageletDisplayedEvents);
 
 var cssEventPrefix;
-switch(BigPipeExperiments.prefetch){
+switch(require('BigPipeExperiments').prefetch){
 case 'all':
 cssEventPrefix = 'phase_prefetch_';
 break;
@@ -12073,21 +12239,26 @@ break;}
 
 
 this.arbiter.registerCallback(__annotator(function(){
-this._informPageletEvent('css',pageletData);
-var displayResources=
-(pageletData.css || []).concat(pageletData.displayJS || []);
-Bootloader.loadResources(displayResources,__annotator(function(){
-this._informPageletEvent('css_load',pageletData);
+this._informPageletEvent(require('PageletEventConstsJS').CSS_START,pageletData);
+var displayResources=pageletData.displayResources || [];
+require('Bootloader').loadResources(
+displayResources,
+__annotator(function BigPipeBootloadDisplayCSSResources(){
+this._informPageletEvent(require('PageletEventConstsJS').CSS_END,pageletData);
 this.arbiter.inform(pageletData.id + '_css_end',true,arbiter_state);
-pageletDisplayArbiter.inform('display_resources_downloaded');},{'module':'BigPipe','line':602,'column':49}).
-bind(this),false,pageletData.id);},{'module':'BigPipe','line':598,'column':34}).
+pageletDisplayArbiter.inform('display_resources_downloaded');},{'module':'BigPipe','line':624,'column':8,'name':'BigPipeBootloadDisplayCSSResources'}).
+bind(this),
+false,
+pageletData.id);},{'module':'BigPipe','line':619,'column':34}).
+
 bind(this),[cssEventPrefix + phase]);
 
+this.arbiter.registerCallback(this._loadedCallback,['pagelet_onload']);
 this.arbiter.registerCallback(this.onloadCallback,['pagelet_onload']);
 
 var jsEvents=[pageletData.id + '_displayed'];
 if(!this.jsNonBlock){
-switch(BigPipeExperiments.download_js){
+switch(require('BigPipeExperiments').download_js){
 case 'post_tti':
 jsEvents.push('tti_pagelet_displayed');
 break;
@@ -12097,16 +12268,17 @@ break;}}
 
 
 
+var secondFlushResources=pageletData.allResources || [];
 if(this._secondFlushRan){
-Bootloader.loadResources(pageletData.js || []);}else
+require('Bootloader').loadResources(secondFlushResources);}else
 {
-Array.prototype.push.apply(this._secondFlushPendingJS,pageletData.js || []);}
+Array.prototype.push.apply(this._secondFlushPendingJS,secondFlushResources);}
 
 this.arbiter.registerCallback(
 this._downloadJsForPagelet.bind(this,pageletData),jsEvents);
 
 if(pageletData.is_last){
-this._endPhase(phase);}},{'module':'BigPipe','line':492,'column':37}),
+this._endPhase(phase);}},{'module':'BigPipe','line':513,'column':37}),
 
 'BigPipe#onPageletArrive')});
 
@@ -12116,26 +12288,27 @@ if(!content || typeof content === 'string'){
 return content;}
 
 if(content.container_id){
-var container=$(content.container_id);
+var container=require('$')(content.container_id);
 content = extractMarkup(container) || '';
 container.parentNode.removeChild(container);
 return content;}
 
-return null;}__annotator(getContentMarkup,{'module':'BigPipe','line':637,'column':0,'name':'getContentMarkup'});
+return null;}__annotator(getContentMarkup,{'module':'BigPipe','line':664,'column':0,'name':'getContentMarkup'});
 
 
 BigPipe.Events = {
 init:'BigPipe/init',
-tti:'tti_bigpipe'};
+tti:'tti_bigpipe',
+loaded:'pagelet_loaded_all'};
 
 
 function extractMarkup(container){
 if(!container.firstChild){
 console.error('Pagelet markup container is empty.');
-Bootloader.loadModules(["ErrorSignal"],__annotator(function(ErrorSignal){
+require('Bootloader').loadModules(["ErrorSignal"],__annotator(function(ErrorSignal){
 ErrorSignal.sendErrorSignal(
 'bigpipe',
-'Pagelet markup container is empty.');},{'module':'BigPipe','line':658,'column':44}));
+'Pagelet markup container is empty.');},{'module':'BigPipe','line':686,'column':44}));
 
 return null;}
 
@@ -12148,11 +12321,12 @@ var comment=container.firstChild.nodeValue;
 
 comment = comment.substring(1,comment.length - 1);
 
-return comment.replace(/\\([\s\S]|$)/g,'$1');}__annotator(extractMarkup,{'module':'BigPipe','line':655,'column':0,'name':'extractMarkup'});
+return comment.replace(/\\([\s\S]|$)/g,'$1');}__annotator(extractMarkup,{'module':'BigPipe','line':683,'column':0,'name':'extractMarkup'});
 
 
 function appendNodes(container,markup){
 var nn=document.createElement('div');
+var injectedElements=[];
 
 var hax=ie < 7;
 if(hax){
@@ -12172,14 +12346,17 @@ var frag=document.createDocumentFragment();
 
 
 while(nn.firstChild) {
+injectedElements.push(nn.firstChild);
 frag.appendChild(nn.firstChild);}
 
 container.appendChild(frag);
 
 
 if(hax){
-container.removeChild(nn);}}__annotator(appendNodes,{'module':'BigPipe','line':677,'column':0,'name':'appendNodes'});
+container.removeChild(nn);}
 
+
+return injectedElements;}__annotator(appendNodes,{'module':'BigPipe','line':705,'column':0,'name':'appendNodes'});
 
 
 module.exports = BigPipe;},{'module':'BigPipe','line':0,'column':0,'name':'$module_BigPipe'}),null);
@@ -12202,16 +12379,16 @@ module.exports = BigPipe;},{'module':'BigPipe','line':0,'column':0,'name':'$modu
  *
  * @providesModule EventEmitterWithValidation
  * @typechecks
- */__d('EventEmitterWithValidation',['BaseEventEmitter'],__annotator(function $module_EventEmitterWithValidation(global,require,requireDynamic,requireLazy,module,exports,BaseEventEmitter){if(require.__markCompiled)require.__markCompiled();var _BaseEventEmitter,_superProto;
+ */__d('EventEmitterWithValidation',['BaseEventEmitter'],__annotator(function $module_EventEmitterWithValidation(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();var _BaseEventEmitter,_superProto;
 
-'use strict';_BaseEventEmitter =
-
-
+'use strict';_BaseEventEmitter = babelHelpers.inherits(
 
 
 
 
-BaseEventEmitter;_superProto = _BaseEventEmitter && _BaseEventEmitter.prototype;Object.assign(EventEmitterWithValidation,_BaseEventEmitter);EventEmitterWithValidation.prototype = Object.create(_BaseEventEmitter.prototype);EventEmitterWithValidation.prototype.constructor = EventEmitterWithValidation;EventEmitterWithValidation.__superConstructor__ = _BaseEventEmitter;
+
+
+EventEmitterWithValidation,require('BaseEventEmitter'));_superProto = _BaseEventEmitter && _BaseEventEmitter.prototype;
 
 
 
@@ -12338,9 +12515,9 @@ module.exports = EventEmitterWithValidation;},{'module':'EventEmitterWithValidat
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule mixInEventEmitter
- */__d('mixInEventEmitter',['EventEmitterWithHolding','EventEmitterWithValidation','EventHolder','invariant'],__annotator(function $module_mixInEventEmitter(global,require,requireDynamic,requireLazy,module,exports,EventEmitterWithHolding,EventEmitterWithValidation,EventHolder,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('mixInEventEmitter',['invariant','EventEmitterWithHolding','EventEmitterWithValidation','EventHolder'],__annotator(function $module_mixInEventEmitter(global,require,requireDynamic,requireLazy,module,exports,invariant){
 
-'use strict';var _extends=Object.assign || __annotator(function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;},{'module':'mixInEventEmitter','line':0,'column':0});
+'use strict';if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -12387,7 +12564,7 @@ ctor === Object || ctor === Function)?invariant(0,
 
 
 
-target.__types = _extends({},target.__types,types);
+target.__types = babelHelpers._extends({},target.__types,types);
 Object.assign(target,EventEmitterMixin);}__annotator(mixInEventEmitter,{'module':'mixInEventEmitter','line':49,'column':0,'name':'mixInEventEmitter'});
 
 
@@ -12442,9 +12619,9 @@ this.__getEventEmitter().releaseHeldEventType(eventType);},{'module':'mixInEvent
 
 __getEventEmitter:__annotator(function(){
 if(!this.__eventEmitter){
-var emitter=new EventEmitterWithValidation(this.__types);
-var holder=new EventHolder();
-this.__eventEmitter = new EventEmitterWithHolding(emitter,holder);}
+var emitter=new (require('EventEmitterWithValidation'))(this.__types);
+var holder=new (require('EventHolder'))();
+this.__eventEmitter = new (require('EventEmitterWithHolding'))(emitter,holder);}
 
 return this.__eventEmitter;},{'module':'mixInEventEmitter','line':120,'column':21})};
 
@@ -12494,7 +12671,7 @@ module.exports = Math.floor(0x80000000 * Math.random()).toString(36);},{"module"
  *
  * @providesModule NavigationMetrics-upstream
  * @typechecks
- */__d('NavigationMetrics-upstream',['mixInEventEmitter','pageID','performance'],__annotator(function $module_NavigationMetrics_upstream(global,require,requireDynamic,requireLazy,module,exports,mixInEventEmitter,pageID,performance){if(require.__markCompiled)require.__markCompiled();
+ */__d('NavigationMetrics-upstream',['mixInEventEmitter','pageID','performance'],__annotator(function $module_NavigationMetrics_upstream(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -12548,7 +12725,7 @@ var Events={
 NAVIGATION_DONE:'NAVIGATION_DONE'};
 
 
-var start=performance.timing && performance.timing.navigationStart || 0;
+var start=require('performance').timing && require('performance').timing.navigationStart || 0;
 var tti=0;
 var e2e=0;
 var page;
@@ -12556,7 +12733,7 @@ var pageType;
 var pageURI;
 
 function updateLoadID(){
-loadID = pageID + ':' + loadCount;}__annotator(updateLoadID,{'module':'NavigationMetrics-upstream','line':80,'column':0,'name':'updateLoadID'});
+loadID = require('pageID') + ':' + loadCount;}__annotator(updateLoadID,{'module':'NavigationMetrics-upstream','line':80,'column':0,'name':'updateLoadID'});
 
 
 
@@ -12644,7 +12821,7 @@ pageURI = data.page_uri;},{'module':'NavigationMetrics-upstream','line':157,'col
 
 
 
-mixInEventEmitter(NavigationMetrics,Events);
+require('mixInEventEmitter')(NavigationMetrics,Events);
 
 module.exports = NavigationMetrics;},{'module':'NavigationMetrics-upstream','line':0,'column':0,'name':'$module_NavigationMetrics_upstream'}),null);
 /** Path: html/js/downstream/core/__shims__/NavigationMetrics.js */
@@ -12652,7 +12829,7 @@ module.exports = NavigationMetrics;},{'module':'NavigationMetrics-upstream','lin
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule NavigationMetrics
- */__d('NavigationMetrics',['Arbiter','BigPipe','NavigationMetrics-upstream','PageEvents'],__annotator(function $module_NavigationMetrics(global,require,requireDynamic,requireLazy,module,exports,Arbiter,BigPipe,NavigationMetrics,PageEvents){if(require.__markCompiled)require.__markCompiled();
+ */__d('NavigationMetrics',['Arbiter','BigPipe','NavigationMetrics-upstream','PageEvents'],__annotator(function $module_NavigationMetrics(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -12665,7 +12842,7 @@ module.exports = NavigationMetrics;},{'module':'NavigationMetrics-upstream','lin
 
 var quicklingRids={};
 
-NavigationMetrics.init = __annotator(function(implementation){
+require('NavigationMetrics-upstream').init = __annotator(function(implementation){
 
 
 
@@ -12680,9 +12857,9 @@ NavigationMetrics.init = __annotator(function(implementation){
 
 
 
-Arbiter.subscribe(BigPipe.Events.init,__annotator(function(_,data){
+require('Arbiter').subscribe(require('BigPipe').Events.init,__annotator(function(_,data){
 var arbiterInstance=data.arbiter;
-arbiterInstance.subscribe(BigPipe.Events.tti,__annotator(function(_,data){
+arbiterInstance.subscribe(require('BigPipe').Events.tti,__annotator(function(_,data){
 
 
 implementation.setServerLID(data.lid);
@@ -12695,12 +12872,12 @@ previousData.tti = data.ts;}}else
 implementation.setTTI(data.ts);}},{'module':'NavigationMetrics','line':35,'column':50}));
 
 
-arbiterInstance.subscribe(PageEvents.AJAXPIPE_SEND,__annotator(function(_,data){
+arbiterInstance.subscribe(require('PageEvents').AJAXPIPE_SEND,__annotator(function(_,data){
 if(data.quickling){
 quicklingRids[data.rid] = {start:data.ts};}},{'module':'NavigationMetrics','line':48,'column':56}));
 
 
-arbiterInstance.subscribe(PageEvents.AJAXPIPE_ONLOAD,__annotator(function(_,data){
+arbiterInstance.subscribe(require('PageEvents').AJAXPIPE_ONLOAD,__annotator(function(_,data){
 var previousData=quicklingRids[data.rid];
 if(previousData){
 implementation.setStart(previousData.start);
@@ -12710,13 +12887,13 @@ implementation.doneNavigation();}},{'module':'NavigationMetrics','line':53,'colu
 
 
 
-Arbiter.subscribe(PageEvents.BIGPIPE_ONLOAD,__annotator(function(_,data){
+require('Arbiter').subscribe(require('PageEvents').BIGPIPE_ONLOAD,__annotator(function(_,data){
 implementation.setE2E(data.ts);
 implementation.doneNavigation();},{'module':'NavigationMetrics','line':63,'column':47}));},{'module':'NavigationMetrics','line':18,'column':25});
 
 
 
-module.exports = NavigationMetrics;},{'module':'NavigationMetrics','line':0,'column':0,'name':'$module_NavigationMetrics'}),null);
+module.exports = require('NavigationMetrics-upstream');},{'module':'NavigationMetrics','line':0,'column':0,'name':'$module_NavigationMetrics'}),null);
 /** Path: html/js/downstream/storage/WebStorage.js */
 /**
  * @generated SignedSource<<1956e39479f6d6b7a6db7faf7b0dd766>>
@@ -12736,7 +12913,7 @@ module.exports = NavigationMetrics;},{'module':'NavigationMetrics','line':0,'col
  *
  * @providesModule WebStorage
  * @typechecks
- */__d('WebStorage',['ErrorUtils','ex'],__annotator(function $module_WebStorage(global,require,requireDynamic,requireLazy,module,exports,ErrorUtils,ex){if(require.__markCompiled)require.__markCompiled();
+ */__d('WebStorage',['ErrorUtils','ex'],__annotator(function $module_WebStorage(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -12809,13 +12986,13 @@ var len=storage.getItem(key).length;
 return key + '(' + len + ')';},{'module':'WebStorage','line':87,'column':36}));
 
 
-err = new Error(ex(
+err = new Error(require('ex')(
 'Storage quota exceeded while setting %s(%s). Items(length) follows: %s',
 key,
 value.length,
 keys.join()));
 
-ErrorUtils.reportError(err);}
+require('ErrorUtils').reportError(err);}
 
 
 return err;},{params:[[storage,'object','storage'],[key,'string','key'],[value,'string','value']]});}__annotator(setItemGuarded,{'module':'WebStorage','line':81,'column':0,'name':'setItemGuarded'},{params:['object','string','string']});
@@ -12863,6 +13040,60 @@ return inFrame;}__annotator(isInIframe,{"module":"isInIframe","line":30,"column"
 
 
 module.exports = isInIframe;},{"module":"isInIframe","line":0,"column":0,"name":"$module_isInIframe"}),null);
+/** Path: html/js/downstream/lower_domain/lowerFacebookDomain.js */
+/**
+ * @generated SignedSource<<30d0e39c8a3a1706cf8fab8c4e86ec1e>>
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !! This file is a check-in of a static_upstream project!      !!
+ * !!                                                            !!
+ * !! You should not modify this file directly. Instead:         !!
+ * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
+ * !!    the latest version from upstream.                       !!
+ * !! 2) Make your changes, test them, etc.                      !!
+ * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
+ * !!    static_upstream.                                        !!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ * Copyright 2004-present Facebook. All Rights Reserved.
+ *
+ * @providesModule lowerFacebookDomain
+ * @typechecks
+ */__d('lowerFacebookDomain',[],__annotator(function $module_lowerFacebookDomain(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
+
+
+var captures=window.location.hostname.match(
+/\.(facebook\.sg|facebookcorewwwi\.onion)$/);
+
+var domain=captures?captures[1]:'facebook.com';
+
+
+
+lowerFacebookDomain.setDomain = __annotator(function(inboundDomain){
+domain = inboundDomain;},{'module':'lowerFacebookDomain','line':31,'column':32});
+
+
+lowerFacebookDomain.isValidDocumentDomain = __annotator(function(){
+if(document.domain == domain){
+return true;}
+
+
+return false;},{'module':'lowerFacebookDomain','line':35,'column':44});
+
+
+
+
+
+
+
+
+function lowerFacebookDomain(){
+document.domain = domain;}__annotator(lowerFacebookDomain,{'module':'lowerFacebookDomain','line':49,'column':0,'name':'lowerFacebookDomain'});
+
+
+module.exports = lowerFacebookDomain;},{'module':'lowerFacebookDomain','line':0,'column':0,'name':'$module_lowerFacebookDomain'}),null);
 /** Path: html/js/downstream/storage/WebStorageMutex.js */
 /**
  * @generated SignedSource<<0afc6399946f47914573d43dc629e123>>
@@ -12881,7 +13112,7 @@ module.exports = isInIframe;},{"module":"isInIframe","line":0,"column":0,"name":
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule WebStorageMutex
- */__d('WebStorageMutex',['WebStorage','setTimeoutAcrossTransitions','pageID'],__annotator(function $module_WebStorageMutex(global,require,requireDynamic,requireLazy,module,exports,WebStorage,setTimeoutAcrossTransitions,pageID){if(require.__markCompiled)require.__markCompiled();
+ */__d('WebStorageMutex',['WebStorage','setTimeoutAcrossTransitions','pageID'],__annotator(function $module_WebStorageMutex(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -12908,8 +13139,8 @@ module.exports = isInIframe;},{"module":"isInIframe","line":0,"column":0,"name":
 
 
 
-var storage=WebStorage.getLocalStorage();
-var curPageID=pageID;
+var storage=require('WebStorage').getLocalStorage();
+var curPageID=require('pageID');
 
 
 
@@ -12951,7 +13182,7 @@ if(!storage){
 return;}
 
 var when=Date.now() + (expires || 10000);
-WebStorage.setItemGuarded(
+require('WebStorage').setItemGuarded(
 storage,
 'mutex_' + this.name,
 curPageID + ':' + when);},{'module':'WebStorageMutex','line':83,'column':12});WebStorageMutex.prototype.
@@ -12987,7 +13218,7 @@ this.$WebStorageMutex_writeLock(expires);}
 
 
 
-this.$WebStorageMutex_locking = setTimeoutAcrossTransitions(__annotator(
+this.$WebStorageMutex_locking = require('setTimeoutAcrossTransitions')(__annotator(
 function(){
 this.$WebStorageMutex_locking = null;
 var f=this.hasLock()?onLock:onError;
@@ -13015,7 +13246,7 @@ storage.removeItem('mutex_' + this.name);}},{'module':'WebStorageMutex','line':1
 module.exports = WebStorageMutex;},{'module':'WebStorageMutex','line':0,'column':0,'name':'$module_WebStorageMutex'}),null);
 /** Path: html/js/downstream/banzai/Banzai.js */
 /**
- * @generated SignedSource<<801ee15d558a628e355e57021b379c9c>>
+ * @generated SignedSource<<01f8d763f095cda001c87f768d98cc15>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -13031,7 +13262,7 @@ module.exports = WebStorageMutex;},{'module':'WebStorageMutex','line':0,'column'
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule Banzai
- */__d('Banzai',['BanzaiAdapter','CurrentUser','ErrorUtils','ExecutionEnvironment','FBJSON','NavigationMetrics','WebStorage','emptyFunction','isInIframe','pageID','setTimeoutAcrossTransitions','WebStorageMutex'],__annotator(function $module_Banzai(global,require,requireDynamic,requireLazy,module,exports,Banzai,CurrentUser,ErrorUtils,ExecutionEnvironment,FBJSON,NavigationMetrics,WebStorage,emptyFunction,isInIframe,pageID,setTimeoutAcrossTransitions){if(require.__markCompiled)require.__markCompiled();
+ */__d('Banzai',['BanzaiAdapter','CurrentUser','ErrorUtils','ExecutionEnvironment','FBJSON','NavigationMetrics','WebStorage','emptyFunction','isInIframe','lowerFacebookDomain','pageID','setTimeoutAcrossTransitions','WebStorageMutex'],__annotator(function $module_Banzai(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -13131,8 +13362,11 @@ module.exports = WebStorageMutex;},{'module':'WebStorageMutex','line':0,'column'
 
 
 
-var adapter=Banzai.adapter;
-var inFrame=isInIframe();
+
+
+
+var adapter=require('BanzaiAdapter').adapter;
+var inFrame=require('isInIframe')();
 
 var STORAGE_PREFIX='bz:';
 
@@ -13149,7 +13383,7 @@ var postBuffer=[];
 var triggerRoute=null;
 
 function canSend(post){
-return post[2] >= Date.now() - (adapter.config.EXPIRY || Banzai.EXPIRY);}__annotator(canSend,{'module':'Banzai','line':135,'column':0,'name':'canSend'});
+return post[2] >= Date.now() - (adapter.config.EXPIRY || require('BanzaiAdapter').EXPIRY);}__annotator(canSend,{'module':'Banzai','line':138,'column':0,'name':'canSend'});
 
 
 
@@ -13163,7 +13397,7 @@ post[3] = (post[3] || 0) + 1;
 
 
 if(!post.__meta.retry && httpStatus >= 400 && httpStatus < 600){
-postBuffer.push(post);}}__annotator(retryPost,{'module':'Banzai','line':140,'column':0,'name':'retryPost'});
+postBuffer.push(post);}}__annotator(retryPost,{'module':'Banzai','line':143,'column':0,'name':'retryPost'});
 
 
 
@@ -13176,20 +13410,20 @@ var t=Date.now() + ms;
 if(!nextSend || t < nextSend){
 nextSend = t;
 clearTimeout(timer);
-timer = setTimeoutAcrossTransitions(send,ms);
-return true;}}__annotator(schedule,{'module':'Banzai','line':158,'column':0,'name':'schedule'});
+timer = require('setTimeoutAcrossTransitions')(send,ms);
+return true;}}__annotator(schedule,{'module':'Banzai','line':161,'column':0,'name':'schedule'});
 
 
 
 
 function send(){
-sendWithCallbacks(null,null);}__annotator(send,{'module':'Banzai','line':169,'column':0,'name':'send'});
+sendWithCallbacks(null,null);}__annotator(send,{'module':'Banzai','line':172,'column':0,'name':'send'});
 
 
 function sendWithCallbacks(onSuccess,onError){
 
 nextSend = null;
-schedule(Banzai.BASIC.delay);
+schedule(require('BanzaiAdapter').BASIC.delay);
 
 
 if(!adapter.readyToSend()){
@@ -13200,7 +13434,7 @@ return;}
 
 
 
-adapter.inform(Banzai.SEND);
+adapter.inform(require('BanzaiAdapter').SEND);
 
 
 
@@ -13245,14 +13479,14 @@ inflightPosts.push(post);
 
 
 
-return m.retry;},{'module':'Banzai','line':199,'column':33}));
+return m.retry;},{'module':'Banzai','line':202,'column':33}));
 
 
 
 
 if(inflightWads.length <= 0){
 
-adapter.inform(Banzai.OK);
+adapter.inform(require('BanzaiAdapter').OK);
 if(onSuccess){
 onSuccess();}
 
@@ -13271,21 +13505,21 @@ adapter.send(inflightWads,__annotator(
 function(){
 
 inflightPosts.forEach(__annotator(function(post){
-post.__meta.status = SENT;},{'module':'Banzai','line':257,'column':28}));
+post.__meta.status = SENT;},{'module':'Banzai','line':260,'column':28}));
 
 if(onSuccess){
-onSuccess();}},{'module':'Banzai','line':255,'column':4}),__annotator(
+onSuccess();}},{'module':'Banzai','line':258,'column':4}),__annotator(
 
 
 function(httpStatus){
 
 
 inflightPosts.forEach(__annotator(function(post){
-retryPost(post,httpStatus);},{'module':'Banzai','line':267,'column':28}));
+retryPost(post,httpStatus);},{'module':'Banzai','line':270,'column':28}));
 
 
 if(onError){
-onError();}},{'module':'Banzai','line':264,'column':4}));}__annotator(sendWithCallbacks,{'module':'Banzai','line':173,'column':0,'name':'sendWithCallbacks'});
+onError();}},{'module':'Banzai','line':267,'column':4}));}__annotator(sendWithCallbacks,{'module':'Banzai','line':176,'column':0,'name':'sendWithCallbacks'});
 
 
 
@@ -13295,7 +13529,7 @@ onError();}},{'module':'Banzai','line':264,'column':4}));}__annotator(sendWithCa
 var storage;
 function initializeStorage(){
 if(!storage){
-var webStore=WebStorage.getLocalStorage();
+var webStore=require('WebStorage').getLocalStorage();
 if(webStore && !inFrame){
 storage = {
 store:__annotator(function store(){
@@ -13304,14 +13538,14 @@ return;}
 
 
 var posts=postBuffer.map(__annotator(function(post){
-return [post[0],post[1],post[2],post[3] || 0,post.__meta];},{'module':'Banzai','line':290,'column':37}));
+return [post[0],post[1],post[2],post[3] || 0,post.__meta];},{'module':'Banzai','line':293,'column':37}));
 
 postBuffer = [];
 
 
 webStore.setItem(
-STORAGE_PREFIX + pageID + '.' + Date.now(),
-FBJSON.stringify(posts));},{'module':'Banzai','line':285,'column':15,'name':'store'}),
+STORAGE_PREFIX + require('pageID') + '.' + Date.now(),
+require('FBJSON').stringify(posts));},{'module':'Banzai','line':288,'column':15,'name':'store'}),
 
 
 
@@ -13345,7 +13579,7 @@ return;}
 
 
 
-var posts=FBJSON.parse(json,module.id);
+var posts=require('FBJSON').parse(json,module.id);
 posts.forEach(__annotator(function(post){
 if(!post){return;}
 
@@ -13357,27 +13591,27 @@ if(!postable){
 return;}
 
 
-var currentUserId=CurrentUser.getID();
+var currentUserId=require('CurrentUser').getID();
 var useridMatch=m.userID === currentUserId;
 var allowUserMismatch=
-Banzai.isEnabled('allow_userid_mismatch') &&
+require('BanzaiAdapter').isEnabled('allow_userid_mismatch') &&
 currentUserId === '0';
 
 if(useridMatch || allowUserMismatch){
 m.status = READY;
-postBuffer.push(post);}},{'module':'Banzai','line':333,'column':28}));},{'module':'Banzai','line':321,'column':25}));
+postBuffer.push(post);}},{'module':'Banzai','line':336,'column':28}));},{'module':'Banzai','line':324,'column':25}));
 
 
 
 
-mutex.unlock();},{'module':'Banzai','line':306,'column':47}));},{'module':'Banzai','line':302,'column':17,'name':'restore'})};}else
+mutex.unlock();},{'module':'Banzai','line':309,'column':47}));},{'module':'Banzai','line':305,'column':17,'name':'restore'})};}else
 
 
 
 {
 storage = {
-store:emptyFunction,
-restore:emptyFunction};}}}__annotator(initializeStorage,{'module':'Banzai','line':280,'column':0,'name':'initializeStorage'});
+store:require('emptyFunction'),
+restore:require('emptyFunction')};}}}__annotator(initializeStorage,{'module':'Banzai','line':283,'column':0,'name':'initializeStorage'});
 
 
 
@@ -13388,44 +13622,44 @@ restore:emptyFunction};}}}__annotator(initializeStorage,{'module':'Banzai','line
 
 
 
-Banzai.SEND = 'Banzai:SEND';
-Banzai.OK = 'Banzai:OK';
-Banzai.ERROR = 'Banzai:ERROR';
-Banzai.SHUTDOWN = 'Banzai:SHUTDOWN';
-Banzai.SEND_TIMEOUT = 15000;
-Banzai.VITAL_WAIT = 1000;
-Banzai.BASIC_WAIT = 60000;
+require('BanzaiAdapter').SEND = 'Banzai:SEND';
+require('BanzaiAdapter').OK = 'Banzai:OK';
+require('BanzaiAdapter').ERROR = 'Banzai:ERROR';
+require('BanzaiAdapter').SHUTDOWN = 'Banzai:SHUTDOWN';
+require('BanzaiAdapter').SEND_TIMEOUT = 15000;
+require('BanzaiAdapter').VITAL_WAIT = 1000;
+require('BanzaiAdapter').BASIC_WAIT = 60000;
 
 
 
-Banzai.EXPIRY = 30 * 60000;
+require('BanzaiAdapter').EXPIRY = 30 * 60000;
 
 
 
 
-Banzai.VITAL = {
-delay:adapter.config.MIN_WAIT || Banzai.VITAL_WAIT};
+require('BanzaiAdapter').VITAL = {
+delay:adapter.config.MIN_WAIT || require('BanzaiAdapter').VITAL_WAIT};
 
-Banzai.BASIC = {
-delay:adapter.config.MAX_WAIT || Banzai.BASIC_WAIT};
+require('BanzaiAdapter').BASIC = {
+delay:adapter.config.MAX_WAIT || require('BanzaiAdapter').BASIC_WAIT};
 
 
-Banzai.FBTRACE = adapter.config.fbtrace,
+require('BanzaiAdapter').FBTRACE = adapter.config.fbtrace,
 
-Banzai.isEnabled = __annotator(function(proj){
+require('BanzaiAdapter').isEnabled = __annotator(function(proj){
 if(__DEV__){
 if(!proj){
 console.error('project name required');}}
 
 
-return adapter.config.gks && adapter.config.gks[proj];},{'module':'Banzai','line':399,'column':19});
+return adapter.config.gks && adapter.config.gks[proj];},{'module':'Banzai','line':402,'column':19});
 
 
 
-Banzai.post = __annotator(function(route,data,options){
+require('BanzaiAdapter').post = __annotator(function(route,data,options){
 
 if(!route){
-ErrorUtils.reportError(
+require('ErrorUtils').reportError(
 new Error('Banzai.post called without specifying a route'));}
 
 
@@ -13437,7 +13671,7 @@ if(adapter.config.disabled){
 return;}
 
 
-if(!ExecutionEnvironment.canUseDOM){
+if(!require('ExecutionEnvironment').canUseDOM){
 return;}
 
 
@@ -13455,7 +13689,7 @@ return;}}}}
 
 
 
-if(inFrame && document.domain == 'facebook.com'){
+if(inFrame && require('lowerFacebookDomain').isValidDocumentDomain()){
 var bz;
 try{
 bz = global.top.require('Banzai');}
@@ -13482,8 +13716,8 @@ Date.now(),
 
 post.__meta = {
 retry:retry === true,
-pageID:pageID,
-userID:CurrentUser.getID(),
+pageID:require('pageID'),
+userID:require('CurrentUser').getID(),
 status:READY};
 
 
@@ -13493,8 +13727,8 @@ if(options.signal){
 post.__meta.status = INFLIGHT;
 
 var payload=[{
-user:CurrentUser.getID(),
-page_id:pageID,
+user:require('CurrentUser').getID(),
+page_id:require('pageID'),
 posts:[post],
 trigger:route}];
 
@@ -13502,10 +13736,10 @@ trigger:route}];
 adapter.send(
 payload,__annotator(
 function(){
-post.__meta.status = SENT;},{'module':'Banzai','line':488,'column':6}),__annotator(
+post.__meta.status = SENT;},{'module':'Banzai','line':491,'column':6}),__annotator(
 
 function(httpStatus){
-retryPost(post,httpStatus);},{'module':'Banzai','line':491,'column':6}),
+retryPost(post,httpStatus);},{'module':'Banzai','line':494,'column':6}),
 
 true);
 
@@ -13522,64 +13756,64 @@ postBuffer.push(post);
 
 var delay=options.delay;
 if(delay == null){
-delay = Banzai.BASIC_WAIT;}
+delay = require('BanzaiAdapter').BASIC_WAIT;}
 
 if(schedule(delay) || !triggerRoute){
-triggerRoute = route;}},{'module':'Banzai','line':409,'column':14});
+triggerRoute = route;}},{'module':'Banzai','line':412,'column':14});
 
 
 
-Banzai.flush = __annotator(function(onSuccess,onError){
+require('BanzaiAdapter').flush = __annotator(function(onSuccess,onError){
 clearTimeout(timer);
 timer = 0;
-sendWithCallbacks(onSuccess,onError);},{'module':'Banzai','line':516,'column':15});
+sendWithCallbacks(onSuccess,onError);},{'module':'Banzai','line':519,'column':15});
 
 
-Banzai.subscribe = adapter.subscribe;
-
-
-
-
-Banzai._schedule = schedule;
+require('BanzaiAdapter').subscribe = adapter.subscribe;
 
 
 
 
-Banzai._store = __annotator(function(unstash){
+require('BanzaiAdapter')._schedule = schedule;
+
+
+
+
+require('BanzaiAdapter')._store = __annotator(function(unstash){
 initializeStorage();
-ErrorUtils.applyWithGuard(storage.store,storage);},{'module':'Banzai','line':532,'column':16});
+require('ErrorUtils').applyWithGuard(storage.store,storage);},{'module':'Banzai','line':535,'column':16});
 
 
 
 
 
-Banzai._restore = __annotator(function(unstash){
+require('BanzaiAdapter')._restore = __annotator(function(unstash){
 initializeStorage();
-ErrorUtils.applyWithGuard(storage.restore,storage);
+require('ErrorUtils').applyWithGuard(storage.restore,storage);
 
 
-schedule(adapter.config.RESTORE_WAIT || Banzai.VITAL_WAIT);},{'module':'Banzai','line':540,'column':18});
+schedule(adapter.config.RESTORE_WAIT || require('BanzaiAdapter').VITAL_WAIT);},{'module':'Banzai','line':543,'column':18});
 
 
 
 
 
-Banzai._unload = __annotator(function(){
+require('BanzaiAdapter')._unload = __annotator(function(){
 
 adapter.cleanup();
-adapter.inform(Banzai.SHUTDOWN);
+adapter.inform(require('BanzaiAdapter').SHUTDOWN);
 initializeStorage();
-ErrorUtils.applyWithGuard(storage.store,storage);},{'module':'Banzai','line':551,'column':17});
+require('ErrorUtils').applyWithGuard(storage.store,storage);},{'module':'Banzai','line':554,'column':17});
 
 
 
 
 
 
-Banzai._testState = __annotator(function(){
+require('BanzaiAdapter')._testState = __annotator(function(){
 return {
 postBuffer:postBuffer,
-triggerRoute:triggerRoute};},{'module':'Banzai','line':563,'column':20});
+triggerRoute:triggerRoute};},{'module':'Banzai','line':566,'column':20});
 
 
 
@@ -13587,21 +13821,21 @@ triggerRoute:triggerRoute};},{'module':'Banzai','line':563,'column':20});
 
 
 
-if(ExecutionEnvironment.canUseDOM){
+if(require('ExecutionEnvironment').canUseDOM){
 
 adapter.setHooks();
 
 
-NavigationMetrics.addListener(
-NavigationMetrics.Events.NAVIGATION_DONE,__annotator(
+require('NavigationMetrics').addListener(
+require('NavigationMetrics').Events.NAVIGATION_DONE,__annotator(
 function(){
-Banzai._restore();
-NavigationMetrics.removeCurrentListener();},{'module':'Banzai','line':581,'column':4}));}
+require('BanzaiAdapter')._restore();
+require('NavigationMetrics').removeCurrentListener();},{'module':'Banzai','line':584,'column':4}));}
 
 
 
 
-module.exports = Banzai;},{'module':'Banzai','line':0,'column':0,'name':'$module_Banzai'}),null);
+module.exports = require('BanzaiAdapter');},{'module':'Banzai','line':0,'column':0,'name':'$module_Banzai'}),null);
 /** Path: html/js/downstream/banzai/BanzaiODS.js */
 /**
  * @generated SignedSource<<6ffe62089e030685fd04dbee08f3a352>>
@@ -13621,7 +13855,7 @@ module.exports = Banzai;},{'module':'Banzai','line':0,'column':0,'name':'$module
  *
  * @providesModule BanzaiODS
  * @typechecks
- */__d('BanzaiODS',['Banzai','invariant'],__annotator(function $module_BanzaiODS(global,require,requireDynamic,requireLazy,module,exports,Banzai,invariant){if(require.__markCompiled)require.__markCompiled();
+ */__d('BanzaiODS',['invariant','Banzai'],__annotator(function $module_BanzaiODS(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -13745,7 +13979,7 @@ _bump(ent,key,n,d);},{params:[[ent,'string','ent'],[key,'string','key'],[n,'?num
 
 flush:__annotator(function(postOptions){return __bodyWrapper(this,arguments,function(){
 for(var k in data) {
-Banzai.post('ods:' + k,data[k],postOptions);}
+require('Banzai').post('ods:' + k,data[k],postOptions);}
 
 data = {};},{params:[[postOptions,'?object','postOptions']]});},{'module':'BanzaiODS','line':141,'column':11},{params:['?object']})};}__annotator(_create,{'module':'BanzaiODS','line':39,'column':0,'name':'_create'});
 
@@ -13756,12 +13990,12 @@ var BanzaiODS=_create();
 BanzaiODS.create = _create;
 
 
-Banzai.subscribe(Banzai.SEND,BanzaiODS.flush.bind(BanzaiODS,null));
+require('Banzai').subscribe(require('Banzai').SEND,BanzaiODS.flush.bind(BanzaiODS,null));
 
 module.exports = BanzaiODS;},{'module':'BanzaiODS','line':0,'column':0,'name':'$module_BanzaiODS'}),null);
 /** Path: html/js/downstream/component_utils/lowerDomain.js */
 /**
- * @generated SignedSource<<465808499ecee493f3df025b1bb852f0>>
+ * @generated SignedSource<<edc73129f8501c75ac42cda6d6db4ee6>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -13777,7 +14011,9 @@ module.exports = BanzaiODS;},{'module':'BanzaiODS','line':0,'column':0,'name':'$
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule lowerDomain
- */__d("lowerDomain",[],__annotator(function $module_lowerDomain(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+ */__d('lowerDomain',['lowerFacebookDomain'],__annotator(function $module_lowerDomain(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
 
 
 
@@ -13786,222 +14022,7 @@ module.exports = BanzaiODS;},{'module':'BanzaiODS','line':0,'column':0,'name':'$
 
 
 if(document.domain.toLowerCase().match(/(^|\.)facebook\..*/)){
-document.domain = "facebook.com";}},{"module":"lowerDomain","line":0,"column":0,"name":"$module_lowerDomain"}),null);
-/** Path: html/js/downstream/core/dom/Scroll.js */
-/**
- * @generated SignedSource<<2839a6d644b3f7e3d0a6828aa2877a55>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule Scroll
- */__d("Scroll",[],__annotator(function $module_Scroll(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-function _isViewportScrollElement(element,doc){
-return !!doc && (
-element === doc.documentElement || element === doc.body);}__annotator(_isViewportScrollElement,{"module":"Scroll","line":25,"column":0,"name":"_isViewportScrollElement"});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var Scroll={
-
-
-
-
-getTop:__annotator(function(element){
-var doc=element.ownerDocument;
-return _isViewportScrollElement(element,doc)?
-
-
-
-doc.body.scrollTop || doc.documentElement.scrollTop:
-element.scrollTop;},{"module":"Scroll","line":48,"column":10}),
-
-
-
-
-
-
-setTop:__annotator(function(element,newTop){
-var doc=element.ownerDocument;
-if(_isViewportScrollElement(element,doc)){
-doc.body.scrollTop = doc.documentElement.scrollTop = newTop;}else
-{
-element.scrollTop = newTop;}},{"module":"Scroll","line":62,"column":10}),
-
-
-
-
-
-
-
-getLeft:__annotator(function(element){
-var doc=element.ownerDocument;
-return _isViewportScrollElement(element,doc)?
-doc.body.scrollLeft || doc.documentElement.scrollLeft:
-element.scrollLeft;},{"module":"Scroll","line":75,"column":11}),
-
-
-
-
-
-
-setLeft:__annotator(function(element,newLeft){
-var doc=element.ownerDocument;
-if(_isViewportScrollElement(element,doc)){
-doc.body.scrollLeft = doc.documentElement.scrollLeft = newLeft;}else
-{
-element.scrollLeft = newLeft;}},{"module":"Scroll","line":86,"column":11})};
-
-
-
-
-module.exports = Scroll;},{"module":"Scroll","line":0,"column":0,"name":"$module_Scroll"}),null);
-/** Path: html/js/downstream/core/dom/isNode.js */
-/**
- * @generated SignedSource<<29f1b57d5f1e2d8067bb243ab98ca1f4>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule isNode
- * @typechecks
- */__d('isNode',[],__annotator(function $module_isNode(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-function isNode(object){return __bodyWrapper(this,arguments,function(){
-return !!(object && (
-typeof Node === 'function'?object instanceof Node:
-typeof object === 'object' &&
-typeof object.nodeType === 'number' &&
-typeof object.nodeName === 'string'));},{returns:'boolean'});}__annotator(isNode,{'module':'isNode','line':25,'column':0,'name':'isNode'},{returns:'boolean'});
-
-
-
-module.exports = isNode;},{'module':'isNode','line':0,'column':0,'name':'$module_isNode'}),null);
-/** Path: html/js/downstream/core/dom/isTextNode.js */
-/**
- * @generated SignedSource<<a6d3ad442df1fb39fdad82b239b69cf8>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule isTextNode
- * @typechecks
- */__d('isTextNode',['isNode'],__annotator(function $module_isTextNode(global,require,requireDynamic,requireLazy,module,exports,isNode){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-function isTextNode(object){return __bodyWrapper(this,arguments,function(){
-return isNode(object) && object.nodeType == 3;},{returns:'boolean'});}__annotator(isTextNode,{'module':'isTextNode','line':27,'column':0,'name':'isTextNode'},{returns:'boolean'});
-
-
-module.exports = isTextNode;},{'module':'isTextNode','line':0,'column':0,'name':'$module_isTextNode'}),null);
-/** Path: html/js/downstream/core/dom/containsNode.js */
-/**
- * @generated SignedSource<<3287e01149a10d8dc58e7b322f55bfbc>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule containsNode
- * @typechecks
- */__d('containsNode',['isTextNode'],__annotator(function $module_containsNode(global,require,requireDynamic,requireLazy,module,exports,isTextNode){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-
-
-
-
-
-function containsNode(outerNode,innerNode){return __bodyWrapper(this,arguments,function(){
-if(!outerNode || !innerNode){
-return false;}else
-if(outerNode === innerNode){
-return true;}else
-if(isTextNode(outerNode)){
-return false;}else
-if(isTextNode(innerNode)){
-return containsNode(outerNode,innerNode.parentNode);}else
-if(outerNode.contains){
-return outerNode.contains(innerNode);}else
-if(outerNode.compareDocumentPosition){
-return !!(outerNode.compareDocumentPosition(innerNode) & 16);}else
-{
-return false;}},{params:[[outerNode,'?DOMNode','outerNode'],[innerNode,'?DOMNode','innerNode']],returns:'boolean'});}__annotator(containsNode,{'module':'containsNode','line':32,'column':0,'name':'containsNode'},{params:['?DOMNode','?DOMNode'],returns:'boolean'});
-
-
-
-module.exports = containsNode;},{'module':'containsNode','line':0,'column':0,'name':'$module_containsNode'}),null);
+require('lowerFacebookDomain')();}},{'module':'lowerDomain','line':0,'column':0,'name':'$module_lowerDomain'}),null);
 /** Path: html/js/downstream/core/dom/getActiveElement.js */
 /**
  * @generated SignedSource<<034376a693284fd416aef08098c1ea67>>
@@ -14038,127 +14059,9 @@ return document.body;}},{returns:"?HTMLElement"});}__annotator(getActiveElement,
 
 
 module.exports = getActiveElement;},{"module":"getActiveElement","line":0,"column":0,"name":"$module_getActiveElement"}),null);
-/** Path: html/js/downstream/core/dom/getDocumentScrollElement.js */
-/**
- * @generated SignedSource<<1f8bddb473d73c9e3cc3bc79cf6df9bf>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule getDocumentScrollElement
- * @typechecks
- */__d('getDocumentScrollElement',[],__annotator(function $module_getDocumentScrollElement(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
-
-'use strict';
-
-var isWebkit=
-typeof navigator !== 'undefined' &&
-navigator.userAgent.indexOf('AppleWebKit') > -1;
-
-
-
-
-
-
-
-
-
-
-function getDocumentScrollElement(doc){return __bodyWrapper(this,arguments,function(){
-doc = doc || document;
-return !isWebkit && doc.compatMode === 'CSS1Compat'?
-doc.documentElement:
-doc.body;},{params:[[doc,'?DOMDocument','doc']],returns:'?HTMLElement'});}__annotator(getDocumentScrollElement,{'module':'getDocumentScrollElement','line':36,'column':0,'name':'getDocumentScrollElement'},{params:['?DOMDocument'],returns:'?HTMLElement'});
-
-
-module.exports = getDocumentScrollElement;},{'module':'getDocumentScrollElement','line':0,'column':0,'name':'$module_getDocumentScrollElement'}),null);
-/** Path: html/js/downstream/core/dom/isElementNode.js */
-/**
- * @generated SignedSource<<98ed910d79603f6436cd8b859a1d8abc>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule isElementNode
- * @typechecks
- */__d('isElementNode',['isNode'],__annotator(function $module_isElementNode(global,require,requireDynamic,requireLazy,module,exports,isNode){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-
-
-
-function isElementNode(element){return __bodyWrapper(this,arguments,function(){
-return isNode(element) && element.nodeType == 1;},{returns:'boolean'});}__annotator(isElementNode,{'module':'isElementNode','line':30,'column':0,'name':'isElementNode'},{returns:'boolean'});
-
-
-module.exports = isElementNode;},{'module':'isElementNode','line':0,'column':0,'name':'$module_isElementNode'}),null);
-/** Path: html/js/downstream/core/getObjectValues.js */
-/**
- * @generated SignedSource<<7f38449ed45d2af16cce28984455ff69>>
- *
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * !! This file is a check-in of a static_upstream project!      !!
- * !!                                                            !!
- * !! You should not modify this file directly. Instead:         !!
- * !! 1) Use `fjs use-upstream` to temporarily replace this with !!
- * !!    the latest version from upstream.                       !!
- * !! 2) Make your changes, test them, etc.                      !!
- * !! 3) Use `fjs push-upstream` to copy your changes back to    !!
- * !!    static_upstream.                                        !!
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- *
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule getObjectValues
- * @typechecks
- */__d("getObjectValues",[],__annotator(function $module_getObjectValues(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-
-
-
-function getObjectValues(obj){return __bodyWrapper(this,arguments,function(){
-var values=[];
-for(var key in obj) {
-values.push(obj[key]);}
-
-return values;},{params:[[obj,"object","obj"]],returns:"array"});}__annotator(getObjectValues,{"module":"getObjectValues","line":30,"column":0,"name":"getObjectValues"},{params:["object"],returns:"array"});
-
-
-module.exports = getObjectValues;},{"module":"getObjectValues","line":0,"column":0,"name":"$module_getObjectValues"}),null);
 /** Path: html/js/downstream/logging/ScriptPath.js */
 /**
- * @generated SignedSource<<12e9018d81ca8b6561f190bd0747f40b>>
+ * @generated SignedSource<<5a50a655be67c319c1280b574b997be1>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -14175,7 +14078,7 @@ module.exports = getObjectValues;},{"module":"getObjectValues","line":0,"column"
  *
  * @providesModule ScriptPath
  * @typechecks
- */__d('ScriptPath',['WebStorage','ErrorUtils','isInIframe'],__annotator(function $module_ScriptPath(global,require,requireDynamic,requireLazy,module,exports,WebStorage,ErrorUtils,isInIframe){if(require.__markCompiled)require.__markCompiled();
+ */__d('ScriptPath',['WebStorage','ErrorUtils','isInIframe'],__annotator(function $module_ScriptPath(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -14202,7 +14105,7 @@ module.exports = getObjectValues;},{"module":"getObjectValues","line":0,"column"
 var PAGEINFO_NAME='sp_pi';
 var RETENTION_TIME=1000 * 30;
 
-var _webStore=WebStorage.getLocalStorage();
+var _webStore=require('WebStorage').getLocalStorage();
 
 var _sourcePageInfo=null;
 var _pageInfo=null;
@@ -14245,22 +14148,23 @@ delete _callbacks[token];}},{params:[[token,'number','token']]});}__annotator(_u
 
 
 
-function _notify(cause){return __bodyWrapper(this,arguments,function(){
+function _notify(cause,extraData){return __bodyWrapper(this,arguments,function(){
 Object.keys(_callbacks).forEach(__annotator(function(key){
-ErrorUtils.applyWithGuard(_callbacks[key],null,[{
+require('ErrorUtils').applyWithGuard(_callbacks[key],null,[{
 source:_sourcePageInfo,
 dest:_pageInfo,
-cause:cause}]);},{'module':'ScriptPath','line':90,'column':34}));},{params:[[cause,'?string','cause']]});}__annotator(_notify,{'module':'ScriptPath','line':89,'column':0,'name':'_notify'},{params:['?string']});
+cause:cause,
+extraData:extraData}]);},{'module':'ScriptPath','line':90,'column':34}));},{params:[[cause,'?string','cause'],[extraData,'?object','extraData']]});}__annotator(_notify,{'module':'ScriptPath','line':89,'column':0,'name':'_notify'},{params:['?string','?object']});
 
 
 
 
 function _getScriptPath(){
-return _pageInfo?_pageInfo.scriptPath:undefined;}__annotator(_getScriptPath,{'module':'ScriptPath','line':99,'column':0,'name':'_getScriptPath'});
+return _pageInfo?_pageInfo.scriptPath:undefined;}__annotator(_getScriptPath,{'module':'ScriptPath','line':100,'column':0,'name':'_getScriptPath'});
 
 
 function _storeScriptPathInfo(){
-if(!_webStore || isInIframe()){
+if(!_webStore || require('isInIframe')()){
 return;}
 
 _webStore.setItem(
@@ -14268,7 +14172,7 @@ PAGEINFO_NAME,
 JSON.stringify({
 pageInfo:_pageInfo,
 clickPoint:_lastClickPointInfo,
-time:Date.now()}));}__annotator(_storeScriptPathInfo,{'module':'ScriptPath','line':103,'column':0,'name':'_storeScriptPathInfo'});
+time:Date.now()}));}__annotator(_storeScriptPathInfo,{'module':'ScriptPath','line':104,'column':0,'name':'_storeScriptPathInfo'});
 
 
 
@@ -14288,7 +14192,7 @@ return;}
 _pageInfo = info.pageInfo;
 _lastClickPointInfo = info.clickPoint;
 if(_pageInfo){
-_pageInfo.restored = true;}}}}__annotator(_loadScriptPathInfo,{'module':'ScriptPath','line':117,'column':0,'name':'_loadScriptPathInfo'});
+_pageInfo.restored = true;}}}}__annotator(_loadScriptPathInfo,{'module':'ScriptPath','line':118,'column':0,'name':'_loadScriptPathInfo'});
 
 
 
@@ -14314,10 +14218,10 @@ _overlayViewStack = [];
 
 window._script_path = scriptPath;
 
-_notify();},{params:[[scriptPath,'string','scriptPath'],[categoryToken,'?string','categoryToken'],[extraData,'?object','extraData']]});},{'module':'ScriptPath','line':142,'column':7},{params:['string','?string','?object']}),
+_notify();},{params:[[scriptPath,'string','scriptPath'],[categoryToken,'?string','categoryToken'],[extraData,'?object','extraData']]});},{'module':'ScriptPath','line':143,'column':7},{params:['string','?string','?object']}),
 
 
-openOverlayView:__annotator(function(endpoint){return __bodyWrapper(this,arguments,function(){
+openOverlayView:__annotator(function(endpoint,extraData){return __bodyWrapper(this,arguments,function(){
 if(!endpoint){
 return;}
 
@@ -14326,11 +14230,11 @@ if(stackSize === 0 || _overlayViewStack[stackSize - 1] !== endpoint){
 _sourcePageInfo = Object.assign({},_pageInfo);
 _pageInfo.topViewEndpoint = endpoint;
 _overlayViewStack.push(endpoint);
-_notify(CAUSE.OPEN_OVERLAY_VIEW);}},{params:[[endpoint,'string','endpoint']]});},{'module':'ScriptPath','line':161,'column':17},{params:['string']}),
+_notify(CAUSE.OPEN_OVERLAY_VIEW,extraData);}},{params:[[endpoint,'string','endpoint'],[extraData,'?object','extraData']]});},{'module':'ScriptPath','line':162,'column':17},{params:['string','?object']}),
 
 
 
-closeOverlayView:__annotator(function(endpoint){return __bodyWrapper(this,arguments,function(){
+closeOverlayView:__annotator(function(endpoint,extraData){return __bodyWrapper(this,arguments,function(){
 var index=_overlayViewStack.lastIndexOf(endpoint);
 if(index === -1){
 return;}
@@ -14342,7 +14246,7 @@ _pageInfo.topViewEndpoint = _overlayViewStack[index - 1];}else
 _pageInfo.topViewEndpoint = null;}
 
 _overlayViewStack = _overlayViewStack.slice(0,index);
-_notify(CAUSE.CLOSE_OVERLAY_VIEW);},{params:[[endpoint,'string','endpoint']]});},{'module':'ScriptPath','line':174,'column':18},{params:['string']}),
+_notify(CAUSE.CLOSE_OVERLAY_VIEW,extraData);},{params:[[endpoint,'string','endpoint'],[extraData,'?object','extraData']]});},{'module':'ScriptPath','line':175,'column':18},{params:['string','?object']}),
 
 
 
@@ -14350,11 +14254,11 @@ _notify(CAUSE.CLOSE_OVERLAY_VIEW);},{params:[[endpoint,'string','endpoint']]});}
 
 setClickPointInfo:__annotator(function(clickPointInfo){
 _lastClickPointInfo = clickPointInfo;
-_storeScriptPathInfo();},{'module':'ScriptPath','line':192,'column':21}),
+_storeScriptPathInfo();},{'module':'ScriptPath','line':193,'column':21}),
 
 
 getClickPointInfo:__annotator(function(){
-return _lastClickPointInfo;},{'module':'ScriptPath','line':197,'column':21}),
+return _lastClickPointInfo;},{'module':'ScriptPath','line':198,'column':21}),
 
 
 
@@ -14369,7 +14273,7 @@ getScriptPath:_getScriptPath,
 
 
 getCategoryToken:__annotator(function(){return __bodyWrapper(this,arguments,function(){
-return _pageInfo?_pageInfo.categoryToken:undefined;},{returns:'?string'});},{'module':'ScriptPath','line':212,'column':20},{returns:'?string'}),
+return _pageInfo?_pageInfo.categoryToken:undefined;},{returns:'?string'});},{'module':'ScriptPath','line':213,'column':20},{returns:'?string'}),
 
 
 
@@ -14380,36 +14284,36 @@ getTopViewEndpoint:__annotator(function(){return __bodyWrapper(this,arguments,fu
 var stackSize=_overlayViewStack.length;
 return stackSize > 0?
 _overlayViewStack[stackSize - 1]:
-_getScriptPath();},{returns:'?string'});},{'module':'ScriptPath','line':220,'column':22},{returns:'?string'}),
+_getScriptPath();},{returns:'?string'});},{'module':'ScriptPath','line':221,'column':22},{returns:'?string'}),
 
 
 getPageInfo:__annotator(function(){return __bodyWrapper(this,arguments,function(){
-return _pageInfo;},{returns:'?object'});},{'module':'ScriptPath','line':227,'column':15},{returns:'?object'}),
+return _pageInfo;},{returns:'?object'});},{'module':'ScriptPath','line':228,'column':15},{returns:'?object'}),
 
 
 getSourcePageInfo:__annotator(function(){return __bodyWrapper(this,arguments,function(){
-return _sourcePageInfo;},{returns:'?object'});},{'module':'ScriptPath','line':231,'column':21},{returns:'?object'}),
+return _sourcePageInfo;},{returns:'?object'});},{'module':'ScriptPath','line':232,'column':21},{returns:'?object'}),
 
 
 subscribe:__annotator(function(callback){return __bodyWrapper(this,arguments,function(){
-return _registerCallback(callback);},{params:[[callback,'function','callback']],returns:'number'});},{'module':'ScriptPath','line':235,'column':13},{params:['function'],returns:'number'}),
+return _registerCallback(callback);},{params:[[callback,'function','callback']],returns:'number'});},{'module':'ScriptPath','line':236,'column':13},{params:['function'],returns:'number'}),
 
 
 unsubscribe:__annotator(function(token){return __bodyWrapper(this,arguments,function(){
-_unregisterCallback(token);},{params:[[token,'number','token']]});},{'module':'ScriptPath','line':239,'column':15},{params:['number']}),
+_unregisterCallback(token);},{params:[[token,'number','token']]});},{'module':'ScriptPath','line':240,'column':15},{params:['number']}),
 
 
 shutdown:__annotator(function(){
-_storeScriptPathInfo();},{'module':'ScriptPath','line':243,'column':12})};
+_storeScriptPathInfo();},{'module':'ScriptPath','line':244,'column':12})};
 
 
 
 ScriptPath.CAUSE = CAUSE;
 
 module.exports = ScriptPath;},{'module':'ScriptPath','line':0,'column':0,'name':'$module_ScriptPath'}),null);
-/** Path: html/js/downstream/useragent/UserAgent_DEPRECATED.js */
+/** Path: html/js/downstream/utils/ReloadPage.js */
 /**
- * @generated SignedSource<<ddd5a4505133b096155b2aaa9dec8832>>
+ * @generated SignedSource<<89d17c05af1045e7c4e31e5e8f27294d>>
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * !! This file is a check-in of a static_upstream project!      !!
@@ -14424,285 +14328,23 @@ module.exports = ScriptPath;},{'module':'ScriptPath','line':0,'column':0,'name':
  *
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
- * @providesModule UserAgent_DEPRECATED
- */__d('UserAgent_DEPRECATED',[],__annotator(function $module_UserAgent_DEPRECATED(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+ * @providesModule ReloadPage
+ *
+ */__d("ReloadPage",[],__annotator(function $module_ReloadPage(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
 
+var ReloadPage={
+now:__annotator(function(forcedReload){
+global.window.location.reload(forcedReload);},{"module":"ReloadPage","line":25,"column":5}),
 
+delay:__annotator(function(timeout){
+global.setTimeout(this.now.bind(this),timeout);},{"module":"ReloadPage","line":28,"column":7})};
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var _populated=false;
-
-
-var _ie,_firefox,_opera,_webkit,_chrome;
-
-
-var _ie_real_version;
-
-
-var _osx,_windows,_linux,_android;
-
-
-var _win64;
-
-
-var _iphone,_ipad,_native;
-
-var _mobile;
-
-function _populate(){
-if(_populated){
-return;}
-
-
-_populated = true;
-
-
-
-
-
-
-var uas=navigator.userAgent;
-var agent=/(?:MSIE.(\d+\.\d+))|(?:(?:Firefox|GranParadiso|Iceweasel).(\d+\.\d+))|(?:Opera(?:.+Version.|.)(\d+\.\d+))|(?:AppleWebKit.(\d+(?:\.\d+)?))|(?:Trident\/\d+\.\d+.*rv:(\d+\.\d+))/.exec(uas);
-var os=/(Mac OS X)|(Windows)|(Linux)/.exec(uas);
-
-_iphone = /\b(iPhone|iP[ao]d)/.exec(uas);
-_ipad = /\b(iP[ao]d)/.exec(uas);
-_android = /Android/i.exec(uas);
-_native = /FBAN\/\w+;/i.exec(uas);
-_mobile = /Mobile/i.exec(uas);
-
-
-
-
-
-
-_win64 = !!/Win64/.exec(uas);
-
-if(agent){
-_ie = agent[1]?parseFloat(agent[1]):
-agent[5]?parseFloat(agent[5]):NaN;
-
-if(_ie && document && document.documentMode){
-_ie = document.documentMode;}
-
-
-var trident=/(?:Trident\/(\d+.\d+))/.exec(uas);
-_ie_real_version = trident?parseFloat(trident[1]) + 4:_ie;
-
-_firefox = agent[2]?parseFloat(agent[2]):NaN;
-_opera = agent[3]?parseFloat(agent[3]):NaN;
-_webkit = agent[4]?parseFloat(agent[4]):NaN;
-if(_webkit){
-
-
-
-agent = /(?:Chrome\/(\d+\.\d+))/.exec(uas);
-_chrome = agent && agent[1]?parseFloat(agent[1]):NaN;}else
-{
-_chrome = NaN;}}else
-
-{
-_ie = _firefox = _opera = _chrome = _webkit = NaN;}
-
-
-if(os){
-if(os[1]){
-
-
-
-
-
-var ver=/(?:Mac OS X (\d+(?:[._]\d+)?))/.exec(uas);
-
-_osx = ver?parseFloat(ver[1].replace('_','.')):true;}else
-{
-_osx = false;}
-
-_windows = !!os[2];
-_linux = !!os[3];}else
-{
-_osx = _windows = _linux = false;}}__annotator(_populate,{'module':'UserAgent_DEPRECATED','line':79,'column':0,'name':'_populate'});
-
-
-
-var UserAgent_DEPRECATED={
-
-
-
-
-
-
-
-ie:__annotator(function(){
-return _populate() || _ie;},{'module':'UserAgent_DEPRECATED','line':163,'column':6}),
-
-
-
-
-
-
-
-
-ieCompatibilityMode:__annotator(function(){
-return _populate() || _ie_real_version > _ie;},{'module':'UserAgent_DEPRECATED','line':173,'column':23}),
-
-
-
-
-
-
-
-
-ie64:__annotator(function(){
-return UserAgent_DEPRECATED.ie() && _win64;},{'module':'UserAgent_DEPRECATED','line':183,'column':8}),
-
-
-
-
-
-
-
-
-firefox:__annotator(function(){
-return _populate() || _firefox;},{'module':'UserAgent_DEPRECATED','line':193,'column':11}),
-
-
-
-
-
-
-
-
-
-opera:__annotator(function(){
-return _populate() || _opera;},{'module':'UserAgent_DEPRECATED','line':204,'column':9}),
-
-
-
-
-
-
-
-
-
-webkit:__annotator(function(){
-return _populate() || _webkit;},{'module':'UserAgent_DEPRECATED','line':215,'column':10}),
-
-
-
-
-
-
-safari:__annotator(function(){
-return UserAgent_DEPRECATED.webkit();},{'module':'UserAgent_DEPRECATED','line':223,'column':10}),
-
-
-
-
-
-
-
-
-chrome:__annotator(function(){
-return _populate() || _chrome;},{'module':'UserAgent_DEPRECATED','line':233,'column':11}),
-
-
-
-
-
-
-
-
-windows:__annotator(function(){
-return _populate() || _windows;},{'module':'UserAgent_DEPRECATED','line':243,'column':11}),
-
-
-
-
-
-
-
-
-
-osx:__annotator(function(){
-return _populate() || _osx;},{'module':'UserAgent_DEPRECATED','line':254,'column':7}),
-
-
-
-
-
-
-
-linux:__annotator(function(){
-return _populate() || _linux;},{'module':'UserAgent_DEPRECATED','line':263,'column':9}),
-
-
-
-
-
-
-
-
-iphone:__annotator(function(){
-return _populate() || _iphone;},{'module':'UserAgent_DEPRECATED','line':273,'column':10}),
-
-
-mobile:__annotator(function(){
-return _populate() || (_iphone || _ipad || _android || _mobile);},{'module':'UserAgent_DEPRECATED','line':277,'column':10}),
-
-
-nativeApp:__annotator(function(){
-
-return _populate() || _native;},{'module':'UserAgent_DEPRECATED','line':281,'column':13}),
-
-
-android:__annotator(function(){
-return _populate() || _android;},{'module':'UserAgent_DEPRECATED','line':286,'column':11}),
-
-
-ipad:__annotator(function(){
-return _populate() || _ipad;},{'module':'UserAgent_DEPRECATED','line':290,'column':8})};
-
-
-
-module.exports = UserAgent_DEPRECATED;},{'module':'UserAgent_DEPRECATED','line':0,'column':0,'name':'$module_UserAgent_DEPRECATED'}),null);
+module.exports = ReloadPage;},{"module":"ReloadPage","line":0,"column":0,"name":"$module_ReloadPage"}),null);
 /** Path: html/js/emptyFunction.js */
 /**
  * @providesLegacy emptyFunction
@@ -14764,13 +14406,13 @@ return r;}},{'module':'event-form-bubbling','line':37,'column':30});},{'module':
 /** Path: html/js/lib/event/onload.js */
 /**
  * @providesLegacy onload
- */__d('legacy:onload',['Run','PageEvents'],__annotator(function $module_legacy_onload(global,require,requireDynamic,requireLazy,__DO_NOT_USE__module,__DO_NOT_USE__exports,Run){if(require.__markCompiled)require.__markCompiled();
+ */__d('legacy:onload',['Run','PageEvents'],__annotator(function $module_legacy_onload(global,require,requireDynamic,requireLazy){if(require.__markCompiled)require.__markCompiled();
 
 
 
 global.PageEvents = require('PageEvents');
 
-global.onloadRegister_DEPRECATED = Run.onLoad;
+global.onloadRegister_DEPRECATED = require('Run').onLoad;
 global.onloadRegister = __annotator(function(){
 if(__DEV__){
 console.warn(
@@ -14778,10 +14420,10 @@ console.warn(
 'onloadRegister_DEPRECATED or modularize the entire call stack and its ' +
 'dependencies.');}
 
-return Run.onLoad.apply(this,arguments);},{'module':'legacy:onload','line':10,'column':24});
+return require('Run').onLoad.apply(this,arguments);},{'module':'legacy:onload','line':10,'column':24});
 
 
-global.onafterloadRegister_DEPRECATED = Run.onAfterLoad;
+global.onafterloadRegister_DEPRECATED = require('Run').onAfterLoad;
 global.onafterloadRegister = __annotator(function(){
 if(__DEV__){
 console.warn(
@@ -14789,19 +14431,19 @@ console.warn(
 'to onafterloadRegister_DEPRECATED or modularize the entire call stack ' +
 'and its dependencies.');}
 
-return Run.onAfterLoad.apply(this,arguments);},{'module':'legacy:onload','line':21,'column':29});
+return require('Run').onAfterLoad.apply(this,arguments);},{'module':'legacy:onload','line':21,'column':29});
 
 
-global.onleaveRegister = Run.onLeave;
-global.onbeforeunloadRegister = Run.onBeforeUnload;
-global.onunloadRegister = Run.onUnload;},{'module':'legacy:onload','line':0,'column':0,'name':'$module_legacy_onload'}),3);
+global.onleaveRegister = require('Run').onLeave;
+global.onbeforeunloadRegister = require('Run').onBeforeUnload;
+global.onunloadRegister = require('Run').onUnload;},{'module':'legacy:onload','line':0,'column':0,'name':'$module_legacy_onload'}),3);
 /** Path: html/js/lib/event/wait_for_load.js */
 /**
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule wait_for_load
  * @runWhenReady_DEPRECATED
- */__d('wait_for_load',['Bootloader','Run'],__annotator(function $module_wait_for_load(global,require,requireDynamic,requireLazy,module,exports,Bootloader,Run){if(require.__markCompiled)require.__markCompiled();
+ */__d('wait_for_load',['Bootloader','Run'],__annotator(function $module_wait_for_load(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -14818,7 +14460,7 @@ return window.domready && f.call(element);}__annotator(run_if_loaded,{'module':'
 
 function run_with(element,deps,f){
 
-Bootloader.loadComponents.call(Bootloader,deps,f.bind(element));
+require('Bootloader').loadComponents.call(require('Bootloader'),deps,f.bind(element));
 return false;}__annotator(run_with,{'module':'wait_for_load','line':21,'column':0,'name':'run_with'});
 
 
@@ -14845,14 +14487,14 @@ return f();}
 switch((e || event).type){
 case 'load':
 case 'focus':
-Run.onAfterLoad(f);
+require('Run').onAfterLoad(f);
 return;
 case 'click':
 var es=element.style,
 ds=document.body.style;
 
 es.cursor = ds.cursor = 'progress';
-Run.onAfterLoad(__annotator(function(){
+require('Run').onAfterLoad(__annotator(function(){
 es.cursor = ds.cursor = '';
 if(element.tagName.toLowerCase() == 'a'){
 
@@ -14899,7 +14541,9 @@ global.JSCC = require('JSCC');},{'module':'legacy:constructor-cache','line':0,'c
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule goURI
- */__d('goURI',['URISchemes'],__annotator(function $module_goURI(global,require,requireDynamic,requireLazy,module,exports,URISchemes){if(require.__markCompiled)require.__markCompiled();
+ */__d('goURI',['ReloadPage','URISchemes'],__annotator(function $module_goURI(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
+
+
 
 
 
@@ -14911,15 +14555,15 @@ global.JSCC = require('JSCC');},{'module':'legacy:constructor-cache','line':0,'c
 function goURI(uri,force,replace){
 uri = uri.toString();
 if(/^([^.:/?#]+):/.test(uri) &&
-!URISchemes.isAllowed(RegExp.$1)){
+!require('URISchemes').isAllowed(RegExp.$1)){
 throw new Error('goURI: URI scheme rejected, URI: ' + uri);}
 
 if(!force && global.PageTransitions){
 global.PageTransitions.go(uri,replace);}else
 if(window.location.href == uri){
-window.location.reload();}else
+require('ReloadPage').now();}else
 {
-window.location.href = uri;}}__annotator(goURI,{'module':'goURI','line':14,'column':0,'name':'goURI'});
+window.location.href = uri;}}__annotator(goURI,{'module':'goURI','line':16,'column':0,'name':'goURI'});
 
 ;
 
@@ -14935,7 +14579,7 @@ global.goURI = require('goURI');},{'module':'legacy:goURI','line':0,'column':0,'
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule InitialJSLoader
- */__d('InitialJSLoader',['Arbiter','Bootloader','PageEvents','Run','ServerJS'],__annotator(function $module_InitialJSLoader(global,require,requireDynamic,requireLazy,module,exports,Arbiter,Bootloader,PageEvents,Run,ServerJS){if(require.__markCompiled)require.__markCompiled();
+ */__d('InitialJSLoader',['Arbiter','Bootloader','PageEvents','Run','ServerJS'],__annotator(function $module_InitialJSLoader(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -14952,13 +14596,13 @@ INITIAL_JS_READY:'BOOTLOAD/JSREADY',
 
 
 loadOnDOMContentReady:__annotator(function(resources,delay){
-Arbiter.subscribe(PageEvents.BIGPIPE_DOMREADY,__annotator(function(){
+require('Arbiter').subscribe(require('PageEvents').BIGPIPE_DOMREADY,__annotator(function(){
 function loadAndNotify(){
-Bootloader.loadResources(resources,__annotator(function(){
-Arbiter.inform(
+require('Bootloader').loadResources(resources,__annotator(function(){
+require('Arbiter').inform(
 InitialJSLoader.INITIAL_JS_READY,
 true,
-Arbiter.BEHAVIOR_STATE);},{'module':'InitialJSLoader','line':24,'column':44}));}__annotator(loadAndNotify,{'module':'InitialJSLoader','line':23,'column':6,'name':'loadAndNotify'});
+require('Arbiter').BEHAVIOR_STATE);},{'module':'InitialJSLoader','line':24,'column':44}));}__annotator(loadAndNotify,{'module':'InitialJSLoader','line':23,'column':6,'name':'loadAndNotify'});
 
 
 
@@ -14971,1710 +14615,19 @@ loadAndNotify();}},{'module':'InitialJSLoader','line':22,'column':51}));},{'modu
 
 
 handleServerJS:__annotator(function(json){
-var serverJS=new ServerJS();
+var serverJS=new (require('ServerJS'))();
 serverJS.handle(json);
-Run.onAfterLoad(serverJS.cleanup.bind(serverJS));},{'module':'InitialJSLoader','line':40,'column':18})};
+require('Run').onAfterLoad(serverJS.cleanup.bind(serverJS));},{'module':'InitialJSLoader','line':40,'column':18})};
 
 
 
 module.exports = InitialJSLoader;},{'module':'InitialJSLoader','line':0,'column':0,'name':'$module_InitialJSLoader'}),null);
-/** Path: html/js/modules/DataStore.js */
-/**
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule DataStore
- */__d('DataStore',['isEmpty'],__annotator(function $module_DataStore(global,require,requireDynamic,requireLazy,module,exports,isEmpty){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var _storage={};
-var _tokenCounter=1;
-
-
-
-
-
-
-
-function _getToken(namespace){
-if(typeof namespace == 'string'){
-return 'str_' + namespace;}else
-{
-
-
-
-
-
-return 'elem_' +
-(namespace.__FB_TOKEN || (
-namespace.__FB_TOKEN = [_tokenCounter++]))[0];}}__annotator(_getToken,{'module':'DataStore','line':33,'column':0,'name':'_getToken'});
-
-
-
-
-
-
-
-
-
-
-function _getStorage(namespace){
-var token=_getToken(namespace);
-return _storage[token] || (_storage[token] = {});}__annotator(_getStorage,{'module':'DataStore','line':55,'column':0,'name':'_getStorage'});
-
-
-var DataStore={
-
-
-
-
-
-
-
-
-
-set:__annotator(function(namespace,key,value){
-if(!namespace){
-throw new TypeError(
-'DataStore.set: namespace is required, got ' + typeof namespace);}
-
-var dataStore=_getStorage(namespace);
-dataStore[key] = value;
-return namespace;},{'module':'DataStore','line':70,'column':7}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-get:__annotator(function(namespace,key,defaultValue){
-if(!namespace){
-throw new TypeError(
-'DataStore.get: namespace is required, got ' + typeof namespace);}
-
-var dataStore=_getStorage(namespace);
-var value=dataStore[key];
-
-
-
-if(typeof value === 'undefined' && namespace.getAttribute){
-
-
-
-
-
-if(namespace.hasAttribute && !namespace.hasAttribute('data-' + key)){
-value = undefined;}else
-{
-var attributeValue=namespace.getAttribute('data-' + key);
-
-value = null === attributeValue?undefined:attributeValue;}}
-
-
-
-if(defaultValue !== undefined && value === undefined){
-value = dataStore[key] = defaultValue;}
-
-return value;},{'module':'DataStore','line':95,'column':7}),
-
-
-
-
-
-
-
-
-
-remove:__annotator(function(namespace,key){
-if(!namespace){
-throw new TypeError(
-'DataStore.remove: namespace is required, got ' + typeof namespace);}
-
-var dataStore=_getStorage(namespace);
-var value=dataStore[key];
-delete dataStore[key];
-
-
-
-if(isEmpty(dataStore)){
-DataStore.purge(namespace);}
-
-
-return value;},{'module':'DataStore','line':133,'column':10}),
-
-
-
-
-
-
-
-purge:__annotator(function(namespace){
-delete _storage[_getToken(namespace)];},{'module':'DataStore','line':156,'column':9}),
-
-
-
-_storage:_storage};
-
-
-module.exports = DataStore;},{'module':'DataStore','line':0,'column':0,'name':'$module_DataStore'}),null);
-/** Path: html/js/modules/DOMQuery.js */
-/**
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule DOMQuery
- */__d('DOMQuery',['CSS','containsNode','createArrayFromMixed','createObjectFrom','ge','getDocumentScrollElement','isElementNode','isNode','isTextNode'],__annotator(function $module_DOMQuery(global,require,requireDynamic,requireLazy,module,exports,CSS,containsNode,createArrayFromMixed,createObjectFrom,ge,getDocumentScrollElement,isElementNode,isNode,isTextNode){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function hasAttribute(element,attr){
-return element.hasAttribute?
-element.hasAttribute(attr):element.getAttribute(attr) !== null;}__annotator(hasAttribute,{'module':'DOMQuery','line':36,'column':0,'name':'hasAttribute'});
-
-
-var DOMQuery={
-
-
-
-
-
-
-
-
-
-
-
-
-find:__annotator(function(element,selector_str){
-var elements=DOMQuery.scry(element,selector_str);
-
-if(__DEV__){
-if(1 != elements.length){
-throw new Error(
-'DOMQuery.find() located ' + elements.length +
-' elements that matched the selector "' + selector_str + '". ' +
-'You should only use DOMQuery.find when you are sure that 1 element' +
-' will match, otherwise, use DOMQuery.scry().');}}
-
-
-
-return elements[0];},{'module':'DOMQuery','line':54,'column':8}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-findPushSafe:__annotator(function(element,selector_old,selector_new){
-var elements_old=DOMQuery.scry(element,selector_old);
-var elements_new=DOMQuery.scry(element,selector_new);
-
-var elements;
-if(elements_old.length === 1 &&
-elements_new.length === 1 &&
-elements_old[0] === elements_new[0]){
-elements = elements_old;}else
-{
-elements = elements_old.concat(elements_new);}
-
-
-if(__DEV__){
-if(1 != elements.length){
-throw new Error(
-'DOMQuery.findPushSafe() located ' + elements.length +
-' elements that matched the selectors "' + selector_old +
-'" or "' + selector_new + '". You should only use' +
-' DOMQuery.findPushSafe when you are sure that 1 element' +
-' will match, otherwise, use DOMQuery.scry().');}}
-
-
-
-return elements[0];},{'module':'DOMQuery','line':84,'column':16}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-scry:__annotator(function(element,selector_str){
-
-
-
-if(!element || !element.getElementsByTagName){
-if(__DEV__){
-throw new Error('You must pass a valid reference element.');}
-
-return [];}
-
-
-var selectors=selector_str.split(' ');
-var candidates=[element];
-if(__DEV__){
-var elem_is_document=!!element.documentElement;}
-
-
-
-for(var i=0;i < selectors.length;i++) {
-
-if(candidates.length === 0){
-break;}
-
-
-
-if(selectors[i] === ''){
-continue;}
-
-
-
-var selector=selectors[i];
-var selector_org=selectors[i];
-var new_candidates=[];
-
-
-var upwards=false;
-if(selector.charAt(0) == '^'){
-if(i === 0){
-upwards = true;
-selector = selector.slice(1);}else
-{
-if(__DEV__){
-throw new Error(
-'DOMQuery.scry: upwards looking selectors (' + selector + ') ' +
-'are only supported on the first selector');}
-
-return [];}}
-
-
-
-
-
-
-
-
-
-
-selector = selector.replace(/\[(?:[^=\]]*=(?:"[^"]*"|'[^']*'))?|[.#]/g,
-' $&');
-
-var sub_selectors=selector.split(' ');
-var tag=sub_selectors[0] || '*';
-var all=tag == '*';
-
-var id_selector=sub_selectors[1] && sub_selectors[1].charAt(0) == '#';
-
-if(__DEV__){
-if(i === 0 && all && elem_is_document && !id_selector){
-throw new Error(
-'scry() was called without a tag in the selector, which is ' +
-'very expensive. You should probably use scry() like `div' +
-selector_str + '` instead of `' + selector_str + '`.');}}
-
-
-
-
-if(id_selector){
-
-
-
-
-
-
-
-var elem=ge(sub_selectors[1].slice(1),element,tag);
-
-if(elem && (all || elem.tagName.toLowerCase() == tag)){
-
-
-for(var iter=0;iter < candidates.length;iter++) {
-if(upwards && DOMQuery.contains(elem,candidates[iter])){
-new_candidates = [elem];
-break;}else
-if(
-document == candidates[iter] ||
-
-DOMQuery.contains(candidates[iter],elem) &&
-candidates[iter] !== elem)
-
-{
-
-new_candidates = [elem];
-break;}}}}else
-
-
-
-{
-
-
-
-
-var tag_candidates=[];
-var candidate_l=candidates.length;
-var elements;
-
-
-var use_qsa=!upwards &&
-selector_org.indexOf('[') < 0 &&
-document.querySelectorAll;
-
-for(var ii=0;ii < candidate_l;ii++) {
-
-if(upwards){
-elements = [];
-var current=candidates[ii].parentNode;
-while(isElementNode(current)) {
-if(all || current.tagName.toLowerCase() == tag){
-elements.push(current);}
-
-
-current = current.parentNode;}}else
-
-
-if(use_qsa){
-elements = candidates[ii].querySelectorAll(selector_org);}else
-{
-elements = candidates[ii].getElementsByTagName(tag);}
-
-
-var elements_l=elements.length;
-for(var jj=0;jj < elements_l;jj++) {
-tag_candidates.push(elements[jj]);}}
-
-
-
-if(!use_qsa){
-for(var sub_iter=1;sub_iter < sub_selectors.length;sub_iter++) {
-var sub_selector=sub_selectors[sub_iter];
-var is_class=sub_selector.charAt(0) == '.';
-var className=sub_selector.substring(1);
-
-for(ii = 0;ii < tag_candidates.length;ii++) {
-var tag_candidate=tag_candidates[ii];
-
-
-if(!tag_candidate || tag_candidate.nodeType !== 1){
-continue;}
-
-
-
-
-if(is_class){
-if(!CSS.hasClass(tag_candidate,className)){
-delete tag_candidates[ii];}
-
-continue;}else
-{
-
-
-
-
-
-var class_selector=
-sub_selector.slice(1,sub_selector.length - 1);
-var equals_index=class_selector.indexOf('=');
-if(equals_index < 0){
-
-
-if(!hasAttribute(tag_candidate,class_selector)){
-delete tag_candidates[ii];
-continue;}}else
-
-{
-
-
-var attr=class_selector.substr(0,equals_index);
-var value=class_selector.substr(equals_index + 1);
-
-value = value.slice(1,value.length - 1);
-
-if(tag_candidate.getAttribute(attr) != value){
-delete tag_candidates[ii];
-continue;}}}}}}
-
-
-
-
-
-
-for(ii = 0;ii < tag_candidates.length;ii++) {
-if(tag_candidates[ii]){
-new_candidates.push(tag_candidates[ii]);
-if(upwards){
-
-
-
-
-
-
-
-
-
-break;}}}}
-
-
-
-
-
-
-
-candidates = new_candidates;}
-
-
-return candidates;},{'module':'DOMQuery','line':180,'column':8}),
-
-
-
-
-
-
-getSelection:__annotator(function(){
-var ws=window.getSelection,
-ds=document.selection;
-if(ws){
-return ws() + '';}else
-if(ds){
-return ds.createRange().text;}
-
-return null;},{'module':'DOMQuery','line':410,'column':16}),
-
-
-
-
-
-
-
-
-
-
-
-contains:__annotator(function(outer_obj,inner_obj){
-outer_obj = ge(outer_obj);
-inner_obj = ge(inner_obj);
-if(typeof outer_obj === 'string' ||
-typeof inner_obj === 'string'){
-console.warn('DOMQuery.contains: Support for node IDs is deprecated.');}
-
-return containsNode(outer_obj,inner_obj);},{'module':'DOMQuery','line':430,'column':12}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-getRootElement:__annotator(function(){
-var elem=null;
-if(window.Quickling && Quickling.isActive()){
-elem = ge('content');}
-
-return elem || document.body;},{'module':'DOMQuery','line':459,'column':18}),
-
-
-
-
-
-
-
-
-
-
-isNode:__annotator(function(obj){
-return isNode(obj);},{'module':'DOMQuery','line':475,'column':10}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-isNodeOfType:__annotator(function(obj,type){
-if(__DEV__){
-if(!type){
-throw new Error('You must pass a type (or types) to isNodeOfType.');}}
-
-
-var types=createArrayFromMixed(type).join('|').toUpperCase().split('|');
-var map=createObjectFrom(types);
-return isNode(obj) && obj.nodeName in map;},{'module':'DOMQuery','line':491,'column':16}),
-
-
-
-
-
-
-
-
-
-isElementNode:__annotator(function(obj){
-return isElementNode(obj);},{'module':'DOMQuery','line':509,'column':17}),
-
-
-
-
-
-
-
-
-isTextNode:__annotator(function(obj){
-return isTextNode(obj);},{'module':'DOMQuery','line':519,'column':14}),
-
-
-
-
-
-
-
-
-isInputNode:__annotator(function(obj){
-
-return DOMQuery.isNodeOfType(obj,['input','textarea']) ||
-obj.contentEditable === 'true';},{'module':'DOMQuery','line':529,'column':15}),
-
-
-getDocumentScrollElement:getDocumentScrollElement};
-
-
-
-module.exports = DOMQuery;},{'module':'DOMQuery','line':0,'column':0,'name':'$module_DOMQuery'}),null);
-/** Path: html/js/modules/DOMEvent.js */
-/**
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * Wrapper to provide consistent API for working with browser events.
- * This lends itself well to use with the DOMEventListener module:
- *
- * DOMEventListener.add(dom, 'click', function(e) {
- *   new DOMEvent(e).kill();
- *   ...
- * });
- *
- * Do not extend this with further dependencies as it is designed to be a
- * low-level component usable for composition.
- *
- * @providesModule DOMEvent
- * @typechecks
- */__d('DOMEvent',['invariant'],__annotator(function $module_DOMEvent(global,require,requireDynamic,requireLazy,module,exports,invariant){if(require.__markCompiled)require.__markCompiled();
-
-
-
-
-function DOMEvent(e){return __bodyWrapper(this,arguments,function(){'use strict';
-this.event = e || window.event;
-
-
-
-
-
-
-
-!(
-typeof this.event.srcElement != 'unknown')?invariant(0,
-'DOMEvent: stale event passed to constructor'):undefined;
-
-
-this.target = this.event.target || this.event.srcElement;},{params:[[e,'object','e']]});}__annotator(DOMEvent,{'module':'DOMEvent','line':22,'column':2,'name':'DOMEvent'},{params:['object']});DOMEvent.prototype.
-
-
-preventDefault = __annotator(function(){'use strict';
-var e=this.event;
-if(e.preventDefault){
-e.preventDefault();
-if(!('defaultPrevented' in e)){
-e.defaultPrevented = true;}}else
-
-{
-e.returnValue = false;}
-
-return this;},{'module':'DOMEvent','line':39,'column':16});DOMEvent.prototype.
-
-
-isDefaultPrevented = __annotator(function(){'use strict';
-var e=this.event;
-return 'defaultPrevented' in e?
-e.defaultPrevented:
-e.returnValue === false;},{'module':'DOMEvent','line':52,'column':20});DOMEvent.prototype.
-
-
-stopPropagation = __annotator(function(){'use strict';
-var e=this.event;
-e.stopPropagation?e.stopPropagation():e.cancelBubble = true;
-return this;},{'module':'DOMEvent','line':59,'column':17});DOMEvent.prototype.
-
-
-kill = __annotator(function(){'use strict';
-this.stopPropagation().preventDefault();
-return this;},{'module':'DOMEvent','line':65,'column':6});DOMEvent.
-
-
-
-
-
-killThenCall = __annotator(function(func){return __bodyWrapper(this,arguments,function(){'use strict';
-return __annotator(function(e){
-new DOMEvent(e).kill();
-return func();},{'module':'DOMEvent','line':74,'column':11});},{params:[[func,'function','func']]});},{'module':'DOMEvent','line':73,'column':21},{params:['function']});
-
-
-
-
-module.exports = DOMEvent;},{'module':'DOMEvent','line':0,'column':0,'name':'$module_DOMEvent'}),null);
-/** Path: html/js/modules/DOMEventListener.js */
-/**
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * This module provides a small and clean abstraction of the two main
- * methods available for attaching events.
- * This module does not provide a unified abstraction of the 'event'
- * itself, for that see the DOMEvent module.
- *
- * Do not extend this with further dependencies as it is designed to be a
- * low-level component usable for composition.
- *
- * @providesModule DOMEventListener
- * @typechecks
- */__d('DOMEventListener',['wrapFunction'],__annotator(function $module_DOMEventListener(global,require,requireDynamic,requireLazy,module,exports,wrapFunction){if(require.__markCompiled)require.__markCompiled();
-
-
-
-var add,remove;
-
-if(window.addEventListener){
-
-
-add = __annotator(function(target,name,listener){return __bodyWrapper(this,arguments,function(){
-listener.wrapper =
-wrapFunction(listener,'entry','DOMEventListener.add ' + name);
-target.addEventListener(name,listener.wrapper,false);},{params:[[name,'string','name'],[listener,'function','listener']]});},{'module':'DOMEventListener','line':23,'column':8},{params:['string','function']});
-
-remove = __annotator(function(target,name,listener){return __bodyWrapper(this,arguments,function(){
-target.removeEventListener(name,listener.wrapper,false);},{params:[[name,'string','name'],[listener,'function','listener']]});},{'module':'DOMEventListener','line':28,'column':11},{params:['string','function']});}else
-
-
-if(window.attachEvent){
-
-
-add = __annotator(function(target,name,listener){return __bodyWrapper(this,arguments,function(){
-listener.wrapper =
-wrapFunction(listener,'entry','DOMEventListener.add ' + name);
-target.attachEvent('on' + name,listener.wrapper);},{params:[[name,'string','name'],[listener,'function','listener']]});},{'module':'DOMEventListener','line':35,'column':8},{params:['string','function']});
-
-remove = __annotator(function(target,name,listener){return __bodyWrapper(this,arguments,function(){
-target.detachEvent('on' + name,listener.wrapper);},{params:[[name,'string','name'],[listener,'function','listener']]});},{'module':'DOMEventListener','line':40,'column':11},{params:['string','function']});}else
-
-
-{
-remove = add = __annotator(function(){},{'module':'DOMEventListener','line':45,'column':17});}
-
-
-var DOMEventListener={
-
-
-
-
-
-
-
-
-
-
-
-add:__annotator(function(target,name,listener){return __bodyWrapper(this,arguments,function(){
-
-
-add(target,name,listener);
-return {
-
-
-
-remove:__annotator(function(){
-remove(target,name,listener);
-target = null;},{'module':'DOMEventListener','line':68,'column':14})};},{params:[[name,'string','name'],[listener,'function','listener']]});},{'module':'DOMEventListener','line':60,'column':7},{params:['string','function']}),
-
-
-
-
-
-
-
-
-
-
-
-remove:remove};
-
-
-module.exports = DOMEventListener;},{'module':'DOMEventListener','line':0,'column':0,'name':'$module_DOMEventListener'}),null);
-/** Path: html/js/modules/Event.js */
-/**
- * Copyright 2004-present Facebook. All Rights Reserved.
- *
- * @providesModule Event
- */__d('Event',['Arbiter','DataStore','DOMQuery','DOMEvent','ErrorUtils','ExecutionEnvironment','Parent','Scroll','UserAgent_DEPRECATED','DOMEventListener','$','invariant','getObjectValues','event-form-bubbling'],__annotator(function $module_Event(global,require,requireDynamic,requireLazy,module,exports,Arbiter,DataStore,DOMQuery,DOMEvent,ErrorUtils,ExecutionEnvironment,Parent,Scroll,UserAgent_DEPRECATED,DOMEventListener,$,invariant,getObjectValues){if(require.__markCompiled)require.__markCompiled();
-
-require('event-form-bubbling');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var Event=global.Event;
-
-
-
-
-var DATASTORE_KEY='Event.listeners';
-if(!Event.prototype){
-Event.prototype = {};}
-
-
-
-
-
-
-
-function informUserActivity(e){
-if(e.type === 'click' ||
-e.type === 'mouseover' ||
-e.type === 'keydown'){
-Arbiter.inform('Event/stop',{event:e});}}__annotator(informUserActivity,{'module':'Event','line':39,'column':0,'name':'informUserActivity'});
-
-
-
-function CustomEvent(target,type,data){
-this.target = target;
-this.type = type;
-this.data = data;}__annotator(CustomEvent,{'module':'Event','line':47,'column':0,'name':'CustomEvent'});
-
-
-Object.assign(CustomEvent.prototype,{
-
-
-
-
-
-
-
-
-
-getData:__annotator(function(){
-this.data = this.data || {};
-return this.data;},{'module':'Event','line':63,'column':11}),
-
-
-
-
-
-
-
-
-stop:__annotator(function(){
-return Event.stop(this);},{'module':'Event','line':74,'column':8}),
-
-
-
-
-
-
-prevent:__annotator(function(){
-return Event.prevent(this);},{'module':'Event','line':82,'column':11}),
-
-
-
-
-
-
-
-isDefaultPrevented:__annotator(function(){
-return Event.isDefaultPrevented(this);},{'module':'Event','line':91,'column':22}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-kill:__annotator(function(){
-return Event.kill(this);},{'module':'Event','line':116,'column':8}),
-
-
-
-
-
-
-getTarget:__annotator(function(){
-return new DOMEvent(this).target || null;},{'module':'Event','line':124,'column':13})});
-
-
-
-function $E(e){
-if(e instanceof CustomEvent){
-return e;}
-
-
-if(!e){
-
-
-
-
-
-
-
-
-
-
-
-
-if(!window.addEventListener && document.createEventObject){
-e = window.event?document.createEventObject(window.event):{};}else
-{
-e = {};}}
-
-
-
-
-
-
-
-if(!e._inherits_from_prototype){
-
-
-for(var k in Event.prototype) {
-try{
-e[k] = Event.prototype[k];}
-catch(ignored) {}}}
-
-
-
-
-return e;}__annotator($E,{'module':'Event','line':129,'column':0,'name':'$E'});
-
-
-
-
-
-Object.assign(Event.prototype,{
-
-_inherits_from_prototype:true,
-
-
-
-
-
-
-getRelatedTarget:__annotator(function(){
-var target=this.relatedTarget || (
-this.fromElement === this.srcElement?this.toElement:this.fromElement);
-return target && target.nodeType?target:null;},{'module':'Event','line':184,'column':20}),
-
-
-
-
-
-
-
-
-
-
-
-getModifiers:__annotator(function(){
-var m={
-control:!!this.ctrlKey,
-shift:!!this.shiftKey,
-alt:!!this.altKey,
-meta:!!this.metaKey};
-
-m.access = UserAgent_DEPRECATED.osx()?m.control:m.alt;
-m.any = m.control || m.shift || m.alt || m.meta;
-return m;},{'module':'Event','line':199,'column':16}),
-
-
-
-
-
-
-
-
-isRightClick:__annotator(function(){
-if(this.which){
-return this.which === 3;}
-
-return this.button && this.button === 2;},{'module':'Event','line':217,'column':16}),
-
-
-
-
-
-
-
-isMiddleClick:__annotator(function(){
-if(this.which){
-return this.which === 2;}
-
-return this.button && this.button === 4;},{'module':'Event','line':229,'column':17}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-isDefaultRequested:__annotator(function(){
-return this.getModifiers().any ||
-this.isMiddleClick() ||
-this.isRightClick();},{'module':'Event','line':259,'column':22})},
-
-
-CustomEvent.prototype);
-
-
-
-
-Object.assign(Event,{
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-listen:__annotator(function(element,type,handler,priority){
-Arbiter.inform('Event/bindListen',{element:element,type:type,handler:handler});
-
-if(!ExecutionEnvironment.canUseDOM){
-return new EventHandlerRef(handler,handlers,type,priority,id);}
-
-
-if(typeof element == 'string'){
-element = $(element);}
-
-
-if(typeof priority == 'undefined'){
-priority = Event.Priority.NORMAL;}
-
-
-if(typeof type == 'object'){
-var events={};
-for(var t in type) {
-events[t] = Event.listen(element,t,type[t],priority);}
-
-return events;}
-
-
-if(type.match(/^on/i)){
-throw new TypeError(
-"Bad event name `" + type + "': use `click', not `onclick'.");}
-
-
-if(element.nodeName == 'LABEL' && type == 'click'){
-var inputs=element.getElementsByTagName('input');
-element = inputs.length == 1?inputs[0]:element;}else
-if(element === window && type === 'scroll'){
-var scroll_element=DOMQuery.getDocumentScrollElement();
-if(scroll_element !== document.documentElement &&
-scroll_element !== document.body){
-element = scroll_element;}}
-
-
-
-var handlers=DataStore.get(element,DATASTORE_KEY,{});
-
-var details=specialEvents[type];
-if(details){
-type = details.base;
-if(details.wrap){
-handler = details.wrap(handler);}}
-
-
-
-
-attachHandler(element,handlers,type);
-
-var typeHandlers=handlers[type];
-if(!(priority in typeHandlers)){
-typeHandlers[priority] = [];}
-
-
-var id=typeHandlers[priority].length;
-var ref=new EventHandlerRef(handler,handlers,type,priority,id);
-
-typeHandlers[priority][id] = ref;
-typeHandlers.numHandlers++;
-
-return ref;},{'module':'Event','line':294,'column':10}),
-
-
-stop:__annotator(function(e){
-if(__DEV__){
-if(!e){
-throw new Error('Event.stop: you must pass an event!');}}
-
-
-var ev=new DOMEvent(e).stopPropagation();
-informUserActivity(ev.event);
-return e;},{'module':'Event','line':360,'column':8}),
-
-
-prevent:__annotator(function(e){
-if(__DEV__){
-if(!e){
-throw new Error('Event.prevent: you must pass an event!');}}
-
-
-new DOMEvent(e).preventDefault();
-return e;},{'module':'Event','line':371,'column':11}),
-
-
-isDefaultPrevented:__annotator(function(e){
-if(__DEV__){
-if(!e){
-throw new Error('Event.isDefaultPrevented: you must pass an event!');}}
-
-
-return new DOMEvent(e).isDefaultPrevented(e);},{'module':'Event','line':381,'column':22}),
-
-
-kill:__annotator(function(e){
-if(__DEV__){
-if(!e){
-throw new Error('Event.kill: you must pass an event!');}}
-
-
-var ev=new DOMEvent(e).kill();
-informUserActivity(ev.event);
-return false;},{'module':'Event','line':390,'column':8}),
-
-
-getKeyCode:__annotator(function(event){
-event = new DOMEvent(event).event;
-if(!event){
-return false;}
-
-switch(event.keyCode){
-case 63232:
-return 38;
-case 63233:
-return 40;
-case 63234:
-return 37;
-case 63235:
-return 39;
-case 63272:
-case 63273:
-case 63275:
-return null;
-case 63276:
-return 33;
-case 63277:
-return 34;}
-
-if(event.shiftKey){
-switch(event.keyCode){
-case 33:
-case 34:
-case 37:
-case 38:
-case 39:
-case 40:
-return null;}}
-
-
-
-return event.keyCode;},{'module':'Event','line':401,'column':14}),
-
-
-getPriorities:__annotator(function(){
-if(!priorities){
-var ordered=getObjectValues(Event.Priority);
-
-ordered.sort(__annotator(function(a,b){return a - b;},{'module':'Event','line':443,'column':19}));
-priorities = ordered;}
-
-return priorities;},{'module':'Event','line':439,'column':17}),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fire:__annotator(function(node,type,data){
-var evt=new CustomEvent(node,type,data);
-var ret;
-do {
-var handler=Event.__getHandler(node,type);
-if(handler){
-ret = handler(evt);}
-
-node = node.parentNode;}while(
-node && ret !== false && !evt.cancelBubble);
-return ret !== false;},{'module':'Event','line':464,'column':8}),
-
-
-
-
-
-
-
-
-
-
-__fire:__annotator(function(element,type,event){
-var handler=Event.__getHandler(element,type);
-if(handler){
-return handler($E(event));}},{'module':'Event','line':485,'column':10}),
-
-
-
-
-
-
-
-
-
-
-__getHandler:__annotator(function(element,type){
-var handlers=DataStore.get(element,DATASTORE_KEY);
-if(handlers && handlers[type]){
-return handlers[type].domHandler;}},{'module':'Event','line':499,'column':16}),
-
-
-
-getPosition:__annotator(function(e){
-e = new DOMEvent(e).event;
-
-var scroll_element=DOMQuery.getDocumentScrollElement();
-var x=e.clientX + Scroll.getLeft(scroll_element);
-var y=e.clientY + Scroll.getTop(scroll_element);
-return {x:x,y:y};},{'module':'Event','line':506,'column':15})});
-
-
-
-
-
-
-
-var priorities=null;
-
-var leaveFilter=__annotator(function(handler){
-return __annotator(function(e){
-if(!DOMQuery.contains(this,e.getRelatedTarget())){
-return handler.call(this,e);}},{'module':'Event','line':523,'column':9});},{'module':'Event','line':522,'column':18});
-
-
-
-
-var specialEvents;
-if(!window.navigator.msPointerEnabled){
-specialEvents = {
-'mouseenter':{base:'mouseover',wrap:leaveFilter},
-'mouseleave':{base:'mouseout',wrap:leaveFilter}};}else
-
-{
-
-
-
-
-specialEvents = {
-'mousedown':{base:'MSPointerDown'},
-'mousemove':{base:'MSPointerMove'},
-'mouseup':{base:'MSPointerUp'},
-'mouseover':{base:'MSPointerOver'},
-'mouseout':{base:'MSPointerOut'},
-'mouseenter':{base:'MSPointerOver',wrap:leaveFilter},
-'mouseleave':{base:'MSPointerOut',wrap:leaveFilter}};}
-
-
-
-
-
-
-
-
-if(UserAgent_DEPRECATED.firefox()){
-var bubbleFocusOrBlur=__annotator(function(type,event){
-event = $E(event);
-var node=event.getTarget();
-while(node) {
-Event.__fire(node,type,event);
-node = node.parentNode;}},{'module':'Event','line':558,'column':26});
-
-
-document.documentElement.addEventListener(
-'focus',
-bubbleFocusOrBlur.bind(null,'focusin'),
-true);
-
-document.documentElement.addEventListener(
-'blur',
-bubbleFocusOrBlur.bind(null,'focusout'),
-true);}
-
-
-
-
-
-
-
-
-
-
-
-
-
-var attachHandler=__annotator(function(element,handlers,type){
-if(type in handlers){
-return;}
-
-
-var listener=listenHandler.bind(element,type);
-
-handlers[type] = {
-
-
-numHandlers:0,
-
-domHandlerRemover:DOMEventListener.add(element,type,listener),
-
-domHandler:listener};
-
-
-
-
-
-
-var fullName='on' + type;
-if(element[fullName]){
-
-
-
-
-
-
-
-var priority=element === document.documentElement?
-Event.Priority._BUBBLE:
-Event.Priority.TRADITIONAL;
-var handler=element[fullName];
-element[fullName] = null;
-Event.listen(element,type,handler,priority);}
-
-
-
-
-if(element.nodeName === 'FORM' && type === 'submit'){
-Event.listen(
-element,
-type,
-Event.__bubbleSubmit.bind(null,element),
-Event.Priority._BUBBLE);}},{'module':'Event','line':588,'column':20});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var listenHandler=__annotator(function(type,event){
-event = $E(event);
-
-if(!DataStore.get(this,DATASTORE_KEY)){
-throw new Error("Bad listenHandler context.");}
-
-
-var type_handlers=DataStore.get(this,DATASTORE_KEY)[type];
-if(!type_handlers){
-throw new Error("No registered handlers for `" + type + "'.");}
-
-
-
-
-if(type == 'click'){
-var node=Parent.byTag(event.getTarget(),'a');
-
-
-if(window.clickRefAction){
-window.clickRefAction('click',node,event);}}
-
-
-
-
-
-var priorities=Event.getPriorities();
-for(var pri_idx=0;pri_idx < priorities.length;pri_idx++) {
-var priority=priorities[pri_idx];
-if(priority in type_handlers){
-var handlers=type_handlers[priority];
-for(var idx=0;idx < handlers.length;idx++) {
-if(!handlers[idx]){
-
-continue;}
-
-var result=handlers[idx].fire(this,event);
-
-
-if(result === false){
-return event.kill();}else
-if(event.cancelBubble){
-event.stop();}}}}
-
-
-
-
-
-return event.returnValue;},{'module':'Event','line':648,'column':20});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Event.Priority = {
-URGENT:-20,
-TRADITIONAL:-10,
-NORMAL:0,
-_BUBBLE:1000};
-
-
-
-
-
-
-
-
-
-function EventHandlerRef(handler,handlers,type,priority,id){
-this._handler = handler;
-this._handlers = handlers;
-this._type = type;
-this._priority = priority;
-this._id = id;}__annotator(EventHandlerRef,{'module':'Event','line':752,'column':0,'name':'EventHandlerRef'});
-
-
-Object.assign(EventHandlerRef.prototype,{
-
-
-
-
-
-
-
-
-
-
-
-
-remove:__annotator(function(){
-if(ExecutionEnvironment.canUseDOM){
-
-!this._handlers?invariant(0,'Event handler has already been removed'):undefined;
-
-
-
-var handlers=this._handlers[this._type];
-if(handlers.numHandlers <= 1){
-handlers.domHandlerRemover.remove();
-delete this._handlers[this._type];}else
-{
-delete handlers[this._priority][this._id];
-handlers.numHandlers--;}
-
-this._handlers = null;}},{'module':'Event','line':773,'column':10}),
-
-
-
-
-
-
-
-
-
-
-fire:__annotator(function(element,event){
-if(ExecutionEnvironment.canUseDOM){
-return ErrorUtils.applyWithGuard(this._handler,element,[event],__annotator(
-function(err){
-err.event_type = event.type;
-err.dom_element = element.name || element.id;
-err.category = 'eventhandler';},{'module':'Event','line':802,'column':8}));}
-
-
-
-
-return true;},{'module':'Event','line':799,'column':8})});
-
-
-
-global.$E = Event.$E = $E;
-
-module.exports = Event;},{'module':'Event','line':0,'column':0,'name':'$module_Event'}),null);
 /** Path: html/js/listeners/modules/FocusListener.js */
 /**
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule FocusListener
- */__d('FocusListener',['Arbiter','CSS','Event','Parent','getActiveElement'],__annotator(function $module_FocusListener(global,require,requireDynamic,requireLazy,module,exports,Arbiter,CSS,Event,Parent,getActiveElement){if(require.__markCompiled)require.__markCompiled();
-
+ */__d('FocusListener',['Arbiter','CSS','Parent','getActiveElement'],__annotator(function $module_FocusListener(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -16684,10 +14637,10 @@ module.exports = Event;},{'module':'Event','line':0,'column':0,'name':'$module_E
 
 var FocusListener={
 expandInput:__annotator(function(parent){
-CSS.addClass(parent,'child_is_active');
-CSS.addClass(parent,'child_is_focused');
-CSS.addClass(parent,'child_was_focused');
-Arbiter.inform('reflow');},{'module':'FocusListener','line':15,'column':15})};
+require('CSS').addClass(parent,'child_is_active');
+require('CSS').addClass(parent,'child_is_focused');
+require('CSS').addClass(parent,'child_was_focused');
+require('Arbiter').inform('reflow');},{'module':'FocusListener','line':14,'column':15})};
 
 
 
@@ -16697,20 +14650,20 @@ if(elem.getAttribute('data-silentfocuslistener')){
 return;}
 
 
-var parent=Parent.byClass(elem,'focus_target');
+var parent=require('Parent').byClass(elem,'focus_target');
 if(parent){
 if('focus' == type || 'focusin' == type){
 FocusListener.expandInput(parent);}else
 {
 if(elem.value === ''){
-CSS.removeClass(parent,'child_is_active');}
+require('CSS').removeClass(parent,'child_is_active');}
 
-CSS.removeClass(parent,'child_is_focused');}}}__annotator(updateFocusClassNames,{'module':'FocusListener','line':23,'column':0,'name':'updateFocusClassNames'});
-
-
+require('CSS').removeClass(parent,'child_is_focused');}}}__annotator(updateFocusClassNames,{'module':'FocusListener','line':22,'column':0,'name':'updateFocusClassNames'});
 
 
-var activeElement=getActiveElement();
+
+
+var activeElement=require('getActiveElement')();
 if(activeElement){
 updateFocusClassNames('focus',activeElement);}
 
@@ -16720,7 +14673,7 @@ updateFocusClassNames('focus',activeElement);}
 
 function handleFocusOrBlur(event){
 event = event || window.event;
-updateFocusClassNames(event.type,event.target || event.srcElement);}__annotator(handleFocusOrBlur,{'module':'FocusListener','line':50,'column':0,'name':'handleFocusOrBlur'});
+updateFocusClassNames(event.type,event.target || event.srcElement);}__annotator(handleFocusOrBlur,{'module':'FocusListener','line':49,'column':0,'name':'handleFocusOrBlur'});
 
 
 var htm=document.documentElement;
@@ -16732,24 +14685,13 @@ htm.attachEvent('onfocusin',handleFocusOrBlur);
 htm.attachEvent('onfocusout',handleFocusOrBlur);}
 
 
-
-
-
-
-
-
-
-
-
-Event.listen(document.documentElement,'submit',__annotator(function(){},{'module':'FocusListener','line':73,'column':49}));
-
 module.exports = FocusListener;},{'module':'FocusListener','line':0,'column':0,'name':'$module_FocusListener'}),null);
 /** Path: html/js/modules/clickRefAction.js */
 /**
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule clickRefAction
- */__d('clickRefAction',['Arbiter'],__annotator(function $module_clickRefAction(global,require,requireDynamic,requireLazy,module,exports,Arbiter){if(require.__markCompiled)require.__markCompiled();
+ */__d('clickRefAction',['Arbiter'],__annotator(function $module_clickRefAction(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -16848,13 +14790,13 @@ _stack.shift();}
 
 
 
-Arbiter.inform("ClickRefAction/new",{
+require('Arbiter').inform("ClickRefAction/new",{
 cfa:obj,
 node:node,
 mode:mode,
 event:event,
 extra_data:data},
-Arbiter.BEHAVIOR_PERSISTENT);
+require('Arbiter').BEHAVIOR_PERSISTENT);
 
 ue_count++;
 
@@ -16869,7 +14811,7 @@ module.exports = global.clickRefAction = clickRefAction;},{'module':'clickRefAct
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule trackReferrer
- */__d('trackReferrer',['Parent'],__annotator(function $module_trackReferrer(global,require,requireDynamic,requireLazy,module,exports,Parent){if(require.__markCompiled)require.__markCompiled();
+ */__d('trackReferrer',['Parent'],__annotator(function $module_trackReferrer(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -16880,7 +14822,7 @@ module.exports = global.clickRefAction = clickRefAction;},{'module':'clickRefAct
 
 function trackReferrer(elem,uri){
 
-elem = Parent.byAttribute(elem,'data-referrer');
+elem = require('Parent').byAttribute(elem,'data-referrer');
 
 if(elem){
 
@@ -16924,7 +14866,7 @@ module.exports = trackReferrer;},{'module':'trackReferrer','line':0,'column':0,'
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule Primer
- */__d('Primer',['Bootloader','CSS','ErrorUtils','Parent','clickRefAction','trackReferrer'],__annotator(function $module_Primer(global,require,requireDynamic,requireLazy,module,exports,Bootloader,CSS,ErrorUtils,Parent,clickRefAction,trackReferrer){if(require.__markCompiled)require.__markCompiled();
+ */__d('Primer',['Bootloader','CSS','ErrorUtils','Parent','clickRefAction','trackReferrer'],__annotator(function $module_Primer(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -16954,7 +14896,7 @@ var validRels=/async(?:-post)?|dialog(?:-post)?|theater|toggle/;
 var htm=document.documentElement;
 
 function _runInlineHandlers(element,attribute){
-element = Parent.byAttribute(element,attribute);
+element = require('Parent').byAttribute(element,attribute);
 if(!element){
 return;}
 
@@ -16963,19 +14905,19 @@ do {
 var handlers=element.getAttribute(attribute);
 JSON.parse(handlers).forEach(__annotator(function(handler){
 var target=element;
-Bootloader.loadModules.call(Bootloader,[handler[0]],__annotator(function(module){
+require('Bootloader').loadModules.call(require('Bootloader'),[handler[0]],__annotator(function(module){
 module[handler[1]](target);},{'module':'Primer','line':44,'column':60}));},{'module':'Primer','line':42,'column':33}));}while(
 
 
-element = Parent.byAttribute(element.parentNode,attribute));
+element = require('Parent').byAttribute(element.parentNode,attribute));
 return false;}__annotator(_runInlineHandlers,{'module':'Primer','line':34,'column':0,'name':'_runInlineHandlers'});
 
 
-htm.onclick = ErrorUtils.guard(__annotator(function(e){
+htm.onclick = require('ErrorUtils').guard(__annotator(function(e){
 e = e || window.event;
 lastClickTarget = e.target || e.srcElement;
 
-var elem=Parent.byTag(lastClickTarget,'A');
+var elem=require('Parent').byTag(lastClickTarget,'A');
 if(!elem){
 return _runInlineHandlers(lastClickTarget,'data-onclick');}
 
@@ -16985,7 +14927,7 @@ var href=elem.href;
 var url=ajax || href;
 
 if(url){
-clickRefAction('a',elem,e).coalesce_namespace('primer');}
+require('clickRefAction')('a',elem,e).coalesce_namespace('primer');}
 
 
 
@@ -17003,7 +14945,7 @@ return;}}
 
 var returnValue=_runInlineHandlers(lastClickTarget,'data-onclick');
 
-trackReferrer(elem,url);
+require('trackReferrer')(elem,url);
 
 
 var rel=elem.rel && elem.rel.match(validRels);
@@ -17012,24 +14954,24 @@ rel = rel && rel[0];
 switch(rel){
 case 'dialog':
 case 'dialog-post':
-Bootloader.loadModules(["AsyncDialog"],__annotator(function(AsyncDialog){
+require('Bootloader').loadModules(["AsyncDialog"],__annotator(function(AsyncDialog){
 AsyncDialog.bootstrap(url,elem,rel);},{'module':'Primer','line':93,'column':46}));
 
 break;
 case 'async':
 case 'async-post':
-Bootloader.loadModules(["AsyncRequest"],__annotator(function(AsyncRequest){
+require('Bootloader').loadModules(["AsyncRequest"],__annotator(function(AsyncRequest){
 AsyncRequest.bootstrap(url,elem);},{'module':'Primer','line':99,'column':47}));
 
 break;
 case 'theater':
-Bootloader.loadModules(["PhotoSnowlift"],__annotator(function(PhotoSnowlift){
+require('Bootloader').loadModules(["PhotoSnowlift"],__annotator(function(PhotoSnowlift){
 PhotoSnowlift.bootstrap(url,elem);},{'module':'Primer','line':104,'column':48}));
 
 break;
 case 'toggle':
-CSS.toggleClass(elem.parentNode,'openToggler');
-Bootloader.loadModules(["Toggler"],__annotator(function(Toggler){
+require('CSS').toggleClass(elem.parentNode,'openToggler');
+require('Bootloader').loadModules(["Toggler"],__annotator(function(Toggler){
 Toggler.bootstrap(elem);},{'module':'Primer','line':110,'column':42}));
 
 break;
@@ -17040,15 +14982,15 @@ return returnValue;}
 return false;},{'module':'Primer','line':52,'column':31}),
 'Primer click');
 
-htm.onsubmit = ErrorUtils.guard(__annotator(function(e){
+htm.onsubmit = require('ErrorUtils').guard(__annotator(function(e){
 e = e || window.event;
 var elem=e.target || e.srcElement;
 
 if(elem && elem.nodeName == 'FORM' && elem.getAttribute('rel') == 'async'){
-clickRefAction('f',elem,e).coalesce_namespace('primer');
+require('clickRefAction')('f',elem,e).coalesce_namespace('primer');
 
 var target=lastClickTarget;
-Bootloader.loadModules(["Form"],__annotator(function(Form){
+require('Bootloader').loadModules(["Form"],__annotator(function(Form){
 Form.bootstrap(elem,target);},{'module':'Primer','line':129,'column':37}));
 
 
@@ -17064,22 +15006,22 @@ lastHoverTarget = e.target || e.srcElement;
 
 _runInlineHandlers(lastHoverTarget,'data-on' + eventType);
 
-var elem=Parent.byAttribute(lastHoverTarget,'data-hover');
+var elem=require('Parent').byAttribute(lastHoverTarget,'data-hover');
 if(!elem){return;}
 
 switch(elem.getAttribute('data-hover')){
 case 'tooltip':
-Bootloader.loadModules(["Tooltip"],__annotator(function(Tooltip){
+require('Bootloader').loadModules(["Tooltip"],__annotator(function(Tooltip){
 Tooltip.process(elem,lastHoverTarget);},{'module':'Primer','line':150,'column':42}));
 
 break;}},{'module':'Primer','line':139,'column':18});
 
 
 
-htm.onmouseover = ErrorUtils.guard(
+htm.onmouseover = require('ErrorUtils').guard(
 onEventFunc.bind(null,'mouseover'),'Primer mouseover');
 
-var onfocus=ErrorUtils.guard(
+var onfocus=require('ErrorUtils').guard(
 onEventFunc.bind(null,'focus'),'Primer focus');
 if(htm.addEventListener){
 htm.addEventListener('focus',onfocus,true);}else
@@ -17092,7 +15034,7 @@ htm.attachEvent('onfocusin',onfocus);}},{'module':'Primer','line':0,'column':0,'
  * @providesModule URLFragmentPrelude
  *
  * Keep in sync with html/js/modules/QuicklingPrelude.js
- */__d('URLFragmentPrelude',['ScriptPath','URLFragmentPreludeConfig'],__annotator(function $module_URLFragmentPrelude(global,require,requireDynamic,requireLazy,module,exports,ScriptPath,URLFragmentPreludeConfig){if(require.__markCompiled)require.__markCompiled();
+ */__d('URLFragmentPrelude',['ScriptPath','URLFragmentPreludeConfig'],__annotator(function $module_URLFragmentPrelude(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -17129,7 +15071,7 @@ window.location.href.replace(uri_re,__annotator(function(all,path,query,frag){
 var dst,src,first,script_path;
 dst = src = path + (query?'?' + query:'');
 if(frag){
-if(URLFragmentPreludeConfig.incorporateQuicklingFragment){
+if(require('URLFragmentPreludeConfig').incorporateQuicklingFragment){
 
 
 
@@ -17143,7 +15085,7 @@ dst = path_frag.replace(/^[\\\/]+/,'/');}}
 
 
 
-if(URLFragmentPreludeConfig.hashtagRedirect){
+if(require('URLFragmentPreludeConfig').hashtagRedirect){
 
 
 if(src == dst){
@@ -17162,7 +15104,7 @@ dst = '/hashtag/' + frag;}}}}
 if(dst != src){
 
 
-script_path = ScriptPath.getScriptPath();
+script_path = require('ScriptPath').getScriptPath();
 if(script_path){
 document.cookie = "rdir=" + script_path + "; path=/; domain=" +
 window.location.hostname.replace(/^.*(\.facebook\..*)$/i,'$1');}
@@ -17196,7 +15138,7 @@ module.exports = SidebarPrelude;},{'module':'SidebarPrelude','line':0,'column':0
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule SubmitOnEnterListener
- */__d('SubmitOnEnterListener',['Bootloader','CSS'],__annotator(function $module_SubmitOnEnterListener(global,require,requireDynamic,requireLazy,module,exports,Bootloader,CSS){if(require.__markCompiled)require.__markCompiled();
+ */__d('SubmitOnEnterListener',['Bootloader','CSS'],__annotator(function $module_SubmitOnEnterListener(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -17213,9 +15155,9 @@ var elem=e.target || e.srcElement;
 var send_on_enter=
 e.keyCode == 13 &&
 !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey &&
-CSS.hasClass(elem,'enter_submit');
+require('CSS').hasClass(elem,'enter_submit');
 if(send_on_enter){
-Bootloader.loadModules(
+require('Bootloader').loadModules(
 ["DOM","Input","trackReferrer","Form"],__annotator(
 function(DOM,Input,trackReferrer,Form){
 if(!Input.isEmpty(elem)){
@@ -17241,7 +15183,7 @@ return false;}},{'module':'SubmitOnEnterListener','line':16,'column':37});},{'mo
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule CommentPrelude
- */__d('CommentPrelude',['Arbiter','BanzaiODS','ErrorUtils','CSS','Parent','clickRefAction','ex'],__annotator(function $module_CommentPrelude(global,require,requireDynamic,requireLazy,module,exports,Arbiter,BanzaiODS,ErrorUtils,CSS,Parent,clickRefAction,ex){if(require.__markCompiled)require.__markCompiled();
+ */__d('CommentPrelude',['Arbiter','BanzaiODS','ErrorUtils','CSS','Parent','clickRefAction','ex'],__annotator(function $module_CommentPrelude(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -17265,27 +15207,27 @@ ref === 'action_link_timeline_bling')
 return;}
 
 
-var error=new Error(ex(
+var error=new Error(require('ex')(
 'Deprecated CommentPrelude action %s called from ref %s',
 action || 'unknown',
 ref || 'unknown'));
 
 error.type = 'warn';
-ErrorUtils.reportError(error);
+require('ErrorUtils').reportError(error);
 
-BanzaiODS.bumpEntityKey('comment_prelude',ref);}__annotator(logRef,{'module':'CommentPrelude','line':16,'column':0,'name':'logRef'});
+require('BanzaiODS').bumpEntityKey('comment_prelude',ref);}__annotator(logRef,{'module':'CommentPrelude','line':16,'column':0,'name':'logRef'});
 
 
 
 function click(elem,focus,ref){
 logRef(ref,'click');
 
-var item=Parent.byTag(elem,'form');
-if(!item || !CSS.hasClass(item,'collapsible_comments')){
+var item=require('Parent').byTag(elem,'form');
+if(!item || !require('CSS').hasClass(item,'collapsible_comments')){
 return;}
 
 
-clickRefAction('ufi',elem,null,'FORCE');
+require('clickRefAction')('ufi',elem,null,'FORCE');
 
 
 return expand(elem,focus,ref);}__annotator(click,{'module':'CommentPrelude','line':41,'column':0,'name':'click'});
@@ -17295,8 +15237,8 @@ return expand(elem,focus,ref);}__annotator(click,{'module':'CommentPrelude','lin
 function expand(elem,focus,ref){
 logRef(ref,'expand');
 
-var item=Parent.byTag(elem,'form');
-if(!item || !CSS.hasClass(item,'collapsible_comments')){
+var item=require('Parent').byTag(elem,'form');
+if(!item || !require('CSS').hasClass(item,'collapsible_comments')){
 return;}
 
 
@@ -17307,9 +15249,9 @@ var focus_item=item.add_comment_text_text || item.add_comment_text;
 
 var len=focus_item.length;
 if(len){
-if(!Parent.byClass(focus_item[len - 1],'UFIReplyList')){
+if(!require('Parent').byClass(focus_item[len - 1],'UFIReplyList')){
 focus_item = focus_item[len - 1];}else
-if(!Parent.byClass(focus_item[0],'UFIReplyList')){
+if(!require('Parent').byClass(focus_item[0],'UFIReplyList')){
 focus_item = focus_item[0];}else
 {
 focus_item = null;}}
@@ -17317,7 +15259,7 @@ focus_item = null;}}
 
 if(focus_item){
 focus_item.focus();
-Arbiter.inform('comment/focus',{element:focus_item});}}
+require('Arbiter').inform('comment/focus',{element:focus_item});}}
 
 
 return false;}__annotator(expand,{'module':'CommentPrelude','line':56,'column':0,'name':'expand'});
@@ -17326,11 +15268,11 @@ return false;}__annotator(expand,{'module':'CommentPrelude','line':56,'column':0
 function uncollapse(form_elem,ref){
 logRef(ref,'uncollapse');
 
-if(!form_elem || !CSS.hasClass(form_elem,'collapsible_comments')){
+if(!form_elem || !require('CSS').hasClass(form_elem,'collapsible_comments')){
 return;}
 
 
-var remove_class=CSS.removeClass.bind(null,form_elem,'collapsed_comments');
+var remove_class=require('CSS').removeClass.bind(null,form_elem,'collapsed_comments');
 if(window.ScrollAwareDOM){
 window.ScrollAwareDOM.monitor(form_elem,remove_class);}else
 {
@@ -17342,12 +15284,12 @@ function onBlingboxClick(target){
 var ref=target.getAttribute('data-comment-prelude-ref');
 logRef(ref,'blingbox');
 
-var item=Parent.byTag(target,'form');
-if(!item || !CSS.hasClass(item,'collapsible_comments')){
+var item=require('Parent').byTag(target,'form');
+if(!item || !require('CSS').hasClass(item,'collapsible_comments')){
 return;}
 
 
-CSS.toggleClass(item,'collapsed_comments');}__annotator(onBlingboxClick,{'module':'CommentPrelude','line':102,'column':0,'name':'onBlingboxClick'});
+require('CSS').toggleClass(item,'collapsed_comments');}__annotator(onBlingboxClick,{'module':'CommentPrelude','line':102,'column':0,'name':'onBlingboxClick'});
 
 
 var CommentPrelude={
@@ -17362,12 +15304,12 @@ module.exports = CommentPrelude;},{'module':'CommentPrelude','line':0,'column':0
 /** Path: html/js/ufi/prelude.js */
 /**
  * @providesLegacy ufi-comment-prelude-js
- */__d('legacy:ufi-comment-prelude-js',['CommentPrelude'],__annotator(function $module_legacy_ufi_comment_prelude_js(global,require,requireDynamic,requireLazy,__DO_NOT_USE__module,__DO_NOT_USE__exports,CommentPrelude){if(require.__markCompiled)require.__markCompiled();
+ */__d('legacy:ufi-comment-prelude-js',['CommentPrelude'],__annotator(function $module_legacy_ufi_comment_prelude_js(global,require,requireDynamic,requireLazy){if(require.__markCompiled)require.__markCompiled();
 
 
 
-global.fc_click = CommentPrelude.click;
-global.fc_expand = CommentPrelude.expand;},{'module':'legacy:ufi-comment-prelude-js','line':0,'column':0,'name':'$module_legacy_ufi_comment_prelude_js'}),3);
+global.fc_click = require('CommentPrelude').click;
+global.fc_expand = require('CommentPrelude').expand;},{'module':'legacy:ufi-comment-prelude-js','line':0,'column':0,'name':'$module_legacy_ufi_comment_prelude_js'}),3);
 /** Path: html/js/modules/ScriptMonitor.js */
 /**
  * Copyright 2004-present Facebook. All Rights Reserved.
@@ -17422,7 +15364,7 @@ return urls;},{'module':'ScriptMonitor','line':46,'column':8})};},{'module':'Scr
  * Copyright 2004-present Facebook. All Rights Reserved.
  *
  * @providesModule SyntaxErrorMonitor
- */__d('SyntaxErrorMonitor',['Cookie','ErrorUtils'],__annotator(function $module_SyntaxErrorMonitor(global,require,requireDynamic,requireLazy,module,exports,Cookie,ErrorUtils){if(require.__markCompiled)require.__markCompiled();
+ */__d('SyntaxErrorMonitor',['Cookie','ErrorUtils'],__annotator(function $module_SyntaxErrorMonitor(global,require,requireDynamic,requireLazy,module,exports){if(require.__markCompiled)require.__markCompiled();
 
 
 
@@ -17440,10 +15382,10 @@ return error.name == 'SyntaxError' || /syntaxerror/i.test(error.message);}__anno
 
 function _onError(error){
 if(_isSyntaxError(error)){
-var last_update=Cookie.get(COOKIE_NAME);
+var last_update=require('Cookie').get(COOKIE_NAME);
 var days=Math.floor((Date.now() - EPOCH) / MILLISECONCDS_IN_DAY);
 if(!last_update || days - last_update >= _config.bump_freq_day){
-Cookie.set(COOKIE_NAME,days,_config.cookie_ttl_sec * 1000);}}}__annotator(_onError,{'module':'SyntaxErrorMonitor','line':21,'column':0,'name':'_onError'});
+require('Cookie').set(COOKIE_NAME,days,_config.cookie_ttl_sec * 1000);}}}__annotator(_onError,{'module':'SyntaxErrorMonitor','line':21,'column':0,'name':'_onError'});
 
 
 
@@ -17451,7 +15393,7 @@ Cookie.set(COOKIE_NAME,days,_config.cookie_ttl_sec * 1000);}}}__annotator(_onErr
 var SyntaxErrorMonitor={
 init:__annotator(function(config){
 _config = config;
-ErrorUtils.addListener(_onError);},{'module':'SyntaxErrorMonitor','line':32,'column':8})};
+require('ErrorUtils').addListener(_onError);},{'module':'SyntaxErrorMonitor','line':32,'column':8})};
 
 
 
