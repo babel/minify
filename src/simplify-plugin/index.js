@@ -139,6 +139,25 @@ module.exports = ({ Plugin, types: t }) => {
       // concat
       VariableDeclaration: {
         enter: [
+          // concat variables of the same kind with their siblings
+          function (node) {
+            if (!this.inList) {
+              return;
+            }
+
+            while (true) {
+              let sibling = this.getSibling(this.key + 1);
+              if (!sibling.isVariableDeclaration({ kind: node.kind })) {
+                break;
+              }
+
+              node.declarations = node.declarations.concat(
+                sibling.node.declarations
+              );
+              sibling.dangerouslyRemove();
+            }
+          },
+
           // concat variable declarations next to for loops with it's
           // initialisers if they're of the same variable kind
           function (node) {
@@ -160,25 +179,6 @@ module.exports = ({ Plugin, types: t }) => {
               init.node.declarations
             );
             this.dangerouslyRemove();
-          },
-
-          // concat variables of the same kind with their siblings
-          function (node) {
-            if (!this.inList) {
-              return;
-            }
-
-            while (true) {
-              let sibling = this.getSibling(this.key + 1);
-              if (!sibling.isVariableDeclaration({ kind: node.kind })) {
-                break;
-              }
-
-              node.declarations = node.declarations.concat(
-                sibling.node.declarations
-              );
-              sibling.dangerouslyRemove();
-            }
           },
         ],
       },
