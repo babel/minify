@@ -589,7 +589,7 @@ module.exports = ({ Plugin, types: t }) => {
     let retStatements = [];
     let bailed;
     do {
-      let res = _convert(statements);
+      let res = convert(statements);
       bailed = res.bailed;
       let {seq, bailedAtIndex} = res;
       if (seq) {
@@ -607,10 +607,7 @@ module.exports = ({ Plugin, types: t }) => {
     } while (bailed);
 
     return retStatements;
-  }
 
-  function _convert(statements) {
-    return convert(statements, 0);
 
     function convert(nodes) {
       let exprs = [];
