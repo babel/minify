@@ -235,10 +235,7 @@ module.exports = ({ Plugin, types: t }) => {
 
       BlockStatement(node, parent, scope) {
         if (t.isFunction(parent) && node === parent.body) {
-          const {statements, declars} = toMultipleSequenceExpressions(node.body);
-          if (declars.length) {
-            statements.unshift(t.variableDeclaration('var', declars));
-          }
+          const statements = toMultipleSequenceExpressions(node.body);
           return t.blockStatement(statements);
         }
         if (t.isTryStatement(parent) || t.isCatchClause(parent)) {
@@ -590,13 +587,11 @@ module.exports = ({ Plugin, types: t }) => {
 
   function toMultipleSequenceExpressions(statements) {
     let retStatements = [];
-    let retDeclars = [];
     let bailed;
     do {
       let res = _convert(statements);
       bailed = res.bailed;
-      let {seq, bailedAtIndex, declars} = res;
-      retDeclars.push(...declars);
+      let {seq, bailedAtIndex} = res;
       if (seq) {
         retStatements.push(t.expressionStatement(seq));
       }
@@ -611,10 +606,7 @@ module.exports = ({ Plugin, types: t }) => {
       }
     } while (bailed);
 
-    return {
-      declars: retDeclars,
-      statements: retStatements,
-    };
+    return retStatements;
   }
 
   function _convert(statements) {
@@ -622,7 +614,6 @@ module.exports = ({ Plugin, types: t }) => {
 
     function convert(nodes) {
       let exprs = [];
-      let declars = [];
 
       for (let i = 0; i < nodes.length; i++) {
         let bail = () => {
@@ -634,18 +625,10 @@ module.exports = ({ Plugin, types: t }) => {
           }
 
           return {
-            declars,
             seq,
             bailed: true,
             bailedAtIndex: i,
           };
-        };
-
-        let processRecur = (res) => {
-          if (!res.bailed) {
-            declars.push(...res.declars);
-          }
-          return res;
         };
 
         let node = nodes[i];
@@ -653,29 +636,10 @@ module.exports = ({ Plugin, types: t }) => {
           exprs.push(node);
         } else if (t.isExpressionStatement(node)) {
           exprs.push(node.expression);
-        } else if (t.isVariableDeclaration(node)) {
-          if (node.kind !== 'var') {
-            return bail();
-          }
-
-          for (let declar of node.declarations) {
-            let bindings = t.getBindingIdentifiers(declar);
-            for (let key in bindings) {
-              declars.push(t.variableDeclarator(bindings[key]));
-            }
-
-            if (declar.init) {
-              exprs.push(
-                t.assignmentExpression('=', declar.id, declar.init)
-              );
-            }
-          }
-
-          continue;
         } else if (t.isIfStatement(node)) {
           let consequent;
           if (node.consequent) {
-            const res = processRecur(convert([node.consequent]));
+            const res = convert([node.consequent]);
             if (res.bailed) {
               return bail();
             }
@@ -683,7 +647,7 @@ module.exports = ({ Plugin, types: t }) => {
           }
           let alternate;
           if (node.alternate) {
-            const res = processRecur(convert([node.alternate]));
+            const res = convert([node.alternate]);
             if (res.bailed) {
               return bail();
             }
@@ -698,7 +662,7 @@ module.exports = ({ Plugin, types: t }) => {
             exprs.push(t.conditionalExpression(node.test, consequent, alternate));
           }
         } else if (t.isBlockStatement(node)) {
-          const res = processRecur(convert(node.body));
+          const res = convert(node.body);
           if (res.bailed) {
             return bail();
           }
@@ -715,7 +679,7 @@ module.exports = ({ Plugin, types: t }) => {
         seq = t.sequenceExpression(exprs);
       }
 
-      return { seq, declars };
+      return { seq };
     }
   }
 

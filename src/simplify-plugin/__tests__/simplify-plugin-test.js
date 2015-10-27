@@ -595,10 +595,14 @@ describe('simplify-plugin', () => {
         z();
       }
     `);
+
+    // TODO merge var z into the init part of for.
     const expected = unpad(`
       function foo() {
-        var x;
-        a(), x = bar(), b(x), this.d = x;
+        a();
+
+        var x = bar();
+        b(x), this.d = x;
       }
       function bar() {
         x();
@@ -606,8 +610,9 @@ describe('simplify-plugin', () => {
         try {
           y();
         } catch (e) {}
+        var z;
 
-        for (var z = x(), z(); a;) b();
+        for (z = x(), z(); a;) b();
 
         c(), z();
       }
