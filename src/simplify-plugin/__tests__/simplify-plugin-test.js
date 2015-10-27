@@ -60,7 +60,7 @@ describe('simplify-plugin', () => {
 
   it('should shorten bool', () => {
     const source = `true; false;`;
-    const expected = `!0;!1;`;
+    const expected = `!0, !1;`;
     expect(transform(source)).toBe(expected);
   });
 
@@ -131,6 +131,31 @@ describe('simplify-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should the program into as much sequence exprs', () => {
+    const source = unpad(`
+      x();
+      y();
+      for (var x = 0; x < 10; x++) {
+        var z = foo();
+        console.log(z);
+        console.log(z);
+      }
+      a();
+      b = 1;
+    `);
+    const expected = unpad(`
+      x(), y();
+
+      for (var x = 0; x < 10; x++) {
+        var z = foo();
+        console.log(z), console.log(z);
+      }
+      a(), b = 1;
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
+
 
   it('should turn if to gaurded expression', () => {
     const source = unpad(`
@@ -236,8 +261,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       !function () {
         x();
-      }();
-      y = (function () {
+      }(), y = (function () {
         x();
       })();
     `);

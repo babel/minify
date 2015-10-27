@@ -55,7 +55,7 @@ module.exports = ({ Plugin, types: t }) => {
         }
 
         if (t.isFunctionExpression(node.callee)
-            && t.isExpressionStatement(parent)) {
+            && (t.isExpressionStatement(parent) || t.isSequenceExpression(parent))) {
           return t.callExpression(
             t.unaryExpression('!', node.callee),
             node.arguments
@@ -233,6 +233,14 @@ module.exports = ({ Plugin, types: t }) => {
             }
           },
         ],
+      },
+
+      Program(node) {
+        const statements = toMultipleSequenceExpressions(node.body);
+        if (!statements.length) {
+          return;
+        }
+        node.body = statements;
       },
 
       BlockStatement(node, parent, scope) {
