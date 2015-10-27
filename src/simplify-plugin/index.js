@@ -256,17 +256,16 @@ module.exports = ({ Plugin, types: t }) => {
 
       // Try to merge previous statements into a sequence
       ReturnStatement(node, parent, scope) {
-        let res = priorStatementsToSequence(this);
-        if (!res) {
+        if (!this.inList) {
           return;
         }
 
-        if (res.declars.length) {
-          this.insertBefore(t.variableDeclaration('var', res.declars));
+        const prev = this.getSibling(this.key - 1);
+        if (!prev.isExpressionStatement()) {
+          return;
         }
-        res.spliceOut();
-        let seq = res.seq;
 
+        let seq = prev.node.expression;
         if (node.argument) {
           if (t.isSequenceExpression(seq)) {
             seq.expressions.push(node.argument);
@@ -283,6 +282,7 @@ module.exports = ({ Plugin, types: t }) => {
         }
 
         if (seq) {
+          prev.dangerouslyRemove();
           return t.returnStatement(seq);
         }
       },
