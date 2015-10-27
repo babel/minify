@@ -505,20 +505,30 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit('should combine returns', () => {
-
-    function shit() {
-  if(bl){
-    if(bl.indexOf){
-      if(typeof bl.indexOf == 'function'){
-        if(bl.indexOf(route) != -1){
-        return;
+  it('should combine returns', () => {
+    const source = unpad(`
+      function foo() {
+        if (a) {
+          if (a.b) {
+            if(a.b.c) {
+              if(a.b.c()){
+                return;
+              }
+            }
+          }
         }
+        for (; true;) wat();
       }
-    }
-  }
-}
+   `);
 
+    // Extra parens babel bug #2602
+    const expected = unpad(`
+      function foo() {
+        if (!(a && (a.b && (a.b.c && a.b.c())))) for (; !0;) wat();
+      }
+   `);
+
+    expect(transform(source)).toBe(expected);
   });
 
   it('should convert early returns to negated if blocks', () => {
@@ -559,8 +569,8 @@ describe('simplify-plugin', () => {
 
         boo();
       }
-    `);
 
+    `);
     expect(transform(source)).toBe(expected);
   });
 });

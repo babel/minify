@@ -396,6 +396,15 @@ module.exports = ({ Plugin, types: t }) => {
             }
           },
 
+          function (node) {
+            if (!t.isIfStatement(node.consequent)) {
+              return;
+            }
+
+            node.test = t.binaryExpression('&&', node.test, node.consequent.test);
+            node.consequent = node.consequent.consequent;
+          },
+
           function(node, parent) {
             if (!this.inList || node.alternate ||
                 !(t.isReturnStatement(node.consequent) && !node.consequent.argument) ||
@@ -405,12 +414,10 @@ module.exports = ({ Plugin, types: t }) => {
 
 
             const test = node.test;
-            if (t.isBinaryExpression(test)) {
-              if (test.operator === '!==') {
-                test.operator = '===';
-              } else if (test.operator === '!=') {
-                test.operator = '==';
-              }
+            if (t.isBinaryExpression(test) && test.operator === '!==') {
+              test.operator = '===';
+            } else if (t.isBinaryExpression(test) && test.operator === '!=') {
+              test.operator = '==';
             } else if (t.isUnaryExpression(test, { operator: '!' })) {
               node.test = test.argument;
             } else {
