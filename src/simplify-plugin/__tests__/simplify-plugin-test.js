@@ -144,6 +144,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         wow();
+
         for (var z, x = 0; x < 10; x++) z = bar, z();
       }
     `);
@@ -418,6 +419,7 @@ describe('simplify-plugin', () => {
        function foo() {
          if (window.self != window.top) return void (__DEV__ && console.log('lol', name));
          lol();
+
          try {
            lol();
          } catch (e) {}
@@ -440,7 +442,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        return a || (b = !0);
+        return a || void (b = !0);
       }
     `);
 
@@ -555,7 +557,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        lol || (doThings(), doOtherThings());
+        return lol || void (doThings(), doOtherThings());
       }
       function bar(a) {
         if (!lol) try {
@@ -572,5 +574,53 @@ describe('simplify-plugin', () => {
 
     `);
     expect(transform(source)).toBe(expected);
+  });
+
+
+  it('should merge function blocks into sequence expressions', () => {
+    const source = unpad(`
+      function foo() {
+        a();
+        var x = bar();
+        b(x);
+        this.d = x;
+      }
+      function bar() {
+        x();
+        try { y() } catch (e) {}
+        var z = x();
+        z();
+        while (a) b();
+        c();
+        z();
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var x;
+        a(), x = bar(), b(x), this.d = x;
+      }
+      function bar() {
+        x();
+
+        try {
+          y();
+        } catch (e) {}
+
+        for (var z = x(), z(); a;) b();
+
+        c(), z();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should merge expressions into if statements test', () => {
+
+  });
+
+  it('should understand continue statements', () => {
+
   });
 });

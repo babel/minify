@@ -235,7 +235,11 @@ module.exports = ({ Plugin, types: t }) => {
 
       BlockStatement(node, parent, scope) {
         if (t.isFunction(parent) && node === parent.body) {
-          return;
+          const {statements, declars} = toMultipleSequenceExpressions(node.body);
+          if (declars.length) {
+            statements.unshift(t.variableDeclaration('var', declars));
+          }
+          return t.blockStatement(statements);
         }
         if (t.isTryStatement(parent) || t.isCatchClause(parent)) {
           return;
@@ -342,14 +346,14 @@ module.exports = ({ Plugin, types: t }) => {
             // Next is the last expression, turn into a return while void'ing the exprs
             if (!this.getSibling(this.key + 2).node && t.isReturnStatement(node.consequent) &&
               !node.alternate && next.isExpressionStatement()) {
-                const nextExpr = next.node.expression;
+                const nextExpr = t.unaryExpression('void', next.node.expression);
                 next.dangerouslyRemove();
                 if (node.consequent.argument) {
                   return t.returnStatement(
                     t.conditionalExpression(
                       node.test,
                       node.consequent.argument,
-                      t.unaryExpression('void', nextExpr)
+                      nextExpr
                     )
                   );
                 }
@@ -581,6 +585,137 @@ module.exports = ({ Plugin, types: t }) => {
       } else {
         return t.sequenceExpression(exprs);
       }
+    }
+  }
+
+  function toMultipleSequenceExpressions(statements) {
+    let retStatements = [];
+    let retDeclars = [];
+    let bailed;
+    do {
+      let res = _convert(statements);
+      bailed = res.bailed;
+      let {seq, bailedAtIndex, declars} = res;
+      retDeclars.push(...declars);
+      if (seq) {
+        retStatements.push(t.expressionStatement(seq));
+      }
+      if (bailed && statements[bailedAtIndex]) {
+        retStatements.push(statements[bailedAtIndex]);
+      }
+      if (bailed) {
+        statements = statements.slice(bailedAtIndex + 1);
+        if (!statements.length) {
+          bailed = false;
+        }
+      }
+    } while (bailed);
+
+    return {
+      declars: retDeclars,
+      statements: retStatements,
+    };
+  }
+
+  function _convert(statements) {
+    return convert(statements, 0);
+
+    function convert(nodes) {
+      let exprs = [];
+      let declars = [];
+
+      for (let i = 0; i < nodes.length; i++) {
+        let bail = () => {
+          let seq;
+          if (exprs.length === 1) {
+            seq = exprs[0];
+          } else if (exprs.length) {
+            seq = t.sequenceExpression(exprs);
+          }
+
+          return {
+            declars,
+            seq,
+            bailed: true,
+            bailedAtIndex: i,
+          };
+        };
+
+        let processRecur = (res) => {
+          if (!res.bailed) {
+            declars.push(...res.declars);
+          }
+          return res;
+        };
+
+        let node = nodes[i];
+        if (t.isExpression(node)) {
+          exprs.push(node);
+        } else if (t.isExpressionStatement(node)) {
+          exprs.push(node.expression);
+        } else if (t.isVariableDeclaration(node)) {
+          if (node.kind !== 'var') {
+            return bail();
+          }
+
+          for (let declar of node.declarations) {
+            let bindings = t.getBindingIdentifiers(declar);
+            for (let key in bindings) {
+              declars.push(t.variableDeclarator(bindings[key]));
+            }
+
+            if (declar.init) {
+              exprs.push(
+                t.assignmentExpression('=', declar.id, declar.init)
+              );
+            }
+          }
+
+          continue;
+        } else if (t.isIfStatement(node)) {
+          let consequent;
+          if (node.consequent) {
+            const res = processRecur(convert([node.consequent]));
+            if (res.bailed) {
+              return bail();
+            }
+            consequent = res.seq;
+          }
+          let alternate;
+          if (node.alternate) {
+            const res = processRecur(convert([node.alternate]));
+            if (res.bailed) {
+              return bail();
+            }
+            alternate = res.seq;
+          }
+
+          if (!alternate) {
+            exprs.push(t.binaryExpression('&&', node.test, consequent));
+          } else if (!consequent) {
+            exprs.push(t.binaryExpression('||', node.test, alternate));
+          } else {
+            exprs.push(t.conditionalExpression(node.test, consequent, alternate));
+          }
+        } else if (t.isBlockStatement(node)) {
+          const res = processRecur(convert(node.body));
+          if (res.bailed) {
+            return bail();
+          }
+          exprs.push(res.seq);
+        } else {
+          return bail();
+        }
+      }
+
+      let seq;
+      if (exprs.length === 1) {
+        seq = exprs[0];
+      } else {
+        seq = t.sequenceExpression(exprs);
+      }
+
+      return { seq, declars };
     }
   }
 
