@@ -150,3 +150,18 @@ should compile to
 ```
 l = "function" == typeof Symbol && "function" == typeof Symbol ? Symbol.iterator : "@@iterator",
 ```
+
+
+
+
+# NEW NUMBERs
+
+Downloaded a new package from production with no_min, and then compiled it using jsxmin on my devserver.
+
+```
+        raw      raw win gzip    gzip win parse time
+babel   201.44kB 91%     48.79kB 50%      15ms
+uglify  196.99kB 96%     48.95kB 49%      19ms
+closure 192.94kB 100%    49.42kB 48%      17ms
+jsxmin  205.97kB 87%     51.29kB 43%      16ms
+```
