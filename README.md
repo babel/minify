@@ -105,6 +105,7 @@ TODOS:
 - understand and optimize continue
 - some conditionals (with void 0) maybe turned into logical exprs
 - should merge more blocks into sequence expressions
+- Look at function hoisting?
 
 - Here is a place were uglify is crushing it making it into two fors and one if with no blocks:
 
