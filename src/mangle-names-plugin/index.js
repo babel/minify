@@ -176,6 +176,8 @@ module.exports = ({ Plugin, types: t }) => {
       return true;
     }
 
+    // If any of the references is in a scope with a competing
+    // binding then we need to pick a different name.
     for (let ref of refs) {
       if (ref.scope.getBinding(name)) {
         return false;
