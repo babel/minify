@@ -165,3 +165,12 @@ uglify  196.99kB 96%     48.95kB 49%      19ms
 closure 192.94kB 100%    49.42kB 48%      17ms
 jsxmin  205.97kB 87%     51.29kB 43%      16ms
 ```
+
+After some upstream babel fixes:
+```
+        raw      raw win gzip    gzip win parse time
+babel   200.06kB 93%     48.59kB 50%      16ms
+uglify  196.99kB 96%     48.95kB 49%      15ms
+closure 192.94kB 100%    49.42kB 48%      17ms
+jsxmin  205.97kB 87%     51.29kB 43%      18ms
+```
