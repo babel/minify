@@ -28,6 +28,31 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should not remove params (preserve fn.length)', () => {
+    const expected = unpad(`
+      _(function bar(p) {
+        return 1;
+      });
+      function foo(w) {
+        return 1;
+      }
+      foo();
+      foo();
+    `);
+    const source = unpad(`
+      _(function bar(p) {
+        return 1;
+      });
+      function foo(w) {
+        return 1;
+      }
+      foo();
+      foo();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should inline binding with one reference', () => {
     const expected = 'console.log(1);';
     const source = unpad(`
@@ -41,11 +66,15 @@ describe('dce-plugin', () => {
   it('should remove side effectless statements', () => {
     const expected = unpad(`
       function x() {}
+      x();
+      x();
     `);
     const source = unpad(`
       function x() {
         1;
       }
+      x();
+      x();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -57,7 +86,11 @@ describe('dce-plugin', () => {
         function y() {
           console.log(1);
         }
+        y();
+        y();
       }
+      x();
+      x();
     `);
     const source = unpad(`
       function x() {
@@ -65,18 +98,37 @@ describe('dce-plugin', () => {
         function y() {
           console.log(i);
         }
+        y();
+        y();
       }
+      x();
+      x();
     `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not inline function expressions', () => {
+  it('should inline function decl', () => {
     const expected = unpad(`
-      var x = function x() {
+      (function x() {
         return 1;
-      };
+      })();
+    `);
+    const source = unpad(`
+      function x() {
+        return 1;
+      }
       x();
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should inline function expressions', () => {
+    const expected = unpad(`
+      (function () {
+        return 1;
+      })();
     `);
     const source = unpad(`
       var x = function() {
@@ -88,7 +140,27 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  // bug in babel https://github.com/babel/babel/issues/2570
+  it('should handle mutual recursion', () => {
+    const expected = unpad(`
+      function foo() {
+        return bar();
+      }
+      function bar() {
+        return foo();
+      }
+    `);
+    const source = unpad(`
+      function foo() {
+        return bar();
+      }
+      function bar() {
+        return foo();
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it('should not inline vars with multiple references', () => {
     const expected = unpad(`
       var x = function x() {
@@ -96,6 +168,7 @@ describe('dce-plugin', () => {
           y = 1;
         }
       };
+      x();
       x();
       var y = null;
     `);
@@ -105,6 +178,7 @@ describe('dce-plugin', () => {
           y = 1;
         }
       };
+      x();
       x();
       var y = null;
     `);
@@ -119,14 +193,18 @@ describe('dce-plugin', () => {
           y();
           return;
         }
-      };
+      }
+      foo();
+      foo();
     `);
     const expected = unpad(`
       function foo() {
         if (1) {
           y();
         }
-      };
+      }
+      foo();
+      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -137,18 +215,22 @@ describe('dce-plugin', () => {
       function foo() {
         y();
         return;
-      };
+      }
+      foo();
+      foo();
     `);
     const expected = unpad(`
       function foo() {
         y();
-      };
+      }
+      foo();
+      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove redundant returns complex' , () => {
+  it('should remove redundant returns (complex)' , () => {
     const source = unpad(`
       function foo() {
         if (1) {
@@ -159,7 +241,9 @@ describe('dce-plugin', () => {
           return;
         }
         return;
-      };
+      }
+      foo();
+      foo();
     `);
     const expected = unpad(`
       function foo() {
@@ -167,7 +251,9 @@ describe('dce-plugin', () => {
           y();
           if (b) {}
         }
-      };
+      }
+      foo();
+      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -181,7 +267,9 @@ describe('dce-plugin', () => {
           return;
         }
         x();
-      };
+      }
+      foo();
+      foo();
     `);
     const expected = unpad(`
       function foo() {
@@ -190,7 +278,9 @@ describe('dce-plugin', () => {
           return;
         }
         x();
-      };
+      }
+      foo();
+      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -202,12 +292,16 @@ describe('dce-plugin', () => {
         z();
         return;
         x();
-      };
+      }
+      foo();
+      foo();
     `);
     const expected = unpad(`
       function foo() {
         z();
-      };
+      }
+      foo();
+      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
