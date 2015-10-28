@@ -156,6 +156,7 @@ module.exports = ({ Plugin, types: t }) => {
   });
 
   function canUse(name, scope, refs, refsMap) {
+    // Competing binding in the definition scope.
     const competingBinding = scope.getBinding(name);
     if (competingBinding) {
       /**
