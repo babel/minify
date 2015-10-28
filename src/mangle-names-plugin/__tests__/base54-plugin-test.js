@@ -77,6 +77,29 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should not shadow outer references', () => {
+    const expected = unpad(`
+      function bar() {
+        function i(n, c, f) {
+          o(n, c, f);
+        }
+
+        function o() {}
+      }
+    `);
+    const source = unpad(`
+      function bar() {
+        function foo(a, b, c) {
+          lol(a,b,c);
+        }
+
+        function lol() {}
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should mangle args', () => {
     const expected = unpad(`
       function foo(o) {

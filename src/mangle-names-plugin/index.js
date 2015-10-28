@@ -23,7 +23,7 @@ module.exports = ({ Plugin, types: t }) => {
             newName = state.base54.name(i);
             i += 1;
           } while (!(t.isValidIdentifier(newName)
-              && canUse(newName, scope, state.refs)));
+              && canUse(newName, scope, bindingRefs, state.refs)));
 
           scope.bindings[newName] = binding;
           for (let ref of bindingRefs) {
@@ -151,30 +151,35 @@ module.exports = ({ Plugin, types: t }) => {
 
       'UnaryExpression|BinaryExpression'(node, parent, scope, state) {
         state.get('base54').consider(node.operator);
-      }
+      },
     },
   });
 
-  function canUse(name, scope, refs) {
-    const binding = scope.getBinding(name);
-    if (!binding || !refs.has(binding)) {
+  function canUse(name, scope, refs, refsMap) {
+    const competingBinding = scope.getBinding(name);
+    if (competingBinding) {
+      /**
+       * Go through all references then crawl their scopes upwards,
+       * looking to see if one of these references is in this scope.
+       */
+      const bindingRefs = refsMap.get(competingBinding);
+      for (let ref of bindingRefs) {
+        let myScope = ref.scope;
+        do {
+          if (myScope === scope) {
+            return false;
+          }
+          myScope = myScope.parent;
+        } while (myScope);
+
+      }
       return true;
     }
 
-    const bindingRefs = refs.get(binding);
-
-    /**
-     * Go through all references then crawl their scopes upwards,
-     * looking to see if one of these references is in this scope.
-     */
-    for (let ref of bindingRefs) {
-      let myScope = ref.scope;
-      do {
-        if (myScope === scope) {
-          return false;
-        }
-        myScope = myScope.parent;
-      } while (myScope);
+    for (let ref of refs) {
+      if (ref.scope.getBinding(name)) {
+        return false;
+      }
     }
     return true;
   }
