@@ -362,7 +362,7 @@ module.exports = ({ Plugin, types: t }) => {
                 }
 
                 return t.returnStatement(
-                  t.binaryExpression('||', node.test, nextExpr)
+                  t.logicalExpression('||', node.test, nextExpr)
                 );
             }
 
@@ -408,7 +408,7 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            node.test = t.binaryExpression('&&', node.test, node.consequent.test);
+            node.test = t.logicalExpression('&&', node.test, node.consequent.test);
             node.consequent = node.consequent.consequent;
           },
 
@@ -557,9 +557,9 @@ module.exports = ({ Plugin, types: t }) => {
           }
 
           if (!alternate) {
-            exprs.push(t.binaryExpression('&&', node.test, consequent));
+            exprs.push(t.logicalExpression('&&', node.test, consequent));
           } else if (!consequent) {
-            exprs.push(t.binaryExpression('||', node.test, alternate));
+            exprs.push(t.logicalExpression('||', node.test, alternate));
           } else {
             exprs.push(t.conditionalExpression(node.test, consequent, alternate));
           }

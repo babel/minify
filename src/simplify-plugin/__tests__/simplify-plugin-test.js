@@ -300,10 +300,9 @@ describe('simplify-plugin', () => {
       }
     `);
 
-    // TODO shouldn't print those parens (yuck).
     const expected = unpad(`
       function foo() {
-        return (y(), x(), 1);
+        return y(), x(), 1;
       }
     `);
 
@@ -323,7 +322,6 @@ describe('simplify-plugin', () => {
       }
     `);
 
-    // TODO shouldn't print those parens (yuck).
     const expected = unpad(`
       function foo() {
         try {
@@ -331,7 +329,7 @@ describe('simplify-plugin', () => {
         } catch (e) {
           1;
         }
-        return (y(), 1);
+        return y(), 1;
       }
     `);
 
@@ -533,10 +531,9 @@ describe('simplify-plugin', () => {
       }
    `);
 
-    // Extra parens babel bug #2602
     const expected = unpad(`
       function foo() {
-        if (!(a && (a.b && (a.b.c && a.b.c())))) for (; !0;) wat();
+        if (!(a && a.b && a.b.c && a.b.c())) for (; !0;) wat();
       }
    `);
 

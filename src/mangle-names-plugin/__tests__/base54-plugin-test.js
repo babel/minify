@@ -34,10 +34,10 @@ describe('mangle-names', () => {
   it('should handle name collisions', () => {
     const expected = unpad(`
       function foo() {
-        var n = 2;
-        var o = 1;
-        if (o) {
-          console.log(o + n);
+        var o = 2;
+        var n = 1;
+        if (n) {
+          console.log(n + o);
         }
       }
     `);
