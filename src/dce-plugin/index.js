@@ -3,10 +3,6 @@
 module.exports = ({ Plugin, types: t }) => {
 
   return new Plugin('dce', {
-    metadata: {
-      group: 'builtin-pre',
-    },
-
     visitor: {
 
       // remove side effectless statement

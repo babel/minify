@@ -5,10 +5,6 @@ module.exports = ({ Plugin, types: t }) => {
   const VOID_0 = t.unaryExpression('void', t.literal(0), true);
 
   return new Plugin('simplify', {
-    metadata: {
-      group: 'builtin-pre',
-    },
-
     visitor: {
       // undefined -> void 0
       ReferencedIdentifier(node) {
