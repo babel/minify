@@ -119,6 +119,7 @@ module.exports = ({ Plugin, types: t }) => {
         flipNegation(node);
       },
 
+/* This is just removing functions for some reason?
       // hoist all function declarations
       Block(node) {
         let top = [];
@@ -135,6 +136,7 @@ module.exports = ({ Plugin, types: t }) => {
 
         node.body = top.concat(bottom);
       },
+*/
 
       // concat
       VariableDeclaration: {
