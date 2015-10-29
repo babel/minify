@@ -631,6 +631,29 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should merge function blocks into sequence expressions (part 2)', () => {
+    const source = unpad(`
+      function bar() {
+        var z;
+        c();
+        for (z in { a: 1}) x(z);
+        z();
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        var z;
+        c();
+
+        for (z in { a: 1 }) x(z);
+        z();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should merge expressions into if statements test', () => {
 
   });

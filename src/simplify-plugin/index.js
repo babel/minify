@@ -183,54 +183,51 @@ module.exports = ({ Plugin, types: t }) => {
 
       // turn a for loop block block with single statement
       // loops into just the single statement
-      For: {
-        enter: [
-          function(node, parent, scope) {
-            let block = node.body;
-            if (!block || !t.isBlockStatement(block)) {
-              return;
-            }
+      For(node, parent, scope) {
+        let block = node.body;
+        if (!block || !t.isBlockStatement(block)) {
+          return;
+        }
 
-            let body = block.body;
-            if (body.length !== 1) {
-              return;
-            }
+        let body = block.body;
+        if (body.length !== 1) {
+          return;
+        }
 
-            let first = body[0];
-            node.body = first;
-          },
+        let first = body[0];
+        node.body = first;
+      },
 
-          function(node, parent, scope) {
-            if (!this.inList || (node.init && !t.isExpression(node.init))) {
-              return;
-            }
 
-            const prev = this.getSibling(this.key - 1);
-            let consumed = false;
-            if (prev.isVariableDeclaration()) {
-              if (!node.init) {
-                node.init = prev.node;
-                consumed = true;
-              }
-            } else if (prev.isExpressionStatement()) {
-              const expr = prev.node.expression;
-              if (node.init) {
-                if (t.isSequenceExpression(expr)) {
-                  expr.expressions.push(node.init);
-                  node.init = expr;
-                } else {
-                  node.init = t.sequenceExpression([expr, node.init]);
-                }
-              } else {
-                node.init = expr;
-              }
-              consumed = true;
+      ForStatement(node, parent, scope) {
+        if (!this.inList || (node.init && !t.isExpression(node.init))) {
+          return;
+        }
+
+        const prev = this.getSibling(this.key - 1);
+        let consumed = false;
+        if (prev.isVariableDeclaration()) {
+          if (!node.init) {
+            node.init = prev.node;
+            consumed = true;
+          }
+        } else if (prev.isExpressionStatement()) {
+          const expr = prev.node.expression;
+          if (node.init) {
+            if (t.isSequenceExpression(expr)) {
+              expr.expressions.push(node.init);
+              node.init = expr;
+            } else {
+              node.init = t.sequenceExpression([expr, node.init]);
             }
-            if (consumed) {
-              prev.dangerouslyRemove();
-            }
-          },
-        ],
+          } else {
+            node.init = expr;
+          }
+          consumed = true;
+        }
+        if (consumed) {
+          prev.dangerouslyRemove();
+        }
       },
 
       Program(node) {
