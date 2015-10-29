@@ -393,6 +393,13 @@ module.exports = ({ Plugin, types: t }) => {
             if (!t.isIfStatement(node.consequent)) {
               return;
             }
+            if (node.alternate && node.consequent.alternate) {
+              return;
+            }
+
+            if (node.consequent.alternate) {
+              node.alternate = node.consequent.alternate;
+            }
 
             node.test = t.logicalExpression('&&', node.test, node.consequent.test);
             node.consequent = node.consequent.consequent;

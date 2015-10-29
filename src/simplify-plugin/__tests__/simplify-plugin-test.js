@@ -654,6 +654,33 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should figure in alternate when merging ifs', () => {
+    const source = unpad(`
+      if (a) {
+        if (b) {
+          c();
+        } else {
+          while (1) d();
+        }
+      }
+      if (a) {
+        if (b) {
+          c();
+        } else {
+          while (1) d();
+        }
+      } else {
+        z();
+      }
+    `);
+
+    const expected = unpad(`
+      if (a && b) c();else for (;1;) d();
+      if (a) if (b) c();else for (;1;) d();else z();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should merge expressions into if statements test', () => {
 
   });
