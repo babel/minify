@@ -59,15 +59,6 @@ module.exports = ({ Plugin, types: t }) => {
         }
       },
 
-      // !foo && bar -> foo || bar
-      LogicalExpression(node) {
-        if (node.operator === '&&' &&
-          t.isUnaryExpression(node.left, { operator: '!' })) {
-          node.operator = '||';
-          node.left = node.left.argument;
-        }
-      },
-
       // shorten booleans to a negation
       // true -> !0
       // false -> !1
