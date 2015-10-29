@@ -18,11 +18,11 @@ module.exports = ({ Plugin, types: t }) => {
       ReferencedIdentifier: function ReferencedIdentifier(node, parent, scope) {
         const binding = scope.getBinding(node.name);
         if (!binding || binding.references > 1 || !binding.constant ||
-            bindingIsParam(binding) || binding.kind === 'module') {
+            binding.param === 'param' || binding.kind === 'module') {
               return;
         }
 
-        const bindingPath = getBindingPath(binding);
+        const bindingPath = binding.path;
 
         let replacement = bindingPath.node;
         if (t.isVariableDeclarator(replacement)) {
@@ -59,9 +59,9 @@ module.exports = ({ Plugin, types: t }) => {
       Scope(node, parent, scope) {
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
-          if (!binding.referenced && !bindingIsParam(binding) && binding.kind !== 'module') {
+          if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
             scope.removeBinding(name);
-            let path = getBindingPath(binding);
+            let path = binding.path;
             if (path.isVariableDeclarator()) {
               if (!scope.isPure(path.node.init)) {
                 continue;
@@ -137,26 +137,3 @@ module.exports = ({ Plugin, types: t }) => {
     },
   });
 };
-
-// Babel regression: https://github.com/babel/babel/issues/2615
-function getBindingPath(binding) {
-  return binding.path.parentPath && binding.path.parentPath.isFunctionDeclaration() ?
-         binding.path.parentPath : binding.path;
-}
-
-// Babel regression: https://github.com/babel/babel/issues/2617
-function bindingIsParam(b) {
-  if (b.kind === 'param') {
-    return true;
-  }
-
-  if (!b.path.node) {
-    return true;
-  }
-
-  if (b.path.parentPath && b.path.parentPath.isFunction()) {
-    return b.path.parentPath.node.params.indexOf(b.path.node) > -1;
-  }
-
-  return false;
-}
