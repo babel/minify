@@ -8,6 +8,7 @@ module.exports = ({ Plugin, types: t }) => {
     },
 
     visitor: {
+
       // remove side effectless statement
       ExpressionStatement: function () {
         if (this.get('expression').isPure() && !this.isCompletionRecord()) {
@@ -60,7 +61,6 @@ module.exports = ({ Plugin, types: t }) => {
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
           if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
-            scope.removeBinding(name);
             let path = binding.path;
             if (path.isVariableDeclarator()) {
               if (!scope.isPure(path.node.init)) {
@@ -72,6 +72,7 @@ module.exports = ({ Plugin, types: t }) => {
               // `bar(function foo() {})` foo is not referenced but it's used.
               continue;
             }
+            scope.removeBinding(name);
             path.dangerouslyRemove();
           }
         }
