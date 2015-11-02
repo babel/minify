@@ -184,3 +184,11 @@ closure 192.94kB 100%    49.42kB 48%      15ms
 babel   198.48kB 94%     49.51kB 48%      14ms
 jsxmin  205.97kB 87%     51.29kB 43%      19ms
 ```
+
+```
+        raw      raw win gzip    gzip win parse time
+uglify  196.99kB 96%     48.95kB 49%      13ms
+closure 192.94kB 100%    49.42kB 48%      18ms
+babel   199.98kB 93%     49.96kB 46%      13ms
+jsxmin  205.97kB 87%     51.29kB 43%      14ms
+```
