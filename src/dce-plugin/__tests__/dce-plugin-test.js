@@ -5,7 +5,6 @@ const babel = require('babel-core');
 function transform(code) {
   return babel.transform(code,  {
     plugins: [require('../index')],
-    blacklist: ['strict'],
   }).code;
 }
 
@@ -163,7 +162,7 @@ describe('dce-plugin', () => {
 
   it('should not inline vars with multiple references', () => {
     const expected = unpad(`
-      var x = function x() {
+      var x = function () {
         if (!y) {
           y = 1;
         }
