@@ -5,7 +5,6 @@ const babel = require('babel-core');
 function transform(code) {
   return babel.transform(code,  {
     plugins: [require('../index')],
-    blacklist: ['strict'],
   }).code;
 }
 

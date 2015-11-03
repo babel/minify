@@ -3,7 +3,7 @@ const Base54 = require('./Base54');
 module.exports = ({ Plugin, types: t }) => {
   const mangleNamesVisitors = {
     Scope: {
-      exit(node, parent, scope, state) {
+      exit({ scope }, state) {
         const bindings = scope.bindings;
         scope.bindings = {};
 
@@ -34,126 +34,122 @@ module.exports = ({ Plugin, types: t }) => {
     },
   };
 
-  return new Plugin('mangle-names', {
-    metadata: {
-      group: 'builtin-pre',
-    },
-
+  return {
     pre(state) {
-      state.set('base54', new Base54());
-      state.set('refs', new Map());
+      this.base54 = new Base54();
+      this.refs = new Map();
     },
 
     visitor: {
       Program: {
-        exit(node, parent, scope, state) {
-          state.get('base54').sort();
-          this.traverse(mangleNamesVisitors, {
-            base54: state.get('base54'),
-            refs: state.get('refs'),
+        exit(path) {
+          this.base54.sort();
+          path.traverse(mangleNamesVisitors, {
+            base54: this.base54,
+            refs: this.refs,
           });
         },
       },
 
-      'ReferencedIdentifier|BindingIdentifier'(node, parent, scope, state) {
-        const refs = state.get('refs');
-        recordRef(refs, scope.getBinding(node.name), this);
+      'ReferencedIdentifier|BindingIdentifier'(path) {
+        const { scope, node } = path;
+        recordRef(this.refs, scope.getBinding(node.name), path);
       },
 
-      'FunctionExpression|FunctionDeclaration'(node, parent, scope, state) {
-        state.get('base54').consider('function');
+      'FunctionExpression|FunctionDeclaration'(path) {
+        this.base54.consider('function');
       },
 
-      'ClassExpression|ClassDeclaration'(node, parent, scope, state) {
-        state.get('base54').consider('class');
+      'ClassExpression|ClassDeclaration'(path) {
+        this.base54.consider('class');
       },
 
-      Identifier(node, parent, scope, state) {
+      Identifier({ scope, node }) {
         // Don't consider lexical bindings as they will be renamed.
         if (!scope.getBinding(node.name)) {
-          state.get('base54').consider(node.name);
+          this.base54.consider(node.name);
         }
       },
 
-      ReturnStatement(node, parent, scope, state) {
-        state.get('base54').consider('return');
+      ReturnStatement(path) {
+        this.base54.consider('return');
       },
 
-      ThrowStatement(node, parent, scope, state) {
-        state.get('base54').consider('throw');
+      ThrowStatement(path) {
+        this.base54.consider('throw');
       },
 
-      ContinueStatement(node, parent, scope, state) {
-        state.get('base54').consider('continue');
+      ContinueStatement(path) {
+        this.base54.consider('continue');
       },
 
-      BreakStatement(node, parent, scope, state) {
-        state.get('base54').consider('break');
+      BreakStatement(path) {
+        this.base54.consider('break');
       },
 
-      DebuggerStatement(node, parent, scope, state) {
-        state.get('base54').consider('debugger');
+      DebuggerStatement(path) {
+        this.base54.consider('debugger');
       },
 
-      WhileStatement(node, parent, scope, state) {
-        state.get('base54').consider('while');
+      WhileStatement(path) {
+        this.base54.consider('while');
       },
 
-      DoWhileStatement(node, parent, scope, state) {
-        state.get('base54').consider('do while');
+      DoWhileStatement(path) {
+        this.base54.consider('do while');
       },
 
-      For(node, parent, scope, state) {
-        state.get('base54').consider('for');
+      For(path) {
+        this.base54.consider('for');
       },
 
-      ForInStatement(node, parent, scope, state) {
-        state.get('base54').consider('in');
+      ForInStatement(path) {
+        this.base54.consider('in');
       },
 
-      ForOfStatement(node, parent, scope, state) {
-        state.get('base54').consider('of');
+      ForOfStatement(path) {
+        this.base54.consider('of');
       },
 
-      IfStatement(node, parent, scope, state) {
-        state.get('base54').consider('if');
+      IfStatement({ node }) {
+        this.base54.consider('if');
         if (node.alternate) {
-          state.get('base54').consider('else');
+          this.base54.consider('else');
         }
       },
 
-      VariableDeclaration(node, parent, scope, state) {
-        state.get('base54').consider(node.kind);
+      VariableDeclaration({ node }) {
+        this.base54.consider(node.kind);
       },
 
-      NewExpression(node, parent, scope, state) {
-        state.get('base54').consider('new');
+      NewExpression(path) {
+        this.base54.consider('new');
       },
 
-      ThisExpression(node, parent, scope, state) {
-        state.get('base54').consider('this');
+      ThisExpression(path) {
+        this.base54.consider('this');
       },
 
-      TryStatement(node, parent, scope, state) {
-        state.get('base54').consider('try');
+      TryStatement({ node }) {
+        this.base54.consider('try');
         if (node.finalizer) {
-          state.get('base54').consider('finally');
+          this.base54.consider('finally');
         }
       },
 
-      CatchClause(node, parent, scope, state) {
-        state.get('base54').consider('catch');
+      CatchClause(path) {
+        this.base54.consider('catch');
       },
 
-      Literal(node, parent, scope, state) {
-        state.get('base54').consider(String(node.value));
+      Literal({ node }) {
+        this.base54.consider(String(node.value));
       },
 
-      'UnaryExpression|BinaryExpression'(node, parent, scope, state) {
-        state.get('base54').consider(node.operator);
+      'UnaryExpression|BinaryExpression'({ node }) {
+        this.base54.consider(node.operator);
       },
     },
-  });
+  };
 
   function canUse(name, scope, refs, refsMap) {
     // Competing binding in the definition scope.
