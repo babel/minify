@@ -4,7 +4,6 @@ const babel = require('babel-core');
 
 function transform(code) {
   return babel.transform(code,  {
-    whitelist: [],
     plugins: [require('../index')],
   }).code;
 }
@@ -49,12 +48,6 @@ describe('simplify-plugin', () => {
   it(`should turn String(x) to x + ''`, () => {
     const source = `String(x);`;
     const expected = `x + "";`;
-    expect(transform(source)).toBe(expected);
-  });
-
-  it(`!foo && bar -> foo || bar`, () => {
-    const source = `!foo && bar;`;
-    const expected = `foo || bar;`;
     expect(transform(source)).toBe(expected);
   });
 
@@ -675,8 +668,8 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      if (a && b) c();else for (;1;) d();
-      if (a) if (b) c();else for (;1;) d();else z();
+      if (a && b) c();else for (; 1;) d();
+      if (a) if (b) c();else for (; 1;) d();else z();
     `);
     expect(transform(source)).toBe(expected);
   });
