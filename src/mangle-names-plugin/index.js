@@ -35,7 +35,7 @@ module.exports = ({ Plugin, types: t }) => {
   };
 
   return {
-    pre(state) {
+    pre() {
       this.base54 = new Base54();
       this.refs = new Map();
     },
