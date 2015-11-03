@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+Error.stackTraceLimit = Infinity;
 
 const uglify = require('uglify-js');
 const Table  = require('cli-table');
@@ -10,7 +11,9 @@ const zlib   = require('zlib');
 const fs     = require('fs');
 const path   = require('path');
 
-babel.register();
+
+require('babel-jest/node_modules/babel-core').register();
+
 const filename = process.argv[2];
 if (!filename) {
   console.error('Error: No filename specified');
@@ -74,12 +77,6 @@ function test(name, callback) {
 
 test('babel', function (code, callback) {
   return babel.transform(code, {
-    experimental: true,
-    whitelist: [],
-    optional: [
-      'minification.memberExpressionLiterals',
-      'minification.propertyLiterals',
-    ],
     plugins: [
 //      'constant-folding',
       require('../src/mangle-names-plugin'),
