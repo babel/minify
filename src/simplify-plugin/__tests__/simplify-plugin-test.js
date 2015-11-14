@@ -242,7 +242,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should turn IIFE to negation', () => {
+  xit('should turn IIFE to negation', () => {
     const source = unpad(`
       (function() {
         x();

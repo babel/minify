@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/facebook/babel-minify#readme",
   "dependencies": {
-    "babel-core": "^6.0.20",
+    "babel-core": "^6.1.4",
     "babel-plugin-constant-folding": "^1.0.1",
     "babel-plugin-dead-code-elimination": "^1.0.2",
     "babel-plugin-merge-sibling-variables": "^1.0.2",

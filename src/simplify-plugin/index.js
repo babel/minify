@@ -38,22 +38,26 @@ module.exports = ({ Plugin, types: t }) => {
         },
       },
 
-      // Number(foo) -> +foo
       CallExpression(path) {
         const {node, parent } = path;
 
+        // Number(foo) -> +foo
         if (t.isIdentifier(node.callee, { name: 'Number' }) &&
           node.arguments.length === 1) {
           path.replaceWith(t.unaryExpression('+', node.arguments[0], true));
           return;
         }
 
+        // String(foo) -> foo + ''
         if (t.isIdentifier(node.callee, { name: 'String' }) &&
           node.arguments.length === 1) {
           path.replaceWith(t.binaryExpression('+', node.arguments[0], t.stringLiteral('')));
           return;
         }
 
+        // (function() {})() -> !function() {}()
+        // Bug in babel https://github.com/babel/babel/issues/3052
+        /*
         if (t.isFunctionExpression(node.callee)
             && (t.isExpressionStatement(parent) || t.isSequenceExpression(parent))) {
           path.replaceWith(
@@ -64,6 +68,7 @@ module.exports = ({ Plugin, types: t }) => {
           );
           return;
         }
+        */
       },
 
       // shorten booleans to a negation
