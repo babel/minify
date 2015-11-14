@@ -15,7 +15,7 @@ module.exports = ({ Plugin, types: t }) => {
         const { scope, node } = path;
         const binding = scope.getBinding(node.name);
         if (!binding || binding.references > 1 || !binding.constant ||
-            binding.param === 'param' || binding.kind === 'module') {
+            binding.kind === 'param' || binding.kind === 'module') {
               return;
         }
 

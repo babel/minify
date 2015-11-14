@@ -37,6 +37,11 @@ describe('dce-plugin', () => {
       }
       foo();
       foo();
+      var bar = function (a) {
+        return a;
+      };
+      bar();
+      bar();
     `);
     const source = unpad(`
       _(function bar(p) {
@@ -47,6 +52,11 @@ describe('dce-plugin', () => {
       }
       foo();
       foo();
+      var bar = function (a) {
+        return a;
+      };
+      bar();
+      bar();
     `);
 
     expect(transform(source)).toBe(expected);
@@ -134,6 +144,27 @@ describe('dce-plugin', () => {
         return 1;
       };
       x();
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should inline function expression (complex)', () => {
+    const expected = unpad(`
+      (function () {
+        return (function (a) {
+          return a;
+        })(1);
+      })();
+    `);
+    const source = unpad(`
+      var x = function(a) {
+        return a;
+      };
+      var y = function() {
+        return x(1);
+      };
+      y();
     `);
 
     expect(transform(source).trim()).toBe(expected);
