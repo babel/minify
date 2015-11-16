@@ -2,6 +2,24 @@
 
 module.exports = ({ Plugin, types: t }) => {
 
+  const removeReferenceVisitor = {
+    ReferencedIdentifier(path) {
+      if (!this.bindingsToReplace[path.node.name]) {
+        return;
+      }
+
+      const { replacement, markReplaced, scope } = this.bindingsToReplace[path.node.name];
+
+      if ((t.isClass(replacement) || t.isFunction(replacement))
+          && scope !== path.scope) {
+        return;
+      }
+
+      path.replaceWith(replacement);
+      markReplaced();
+    },
+  };
+
   return {
     visitor: {
       // remove side effectless statement
@@ -11,66 +29,52 @@ module.exports = ({ Plugin, types: t }) => {
         }
       },
 
-      ReferencedIdentifier(path) {
-        const { scope, node } = path;
-        const binding = scope.getBinding(node.name);
-        if (!binding || binding.references > 1 || !binding.constant ||
-            binding.kind === 'param' || binding.kind === 'module') {
-              return;
-        }
-
-        const bindingPath = binding.path;
-
-        let replacement = bindingPath.node;
-        if (t.isVariableDeclarator(replacement)) {
-          replacement = replacement.init;
-        }
-        if (!replacement) {
-          return;
-        }
-
-        // ensure it's a "pure" type
-        if (!scope.isPure(replacement, true)) {
-          return;
-        }
-
-        // don't change path if it's in a different scope, path can be bad
-        // for performance since it may be inside a loop or deeply nested in
-        // hot code
-        if ((t.isClass(replacement) || t.isFunction(replacement))
-            && bindingPath.scope.parent && bindingPath.scope.parent !== scope) {
-              return;
-        }
-
-        if (path.findParent(({ node: n }) => n === replacement)) {
-          return;
-        }
-
-        t.toExpression(replacement);
-        scope.removeBinding(node.name);
-        bindingPath.remove();
-        path.replaceWith(replacement);
-      },
-
       // Remove bindings with no references.
-      Scope({ node, parent, scope }) {
+      Scope(path) {
+        const { scope } = path;
+        const bindingsToReplace = Object.create(null);
+
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
           if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
-            let path = binding.path;
-            if (path.isVariableDeclarator()) {
-              if (!scope.isPure(path.node.init)) {
+            if (binding.path.isVariableDeclarator()) {
+              if (!scope.isPure(binding.path.node.init)) {
                 continue;
               }
-            } else if (!scope.isPure(path.node)) {
+            } else if (!scope.isPure(binding.path.node)) {
               continue;
-            } else if (path.isFunctionExpression()) {
+            } else if (binding.path.isFunctionExpression()) {
               // `bar(function foo() {})` foo is not referenced but it's used.
               continue;
             }
             scope.removeBinding(name);
-            path.remove();
+            binding.path.remove();
+          } else if (binding.references === 1 && binding.kind !== 'param' &&
+                     binding.kind !== 'module' && binding.constant) {
+            let replacement = binding.path.node;
+            if (t.isVariableDeclarator(replacement)) {
+              replacement = replacement.init;
+            }
+            if (!replacement) {
+              continue;
+            }
+
+            if (!scope.isPure(replacement, true)) {
+              continue;
+            }
+            t.toExpression(replacement);
+            bindingsToReplace[name] = {
+              scope,
+              replacement,
+              markReplaced() {
+                scope.removeBinding(name);
+                binding.path.remove();
+              },
+            };
           }
+        }
+        if (Object.keys(bindingsToReplace).length) {
+          path.traverse(removeReferenceVisitor, {bindingsToReplace});
         }
       },
 

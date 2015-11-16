@@ -149,22 +149,18 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should inline function expression (complex)', () => {
+  it('should not inline in a different scope', () => {
     const expected = unpad(`
-      (function () {
-        return (function (a) {
-          return a;
-        })(1);
-      })();
-    `);
-    const source = unpad(`
-      var x = function(a) {
+      var x = function (a) {
         return a;
       };
-      var y = function() {
-        return x(1);
+      while (1) x(1);
+    `);
+    const source = unpad(`
+      var x = function (a) {
+        return a;
       };
-      y();
+      while (1) x(1);
     `);
 
     expect(transform(source).trim()).toBe(expected);
