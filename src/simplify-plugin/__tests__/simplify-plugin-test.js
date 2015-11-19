@@ -647,30 +647,38 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should figure in alternate when merging ifs', () => {
+  it('should merge if statements when there is no alternate', () => {
     const source = unpad(`
       if (a) {
         if (b) {
-          c();
-        } else {
-          while (1) d();
+          throw 'wow';
         }
-      }
-      if (a) {
-        if (b) {
-          c();
-        } else {
-          while (1) d();
-        }
-      } else {
-        z();
       }
     `);
 
     const expected = unpad(`
-      if (a && b) c();else for (; 1;) d();
-      if (a) if (b) c();else for (; 1;) d();else z();
+      if (a && b) throw 'wow';
     `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should not merge if statements if changes semantics', () => {
+    const source = unpad(`
+      function foo() {
+        if (a) {
+          if (b()) return false;
+        } else if (c()) return true;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        if (a) {
+            if (b()) return !1;
+        } else if (c()) return !0;
+      }
+    `);
+
     expect(transform(source)).toBe(expected);
   });
 

@@ -437,7 +437,7 @@ module.exports = ({ Plugin, types: t }) => {
             if (!t.isIfStatement(node.consequent)) {
               return;
             }
-            if (node.alternate && node.consequent.alternate) {
+            if (node.alternate) {
               return;
             }
 
