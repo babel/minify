@@ -301,6 +301,15 @@ module.exports = ({ Plugin, types: t }) => {
         if (seq) {
           prev.remove();
           path.replaceWith(t.returnStatement(seq));
+
+          // Since we were able to merge some stuff it's possible that this has opened
+          // oppurtinties for other transforms to happen. Let's revisit the funciton parent.
+          // TODO: Look into changing the traversal order from bottom to up to avoid
+          // having to revisit things.
+          const fn = path.scope.getFunctionParent().path;
+          fn.pushContext(path.context);
+          fn.visit();
+          fn.popContext();
         }
       },
       // turn blocked ifs into single statements
