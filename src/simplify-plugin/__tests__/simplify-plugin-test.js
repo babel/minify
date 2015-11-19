@@ -682,6 +682,24 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should merge if/return statements', () => {
+    const source = unpad(`
+      function foo() {
+        if (a) return b;
+        if (c) return d;
+        return e;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return a ? b : c ? d : e;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should merge expressions into if statements test', () => {
 
   });

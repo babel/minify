@@ -352,7 +352,17 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            const next = path.getSibling(path.key + 1);
+            let next = path.getSibling(path.key + 1);
+
+            // If the next satatement(s) is an if statement and we can simplify that
+            // to potentailly be an expression (or a return) then this will make it
+            // easier merge.
+            if (next.isIfStatement()) {
+              next.pushContext(path.context);
+              next.visit();
+              next.popContext();
+              next = path.getSibling(path.key + 1);
+            }
 
             // No alternate but the next statement is a return
             // also turn into a return conditional
