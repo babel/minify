@@ -1,0 +1,53 @@
+TODOS:
+
+- convert early if returns to if with negated condition (babel)
+- needlessly parenthesising expressions (babel)
+- understand and optimize continue
+- some conditionals (with void 0) maybe turned into logical exprs
+- should merge more blocks into sequence expressions
+- Look at function hoisting?
+
+- Here is a place were uglify is crushing it making it into two fors and one if with no blocks:
+
+```
+  // taken from require.js
+ function _debugUnresolvedDependencies(names) {
+    var unresolved = Array.prototype.slice.call(names);
+    var visited = {};
+    var ii, name, module, dependency;
+
+    while (unresolved.length) {
+      name = unresolved.shift();
+      if (visited[name]) {
+        continue;
+      }
+      visited[name] = true;
+
+      module = modulesMap[name];
+      if (!module || !module.waiting) {
+        continue;
+      }
+
+      for (ii = 0; ii < module.dependencies.length; ii++) {
+        dependency = module.dependencies[ii];
+        if (!modulesMap[dependency] || modulesMap[dependency].waiting) {
+          unresolved.push(dependency);
+        }
+      }
+    }
+}
+```
+
+- multiple conditionals should add an "&&" between them
+- why is this even real code? :/
+```
+var symbolIterator=typeof Symbol === 'function'?typeof Symbol === 'function'?
+    Symbol.iterator:'@@iterator':
+    '@@iterator'
+```
+
+should compile to
+
+```
+l = "function" == typeof Symbol && "function" == typeof Symbol ? Symbol.iterator : "@@iterator",
+```
