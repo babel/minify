@@ -2,35 +2,33 @@ const Base54 = require('./Base54');
 
 module.exports = ({ Plugin, types: t }) => {
   const mangleNamesVisitors = {
-    Scope: {
-      exit({ scope }) {
-        const bindings = scope.bindings;
-        scope.bindings = {};
+    Scope({ scope }) {
+      const bindings = scope.bindings;
+      scope.bindings = {};
 
-        const names = Object.keys(bindings);
+      const names = Object.keys(bindings);
 
-        let i = 0;
-        for (let name of names) {
-          let binding = bindings[name];
-          let bindingRefs = this.refs.get(binding);
-          if (!bindingRefs) {
-            continue;
-          }
-
-          let newName;
-
-          do {
-            newName = this.base54.name(i);
-            i += 1;
-          } while (!(t.isValidIdentifier(newName)
-              && canUse(newName, scope, bindingRefs, this.refs)));
-
-          scope.bindings[newName] = binding;
-          for (let ref of bindingRefs) {
-            ref.node.name = newName;
-          }
+      let i = 0;
+      for (let name of names) {
+        let binding = bindings[name];
+        let bindingRefs = this.refs.get(binding);
+        if (!bindingRefs) {
+          continue;
         }
-      },
+
+        let newName;
+
+        do {
+          newName = this.base54.name(i);
+          i += 1;
+        } while (!(t.isValidIdentifier(newName)
+            && canUse(newName, scope, bindingRefs, this.refs)));
+
+        scope.bindings[newName] = binding;
+        for (let ref of bindingRefs) {
+          ref.node.name = newName;
+        }
+      }
     },
   };
 

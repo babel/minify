@@ -58,6 +58,15 @@ Backbone.js numbers (passing tests):
 ```
         raw      raw win gzip    gzip win parse time
 uglify  21.82kB  220%    7.32kB  169%     2ms
-closure 21.67kB  223%    7.37kB  167%     2ms
-babel   23.19kB  201%    7.48kB  163%     2ms
+babel   22.06kB  217%    7.34kB  168%     2ms
+closure 21.67kB  223%    7.37kB  167%     3ms
 ```
+
+if (x) continue
+wat
+
+if (!x) {
+wat
+}
+
+!(x == null) -> x != null

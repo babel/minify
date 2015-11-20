@@ -79,11 +79,11 @@ describe('mangle-names', () => {
   it('should not shadow outer references', () => {
     const expected = unpad(`
       function bar() {
-        function i(n, c, f) {
-          o(n, c, f);
+        function n(c, i, o) {
+          f(c, i, o);
         }
 
-        function o() {}
+        function f() {}
       }
     `);
     const source = unpad(`
