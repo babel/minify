@@ -389,8 +389,9 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             // Next is the last expression, turn into a return while void'ing the exprs
-            if (!path.getSibling(path.key + 2).node && t.isReturnStatement(node.consequent) &&
-              !node.alternate && next.isExpressionStatement()) {
+            if (path.parentPath && path.parentPath.parentPath &&
+                path.parentPath.parentPath.isFunction() && !path.getSibling(path.key + 2).node &&
+                t.isReturnStatement(node.consequent) && !node.alternate && next.isExpressionStatement()) {
                 const nextExpr = t.unaryExpression('void', next.node.expression);
                 next.remove();
                 if (node.consequent.argument) {

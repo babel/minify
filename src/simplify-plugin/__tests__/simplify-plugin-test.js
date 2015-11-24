@@ -737,6 +737,32 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should not return inside a loop', () => {
+    const source = unpad(`
+      function foo() {
+        while(1) {
+          if (a === null) {
+            b();
+            return;
+          }
+          a();
+          b();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        for (; 1;) {
+          if (null === a) return void b();
+          a(), b();
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should merge expressions into if statements test', () => {
 
   });
