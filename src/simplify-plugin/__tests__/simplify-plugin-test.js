@@ -718,6 +718,25 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should hoist functions', () => {
+    const source = unpad(`
+      function foo() {
+        a();
+        function bar() {}
+        b();
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        function bar() {}
+        a(), b();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should merge expressions into if statements test', () => {
 
   });

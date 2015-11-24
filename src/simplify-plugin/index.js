@@ -122,25 +122,6 @@ module.exports = ({ Plugin, types: t }) => {
         flipNegation(node);
       },
 
-/* Path is just removing functions for some reason?
-      // hoist all function declarations
-      Block({ node }) {
-        let top = [];
-        let bottom = [];
-
-        for (let i = 0; i < node.body.length; i++) {
-          let bodyNode = node.body[i];
-          if (t.isFunctionDeclaration(bodyNode)) {
-            top.push(bodyNode);
-          } else {
-            bottom.push(bodyNode);
-          }
-        }
-
-        node.body = top.concat(bottom);
-      },
-*/
-
       // concat
       VariableDeclaration: {
         enter: [
@@ -250,8 +231,26 @@ module.exports = ({ Plugin, types: t }) => {
 
       BlockStatement(path) {
         const { node, parent } = path;
-        const statements = toMultipleSequenceExpressions(node.body);
-        if (!statements.length || node[seen]) {
+
+        if (node[seen]) {
+          return;
+        }
+
+        const top = [];
+        const bottom = [];
+
+        for (let i = 0; i < node.body.length; i++) {
+          const bodyNode = node.body[i];
+          if (t.isFunctionDeclaration(bodyNode)) {
+            top.push(bodyNode);
+          } else {
+            bottom.push(bodyNode);
+          }
+        }
+
+        const statements = top.concat(toMultipleSequenceExpressions(bottom));
+
+        if (!statements.length) {
           return;
         }
 
