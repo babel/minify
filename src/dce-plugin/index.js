@@ -15,6 +15,7 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
+      t.toExpression(replacement);
       path.replaceWith(replacement);
       markReplaced();
     },
@@ -62,7 +63,7 @@ module.exports = ({ Plugin, types: t }) => {
             if (!scope.isPure(replacement, true)) {
               continue;
             }
-            t.toExpression(replacement);
+
             bindingsToReplace[name] = {
               scope,
               replacement,
