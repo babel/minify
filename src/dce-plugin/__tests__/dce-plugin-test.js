@@ -22,14 +22,24 @@ function unpad(str) {
 
 describe('dce-plugin', () => {
   it('should remove bindings with no references', () => {
-    const expected = '';
+    const source = 'function foo() {var x = 1;}';
+    const expected = 'function foo() {}';
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should keep bindings in the global namespace ', () => {
     const source = 'var x = 1;';
+    const expected = 'var x = 1;';
     expect(transform(source)).toBe(expected);
   });
 
   it('should handle impure right-hands', () => {
-    const expected = 'f();';
-    const source = 'var x = f();';
+    const source = 'function foo() { var x = f(); }';
+    const expected = unpad(`
+      function foo() {
+        f();
+      }
+    `);
     expect(transform(source)).toBe(expected);
   });
 
@@ -69,27 +79,29 @@ describe('dce-plugin', () => {
   });
 
   it('should inline binding with one reference', () => {
-    const expected = 'console.log(1);';
     const source = unpad(`
-      var x = 1;
-      console.log(x);
+      function foo() {
+        var x = 1;
+        console.log(x);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        console.log(1);
+      }
     `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it('should remove side effectless statements', () => {
-    const expected = unpad(`
-      function x() {}
-      x();
-      x();
-    `);
     const source = unpad(`
-      function x() {
+      function foo() {
         1;
       }
-      x();
-      x();
+    `);
+    const expected = unpad(`
+      function foo() {}
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -104,8 +116,6 @@ describe('dce-plugin', () => {
         y();
         y();
       }
-      x();
-      x();
     `);
     const source = unpad(`
       function x() {
@@ -116,8 +126,6 @@ describe('dce-plugin', () => {
         y();
         y();
       }
-      x();
-      x();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -125,68 +133,84 @@ describe('dce-plugin', () => {
 
   it('should inline function decl', () => {
     const expected = unpad(`
-      (function x() {
-        return 1;
-      })();
+      function foo() {
+        (function x() {
+          return 1;
+        })();
+      }
     `);
     const source = unpad(`
-      function x() {
-        return 1;
+      function foo() {
+        function x() {
+          return 1;
+        }
+        x();
       }
-      x();
     `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it('should inline function expressions', () => {
-    const expected = unpad(`
-      (function () {
-        return 1;
-      })();
-    `);
     const source = unpad(`
-      var x = function() {
-        return 1;
-      };
-      x();
+      function foo() {
+        var x = function() {
+          return 1;
+        };
+        x();
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        (function () {
+          return 1;
+        })();
+      }
     `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it('should not inline in a different scope', () => {
-    const expected = unpad(`
-      var x = function (a) {
-        return a;
-      };
-      while (1) x(1);
-    `);
     const source = unpad(`
-      var x = function (a) {
-        return a;
-      };
-      while (1) x(1);
+      function foo() {
+        var x = function (a) {
+          return a;
+        };
+        while (1) x(1);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var x = function (a) {
+          return a;
+        };
+        while (1) x(1);
+      }
     `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it('should handle mutual recursion', () => {
-    const expected = unpad(`
-      function foo() {
-        return bar();
-      }
-      function bar() {
-        return foo();
+    const source = unpad(`
+      function baz() {
+        function foo() {
+          return bar();
+        }
+        function bar() {
+          return foo();
+        }
       }
     `);
-    const source = unpad(`
-      function foo() {
-        return bar();
-      }
-      function bar() {
-        return foo();
+    const expected = unpad(`
+      function baz() {
+        function foo() {
+          return bar();
+        }
+        function bar() {
+          return foo();
+        }
       }
     `);
 
@@ -194,25 +218,30 @@ describe('dce-plugin', () => {
   });
 
   it('should not inline vars with multiple references', () => {
-    const expected = unpad(`
-      var x = function () {
-        if (!y) {
-          y = 1;
-        }
-      };
-      x();
-      x();
-      var y = null;
-    `);
     const source = unpad(`
-      var x = function() {
-        if (!y) {
-          y = 1;
-        }
-      };
-      x();
-      x();
-      var y = null;
+      function foo() {
+        var x = function() {
+         if (!y) {
+            y = 1;
+         }
+        };
+        x();
+        x();
+        var y = null;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        var x = function () {
+          if (!y) {
+            y = 1;
+          }
+        };
+        x();
+        x();
+        var y = null;
+      }
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -226,8 +255,6 @@ describe('dce-plugin', () => {
           return;
         }
       }
-      foo();
-      foo();
     `);
     const expected = unpad(`
       function foo() {
@@ -235,8 +262,6 @@ describe('dce-plugin', () => {
           y();
         }
       }
-      foo();
-      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -248,15 +273,11 @@ describe('dce-plugin', () => {
         y();
         return;
       }
-      foo();
-      foo();
     `);
     const expected = unpad(`
       function foo() {
         y();
       }
-      foo();
-      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -274,8 +295,6 @@ describe('dce-plugin', () => {
         }
         return;
       }
-      foo();
-      foo();
     `);
     const expected = unpad(`
       function foo() {
@@ -284,8 +303,6 @@ describe('dce-plugin', () => {
           if (b) {}
         }
       }
-      foo();
-      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -300,8 +317,6 @@ describe('dce-plugin', () => {
         }
         x();
       }
-      foo();
-      foo();
     `);
     const expected = unpad(`
       function foo() {
@@ -311,8 +326,6 @@ describe('dce-plugin', () => {
         }
         x();
       }
-      foo();
-      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);
@@ -325,15 +338,11 @@ describe('dce-plugin', () => {
         return;
         x();
       }
-      foo();
-      foo();
     `);
     const expected = unpad(`
       function foo() {
         z();
       }
-      foo();
-      foo();
     `);
 
     expect(transform(source).trim()).toBe(expected);

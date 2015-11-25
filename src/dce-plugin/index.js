@@ -32,6 +32,10 @@ module.exports = ({ Plugin, types: t }) => {
 
       // Remove bindings with no references.
       Scope(path) {
+        if (path.isProgram()) {
+          return;
+        }
+
         const { scope } = path;
         const bindingsToReplace = Object.create(null);
 
