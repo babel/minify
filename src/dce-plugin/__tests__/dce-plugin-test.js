@@ -347,4 +347,38 @@ describe('dce-plugin', () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should remove functions only called in themselves', () => {
+    const source = unpad(`
+      function foo() {
+        function baz() {
+          function bar() {
+            baz();
+          }
+          bar();
+          bar();
+        }
+      }
+    `);
+    const expected = 'function foo() {}';
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should remove functions only called in themselves 2', () => {
+    const source = unpad(`
+      function foo() {
+        var baz = function () {
+          function bar() {
+            baz();
+          }
+          bar();
+          bar();
+        };
+      }
+    `);
+    const expected = 'function foo() {}';
+
+    expect(transform(source).trim()).toBe(expected);
+  });
 });

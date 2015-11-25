@@ -64,28 +64,47 @@ module.exports = ({ Plugin, types: t }) => {
             }
             scope.removeBinding(name);
             binding.path.remove();
-          } else if (binding.references === 1 && binding.kind !== 'param' &&
-                     binding.kind !== 'module' && binding.constant) {
-            let replacement = binding.path.node;
-            if (t.isVariableDeclarator(replacement)) {
-              replacement = replacement.init;
-            }
-            if (!replacement) {
-              continue;
-            }
+          } else if (binding.constant) {
+            if (binding.path.isFunctionDeclaration() ||
+                (binding.path.isVariableDeclarator() && binding.path.get('init').isFunction())) {
+              const fun = binding.path.isFunctionDeclaration() ? binding.path : binding.path.get('init');
+              let allInside = true;
+              for (let ref of binding.referencePaths) {
+                if (!ref.find(p => p.node === fun.node)) {
+                  allInside = false;
+                  break;
+                }
+              }
 
-            if (!scope.isPure(replacement, true)) {
-              continue;
-            }
-
-            bindingsToReplace[name] = {
-              scope,
-              replacement,
-              markReplaced() {
+              if (allInside) {
                 scope.removeBinding(name);
                 binding.path.remove();
-              },
-            };
+                continue;
+              }
+            }
+
+            if (binding.references === 1 && binding.kind !== 'param' && binding.kind !== 'module' && binding.constant) {
+              let replacement = binding.path.node;
+              if (t.isVariableDeclarator(replacement)) {
+                replacement = replacement.init;
+              }
+              if (!replacement) {
+                continue;
+              }
+
+              if (!scope.isPure(replacement, true)) {
+                continue;
+              }
+
+              bindingsToReplace[name] = {
+                scope,
+                replacement,
+                markReplaced() {
+                  scope.removeBinding(name);
+                  binding.path.remove();
+                },
+              };
+            }
           }
         }
         if (Object.keys(bindingsToReplace).length) {
