@@ -27,6 +27,12 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should handle impure right-hands', () => {
+    const expected = 'f();';
+    const source = 'var x = f();';
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should not remove params (preserve fn.length)', () => {
     const expected = unpad(`
       _(function bar(p) {

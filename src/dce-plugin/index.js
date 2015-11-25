@@ -39,7 +39,17 @@ module.exports = ({ Plugin, types: t }) => {
           let binding = scope.bindings[name];
           if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
             if (binding.path.isVariableDeclarator()) {
-              if (!scope.isPure(binding.path.node.init)) {
+
+              // Can't remove if in a for in statement `for (var x in wat)`.
+              if (binding.path.parentPath.parentPath && binding.path.parentPath.parentPath.isForInStatement()) {
+                continue;
+              }
+
+              if (binding.path.node.init && !scope.isPure(binding.path.node.init)) {
+                if (binding.path.parentPath.node.declarations.length === 1) {
+                  binding.path.parentPath.replaceWith(binding.path.node.init);
+                  scope.removeBinding(name);
+                }
                 continue;
               }
             } else if (!scope.isPure(binding.path.node)) {
