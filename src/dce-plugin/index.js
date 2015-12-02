@@ -41,6 +41,7 @@ module.exports = ({ Plugin, types: t }) => {
 
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
+
           if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
             if (binding.path.isVariableDeclarator()) {
 
@@ -101,7 +102,7 @@ module.exports = ({ Plugin, types: t }) => {
                 replacement,
                 markReplaced() {
                   scope.removeBinding(name);
-                  binding.path.remove();
+                  if (binding.path.node) binding.path.remove();
                 },
               };
             }
