@@ -353,7 +353,7 @@ module.exports = ({ Plugin, types: t }) => {
                   t.conditionalExpression(
                     node.test,
                     node.consequent.argument || VOID_0,
-                    node.alternate.argument
+                    node.alternate.argument || VOID_0
                   )
                 )
               );
@@ -376,7 +376,7 @@ module.exports = ({ Plugin, types: t }) => {
             // also turn into a return conditional
             if (t.isReturnStatement(node.consequent) &&
               !node.alternate && next.isReturnStatement()) {
-                const nextArg = next.node.argument;
+                const nextArg = next.node.argument || VOID_0;
                 next.remove();
                 path.replaceWith(
                   t.returnStatement(
