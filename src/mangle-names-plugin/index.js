@@ -33,23 +33,21 @@ module.exports = ({ Plugin, types: t }) => {
     },
   };
 
-  return {
-    pre() {
-      this.refs = new Map();
+  const collectVisitor = {
+    'ReferencedIdentifier|BindingIdentifier'(path) {
+      const { scope, node } = path;
+      recordRef(this.refs, scope.getBinding(node.name), path);
     },
+  };
 
+  return {
     visitor: {
-      Program: {
-        exit(path) {
-          path.traverse(mangleNamesVisitors, {
-            refs: this.refs,
-          });
-        },
-      },
-
-      'ReferencedIdentifier|BindingIdentifier'(path) {
-        const { scope, node } = path;
-        recordRef(this.refs, scope.getBinding(node.name), path);
+      Program(path) {
+        // We want to take control of the sequencing and make sure our visitors
+        // run in isolation.
+        const refs = new Map();
+        path.traverse(collectVisitor, { refs });
+        path.traverse(mangleNamesVisitors, { refs });
       },
     },
   };
