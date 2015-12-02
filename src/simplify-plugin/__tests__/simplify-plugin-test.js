@@ -784,6 +784,31 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should not merge if', () => {
+    const source = unpad(`
+      if (x) {
+        try {
+          foo();
+        } catch (e) {}
+      } else if (y) {
+        if (a) {
+          bar();
+        } else if (b) {
+          baz();
+        } else {
+          for (;;) 1;
+        }
+      }
+   `);
+
+    const expected = unpad(`
+      if (x) try {
+          foo();
+        } catch (e) {} else if (y) if (a) bar();else if (b) baz();else for (;;) 1;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should merge expressions into if statements test', () => {
 
   });

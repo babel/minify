@@ -452,16 +452,14 @@ module.exports = ({ Plugin, types: t }) => {
             }
           },
 
+          // Merge nested if statements if possible
           function ({ node }) {
             if (!t.isIfStatement(node.consequent)) {
               return;
             }
-            if (node.alternate) {
-              return;
-            }
 
-            if (node.consequent.alternate) {
-              node.alternate = node.consequent.alternate;
+            if (node.alternate || node.consequent.alternate) {
+              return;
             }
 
             node.test = t.logicalExpression('&&', node.test, node.consequent.test);
