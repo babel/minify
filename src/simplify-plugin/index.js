@@ -255,7 +255,7 @@ module.exports = ({ Plugin, types: t }) => {
         }
 
         if (statements.length > 1 || (t.isFunction(parent) && node === parent.body) ||
-            t.isTryStatement(parent) || t.isCatchClause(parent)) {
+            t.isTryStatement(parent) || t.isCatchClause(parent) || t.isDoWhileStatement(parent)) {
           const n = t.blockStatement(statements);
           n[seen] = true;
           path.replaceWith(n);

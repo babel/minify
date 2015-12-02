@@ -816,4 +816,19 @@ describe('simplify-plugin', () => {
   it('should understand continue statements', () => {
 
   });
+
+  it('should handle do while statements', () => {
+    const source = unpad(`
+      do {
+        foo();
+      } while (1);
+   `);
+
+    const expected = unpad(`
+      do {
+        foo();
+      } while (1);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
