@@ -77,6 +77,7 @@ function test(name, callback) {
 
 test('babel', function (code, callback) {
   return babel.transform(code, {
+    sourceType: 'script',
     plugins: [
 //      'constant-folding',
       require('../src/mangle-names-plugin'),

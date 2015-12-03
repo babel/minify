@@ -637,6 +637,7 @@ module.exports = ({ Plugin, types: t }) => {
         seq = t.sequenceExpression(exprs);
       }
 
+      seq = seq || VOID_0;
       return { seq };
     }
   }

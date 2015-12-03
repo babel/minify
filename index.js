@@ -9,6 +9,8 @@ process.stdin.on('end', compile);
 
 function compile() {
   var out = babel.transform(code, {
+    sourceType: 'script',
+
     plugins: [
       require('./src/mangle-names-plugin'),
       require('./src/simplify-plugin'),
