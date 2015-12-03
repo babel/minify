@@ -80,9 +80,10 @@ test('babel', function (code, callback) {
     sourceType: 'script',
     plugins: [
 //      'constant-folding',
-      require('../src/mangle-names-plugin'),
-      require('../src/simplify-plugin'),
       require('../src/dce-plugin'),
+      require('../src/simplify-plugin'),
+
+      require('../src/mangle-names-plugin'),
     ],
     compact: true,
     comments: false,

@@ -21,8 +21,7 @@ module.exports = ({ Plugin, types: t }) => {
     },
   };
 
-  return {
-    visitor: {
+  const main = {
       // remove side effectless statement
       ExpressionStatement(path) {
         if (path.get('expression').isPure() && !path.isCompletionRecord()) {
@@ -171,6 +170,12 @@ module.exports = ({ Plugin, types: t }) => {
           path.remove();
         }
       },
-    },
+  };
+  return {
+    visitor: {
+      Program(path) {
+        path.traverse(main, {});
+      }
+    }
   };
 };

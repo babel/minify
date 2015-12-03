@@ -12,9 +12,9 @@ function compile() {
     sourceType: 'script',
 
     plugins: [
-      require('./src/mangle-names-plugin'),
-      require('./src/simplify-plugin'),
       require('./src/dce-plugin'),
+      require('./src/simplify-plugin'),
+      require('./src/mangle-names-plugin'),
     ],
     compact: true,
     comments: false,
