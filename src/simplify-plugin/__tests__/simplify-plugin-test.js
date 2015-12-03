@@ -831,4 +831,39 @@ describe('simplify-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should handle multiple interplays of if statements and returns', () => {
+    const source = unpad(`
+      function lawl() {
+        var a = 1;
+        if (b) {
+          return c;
+        }
+
+        if (a) {
+          bar();
+          return;
+        }
+
+        if (d) {
+          if (g) {
+            this['s'] = morebutts;
+            return wat;
+          }
+          return boo;
+        }
+
+        haha();
+        return butts;
+      }
+   `);
+
+    const expected = unpad(`
+      function lawl() {
+        var a = 1;
+        return b ? c : a ? void bar() : d ? g ? (this.s = morebutts, wat) : boo : (haha(), butts);
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

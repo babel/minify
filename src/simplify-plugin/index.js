@@ -372,6 +372,9 @@ module.exports = ({ Plugin, types: t }) => {
               next = path.getSibling(path.key + 1);
             }
 
+            // Some other visitor might have deleted our node. OUR NODE ;_;
+            if (!path.node) return;
+
             // No alternate but the next statement is a return
             // also turn into a return conditional
             if (t.isReturnStatement(node.consequent) &&
