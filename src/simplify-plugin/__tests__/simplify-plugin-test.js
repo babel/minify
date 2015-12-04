@@ -276,8 +276,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        if (1) return 2;
-        lol(1), lol(2);
+        return 1 ? 2 : void (lol(1), lol(2));
       }
     `);
 
@@ -764,20 +763,81 @@ describe('simplify-plugin', () => {
   });
 
 
-  it('should merge to return', () => {
+  it('should make if with one return into a conditional', () => {
     const source = unpad(`
       function foo() {
-        if (1) {
+        if (b) {
           return foo;
         } else {
           a();
+          b();
         }
       }
     `);
 
     const expected = unpad(`
       function foo() {
-        return 1 ? foo : a();
+        return b ? foo : void (a(), b());
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should make if with one return into a conditional 2', () => {
+    const source = unpad(`
+      function foo() {
+        if (b) {
+          foo();
+        } else {
+          return bar;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return b ? void foo() : bar;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should make if with one return into a conditional 3', () => {
+    const source = unpad(`
+      function foo() {
+        if (b) {
+          foo();
+        } else {
+          return;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return b && void foo();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should make if with one return into a conditional 4', () => {
+    const source = unpad(`
+      function foo() {
+        if (b) {
+          return;
+        } else {
+          foo();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return b || void foo();
       }
     `);
 
@@ -809,13 +869,8 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge expressions into if statements test', () => {
-
-  });
-
-  it('should understand continue statements', () => {
-
-  });
+  it('should merge expressions into if statements test');
+  it('should understand continue statements');
 
   it('should handle do while statements', () => {
     const source = unpad(`
@@ -864,6 +919,30 @@ describe('simplify-plugin', () => {
         return b ? c : a ? void bar() : d ? g ? (this.s = morebutts, wat) : boo : (haha(), butts);
       }
     `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle empty blocks in if statements', () => {
+    const source = unpad(`
+      if (a) {
+      } else {
+        foo();
+      }
+
+      if (a) {
+        foo();
+      } else if (b) {
+      }
+
+      if (a) {
+      } else {
+      }
+    `);
+
+    const expected = unpad(`
+      a || foo(), a ? foo() : b, a;
+    `);
+
     expect(transform(source)).toBe(expected);
   });
 });

@@ -348,7 +348,9 @@ module.exports = ({ Plugin, types: t }) => {
 
             // There is nothing after this block. We can safely convert to
             // a return.
-            if (!path.getSibling(path.key + 1).node) {
+            if (!path.getSibling(path.key + 1).node &&
+                node.consequent && node.alternate
+            ) {
               // Easy: consequent and alternate are return -- conditional.
               if (t.isReturnStatement(node.consequent)
                   && t.isReturnStatement(node.alternate)
