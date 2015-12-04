@@ -346,10 +346,15 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            // There is nothing after this block. We can safely convert to
-            // a return.
+            // There is nothing after this block. And one or both
+            // of the consequent and alternate are either expression statment
+            // or return statements.
             if (!path.getSibling(path.key + 1).node &&
-                node.consequent && node.alternate
+                node.consequent && node.alternate &&
+                (t.isReturnStatement(node.consequent) ||
+                 t.isExpressionStatement(node.consequent)) &&
+                (t.isReturnStatement(node.alternate) ||
+                 t.isExpressionStatement(node.alternate))
             ) {
               // Easy: consequent and alternate are return -- conditional.
               if (t.isReturnStatement(node.consequent)
@@ -408,7 +413,7 @@ module.exports = ({ Plugin, types: t }) => {
                   return;
                 }
 
-                 path.replaceWith(
+                path.replaceWith(
                   t.returnStatement(
                     t.conditionalExpression(
                       node.test,
