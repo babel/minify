@@ -147,7 +147,9 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       // Not last in it's block? (See BlockStatement visitor)
-      if (path.container.length - 1 !== path.key) {
+      if (path.container.length - 1 !== path.key &&
+          !path.getSibling(path.key + 1).isFunctionDeclaration()
+      ) {
         // This is probably a new oppurtinity by some other transform
         // let's call the block visitor on this again before proceeding.
         path.parentPath.pushContext(path.context);

@@ -389,6 +389,31 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  it('should be fine with fun decl after return', () => {
+    const source = unpad(`
+      function foo() {
+        z();
+        z();
+        return 22;
+        function z() {
+          wow();
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        z();
+        z();
+        return 22;
+        function z() {
+          wow();
+        }
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it('should handle returns that were orphaned', () => {
     const source = unpad(`
       var a = true;
