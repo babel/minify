@@ -1,4 +1,9 @@
-See tests for todos.
+## Continue porting the following plugins:
+* babel-plugin-constant-folding
+* babel-plugin-dead-code-elimination
+
+
+See tests for other todos.
 
 Backbone.js numbers (passing tests):
 
