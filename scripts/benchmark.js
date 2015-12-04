@@ -79,7 +79,18 @@ test('babel', function (code, callback) {
   return babel.transform(code, {
     sourceType: 'script',
     plugins: [
-//      'constant-folding',
+      [
+        require('../src/replace-plugin'),
+        {
+          replacements: [{
+            identifierName: '__DEV__',
+            replacement: {
+              type: 'booleanLiteral',
+              value: true,
+            },
+          }],
+        }
+      ],
       require('../src/dce-plugin'),
       require('../src/simplify-plugin'),
 
