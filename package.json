@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/facebook/babel-minify#readme",
   "dependencies": {
-    "babel-core": "^6.2.1",
+    "babel-core": "^6.2.1"
   },
   "jest": {
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
