@@ -389,6 +389,40 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  it('should handle returns that were orphaned', () => {
+    const source = unpad(`
+      var a = true;
+      function foo() {
+        if (a) return;
+        x();
+      }
+    `);
+    const expected = unpad(`
+      var a = true;
+      function foo() {}
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should handle returns that were orphaned 2', () => {
+    const source = unpad(`
+      var a = true;
+      function foo() {
+        if (a) return 1;
+        x();
+      }
+    `);
+    const expected = unpad(`
+      var a = true;
+      function foo() {
+        return 1;
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it('should remove functions only called in themselves', () => {
     const source = unpad(`
       function foo() {

@@ -138,16 +138,27 @@ module.exports = ({ Plugin, types: t }) => {
       }
     },
 
-    // Remove return statements that have no semantic meaning
+    // Double check unreachable code and remove return statements that
+    // have no semantic meaning
     ReturnStatement(path) {
       const { node } = path;
-      if (node.argument || !path.inList) {
+      if (!path.inList) {
         return;
       }
 
       // Not last in it's block? (See BlockStatement visitor)
       if (path.container.length - 1 !== path.key) {
-        throw new Error('Unexpected dead code');
+        // This is probably a new oppurtinity by some other transform
+        // let's call the block visitor on this again before proceeding.
+        path.parentPath.pushContext(path.context);
+        path.parentPath.visit();
+        path.parentPath.popContext();
+
+        return;
+      }
+
+      if (node.argument) {
+        return;
       }
 
       let noNext = true;
