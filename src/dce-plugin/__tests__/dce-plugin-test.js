@@ -291,7 +291,7 @@ describe('dce-plugin', () => {
   it('should remove redundant returns' , () => {
     const source = unpad(`
       function foo() {
-        if (1) {
+        if (a) {
           y();
           return;
         }
@@ -299,7 +299,7 @@ describe('dce-plugin', () => {
     `);
     const expected = unpad(`
       function foo() {
-        if (1) {
+        if (a) {
           y();
         }
       }
@@ -327,7 +327,7 @@ describe('dce-plugin', () => {
   it('should remove redundant returns (complex)' , () => {
     const source = unpad(`
       function foo() {
-        if (1) {
+        if (a) {
           y();
           if (b) {
             return;
@@ -339,7 +339,7 @@ describe('dce-plugin', () => {
     `);
     const expected = unpad(`
       function foo() {
-        if (1) {
+        if (a) {
           y();
           if (b) {}
         }
@@ -352,7 +352,7 @@ describe('dce-plugin', () => {
   it('should keep needed returns' , () => {
     const source = unpad(`
       function foo() {
-        if (1) {
+        if (a) {
           y();
           return;
         }
@@ -361,7 +361,7 @@ describe('dce-plugin', () => {
     `);
     const expected = unpad(`
       function foo() {
-        if (1) {
+        if (a) {
           y();
           return;
         }
@@ -440,6 +440,44 @@ describe('dce-plugin', () => {
     `);
     const expected = 'function foo() {}';
 
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should remove dead if statements', () => {
+    const source = unpad(`
+      if (1) {
+        foo();
+      }
+      if (false) {
+        foo();
+      } else {
+        bar();
+      }
+    `);
+    const expected = 'foo();';
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should remove empty if statements block', () => {
+    const source = unpad(`
+      if (a) {
+      } else {
+        foo();
+      }
+      if (a) {
+        foo();
+      } else {
+
+      }
+    `);
+    const expected = unpad(`
+      if (!a) {
+        foo();
+      }
+      if (a) {
+        foo();
+      }
+    `);
     expect(transform(source).trim()).toBe(expected);
   });
 });
