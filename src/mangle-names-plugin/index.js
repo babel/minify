@@ -25,7 +25,9 @@ module.exports = ({ Plugin, types: t }) => {
         } while (!(t.isValidIdentifier(newName)
             && canUse(newName, scope, bindingRefs, this.refs)));
 
-//        scope.rename(name, newName);
+        // WARNING: this is a destructive operation, use scope.rename for
+        // a safer operation, however, it does full tree traversal for every
+        // rename:
         scope.bindings[newName] = binding;
         for (let ref of bindingRefs) {
           ref.node.name = newName;
