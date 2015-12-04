@@ -39,7 +39,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       CallExpression(path) {
-        const {node, parent } = path;
+        const { node } = path;
 
         // Number(foo) -> +foo
         if (t.isIdentifier(node.callee, { name: 'Number' }) &&
@@ -324,18 +324,20 @@ module.exports = ({ Plugin, types: t }) => {
             // No alternate, make into a guarded expression
             if (node.consequent && !node.alternate &&
                 node.consequent.type === 'ExpressionStatement' &&
-                !path.isCompletionRecord()) {
-                path.replaceWith(
-                  t.expressionStatement(
-                    t.logicalExpression('&&', node.test, node.consequent.expression)
-                  )
-                );
-                return;
+                !path.isCompletionRecord()
+            ) {
+              path.replaceWith(
+                t.expressionStatement(
+                  t.logicalExpression('&&', node.test, node.consequent.expression)
+                )
+              );
+              return;
             }
 
             // Easy, both are expressions, turn into ternary
             if (t.isExpressionStatement(node.consequent) &&
-                t.isExpressionStatement(node.alternate)) {
+                t.isExpressionStatement(node.alternate)
+            ) {
               path.replaceWith(
                 t.conditionalExpression(
                   node.test, node.consequent.expression, node.alternate.expression
@@ -344,20 +346,77 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            // Alternate and consequent are returns turn into a return conditional
-            if (t.isReturnStatement(node.consequent)
-                && t.isReturnStatement(node.alternate)
-                && !path.getSibling(path.key + 1).node) {
-              path.replaceWith(
-                t.returnStatement(
-                  t.conditionalExpression(
-                    node.test,
-                    node.consequent.argument || VOID_0,
-                    node.alternate.argument || VOID_0
+            // There is nothing after this block. We can safely convert to
+            // a return.
+            if (!path.getSibling(path.key + 1).node) {
+              // Easy: consequent and alternate are return -- conditional.
+              if (t.isReturnStatement(node.consequent)
+                  && t.isReturnStatement(node.alternate)
+              ) {
+                path.replaceWith(
+                  t.returnStatement(
+                    t.conditionalExpression(
+                      node.test,
+                      node.consequent.argument || VOID_0,
+                      node.alternate.argument || VOID_0
+                    )
                   )
-                )
-              );
-              return;
+                );
+                return;
+              }
+
+              // Only the consequent is a return, void the alternate.
+              if (t.isReturnStatement(node.consequent)) {
+                if (!node.consequent.argument) {
+                  path.replaceWith(
+                    t.returnStatement(
+                      t.logicalExpression(
+                        '||',
+                        node.test,
+                        t.unaryExpression('void', node.alternate.expression)
+                      )
+                    )
+                  );
+                  return;
+                }
+                path.replaceWith(
+                  t.returnStatement(
+                    t.conditionalExpression(
+                      node.test,
+                      node.consequent.argument || VOID_0,
+                      t.unaryExpression('void', node.alternate.expression)
+                    )
+                  )
+                );
+                return;
+              }
+
+              // Only the alternate is a return, void the consequent.
+              if (t.isReturnStatement(node.alternate)) {
+                if (!node.alternate.argument) {
+                  path.replaceWith(
+                    t.returnStatement(
+                      t.logicalExpression(
+                        '&&',
+                        node.test,
+                        t.unaryExpression('void', node.consequent.expression)
+                      )
+                    )
+                  );
+                  return;
+                }
+
+                 path.replaceWith(
+                  t.returnStatement(
+                    t.conditionalExpression(
+                      node.test,
+                      t.unaryExpression('void', node.consequent.expression),
+                      node.alternate.argument || VOID_0
+                    )
+                  )
+                );
+                return;
+              }
             }
 
             let next = path.getSibling(path.key + 1);
@@ -373,49 +432,53 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             // Some other visitor might have deleted our node. OUR NODE ;_;
-            if (!path.node) return;
+            if (!path.node) {
+              return;
+            }
 
             // No alternate but the next statement is a return
             // also turn into a return conditional
             if (t.isReturnStatement(node.consequent) &&
-              !node.alternate && next.isReturnStatement()) {
-                const nextArg = next.node.argument || VOID_0;
-                next.remove();
-                path.replaceWith(
-                  t.returnStatement(
-                    t.conditionalExpression(
-                      node.test, node.consequent.argument || VOID_0, nextArg
-                    )
+              !node.alternate && next.isReturnStatement()
+            ) {
+              const nextArg = next.node.argument || VOID_0;
+              next.remove();
+              path.replaceWith(
+                t.returnStatement(
+                  t.conditionalExpression(
+                    node.test, node.consequent.argument || VOID_0, nextArg
                   )
-                );
-                return;
+                )
+              );
+              return;
             }
 
             // Next is the last expression, turn into a return while void'ing the exprs
             if (path.parentPath && path.parentPath.parentPath &&
                 path.parentPath.parentPath.isFunction() && !path.getSibling(path.key + 2).node &&
-                t.isReturnStatement(node.consequent) && !node.alternate && next.isExpressionStatement()) {
-                const nextExpr = t.unaryExpression('void', next.node.expression);
-                next.remove();
-                if (node.consequent.argument) {
-                  path.replaceWith(
-                    t.returnStatement(
-                      t.conditionalExpression(
-                        node.test,
-                        node.consequent.argument,
-                        nextExpr
-                      )
-                    )
-                  );
-                  return;
-                }
-
+                t.isReturnStatement(node.consequent) && !node.alternate && next.isExpressionStatement()
+            ) {
+              const nextExpr = t.unaryExpression('void', next.node.expression);
+              next.remove();
+              if (node.consequent.argument) {
                 path.replaceWith(
                   t.returnStatement(
-                    t.logicalExpression('||', node.test, nextExpr)
+                    t.conditionalExpression(
+                      node.test,
+                      node.consequent.argument,
+                      nextExpr
+                    )
                   )
                 );
                 return;
+              }
+
+              path.replaceWith(
+                t.returnStatement(
+                  t.logicalExpression('||', node.test, nextExpr)
+                )
+              );
+              return;
             }
 
             if (node.consequent && node.alternate &&
@@ -474,7 +537,8 @@ module.exports = ({ Plugin, types: t }) => {
 
             if (!path.inList || node.alternate ||
                 !(t.isReturnStatement(node.consequent) && !node.consequent.argument) ||
-                !path.parentPath.parentPath.isFunction()) {
+                !path.parentPath.parentPath.isFunction()
+            ) {
               return;
             }
 
@@ -572,7 +636,6 @@ module.exports = ({ Plugin, types: t }) => {
 
     return retStatements;
 
-
     function convert(nodes) {
       let exprs = [];
 
@@ -615,7 +678,9 @@ module.exports = ({ Plugin, types: t }) => {
             alternate = res.seq;
           }
 
-          if (!alternate) {
+          if (!alternate && !consequent) {
+            exprs.push(node.test);
+          } else if (!alternate) {
             exprs.push(t.logicalExpression('&&', node.test, consequent));
           } else if (!consequent) {
             exprs.push(t.logicalExpression('||', node.test, alternate));
@@ -640,21 +705,9 @@ module.exports = ({ Plugin, types: t }) => {
         seq = t.sequenceExpression(exprs);
       }
 
-      seq = seq || VOID_0;
+      seq = seq;
       return { seq };
     }
   }
 
 };
-
-
-/*
-      // TODO: path doesn't take into account variable declerations
-      // turn program body into sequence expression
-      Program(node, parent, scope) {
-        let seq = t.toSequenceExpression(node.body, scope);
-        if (seq) {
-          node.body = [seq];
-        }
-      },
-*/
