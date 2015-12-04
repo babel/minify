@@ -101,7 +101,9 @@ module.exports = ({ Plugin, types: t }) => {
               replacement,
               markReplaced() {
                 scope.removeBinding(name);
-                if (binding.path.node) binding.path.remove();
+                if (binding.path.node) {
+                  binding.path.remove();
+                }
               },
             };
           }
