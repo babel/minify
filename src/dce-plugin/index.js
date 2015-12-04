@@ -177,6 +177,16 @@ module.exports = ({ Plugin, types: t }) => {
       }
     },
 
+    ConditionalExpression(path) {
+      const { node } = path;
+      const evaluateTest = path.get('test').evaluateTruthy();
+      if (evaluateTest === true) {
+        path.replaceWith(node.consequent);
+      } else if (evaluateTest === false) {
+        path.replaceWith(node.alternate);
+      }
+    },
+
     IfStatement: {
       exit(path) {
         const { node } = path;

@@ -480,4 +480,16 @@ describe('dce-plugin', () => {
     `);
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should evaluate conditional expressions', () => {
+    const source = 'true ? a() : b();';
+    const expected = 'a();';
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should evaluate conditional expressions 2', () => {
+    const source = 'false ? a() : b();';
+    const expected = 'b();';
+    expect(transform(source).trim()).toBe(expected);
+  });
 });
