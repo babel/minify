@@ -192,6 +192,47 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  it('should handle recursion', () => {
+    const source = unpad(`
+      function baz() {
+        var bar = function foo(config) {
+          return foo;
+        };
+        exports.foo = bar;
+      }
+    `);
+    const expected = unpad(`
+      function baz() {
+        exports.foo = function foo(config) {
+          return foo;
+        };
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should handle recursion 2', () => {
+    const source = unpad(`
+      function baz() {
+        var foo = function foo(config) {
+          return foo;
+        };
+        exports.foo = foo;
+      }
+    `);
+    const expected = unpad(`
+      function baz() {
+        exports.foo = function foo(config) {
+          return foo;
+        };
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+
   it('should handle mutual recursion', () => {
     const source = unpad(`
       function baz() {

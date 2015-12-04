@@ -15,6 +15,10 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
+      if (path.find(({ node }) => node === replacement)) {
+        return;
+      }
+
       t.toExpression(replacement);
       path.replaceWith(replacement);
       markReplaced();
