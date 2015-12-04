@@ -1,57 +1,4 @@
-TODOS:
-
-- convert early if returns to if with negated condition (babel)
-- needlessly parenthesising expressions (babel)
-- understand and optimize continue
-- some conditionals (with void 0) maybe turned into logical exprs
-- should merge more blocks into sequence expressions
-- Look at function hoisting?
-
-- Here is a place were uglify is crushing it making it into two fors and one if with no blocks:
-
-```
-  // taken from require.js
- function _debugUnresolvedDependencies(names) {
-    var unresolved = Array.prototype.slice.call(names);
-    var visited = {};
-    var ii, name, module, dependency;
-
-    while (unresolved.length) {
-      name = unresolved.shift();
-      if (visited[name]) {
-        continue;
-      }
-      visited[name] = true;
-
-      module = modulesMap[name];
-      if (!module || !module.waiting) {
-        continue;
-      }
-
-      for (ii = 0; ii < module.dependencies.length; ii++) {
-        dependency = module.dependencies[ii];
-        if (!modulesMap[dependency] || modulesMap[dependency].waiting) {
-          unresolved.push(dependency);
-        }
-      }
-    }
-}
-```
-
-- multiple conditionals should add an "&&" between them
-- why is this even real code? :/
-```
-var symbolIterator=typeof Symbol === 'function'?typeof Symbol === 'function'?
-    Symbol.iterator:'@@iterator':
-    '@@iterator'
-```
-
-should compile to
-
-```
-l = "function" == typeof Symbol && "function" == typeof Symbol ? Symbol.iterator : "@@iterator",
-```
-
+See tests for todos.
 
 Backbone.js numbers (passing tests):
 
@@ -62,18 +9,10 @@ babel   21.88kB  220%    7.33kB  168%     2ms
 closure 21.67kB  223%    7.37kB  167%     2ms
 ```
 
-if (x) continue
-wat
-
-if (!x) {
-wat
-}
-
-!(x == null) -> x != null
-
-
+```
         raw      raw win gzip    gzip win parse time
-babel   195.13kB 98%     48.85kB 50%      15ms
-uglify  196.99kB 96%     48.95kB 49%      17ms
+babel   194.79kB 98%     48.85kB 50%      14ms
+uglify  196.99kB 96%     48.95kB 49%      15ms
 closure 192.94kB 100%    49.42kB 48%      17ms
-jsxmin  205.97kB 87%     51.29kB 43%      16ms
+jsxmin  205.97kB 87%     51.29kB 43%      13ms
+```
