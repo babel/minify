@@ -29,7 +29,11 @@ module.exports = ({ Plugin, types: t }) => {
     // remove side effectless statement
     ExpressionStatement(path) {
       if (path.get('expression').isPure() && !path.isCompletionRecord()) {
-        path.remove();
+        if (!path.parentPath.isBlockStatement()) {
+          path.replaceWith(t.emptyStatement());
+        } else {
+          path.remove();
+        }
       }
     },
 

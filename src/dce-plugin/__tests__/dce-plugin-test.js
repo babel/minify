@@ -581,4 +581,18 @@ describe('dce-plugin', () => {
     const expected = 'b();';
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should not remove needed expressions', () => {
+    const source = unpad(`
+      var n = 1;
+      if (foo) n;
+      console.log(n);
+    `);
+    const expected = unpad(`
+      var n = 1;
+      if (foo) ;
+      console.log(n);
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
 });
