@@ -17,7 +17,7 @@ module.exports = ({ Plugin, types: t }) => {
       Property: {
         exit({ node }) {
           let key = node.key;
-          if (!t.isLiteral(key)) {
+          if (!t.isStringLiteral(key)) {
             return;
           }
 
@@ -35,7 +35,7 @@ module.exports = ({ Plugin, types: t }) => {
       MemberExpression: {
         exit({ node }) {
           let prop = node.property;
-          if (!node.computed || !t.isLiteral(prop)) {
+          if (!node.computed || !t.isStringLiteral(prop)) {
             return;
           }
 
