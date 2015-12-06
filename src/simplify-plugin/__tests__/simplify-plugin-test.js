@@ -33,9 +33,15 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should strip unnecessary property literal qoutes for numbers', () => {
+    const source = `var x = { '1': 'bar' };`;
+    const expected = `var x = { 1: 'bar' };`;
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should turn subscript into dot', () => {
-    const source = `foo['bar'];`;
-    const expected = `foo.bar;`;
+    const source = `foo['1'];`;
+    const expected = `foo[1];`;
     expect(transform(source)).toBe(expected);
   });
 

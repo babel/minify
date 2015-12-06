@@ -17,8 +17,14 @@ module.exports = ({ Plugin, types: t }) => {
       Property: {
         exit({ node }) {
           let key = node.key;
-          if (t.isLiteral(key) && t.isValidIdentifier(key.value)) {
-            // 'foo': 'bar' -> foo: 'bar'
+          if (!t.isLiteral(key)) {
+            return;
+          }
+
+          if (key.value.match(/^\d+$/)) {
+            node.key = t.numericLiteral(parseInt(node.key.value, 10));
+            node.computed = false;
+          } else if (t.isValidIdentifier(key.value)) {
             node.key = t.identifier(key.value);
             node.computed = false;
           }
@@ -29,9 +35,14 @@ module.exports = ({ Plugin, types: t }) => {
       MemberExpression: {
         exit({ node }) {
           let prop = node.property;
-          if (node.computed && t.isLiteral(prop) &&
-            t.isValidIdentifier(prop.value)) {
-            // foo['bar'] => foo.bar
+          if (!node.computed || !t.isLiteral(prop)) {
+            return;
+          }
+
+          if (prop.value.match(/^\d+$/)) {
+            node.property = t.numericLiteral(parseInt(prop.value, 10));
+            node.computed = false;
+          } else if (t.isValidIdentifier(prop.value)) {
             node.property = t.identifier(prop.value);
             node.computed = false;
           }
