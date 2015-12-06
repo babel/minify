@@ -260,6 +260,30 @@ module.exports = ({ Plugin, types: t }) => {
         }
       },
     },
+
+    // Join assignment and definition when in sequence.
+    // var x; x = 1; -> var x = 1;
+    AssignmentExpression(path) {
+      if (!path.get('left').isIdentifier() ||
+          !path.parentPath.isExpressionStatement()
+      ) {
+        return;
+      }
+
+      const prev = path.parentPath.getSibling(path.parentPath.key - 1);
+      if (!(prev && prev.isVariableDeclaration())) {
+        return;
+      }
+
+      const declars = prev.node.declarations;
+      if (declars.length !== 1 || declars[0].init ||
+          declars[0].id.name !== path.get('left').node.name
+      ) {
+        return;
+      }
+      declars[0].init = path.node.right;
+      path.remove();
+    },
   };
 
   return {

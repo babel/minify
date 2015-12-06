@@ -609,4 +609,17 @@ describe('dce-plugin', () => {
     `);
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it('should join the assignment and def', () => {
+    const source = unpad(`
+      var x;
+      x = 1;
+    `);
+
+    const expected = unpad(`
+      var x = 1;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
