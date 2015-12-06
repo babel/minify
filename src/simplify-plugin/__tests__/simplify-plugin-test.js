@@ -1005,4 +1005,58 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('re-arranging conditionals for assignment member exprs', () => {
+    const source = unpad(`
+      if (a) {
+        x.b = foo;
+      } else if (b) {
+        x.b = bar;
+      } else {
+        x.b = baz;
+      }
+    `);
+
+    const expected = unpad(`
+      x.b = a ? foo : b ? bar : baz;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('re-arranging conditionals for assignment with operators', () => {
+    const source = unpad(`
+      if (a) {
+        x.b += foo;
+      } else if (b) {
+        x.b += bar;
+      } else {
+        x.b += baz;
+      }
+    `);
+
+    const expected = unpad(`
+      x.b += a ? foo : b ? bar : baz;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should bail on different operators', () => {
+    const source = unpad(`
+      if (a) {
+        x.b += foo;
+      } else if (b) {
+        x.b -= bar;
+      } else {
+        x.b += baz;
+      }
+    `);
+
+    const expected = unpad(`
+      a ? x.b += foo : b ? x.b -= bar : x.b += baz;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

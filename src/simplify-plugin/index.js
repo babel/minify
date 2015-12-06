@@ -134,7 +134,8 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             let mutations = [];
-            let name = null;
+            let firstLeft = null;
+            let operator = null;
             function visit(path) {
               if (path.isConditionalExpression()) {
                 let bail = visit(path.get('consequent'));
@@ -145,15 +146,22 @@ module.exports = ({ Plugin, types: t }) => {
                 return bail;
               }
 
+              if (operator == null) {
+                operator = path.node.operator;
+              } else if (path.node.operator !== operator) {
+                return true;
+              }
+
               if (!path.isAssignmentExpression() ||
-                  !path.get('left').isIdentifier()
+                  !(path.get('left').isIdentifier() || path.get('left').isMemberExpression())
               ) {
                 return true;
               }
 
-              if (name == null) {
-                name = path.get('left').node.name;
-              } else if (name !== path.get('left').node.name) {
+              const left = path.get('left').node;
+              if (firstLeft == null) {
+                firstLeft = left;
+              } else if (left.name !== firstLeft.name || left.type !== firstLeft.type) {
                 return true;
               }
 
@@ -169,7 +177,11 @@ module.exports = ({ Plugin, types: t }) => {
 
             mutations.forEach(f => f());
             topPath.replaceWith(
-              t.assignmentExpression('=', t.identifier(name), topPath.node)
+              t.assignmentExpression(
+                operator,
+                firstLeft,
+                topPath.node
+              )
             );
           },
         ],
@@ -240,7 +252,6 @@ module.exports = ({ Plugin, types: t }) => {
         let first = body[0];
         node.body = first;
       },
-
 
       ForStatement(path) {
         const { node } = path;
