@@ -20,6 +20,13 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       t.toExpression(replacement);
+
+      // This changes `function.name` but all the other minifier
+      // do it :/
+      if (t.isFunction(replacement)) {
+        replacement.id = null;
+      }
+
       path.replaceWith(replacement);
       markReplaced();
     },

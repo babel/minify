@@ -134,7 +134,7 @@ describe('dce-plugin', () => {
   it('should inline function decl', () => {
     const expected = unpad(`
       function foo() {
-        (function x() {
+        (function () {
           return 1;
         })();
       }
@@ -203,7 +203,7 @@ describe('dce-plugin', () => {
     `);
     const expected = unpad(`
       function baz() {
-        exports.foo = function foo(config) {
+        exports.foo = function (config) {
           return foo;
         };
       }
@@ -223,7 +223,7 @@ describe('dce-plugin', () => {
     `);
     const expected = unpad(`
       function baz() {
-        exports.foo = function foo(config) {
+        exports.foo = function (config) {
           return foo;
         };
       }
