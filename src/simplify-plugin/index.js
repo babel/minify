@@ -116,10 +116,63 @@ module.exports = ({ Plugin, types: t }) => {
         ],
       },
 
-      // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
-      // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
-      ConditionalExpression({ node }) {
-        flipNegation(node);
+      ConditionalExpression: {
+        enter: [
+          // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
+          // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
+          function({ node }) {
+            flipNegation(node);
+          },
+
+          // a ? x = foo : b ? x = bar : x = baz;
+          // x = a ? foo : b ? bar : baz;
+          function(topPath) {
+            if (!topPath.parentPath.isExpressionStatement() &&
+                !topPath.parentPath.isSequenceExpression()
+            ) {
+              return;
+            }
+
+            let mutations = [];
+            let name = null;
+            function visit(path) {
+              if (path.isConditionalExpression()) {
+                let bail = visit(path.get('consequent'));
+                if (bail) {
+                  return true;
+                }
+                bail = visit(path.get('alternate'));
+                return bail;
+              }
+
+              if (!path.isAssignmentExpression() ||
+                  !path.get('left').isIdentifier()
+              ) {
+                return true;
+              }
+
+              if (name == null) {
+                name = path.get('left').node.name;
+              } else if (name !== path.get('left').node.name) {
+                return true;
+              }
+
+              mutations.push(
+                () => path.replaceWith(path.get('right').node)
+              );
+            }
+
+            let bail = visit(topPath);
+            if (bail) {
+              return;
+            }
+
+            mutations.forEach(f => f());
+            topPath.replaceWith(
+              t.assignmentExpression('=', t.identifier(name), topPath.node)
+            );
+          },
+        ],
       },
 
       // concat

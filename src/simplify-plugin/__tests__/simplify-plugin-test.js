@@ -945,4 +945,64 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('re-arrange conditionals for assignment', () => {
+    const source = unpad(`
+      var x;
+      if (a) {
+        x = foo;
+      } else if (b) {
+        x = bar;
+      } else {
+        x = baz;
+      }
+    `);
+
+    const expected = unpad(`
+      var x;
+      x = a ? foo : b ? bar : baz;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should bail on re-arranging conditionals for assignment', () => {
+    const source = unpad(`
+      var x;
+      if (a) {
+        x = foo;
+      } else if (b) {
+        x = bar;
+      } else {
+        y = baz;
+      }
+    `);
+
+    const expected = unpad(`
+      var x;
+      a ? x = foo : b ? x = bar : y = baz;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should bail on re-arranging conditionals for assignment', () => {
+    const source = unpad(`
+      var x;
+      if (a) {
+        x = foo;
+      } else if (b) {
+        x = bar;
+      } else {
+        baz();
+      }
+    `);
+
+    const expected = unpad(`
+      var x;
+      a ? x = foo : b ? x = bar : baz();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
