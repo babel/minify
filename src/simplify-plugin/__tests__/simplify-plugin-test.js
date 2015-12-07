@@ -444,13 +444,13 @@ describe('simplify-plugin', () => {
           return;
         }
 
-        b = true;
+        return wow;
       }
     `);
 
     const expected = unpad(`
       function foo() {
-        return a || void (b = !0);
+        if (!a) return wow;
       }
     `);
 
@@ -539,7 +539,7 @@ describe('simplify-plugin', () => {
   });
 
   it('should convert early returns to negated if blocks', () => {
-    const source = unpad(`
+     const source = unpad(`
       function foo(a) {
         if (lol) return;
         doThings();
@@ -562,7 +562,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        return lol || void (doThings(), doOtherThings());
+        lol || (doThings(), doOtherThings());
       }
       function bar(a) {
         if (!lol) try {
@@ -582,6 +582,23 @@ describe('simplify-plugin', () => {
   });
 
 
+  it('should remove early return when no other statements', () => {
+    const source = unpad(`
+      function foo() {
+        wow();
+        if (x) {
+          return;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        wow();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
   it('should merge function blocks into sequence expressions', () => {
     const source = unpad(`
       function foo() {
@@ -1061,6 +1078,21 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       a ? x.b += foo : b ? x.b -= bar : x.b += baz;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should turn continue into negated if', () => {
+    const source = unpad(`
+      for (var p in foo) {
+        if (p) continue;
+        bar();
+      }
+    `);
+
+    const expected = unpad(`
+      for (var p in foo) p || bar();
     `);
 
     expect(transform(source)).toBe(expected);

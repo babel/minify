@@ -304,44 +304,52 @@ module.exports = ({ Plugin, types: t }) => {
         node.body = statements;
       },
 
-      BlockStatement(path) {
-        const { node, parent } = path;
+      BlockStatement: {
+        enter(path) {
+          const { node, parent } = path;
 
-        if (node[seen]) {
-          return;
-        }
-
-        const top = [];
-        const bottom = [];
-
-        for (let i = 0; i < node.body.length; i++) {
-          const bodyNode = node.body[i];
-          if (t.isFunctionDeclaration(bodyNode)) {
-            top.push(bodyNode);
-          } else {
-            bottom.push(bodyNode);
+          if (node[seen]) {
+            return;
           }
-        }
 
-        const statements = top.concat(toMultipleSequenceExpressions(bottom));
+          const top = [];
+          const bottom = [];
 
-        if (!statements.length) {
-          return;
-        }
+          for (let i = 0; i < node.body.length; i++) {
+            const bodyNode = node.body[i];
+            if (t.isFunctionDeclaration(bodyNode)) {
+              top.push(bodyNode);
+            } else {
+              bottom.push(bodyNode);
+            }
+          }
 
-        if (statements.length > 1 || (t.isFunction(parent) && node === parent.body) ||
-            t.isTryStatement(parent) || t.isCatchClause(parent) || t.isDoWhileStatement(parent)) {
-          const n = t.blockStatement(statements);
-          n[seen] = true;
-          path.replaceWith(n);
-          return;
-        }
+          const statements = top.concat(toMultipleSequenceExpressions(bottom));
 
+          if (!statements.length) {
+            return;
+          }
 
-        if (statements.length) {
-          path.replaceWith(statements[0]);
-          return;
-        }
+          if (statements.length > 1 || needsBlock(node, parent)) {
+                const n = t.blockStatement(statements);
+                n[seen] = true;
+                path.replaceWith(n);
+                return;
+          }
+
+          if (statements.length) {
+            path.replaceWith(statements[0]);
+            return;
+          }
+        },
+
+        exit(path) {
+          const { node, parent } = path;
+          if (node.body.length === 1 && !needsBlock(node, parent)) {
+            path.get('body')[0].inList = false;
+            path.replaceWith(node.body[0]);
+          }
+        },
       },
 
       // Try to merge previous statements into a sequence
@@ -389,6 +397,73 @@ module.exports = ({ Plugin, types: t }) => {
       // turn blocked ifs into single statements
       IfStatement: {
         exit: [
+          // Merge nested if statements if possible
+          function ({ node }) {
+            if (!t.isIfStatement(node.consequent)) {
+              return;
+            }
+
+            if (node.alternate || node.consequent.alternate) {
+              return;
+            }
+
+            node.test = t.logicalExpression('&&', node.test, node.consequent.test);
+            node.consequent = node.consequent.consequent;
+          },
+
+          // Convert early returns and continues in if statements to negated
+          // ifs with the rest of the body in the consequent
+          function(path) {
+            const { node } = path;
+
+            if (!path.inList || node.alternate) {
+              return;
+            }
+
+            if (t.isReturnStatement(node.consequent) &&
+                path.parentPath.parentPath.isFunction()
+            ) {
+              if (node.consequent.argument) {
+                return;
+              }
+            } else if (t.isContinueStatement(node.consequent)) {
+              if (node.consequent.label) {
+                return;
+              }
+            } else {
+              return;
+            }
+
+            const test = node.test;
+            if (t.isBinaryExpression(test) && test.operator === '!==') {
+              test.operator = '===';
+            } else if (t.isBinaryExpression(test) && test.operator === '!=') {
+              test.operator = '==';
+            } else if (t.isUnaryExpression(test, { operator: '!' })) {
+              node.test = test.argument;
+            } else {
+              node.test = t.unaryExpression('!', node.test);
+            }
+
+            const statements = path.container.slice(path.key + 1);
+            if (!statements.length) {
+              path.remove();
+              return;
+            }
+
+            let l = statements.length;
+            while (l-- > 0) {
+              path.getSibling(path.key + 1).remove();
+            }
+
+            if (statements.length === 1) {
+              node.consequent = statements[0];
+            } else {
+              node.consequent = t.blockStatement(statements);
+            }
+            path.visit();
+          },
+
           function(path) {
             const { node } = path;
 
@@ -398,12 +473,17 @@ module.exports = ({ Plugin, types: t }) => {
 
             // No alternate, make into a guarded expression
             if (node.consequent && !node.alternate &&
-                node.consequent.type === 'ExpressionStatement' &&
-                !path.isCompletionRecord()
+                node.consequent.type === 'ExpressionStatement'
             ) {
+              let op = '&&';
+              if (t.isUnaryExpression(node.test, { operator: '!' })) {
+                node.test = node.test.argument;
+                op = '||';
+              }
+
               path.replaceWith(
                 t.expressionStatement(
-                  t.logicalExpression('&&', node.test, node.consequent.expression)
+                  t.logicalExpression(op, node.test, node.consequent.expression)
                 )
               );
               return;
@@ -599,60 +679,6 @@ module.exports = ({ Plugin, types: t }) => {
               node[key] = first;
             }
           },
-
-          // Merge nested if statements if possible
-          function ({ node }) {
-            if (!t.isIfStatement(node.consequent)) {
-              return;
-            }
-
-            if (node.alternate || node.consequent.alternate) {
-              return;
-            }
-
-            node.test = t.logicalExpression('&&', node.test, node.consequent.test);
-            node.consequent = node.consequent.consequent;
-          },
-
-          function(path) {
-            const { node } = path;
-
-            if (!path.inList || node.alternate ||
-                !(t.isReturnStatement(node.consequent) && !node.consequent.argument) ||
-                !path.parentPath.parentPath.isFunction()
-            ) {
-              return;
-            }
-
-            const test = node.test;
-            if (t.isBinaryExpression(test) && test.operator === '!==') {
-              test.operator = '===';
-            } else if (t.isBinaryExpression(test) && test.operator === '!=') {
-              test.operator = '==';
-            } else if (t.isUnaryExpression(test, { operator: '!' })) {
-              node.test = test.argument;
-            } else {
-              node.test = t.unaryExpression('!', node.test);
-            }
-
-            const statements = path.container.slice(path.key + 1);
-            if (!statements.length) {
-              path.remove();
-              return;
-            }
-
-            let l = statements.length;
-            while (l-- > 0) {
-              path.getSibling(path.key + 1).remove();
-            }
-
-            if (statements.length === 1) {
-              node.consequent = statements[0];
-            } else {
-              node.consequent = t.blockStatement(statements);
-            }
-            path.visit();
-          },
         ],
       },
 
@@ -792,4 +818,9 @@ module.exports = ({ Plugin, types: t }) => {
     }
   }
 
+  function needsBlock(node, parent) {
+    return (t.isFunction(parent) && node === parent.body) ||
+           t.isTryStatement(parent) || t.isCatchClause(parent) ||
+           t.isDoWhileStatement(parent);
+  }
 };
