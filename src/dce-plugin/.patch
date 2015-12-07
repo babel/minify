@@ -1,0 +1,93 @@
+modified   src/dce-plugin/index.js
+@@ -22,10 +22,30 @@ module.exports = ({ Plugin, types: t }) => {
+   };
+
+   return {
++    pre() {
++      this.firstIter = true;
++    },
++
+     visitor: {
++      Program: {
++        enter() {
++          this.dirty = false;
++        },
++
++        exit(path) {
++          if (this.dirty) {
++            this.firstIter = false;
++            path.pushContext(path.context);
++            path.visit();
++            path.popContext();
++          }
++        },
++      },
++
+       // remove side effectless statement
+       ExpressionStatement(path) {
+         if (path.get('expression').isPure() && !path.isCompletionRecord()) {
++          console.log('removing', path.node)
+           path.remove();
+         }
+       },
+@@ -37,22 +57,28 @@ module.exports = ({ Plugin, types: t }) => {
+         }
+
+         const { scope } = path;
++
++        if (!this.firstIter) {
++          scope.crawl();
++        }
++
+         const bindingsToReplace = Object.create(null);
+
+         for (let name in scope.bindings) {
+           let binding = scope.bindings[name];
+           if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
+             if (binding.path.isVariableDeclarator()) {
+-
+               // Can't remove if in a for in statement `for (var x in wat)`.
+               if (binding.path.parentPath.parentPath && binding.path.parentPath.parentPath.isForInStatement()) {
+                 continue;
+               }
+
+-              if (binding.path.node.init && !scope.isPure(binding.path.node.init)) {
++              if (binding.path.node.init && binding.path.get('init').isPure()) {
++              console.log('var', binding.path.node.id.name);
+                 if (binding.path.parentPath.node.declarations.length === 1) {
+                   binding.path.parentPath.replaceWith(binding.path.node.init);
+                   scope.removeBinding(name);
++                  this.dirty = true;
+                 }
+                 continue;
+               }
+@@ -62,8 +88,10 @@ module.exports = ({ Plugin, types: t }) => {
+               // `bar(function foo() {})` foo is not referenced but it's used.
+               continue;
+             }
++            console.log('removing', binding.path.node.id.name)
+             scope.removeBinding(name);
+             binding.path.remove();
++            this.dirty = true;
+           } else if (binding.constant) {
+             if (binding.path.isFunctionDeclaration() ||
+                 (binding.path.isVariableDeclarator() && binding.path.get('init').isFunction())) {
+@@ -79,6 +107,7 @@ module.exports = ({ Plugin, types: t }) => {
+               if (allInside) {
+                 scope.removeBinding(name);
+                 binding.path.remove();
++                this.dirty = true;
+                 continue;
+               }
+             }
+@@ -99,9 +128,10 @@ module.exports = ({ Plugin, types: t }) => {
+               bindingsToReplace[name] = {
+                 scope,
+                 replacement,
+-                markReplaced() {
++                markReplaced: () => {
+                   scope.removeBinding(name);
+                   binding.path.remove();
++                  this.dirty = true;
+                 },
+               };

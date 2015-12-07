@@ -1,6 +1,3 @@
-const chars = 'abcdefghijklmnopqrstuvwxyz' +
-              'ABCDEFGHIJKLMNOPQRSTUVWXYZ$'.split('');
-
 module.exports = ({ Plugin, types: t }) => {
   const mangleNamesVisitors = {
     Scope({ scope }) {
@@ -20,7 +17,7 @@ module.exports = ({ Plugin, types: t }) => {
         let newName;
 
         do {
-          newName = getIdentifier(i);
+          newName = this.charset.getIdentifier(i);
           i += 1;
         } while (!(t.isValidIdentifier(newName)
             && canUse(newName, scope, bindingRefs, this.refs)));
@@ -41,16 +38,43 @@ module.exports = ({ Plugin, types: t }) => {
       const { scope, node } = path;
       recordRef(this.refs, scope.getBinding(node.name), path);
     },
+
+    Literal({ node }) {
+      this.charset.consider(String(node.value));
+    },
+
+    Identifier(path) {
+      if ((path.parentPath.isMemberExpression() && path.key === 'property') ||
+          (path.parentPath.isObjectProperty() && path.key === 'key')
+      ) {
+        this.charset.consider(path.node.name);
+      }
+    },
   };
 
   return {
     visitor: {
       Program(path) {
+        // If the source code is small then considering the source program
+        // text is not good because it creates non-determinisim.
+        // Found that in general the source : minified ratio is ~ 1 : 3
+        const shouldConsiderSource = (path.getSource().length / 3) > 32000;
+
+        const charset = new Charset(shouldConsiderSource);
         // We want to take control of the sequencing and make sure our visitors
         // run in isolation.
         const refs = new Map();
-        path.traverse(collectVisitor, { refs });
-        path.traverse(mangleNamesVisitors, { refs });
+        path.traverse(collectVisitor, {
+          refs,
+          charset,
+        });
+
+        charset.sort();
+
+        path.traverse(mangleNamesVisitors, {
+          refs,
+          charset,
+        });
       },
     },
   };
@@ -85,15 +109,54 @@ module.exports = ({ Plugin, types: t }) => {
     }
     refs.get(binding).push(refPath);
   }
+};
 
-  function getIdentifier(num) {
+const CHARSET = ('abcdefghijklmnopqrstuvwxyz' +
+                 'ABCDEFGHIJKLMNOPQRSTUVWXYZ$').split('');
+
+class Charset {
+  constructor(shouldConsider) {
+    this.shouldConsider = shouldConsider;
+    this.chars = CHARSET.slice();
+    this.frequency = {};
+    this.chars.forEach(c => this.frequency[c] = 0);
+    this.finalized = false;
+  }
+
+  consider(str) {
+    if (!this.shouldConsider) {
+      return;
+    }
+
+    str.split('').forEach(c => {
+      if (this.frequency[c] != null) {
+        this.frequency[c]++;
+      }
+    });
+  }
+
+  sort() {
+    if (this.shouldConsider) {
+      this.chars = this.chars.sort(
+        (a, b) => this.frequency[b] - this.frequency[a]
+      );
+    }
+
+    this.finalized = true;
+  }
+
+  getIdentifier(num) {
+    if (!this.finalized) {
+      throw new Error('Should sort first');
+    }
+
     let ret = '';
     num++;
     do {
       num--;
-      ret += chars[num % chars.length];
-      num = Math.floor(num / chars.length);
+      ret += this.chars[num % this.chars.length];
+      num = Math.floor(num / this.chars.length);
     } while (num > 0);
     return ret;
   }
-};
+}
