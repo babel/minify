@@ -112,7 +112,7 @@ module.exports = ({ Plugin, types: t }) => {
 };
 
 const CHARSET = ('abcdefghijklmnopqrstuvwxyz' +
-                 'ABCDEFGHIJKLMNOPQRSTUVWXYZ$').split('');
+                 'ABCDEFGHIJKLMNOPQRSTUVWXYZ$_').split('');
 
 class Charset {
   constructor(shouldConsider) {
