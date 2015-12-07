@@ -101,9 +101,11 @@ test('babel', function (code, callback) {
   }).code;
 });
 
-test('jsxmin', function (code, callback) {
-  return fs.readFileSync(path.join(__dirname, 'fb-jsmin.js'));
-});
+if (filename.match(/fb\.js/)) {
+  test('jsxmin', function (code, callback) {
+    return fs.readFileSync(path.join(__dirname, 'fb-jsmin.js'));
+  });
+}
 
 test('closure', function (code, callback) {
   return child.execSync(
