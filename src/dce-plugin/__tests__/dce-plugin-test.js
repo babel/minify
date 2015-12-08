@@ -94,6 +94,23 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  // This isn't considered pure. (it should)
+  xit('should inline binding with one reference 2', () => {
+    const source = unpad(`
+      function foo() {
+        var y = 1, x = { y: y };
+        foo.exports = x;
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        foo.exports = { y: 1 };
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it('should remove side effectless statements', () => {
     const source = unpad(`
       function foo() {
