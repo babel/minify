@@ -104,7 +104,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-
   it('should simplify comparison', () => {
     const source = `'function' === typeof a;`;
     const expected = `'function' == typeof a;`;
@@ -1129,6 +1128,21 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       for (var p in foo) p || bar();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should flip logical expressions', () => {
+    const source = unpad(`
+      !x && foo();
+      if (!(null == r)) for (;;);
+    `);
+
+    const expected = unpad(`
+      x || foo();
+
+      if (null != r) for (;;);
     `);
 
     expect(transform(source)).toBe(expected);

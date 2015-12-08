@@ -133,6 +133,50 @@ module.exports = ({ Plugin, types: t }) => {
         ],
       },
 
+      // Apply demorgan's law to save byte.
+      // TODO: make sure no security vuln.
+      LogicalExpression(path) {
+        const { node } = path;
+
+        if (t.isUnaryExpression(node.left, { operator: '!' })) {
+          node.operator = node.operator === '&&' ? '||' : '&&';
+          node.left = node.left.argument;
+          return;
+        }
+      },
+
+      UnaryExpression(path) {
+        const { node } = path;
+
+        if (node.operator !== '!' && !node.prefix) {
+          return;
+        }
+
+        const expr = node.argument;
+
+        if (t.isBinaryExpression(expr)) {
+          switch (expr.operator) {
+            case '===':
+              expr.operator = '!==';
+              break;
+            case '!==':
+              expr.operator = '===';
+              break;
+            case '==':
+              expr.operator = '!=';
+              break;
+            case '!=':
+              expr.operator = '==';
+              break;
+            default:
+              return;
+          }
+
+          path.replaceWith(expr);
+          return;
+        }
+      },
+
       ConditionalExpression: {
         enter: [
           // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
