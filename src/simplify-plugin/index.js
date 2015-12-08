@@ -100,12 +100,18 @@ module.exports = ({ Plugin, types: t }) => {
           // typeof blah === 'function' -> 'function' === typeof blah
           function (path) {
             const { node } = path;
+            if (node[seen]) {
+              return;
+            }
 
+            node[seen] = true;
             if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 &&
-              path.get('right').isPure()) {
-              let left = node.left;
-              node.left = node.right;
-              node.right = left;
+              path.get('right').isPure()
+            ) {
+              const left = node.left;
+              const right = node.right;
+              path.get('right').replaceWith(left);
+              path.get('left').replaceWith(right);
             }
           },
 

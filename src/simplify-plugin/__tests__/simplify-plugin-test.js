@@ -69,6 +69,42 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should put pures first in binary expressions', () => {
+    const source = `a === -1;`;
+    const expected = `-1 === a;`;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should put pures first in binary expressions 2', () => {
+    const source = `a === null;`;
+    const expected = `null === a;`;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should put pures first in binary expressions 3', () => {
+    const source = unpad(`
+      function foo() {
+        if (foo !== null) {
+          var bar;
+          bar = baz;
+        }
+        x();
+        return x;
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (null !== foo) {
+            var bar;
+            bar = baz;
+          }
+        return x(), x;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+
   it('should simplify comparison', () => {
     const source = `'function' === typeof a;`;
     const expected = `'function' == typeof a;`;
