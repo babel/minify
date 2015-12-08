@@ -7,16 +7,26 @@ See tests for other todos.
 Backbone.js numbers (passing tests):
 
 ```
-        raw      raw win gzip    gzip win parse time
-uglify  21.82kB  220%    7.32kB  169%     2ms
-babel   21.88kB  220%    7.33kB  168%     2ms
-closure 21.67kB  223%    7.37kB  167%     2ms
-```
+        raw     raw win gzip   gzip win parse time
+babel   21.82kB 220%    7.31kB 169%     1ms
+uglify  21.82kB 220%    7.32kB 169%     2ms
+closure 21.67kB 223%    7.37kB 167%     3ms
 
 ```
+
+FB:
+```
         raw      raw win gzip    gzip win parse time
-babel   194.79kB 98%     48.85kB 50%      14ms
-uglify  196.99kB 96%     48.95kB 49%      15ms
-closure 192.94kB 100%    49.42kB 48%      17ms
-jsxmin  205.97kB 87%     51.29kB 43%      13ms
+babel   193.91kB 99%     48.34kB 51%      13ms
+uglify  196.99kB 96%     48.95kB 49%      16ms
+closure 192.94kB 100%    49.42kB 48%      15ms
+jsxmin  205.97kB 87%     51.29kB 43%      15ms
+```
+
+React:
+```
+        raw      raw win gzip    gzip win parse time
+closure 171.46kB 265%    52.97kB 168%     15ms
+uglify  176.41kB 255%    53.18kB 167%     13ms
+babel   175.48kB 257%    53.3kB  166%     16ms
 ```

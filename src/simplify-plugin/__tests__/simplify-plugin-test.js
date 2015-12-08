@@ -1147,4 +1147,44 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should combine to a single return statement', () => {
+    const source = unpad(`
+      function foo() {
+        if (foo) {
+          bar(foo);
+          return foo;
+        } else if (baz) {
+          bar(baz);
+          return baz;
+        } else if (wat) {
+          bar(wat);
+          return wat;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return foo ? (bar(foo), foo) : baz ? (bar(baz), baz) : wat ? (bar(wat), wat) : void 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should combine break and expressions in the condition in for', () => {
+    const source = unpad(`
+      for (i = 1; i <= j; i++) {
+        foo();
+        if (bar) break;
+      }
+    `);
+
+    const expected = unpad(`
+      for (i = 1; i <= j && (foo(), bar); i++);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
