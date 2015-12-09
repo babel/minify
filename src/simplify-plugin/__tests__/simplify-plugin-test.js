@@ -1173,7 +1173,21 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should combine break and expressions in the condition in for', () => {
+  it('should inline break condition in for test', () => {
+    const source = unpad(`
+      for (i = 1; i <= j; i++) {
+        if (bar) break;
+      }
+    `);
+
+    const expected = unpad(`
+      for (i = 1; i <= j && bar; i++);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should inline break condition in for test 2', () => {
     const source = unpad(`
       for (i = 1; i <= j; i++) {
         foo();
@@ -1183,6 +1197,78 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       for (i = 1; i <= j && (foo(), bar); i++);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should inline break condition in for test 3', () => {
+    const source = unpad(`
+      for (i = 1; i <= j; i++) {
+        if (bar) {
+          break;
+        } else {
+          wat();
+          if (x) throw 1
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      for (i = 1; i <= j && bar; i++) {
+        wat();
+
+        if (x) throw 1;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should inline break condition in for test 4', () => {
+    const source = unpad(`
+      for (i = 1; i <= j; i++) {
+        if (bar) {
+          wat();
+          if (x) throw 1;
+        } else {
+          break;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      for (i = 1; i <= j && !bar; i++) {
+        wat();
+
+        if (x) throw 1;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should inline break condition in for test 5', () => {
+    const source = unpad(`
+      for (i = 1; i <= j; i++) {
+        foo();
+        if (bar) {
+          break;
+        } else {
+          wat();
+          if (x) throw 1
+        }
+        hi();
+      }
+    `);
+
+    const expected = unpad(`
+      for (i = 1; i <= j && (foo(), bar); i++) {
+        wat();
+
+        if (x) throw 1;
+        hi();
+      }
     `);
 
     expect(transform(source)).toBe(expected);

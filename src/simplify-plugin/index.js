@@ -314,36 +314,136 @@ module.exports = ({ Plugin, types: t }) => {
         node.body = first;
       },
 
-      ForStatement(path) {
-        const { node } = path;
-        if (!path.inList || (node.init && !t.isExpression(node.init))) {
-          return;
-        }
 
-        const prev = path.getSibling(path.key - 1);
-        let consumed = false;
-        if (prev.isVariableDeclaration()) {
-          if (!node.init) {
-            node.init = prev.node;
+      ForStatement: {
+
+        // Merge previous expressions in the init part of the for.
+        enter(path) {
+          const { node } = path;
+          if (!path.inList || (node.init && !t.isExpression(node.init))) {
+            return;
+          }
+
+          const prev = path.getSibling(path.key - 1);
+          let consumed = false;
+          if (prev.isVariableDeclaration()) {
+            if (!node.init) {
+              node.init = prev.node;
+              consumed = true;
+            }
+          } else if (prev.isExpressionStatement()) {
+            const expr = prev.node.expression;
+            if (node.init) {
+              if (t.isSequenceExpression(expr)) {
+                expr.expressions.push(node.init);
+                node.init = expr;
+              } else {
+                node.init = t.sequenceExpression([expr, node.init]);
+              }
+            } else {
+              node.init = expr;
+            }
             consumed = true;
           }
-        } else if (prev.isExpressionStatement()) {
-          const expr = prev.node.expression;
-          if (node.init) {
-            if (t.isSequenceExpression(expr)) {
-              expr.expressions.push(node.init);
-              node.init = expr;
-            } else {
-              node.init = t.sequenceExpression([expr, node.init]);
+          if (consumed) {
+            prev.remove();
+          }
+        },
+
+        exit(path) {
+          const { node } = path;
+          if (!node.test) {
+            return;
+          }
+
+          if (!path.get('body').isBlockStatement()) {
+            const bodyNode = path.get('body').node;
+            if (!t.isIfStatement(bodyNode)) {
+              return;
+            }
+
+            if (t.isBreakStatement(bodyNode.consequent, { label: null })) {
+              node.test = t.logicalExpression('&&', node.test, bodyNode.test);
+              node.body = bodyNode.alternate || t.emptyStatement();
+              return;
+            }
+
+            if (t.isBreakStatement(bodyNode.alternate, { label: null })) {
+              node.test = t.logicalExpression('&&', node.test, t.unaryExpression('!', bodyNode.test));
+              node.body = bodyNode.consequent || t.emptyStatement();
+              return;
+            }
+
+            return;
+          }
+
+          const statements = node.body.body;
+          const exprs = [];
+          let ifStatement = null;
+          let breakAt = null;
+          let i = 0;
+          for (let statement; statement = statements[i]; i++) {
+            if (t.isIfStatement(statement)) {
+              if (t.isBreakStatement(statement.consequent, { label: null })) {
+                ifStatement = statement;
+                breakAt = 'consequent';
+              } else if (t.isBreakStatement(statement.alternate, { label: null })) {
+                ifStatement = statement;
+                breakAt = 'alternate';
+              }
+              break;
+            }
+
+            // A statement appears before the break statement then bail.
+            if (!t.isExpressionStatement(statement)) {
+              return;
+            }
+
+            exprs.push(statement.expression);
+          }
+
+          if (!ifStatement) {
+            return;
+          }
+
+          let rest = [];
+
+          if (breakAt = 'consequent') {
+            if (t.isBlockStatement(ifStatement.alternate)) {
+              rest.push(...ifStatement.alternate.body);
+            } else if (ifStatement.alternate) {
+              rest.push(ifStatement.alternate);
             }
           } else {
-            node.init = expr;
+            if (t.isBlockStatement(ifStatement.consequent)) {
+              rest.push(...ifStatement.consequent.body);
+            } else if (ifStatement.consequent) {
+              rest.push(ifStatement.consequent);
+            }
           }
-          consumed = true;
-        }
-        if (consumed) {
-          prev.remove();
-        }
+
+          rest.push(...statements.slice(i + 1));
+
+          const test = breakAt === 'consequent' ? ifStatement.test : t.unaryExpression('!', ifStatement.test);
+          let expr;
+          if (exprs.length === 1) {
+            expr = t.sequenceExpression([exprs[0], test]);
+          } else if (exprs.length) {
+            exprs.push(test);
+            expr = t.sequenceExpression(exprs);
+          } else {
+            expr = test;
+          }
+
+          node.test = t.logicalExpression('&&', node.test, expr);
+          if (rest.length === 1) {
+            node.body = rest[0];
+          } else if (rest.length) {
+            node.body = t.blockStatement(rest);
+          } else {
+            node.body = t.emptyStatement();
+          }
+        },
       },
 
       Program({ node }) {
