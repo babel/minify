@@ -136,6 +136,10 @@ module.exports = ({ Plugin, types: t }) => {
       // Apply demorgan's law to save byte.
       // TODO: make sure no security vuln.
       LogicalExpression(path) {
+        if (!path.parentPath.isExpressionStatement()) {
+          return;
+        }
+
         const { node } = path;
 
         if (t.isUnaryExpression(node.left, { operator: '!' })) {
@@ -950,6 +954,22 @@ module.exports = ({ Plugin, types: t }) => {
                                : t.blockStatement(parentStatements);
 
             path.replaceWith(t.ifStatement(test, consequent, null));
+          },
+
+          function (path) {
+            const { node } = path;
+            const expr = node.test;
+
+            if (t.isUnaryExpression(expr) &&
+                t.isLogicalExpression(expr) &&
+                !t.isLogicalExpression(expr.left) &&
+                !t.isLogicalExpression(expr.right)
+            ) {
+              expr.operator = expr.operator === '&&' ? '||' : '&&';
+              expr.left = t.unaryExpression('!', expr.left);
+              expr.right = t.unaryExpression('!', expr.right);
+              path.get('test').replaceWith(expr);
+            }
           },
         ],
       },
