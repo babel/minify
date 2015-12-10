@@ -1271,4 +1271,48 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should merge conditional returns into test', () => {
+    const source = unpad(`
+      function foo() {
+        if (x) {
+          delete x.x;
+          if (bar()) return;
+        }
+
+        if (bar) {
+          x();
+        } else {
+          y();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        x && (delete x.x, bar()) || (bar ? x() : y());
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should merge conditional return into test', () => {
+    const source = unpad(`
+      function foo() {
+        if (x) {
+          delete x.x;
+          if (bar()) return;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        x && (delete x.x, bar());
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

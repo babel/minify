@@ -881,6 +881,76 @@ module.exports = ({ Plugin, types: t }) => {
             mutations.forEach(f => f());
             path.replaceWith(t.returnStatement(cond));
           },
+
+          // Make if statements with conditional returns in the body into
+          // an if statement that guards the rest of the block.
+          function(path) {
+            const { node } = path;
+
+            if (!path.inList || !path.get('consequent').isBlockStatement() ||
+                node.alternate
+            ) {
+              return;
+            }
+
+            let test;
+            const exprs = [];
+            const statements = node.consequent.body;
+
+            for (let i = 0, statement; statement = statements[i]; i++) {
+              if (t.isExpressionStatement(statement)) {
+                exprs.push(statement.expression);
+              } else if (t.isIfStatement(statement)) {
+                if (i < statements.length - 1) {
+                  // This isn't the last statement. Bail.
+                  return;
+                }
+                if (statement.alternate) {
+                  return;
+                }
+                if (!t.isReturnStatement(statement.consequent)) {
+                  return;
+                }
+                test = statement.test;
+              }
+            }
+
+            if (!test) {
+              return;
+            }
+
+            exprs.push(test);
+
+            const expr = exprs.length === 1 ? exprs[0] : t.sequenceExpression(exprs);
+            const parentStatements = path.container.slice(path.key + 1);
+
+            let l = parentStatements.length;
+
+            if (!l) {
+              path.replaceWith(t.expressionStatement(
+                t.logicalExpression(
+                  '&&',
+                  node.test,
+                  expr
+                )
+              ));
+              return;
+            }
+
+            while (l-- > 0) {
+              path.getSibling(path.key + 1).remove();
+            }
+
+            test = t.unaryExpression(
+              '!',
+              t.logicalExpression('&&', node.test, expr)
+            );
+            const consequent = parentStatements.length === 1
+                               ? parentStatements[0]
+                               : t.blockStatement(parentStatements);
+
+            path.replaceWith(t.ifStatement(test, consequent, null));
+          },
         ],
       },
 
