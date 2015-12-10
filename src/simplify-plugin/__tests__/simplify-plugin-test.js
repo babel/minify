@@ -938,9 +938,7 @@ describe('simplify-plugin', () => {
    `);
 
     const expected = unpad(`
-      do {
-        foo();
-      } while (1);
+      do foo(); while (1);
     `);
     expect(transform(source)).toBe(expected);
   });

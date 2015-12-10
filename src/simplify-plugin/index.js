@@ -1022,7 +1022,6 @@ module.exports = ({ Plugin, types: t }) => {
 
   function needsBlock(node, parent) {
     return (t.isFunction(parent) && node === parent.body) ||
-           t.isTryStatement(parent) || t.isCatchClause(parent) ||
-           t.isDoWhileStatement(parent);
+           t.isTryStatement(parent) || t.isCatchClause(parent);
   }
 };
