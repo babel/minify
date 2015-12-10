@@ -95,7 +95,7 @@ describe('dce-plugin', () => {
   });
 
   // This isn't considered pure. (it should)
-  xit('should inline binding with one reference 2', () => {
+  it('should inline binding with one reference 2', () => {
     const source = unpad(`
       function foo() {
         var y = 1, x = { y: y };
