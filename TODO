@@ -8,28 +8,26 @@ Backbone.js numbers (passing tests):
 
 ```
         raw     raw win gzip   gzip win parse time
-babel   21.82kB 220%    7.31kB 169%     1ms
+babel   21.79kB 221%    7.3kB  169%     2ms
 uglify  21.82kB 220%    7.32kB 169%     2ms
-closure 21.67kB 223%    7.37kB 167%     3ms
-
+closure 21.67kB 223%    7.37kB 167%     2ms
 ```
 
 FB:
 ```
         raw      raw win gzip    gzip win parse time
-babel   193.91kB 99%     48.34kB 51%      13ms
-uglify  196.99kB 96%     48.95kB 49%      16ms
+babel   193.53kB 99%     48.22kB 52%      15ms
+uglify  196.99kB 96%     48.95kB 49%      24ms
 closure 192.94kB 100%    49.42kB 48%      15ms
-jsxmin  205.97kB 87%     51.29kB 43%      15ms
+jsxmin  205.97kB 87%     51.29kB 43%      14ms
 ```
 
 React:
 ```
         raw      raw win gzip    gzip win parse time
-closure 171.46kB 265%    52.97kB 168%     16ms
-uglify  176.41kB 255%    53.18kB 167%     30ms
-babel   175.43kB 257%    53.29kB 166%     16ms
+babel   174.21kB 260%    52.91kB 168%     16ms
+closure 171.46kB 265%    52.97kB 168%     13ms
+uglify  176.41kB 255%    53.18kB 167%     13ms
 ```
-
 
 Look into merging into if statements again (last time it was bad for gzip) (make sure that sqeuence expressions are not parenthesized in if statements by babel)
