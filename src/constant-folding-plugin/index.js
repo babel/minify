@@ -1,5 +1,5 @@
 'use strict';
-
+/*
 module.exports = ({ Plugin, types: t }) => {
   const main = {
     AssignmentExpression(path) {
@@ -16,3 +16,4 @@ module.exports = ({ Plugin, types: t }) => {
     }
   };
 };
+*/
