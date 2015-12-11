@@ -3,6 +3,7 @@
 module.exports = ({ Plugin, types: t }) => {
   const VOID_0 = t.unaryExpression('void', t.numericLiteral(0), true);
   const seen = Symbol('seen');
+  const condExprSeen = Symbol('condExprSeen');
 
   return {
     visitor: {
@@ -248,6 +249,56 @@ module.exports = ({ Plugin, types: t }) => {
                 topPath.node
               )
             );
+          },
+
+          // bar ? void 0 : void 0
+          // (bar, void 0)
+          // TODO: turn this into general equiv check
+          function (path) {
+            const { node } = path;
+            if (isVoid0(node.consequent) && isVoid0(node.alternate)) {
+              path.replaceWith(t.sequenceExpression([path.node.test, VOID_0]));
+            }
+          },
+
+          // bar ? void 0 : foo ? void 0 : <etc>
+          // bar || foo : void 0
+          // TODO: turn this into general equiv check
+          function (path) {
+            const { node } = path;
+
+            if (node[condExprSeen] || !isVoid0(node.consequent)) {
+              return;
+            }
+
+            node[condExprSeen] = true;
+
+            const tests = [node.test];
+            const mutations = [];
+            let alt;
+            for (let next = path.get('alternate'); next.isConditionalExpression(); next = next.get('alternate')) {
+              next.node[condExprSeen] = true;
+              alt = next.node.alternate;
+
+              if (isVoid0(next.node.consequent)) {
+                tests.push(next.node.test);
+                mutations.push(() => next.remove());
+              } else {
+                break;
+              }
+            }
+
+            if (tests.length === 1) {
+              return;
+            }
+
+            const test = tests.reduce((expr, curTest) => t.logicalExpression(
+              '||',
+              expr,
+              curTest
+            ));
+
+            path.replaceWith(t.conditionalExpression(test, VOID_0, alt));
           },
         ],
       },
@@ -565,59 +616,6 @@ module.exports = ({ Plugin, types: t }) => {
             node.consequent = node.consequent.consequent;
           },
 
-          // Convert early returns and continues in if statements to negated
-          // ifs with the rest of the body in the consequent
-          function(path) {
-            const { node } = path;
-
-            if (!path.inList || node.alternate) {
-              return;
-            }
-
-            if (t.isReturnStatement(node.consequent) &&
-                path.parentPath.parentPath.isFunction()
-            ) {
-              if (node.consequent.argument) {
-                return;
-              }
-            } else if (t.isContinueStatement(node.consequent)) {
-              if (node.consequent.label) {
-                return;
-              }
-            } else {
-              return;
-            }
-
-            const test = node.test;
-            if (t.isBinaryExpression(test) && test.operator === '!==') {
-              test.operator = '===';
-            } else if (t.isBinaryExpression(test) && test.operator === '!=') {
-              test.operator = '==';
-            } else if (t.isUnaryExpression(test, { operator: '!' })) {
-              node.test = test.argument;
-            } else {
-              node.test = t.unaryExpression('!', node.test);
-            }
-
-            const statements = path.container.slice(path.key + 1);
-            if (!statements.length) {
-              path.remove();
-              return;
-            }
-
-            let l = statements.length;
-            while (l-- > 0) {
-              path.getSibling(path.key + 1).remove();
-            }
-
-            if (statements.length === 1) {
-              node.consequent = statements[0];
-            } else {
-              node.consequent = t.blockStatement(statements);
-            }
-            path.visit();
-          },
-
           function(path) {
             const { node } = path;
 
@@ -774,7 +772,7 @@ module.exports = ({ Plugin, types: t }) => {
                 path.parentPath.parentPath.isFunction() && !path.getSibling(path.key + 2).node &&
                 t.isReturnStatement(node.consequent) && !node.alternate && next.isExpressionStatement()
             ) {
-              const nextExpr = t.unaryExpression('void', next.node.expression);
+              const nextExpr = next.node.expression;
               next.remove();
               if (node.consequent.argument) {
                 path.replaceWith(
@@ -782,7 +780,7 @@ module.exports = ({ Plugin, types: t }) => {
                     t.conditionalExpression(
                       node.test,
                       node.consequent.argument,
-                      nextExpr
+                      t.unaryExpression('void', nextExpr)
                     )
                   )
                 );
@@ -790,9 +788,7 @@ module.exports = ({ Plugin, types: t }) => {
               }
 
               path.replaceWith(
-                t.returnStatement(
-                  t.logicalExpression('||', node.test, nextExpr)
-                )
+                t.logicalExpression('||', node.test, nextExpr)
               );
               return;
             }
@@ -846,7 +842,7 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            const exprs = [node.consequent.argument];
+            const exprs = [node.consequent.argument || VOID_0];
             const tests = [node.test];
             const mutations = [];
             let i = 1;
@@ -862,7 +858,7 @@ module.exports = ({ Plugin, types: t }) => {
               }
 
               tests.push(next.node.test);
-              exprs.push(next.node.consequent.argument);
+              exprs.push(next.node.consequent.argument || VOID_0);
               mutations.push(() => next.remove());
               i++;
             }
@@ -970,6 +966,59 @@ module.exports = ({ Plugin, types: t }) => {
               expr.right = t.unaryExpression('!', expr.right);
               path.get('test').replaceWith(expr);
             }
+          },
+
+          // Convert early returns and continues in if statements to negated
+          // ifs with the rest of the body in the consequent
+          function(path) {
+            const { node } = path;
+
+            if (!path.inList || node.alternate) {
+              return;
+            }
+
+            if (t.isReturnStatement(node.consequent) &&
+                path.parentPath.parentPath.isFunction()
+            ) {
+              if (node.consequent.argument) {
+                return;
+              }
+            } else if (t.isContinueStatement(node.consequent)) {
+              if (node.consequent.label) {
+                return;
+              }
+            } else {
+              return;
+            }
+
+            const test = node.test;
+            if (t.isBinaryExpression(test) && test.operator === '!==') {
+              test.operator = '===';
+            } else if (t.isBinaryExpression(test) && test.operator === '!=') {
+              test.operator = '==';
+            } else if (t.isUnaryExpression(test, { operator: '!' })) {
+              node.test = test.argument;
+            } else {
+              node.test = t.unaryExpression('!', node.test);
+            }
+
+            const statements = path.container.slice(path.key + 1);
+            if (!statements.length) {
+              path.remove();
+              return;
+            }
+
+            let l = statements.length;
+            while (l-- > 0) {
+              path.getSibling(path.key + 1).remove();
+            }
+
+            if (statements.length === 1) {
+              node.consequent = statements[0];
+            } else {
+              node.consequent = t.blockStatement(statements);
+            }
+            path.visit();
           },
         ],
       },
@@ -1113,5 +1162,12 @@ module.exports = ({ Plugin, types: t }) => {
   function needsBlock(node, parent) {
     return (t.isFunction(parent) && node === parent.body) ||
            t.isTryStatement(parent) || t.isCatchClause(parent);
+  }
+
+  function isVoid0(expr) {
+    return expr === VOID_0 || (
+      t.isUnaryExpression(expr, { operator: 'void' })  &&
+      t.isNumericLiteral(expr.argument, { value: 0 })
+    );
   }
 };

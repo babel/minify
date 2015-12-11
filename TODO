@@ -25,15 +25,17 @@ jsxmin  205.97kB 87%     51.29kB 43%      38ms
 React:
 ```
         raw      raw win gzip    gzip win parse time
-babel   174.3kB  259%    52.96kB 168%     12ms
-closure 171.46kB 265%    52.97kB 168%     33ms
-uglify  176.41kB 255%    53.18kB 167%     20ms
+babel   174.29kB 259%    52.95kB 168%     15ms
+closure 171.46kB 265%    52.97kB 168%     15ms
+uglify  176.41kB 255%    53.18kB 167%     37ms
 ```
 
 jquery:
+```
         raw     raw win gzip    gzip win parse time
-uglify  94.4kB  217%    32.82kB 157%     18ms
-babel   94.52kB 217%    32.93kB 157%     13ms
-closure 94.23kB 218%    33.38kB 153%     20ms
+uglify  94.4kB  217%    32.82kB 157%     12ms
+babel   94.52kB 217%    32.92kB 157%     9ms
+closure 94.23kB 218%    33.38kB 153%     14ms
+```
 
 Look into merging into if statements again (last time it was bad for gzip) (make sure that sqeuence expressions are not parenthesized in if statements by babel)

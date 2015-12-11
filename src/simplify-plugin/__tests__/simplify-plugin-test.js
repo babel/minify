@@ -485,7 +485,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        if (!a) return wow;
+        return a ? void 0 : wow;
       }
     `);
 
@@ -751,6 +751,26 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         return a ? b : c ? d : e;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should merge if/return statements 2', () => {
+    const source = unpad(`
+      function foo() {
+        if (bar) return;
+        if (far) return;
+        if (faz) return;
+
+        return e;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return bar || far || faz ? void 0 : e;
       }
     `);
 
@@ -1165,6 +1185,29 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         return foo ? (bar(foo), foo) : baz ? (bar(baz), baz) : wat ? (bar(wat), wat) : void 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should combine to a single return statement 2', () => {
+    const source = unpad(`
+      function foo() {
+        var v = x.y;
+        if (v === x) return;
+        if (v && V) {
+          if (x && y) return;
+          if (!c && b) return;
+        }
+        return e;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        var v = x.y;
+        return v === x ? void 0 : v && V ? (x && y || !c && b, void 0) : e;
       }
     `);
 
