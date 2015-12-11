@@ -96,7 +96,7 @@ test('babel', function (code, callback) {
 
       require('../src/mangle-names-plugin'),
     ],
-    compact: true,
+    minified: true,
     comments: false,
   }).code;
 });

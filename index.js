@@ -63,7 +63,7 @@ function compile() {
   var out = babel.transform(code, {
     sourceType: 'script',
     plugins: plugins,
-    compact: true,
+    minified: true,
     comments: false,
   }).code;
   console.log(out);
