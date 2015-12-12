@@ -639,4 +639,29 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not replace the wrong things', () => {
+    const source = unpad(`
+      function foo() {
+        var n = 1;
+        wow(n);
+        function wat() {
+          var n = 2;
+          wow(n);
+        }
+        return wat;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        wow(1);
+
+        return function () {
+          wow(2);
+        };
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

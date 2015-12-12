@@ -10,13 +10,20 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
-      const { replacement, markReplaced, scope } = this.bindingsToReplace[path.node.name];
+      const { replacement, markReplaced, scope, binding } = this.bindingsToReplace[path.node.name];
 
+      // Same name, different binding.
+      if (scope.getBinding(path.node.name) !== binding) {
+        return;
+      }
+
+      // Don't want to put functions in loops in stuff.
       if ((t.isClass(replacement) || t.isFunction(replacement))
           && scope !== path.scope) {
         return;
       }
 
+      // Avoid recursion.
       if (path.find(({ node }) => node === replacement)) {
         return;
       }
@@ -114,6 +121,7 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             bindingsToReplace[name] = {
+              binding,
               scope,
               replacement,
               markReplaced() {
