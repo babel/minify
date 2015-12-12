@@ -664,4 +664,27 @@ describe('dce-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should handle case blocks ', () => {
+    const source = unpad(`
+      function a() {
+        switch (foo) {
+          case 6:
+            return bar;
+            break;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        switch (foo) {
+          case 6:
+            return bar;
+            break;
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
