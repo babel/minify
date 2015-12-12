@@ -1,5 +1,7 @@
 'use strict';
 
+const returnSeen = Symbol('returnSeen');
+
 module.exports = ({ Plugin, types: t }) => {
 
   const removeReferenceVisitor = {
@@ -153,9 +155,11 @@ module.exports = ({ Plugin, types: t }) => {
     // have no semantic meaning
     ReturnStatement(path) {
       const { node } = path;
-      if (!path.inList) {
+      if (node[returnSeen] || !path.inList) {
         return;
       }
+
+      node[returnSeen] = true;
 
       // Not last in it's block? (See BlockStatement visitor)
       if (path.container.length - 1 !== path.key &&
