@@ -565,10 +565,31 @@ module.exports = ({ Plugin, types: t }) => {
 
         exit(path) {
           const { node, parent } = path;
-          if (node.body.length === 1 && !needsBlock(node, parent)) {
+
+          if (needsBlock(node, parent)) {
+            return;
+          }
+
+          if (node.body.length === 1) {
             path.get('body')[0].inList = false;
             path.replaceWith(node.body[0]);
+            return;
           }
+
+          // Check if oppurtinties to merge statements are available.
+          const statements = node.body;
+          if (!statements.length) {
+            return;
+          }
+
+          for (let statement of statements) {
+            if (!t.isExpressionStatement(statement)) {
+              return;
+            }
+          }
+
+          delete node[seen];
+          path.visit();
         },
       },
 

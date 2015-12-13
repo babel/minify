@@ -1377,4 +1377,20 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should recombine after continue merging', () => {
+    const source = unpad(`
+      for (;;) {
+        a = b;
+        if (!foo) continue;
+        bar = foo;
+      }
+    `);
+
+    const expected = unpad(`
+      for (;;) a = b, foo && (bar = foo);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
