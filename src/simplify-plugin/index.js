@@ -180,6 +180,21 @@ module.exports = ({ Plugin, types: t }) => {
           path.replaceWith(expr);
           return;
         }
+
+        if (t.isLogicalExpression(expr)) {
+          expr.operator = expr.operator === '&&' ? '||' : '&&';
+          flip('left');
+          flip('right');
+          path.replaceWith(expr);
+        }
+
+        function flip(dir) {
+          if (t.isUnaryExpression(expr[dir], { operator: '!', prefix: true})) {
+            expr[dir] = expr[dir].argument;
+          } else {
+            expr[dir] = t.unaryExpression('!', expr[dir]);
+          }
+        }
       },
 
       ConditionalExpression: {

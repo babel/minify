@@ -572,7 +572,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        if (!(a && a.b && a.b.c && a.b.c())) for (; !0;) wat();
+        if (!a || !a.b || !a.b.c || !a.b.c()) for (; !0;) wat();
       }
    `);
 
@@ -1172,6 +1172,18 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should flip logical expressions 2', () => {
+    const source = unpad(`
+      if (!(1 !== foo || !bar)) for (;;);
+    `);
+
+    const expected = unpad(`
+      if (1 === foo && bar) for (;;);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should combine to a single return statement', () => {
     const source = unpad(`
       function foo() {
@@ -1337,9 +1349,10 @@ describe('simplify-plugin', () => {
       }
     `);
 
+    // TODO: figure out if we can simplify further using demorgan's law
     const expected = unpad(`
       function foo() {
-        x && (delete x.x, bar()) || (bar ? x() : y());
+        (!x || !(delete x.x, bar())) && (bar ? x() : y());
       }
     `);
 
