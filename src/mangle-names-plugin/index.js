@@ -9,6 +9,11 @@ module.exports = ({ Plugin, types: t }) => {
       let i = 0;
       for (let name of names) {
         let binding = bindings[name];
+
+        if (binding.path.isLabeledStatement()) {
+          continue;
+        }
+
         let bindingRefs = this.refs.get(binding);
         if (!bindingRefs) {
           continue;

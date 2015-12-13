@@ -132,13 +132,17 @@ describe('mangle-names', () => {
   it('should ignore labels', () => {
     const source = unpad(`
       function foo() {
-        meh: {}
+        meh: for (;;) {
+          continue meh;
+        }
       }
     `);
 
     const expected = unpad(`
       function foo() {
-        meh: {}
+        meh: for (;;) {
+          continue meh;
+        }
       }
     `);
 
