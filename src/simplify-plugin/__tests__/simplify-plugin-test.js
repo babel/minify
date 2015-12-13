@@ -104,6 +104,12 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should put pures first in binary expressions 2', () => {
+    const source = `a === {};`;
+    const expected = `({}) === a;`;
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should simplify comparison', () => {
     const source = `'function' === typeof a;`;
     const expected = `'function' == typeof a;`;
