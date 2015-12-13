@@ -35,6 +35,10 @@ module.exports = ({ Plugin, types: t }) => {
 
   const collectVisitor = {
     'ReferencedIdentifier|BindingIdentifier'(path) {
+      if (path.parentPath.isLabeledStatement()) {
+        return;
+      }
+
       const { scope, node } = path;
       recordRef(this.refs, scope.getBinding(node.name), path);
     },

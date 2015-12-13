@@ -128,6 +128,22 @@ describe('mangle-names', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should ignore labels', () => {
+    const source = unpad(`
+      function foo() {
+        meh: {}
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        meh: {}
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
 
 function unpad(str) {
