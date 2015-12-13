@@ -39,3 +39,6 @@ closure 94.23kB 218%    33.38kB 153%     14ms
 ```
 
 Look into merging into if statements again (last time it was bad for gzip) (make sure that sqeuence expressions are not parenthesized in if statements by babel)
+
+Pure should have a mode to be more agressive. The following should be considered pure:
+b;
