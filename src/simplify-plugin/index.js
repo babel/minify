@@ -870,7 +870,9 @@ module.exports = ({ Plugin, types: t }) => {
           function(path) {
             const { node } = path;
 
-            if (!path.inList || node.alternate) {
+            if (!path.inList || node.alternate ||
+                !(path.parentPath.parentPath && path.parentPath.parentPath.isFunction())
+            ) {
               return;
             }
 

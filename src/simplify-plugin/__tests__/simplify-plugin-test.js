@@ -1209,29 +1209,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should combine to a single return statement 2', () => {
-    const source = unpad(`
-      function foo() {
-        var v = x.y;
-        if (v === x) return;
-        if (v && V) {
-          if (x && y) return;
-          if (!c && b) return;
-        }
-        return e;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        var v = x.y;
-        return v === x ? void 0 : v && V ? (x && y || !c && b, void 0) : e;
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should inline break condition in for test', () => {
     const source = unpad(`
       for (i = 1; i <= j; i++) {
@@ -1389,6 +1366,34 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       for (;;) a = b, foo && (bar = foo);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should not assume undefined', () => {
+    const source = unpad(`
+      function foo() {
+        if (foo) {
+          if (bar) {
+            return false;
+          }
+          if (baz) {
+            return false;
+          }
+        }
+        return true;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        if (foo) {
+            if (bar) return !1;
+            if (baz) return !1;
+          }
+        return !0;
+      }
     `);
 
     expect(transform(source)).toBe(expected);
