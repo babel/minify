@@ -2,43 +2,6 @@
 
 module.exports = ({ Plugin, types: t }) => {
 
-  const removeReferenceVisitor = {
-    ReferencedIdentifier(path) {
-      if (!this.bindingsToReplace[path.node.name]) {
-        return;
-      }
-
-      const { replacement, markReplaced, scope, binding } = this.bindingsToReplace[path.node.name];
-
-      // Same name, different binding.
-      if (scope.getBinding(path.node.name) !== binding) {
-        return;
-      }
-
-      // Don't want to put functions in loops in stuff.
-      if ((t.isClass(replacement) || t.isFunction(replacement))
-          && scope !== path.scope) {
-        return;
-      }
-
-      // Avoid recursion.
-      if (path.find(({ node }) => node === replacement)) {
-        return;
-      }
-
-      t.toExpression(replacement);
-
-      // This changes `function.name` but all the other minifier
-      // do it :/
-      if (t.isFunction(replacement)) {
-        replacement.id = null;
-      }
-
-      path.replaceWith(replacement);
-      markReplaced();
-    },
-  };
-
   const main = {
     // remove side effectless statement
     ExpressionStatement(path) {
@@ -58,11 +21,9 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       const { scope } = path;
-      const bindingsToReplace = Object.create(null);
 
       for (let name in scope.bindings) {
         let binding = scope.bindings[name];
-
         if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
           if (binding.path.isVariableDeclarator()) {
 
@@ -118,22 +79,24 @@ module.exports = ({ Plugin, types: t }) => {
               continue;
             }
 
-            bindingsToReplace[name] = {
+            if (binding.referencePaths.length > 1) {
+              throw new Error('Expected only one reference');
+            }
+
+            const replaced = replace(binding.referencePaths[0], {
               binding,
               scope,
               replacement,
-              markReplaced() {
-                scope.removeBinding(name);
-                if (binding.path.node) {
-                  binding.path.remove();
-                }
-              },
-            };
+            });
+
+            if (replaced) {
+              scope.removeBinding(name);
+              if (binding.path.node) {
+                binding.path.remove();
+              }
+            }
           }
         }
-      }
-      if (Object.keys(bindingsToReplace).length) {
-        path.traverse(removeReferenceVisitor, {bindingsToReplace});
       }
     },
 
@@ -327,5 +290,36 @@ module.exports = ({ Plugin, types: t }) => {
       }
     }
     return node;
+  }
+
+  function replace(path, options) {
+    const { replacement, scope, binding } = options;
+
+    // Same name, different binding.
+    if (scope.getBinding(path.node.name) !== binding) {
+      return;
+    }
+
+    // Don't want to put functions in loops in stuff.
+    if ((t.isClass(replacement) || t.isFunction(replacement))
+        && scope !== path.scope) {
+          return;
+    }
+
+    // Avoid recursion.
+    if (path.find(({ node }) => node === replacement)) {
+      return;
+    }
+
+    t.toExpression(replacement);
+
+    // This changes `function.name` but all the other minifier
+    // do it :/
+    if (t.isFunction(replacement)) {
+      replacement.id = null;
+    }
+
+    path.replaceWith(replacement);
+    return true;
   }
 };
