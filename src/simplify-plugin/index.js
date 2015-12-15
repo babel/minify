@@ -436,13 +436,13 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             if (t.isBreakStatement(bodyNode.consequent, { label: null })) {
-              node.test = t.logicalExpression('&&', node.test, bodyNode.test);
+              node.test = t.logicalExpression('&&', node.test, t.unaryExpression('!', bodyNode.test));
               node.body = bodyNode.alternate || t.emptyStatement();
               return;
             }
 
             if (t.isBreakStatement(bodyNode.alternate, { label: null })) {
-              node.test = t.logicalExpression('&&', node.test, t.unaryExpression('!', bodyNode.test));
+              node.test = t.logicalExpression('&&', node.test, bodyNode.test);
               node.body = bodyNode.consequent || t.emptyStatement();
               return;
             }
@@ -497,7 +497,7 @@ module.exports = ({ Plugin, types: t }) => {
 
           rest.push(...statements.slice(i + 1));
 
-          const test = breakAt === 'consequent' ? ifStatement.test : t.unaryExpression('!', ifStatement.test);
+          const test = breakAt === 'consequent' ? t.unaryExpression('!', ifStatement.test) : ifStatement.test;
           let expr;
           if (exprs.length === 1) {
             expr = t.sequenceExpression([exprs[0], test]);

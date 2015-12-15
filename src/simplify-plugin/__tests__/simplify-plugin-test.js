@@ -1236,7 +1236,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && bar; i++);
+      for (i = 1; i <= j && !bar; i++);
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1251,7 +1251,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && (foo(), bar); i++);
+      for (i = 1; i <= j && (foo(), !bar); i++);
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1270,7 +1270,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && bar; i++) {
+      for (i = 1; i <= j && !bar; i++) {
         wat();
 
         if (x) throw 1;
@@ -1293,7 +1293,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && !bar; i++) {
+      for (i = 1; i <= j && bar; i++) {
         wat();
 
         if (x) throw 1;
@@ -1318,7 +1318,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && (foo(), bar); i++) {
+      for (i = 1; i <= j && (foo(), !bar); i++) {
         wat();
 
         if (x) throw 1;
