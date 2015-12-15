@@ -636,11 +636,12 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        wow();
+        return wow(), x, void 0;
       }
     `);
     expect(transform(source)).toBe(expected);
   });
+
   it('should merge function blocks into sequence expressions', () => {
     const source = unpad(`
       function foo() {
@@ -902,7 +903,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        return b && void foo();
+        return b ? void foo() : void 0;
       }
     `);
 
@@ -1343,17 +1344,43 @@ describe('simplify-plugin', () => {
       }
     `);
 
-    // TODO: figure out if we can simplify further using demorgan's law
     const expected = unpad(`
       function foo() {
-        (!x || !(delete x.x, bar())) && (bar ? x() : y());
+        x && (delete x.x, bar()) || (bar ? x() : y());
       }
     `);
 
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge conditional return into test', () => {
+  it('should bail on mrege conditional return into test', () => {
+    const source = unpad(`
+      function foo() {
+        if (x) {
+          delete x.x;
+          if (bar()) return 2;
+        }
+
+        if (bar) {
+          x();
+        } else {
+          y();
+        }
+      }
+    `);
+
+    // TODO: figure out if we can simplify further using demorgan's law
+    const expected = unpad(`
+      function foo() {
+        return x && (delete x.x, bar()) ? 2 : void (bar ? x() : y());
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+
+  it('should merge conditional return into test 2', () => {
     const source = unpad(`
       function foo() {
         if (x) {
@@ -1366,6 +1393,50 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         x && (delete x.x, bar());
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle return argument', () => {
+    const source = unpad(`
+      function foo() {
+        if (x) {
+          delete x.x;
+          if (bar()) return x;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        return x && (delete x.x, bar()) ? x : void 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should bail on conditional return into test', () => {
+    const source = unpad(`
+      function foo() {
+        if (x) {
+          var f = wow;
+          delete x.x;
+          if (bar()) return;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        if (x) {
+            var f = wow;
+            delete x.x;
+
+            if (bar()) return;
+          }
       }
     `);
 
