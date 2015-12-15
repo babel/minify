@@ -696,11 +696,18 @@ module.exports = ({ Plugin, types: t }) => {
             // There is nothing after this block. And one or both
             // of the consequent and alternate are either expression statment
             // or return statements.
-            if (!path.getSibling(path.key + 1).node && path.parentPath && path.parentPath.parentPath && path.parentPath.parentPath.isFunction()) {
+            if (!path.getSibling(path.key + 1).node && path.parentPath &&
+                path.parentPath.parentPath && path.parentPath.parentPath.isFunction()
+            ) {
               // Easy: consequent and alternate are return -- conditional.
               if (t.isReturnStatement(node.consequent)
                   && t.isReturnStatement(node.alternate)
               ) {
+                if (!node.consequent.argument && !node.altenrate.argument) {
+                  path.replaceWith(t.expressionStatement(node.test));
+                  return;
+                }
+
                 path.replaceWith(
                   t.returnStatement(
                     t.conditionalExpression(
@@ -715,6 +722,17 @@ module.exports = ({ Plugin, types: t }) => {
 
               // Only the consequent is a return, void the alternate.
               if (t.isReturnStatement(node.consequent) && t.isExpressionStatement(node.alternate)) {
+                if (!node.consequent.argument) {
+                  path.replaceWith(t.expressionStatement(
+                    t.logicalExpression(
+                      '||',
+                      node.test,
+                      node.alternate.expression
+                    )
+                  ));
+                  return;
+                }
+
                 path.replaceWith(
                   t.returnStatement(
                     t.conditionalExpression(
@@ -729,6 +747,17 @@ module.exports = ({ Plugin, types: t }) => {
 
               // Only the alternate is a return, void the consequent.
               if (t.isReturnStatement(node.alternate) && t.isExpressionStatement(node.consequent)) {
+                if (!node.alternate.argument) {
+                  path.replaceWith(t.expressionStatement(
+                    t.logicalExpression(
+                      '&&',
+                      node.test,
+                      node.consequent.expression
+                    )
+                  ));
+                  return;
+                }
+
                 path.replaceWith(
                   t.returnStatement(
                     t.conditionalExpression(
@@ -742,6 +771,11 @@ module.exports = ({ Plugin, types: t }) => {
               }
 
               if (t.isReturnStatement(node.consequent) && !node.alternate) {
+                if (!node.consequent.argument) {
+                  path.replaceWith(t.expressionStatement(node.test));
+                  return;
+                }
+
                 path.replaceWith(
                   t.returnStatement(
                     t.conditionalExpression(
@@ -754,7 +788,12 @@ module.exports = ({ Plugin, types: t }) => {
                 return;
               }
 
-              if (t.isReturnStatement(node.consequent) && !node.consequent) {
+              if (t.isReturnStatement(node.alternate) && !node.consequent) {
+                if (!node.alternate.argument) {
+                  path.replaceWith(t.expressionStatement(node.test));
+                  return;
+                }
+
                 path.replaceWith(
                   t.returnStatement(
                     t.conditionalExpression(

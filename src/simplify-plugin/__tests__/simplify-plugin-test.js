@@ -636,7 +636,8 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        return wow(), x, void 0;
+        wow();
+        x;
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -903,7 +904,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        return b ? void foo() : void 0;
+        b && foo();
       }
     `);
 
@@ -923,7 +924,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        return b || void foo();
+        b || foo();
       }
     `);
 
