@@ -1,5 +1,7 @@
 'use strict';
 
+const isNodesEquiv = require('../utils/isNodesEquiv');
+
 module.exports = ({ Plugin, types: t }) => {
   const VOID_0 = t.unaryExpression('void', t.numericLiteral(0), true);
   const seen = Symbol('seen');
@@ -242,7 +244,7 @@ module.exports = ({ Plugin, types: t }) => {
               const left = path.get('left').node;
               if (firstLeft == null) {
                 firstLeft = left;
-              } else if (left.name !== firstLeft.name || left.type !== firstLeft.type) {
+              } else if (!isNodesEquiv(left, firstLeft)) {
                 return true;
               }
 

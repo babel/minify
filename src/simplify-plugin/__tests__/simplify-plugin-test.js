@@ -1,10 +1,11 @@
 jest.autoMockOff();
 
 const babel = require('babel-core');
+const plugin = require('../index');
 
 function transform(code) {
   return babel.transform(code,  {
-    plugins: [require('../index')],
+    plugins: [plugin],
   }).code;
 }
 
@@ -1137,6 +1138,22 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       a ? x.b += foo : b ? x.b -= bar : x.b += baz;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should bail on different member exprs', () => {
+    const source = unpad(`
+      if (a) {
+        this.a = 1;
+      } else {
+        this.b = 2;
+      }
+    `);
+
+    const expected = unpad(`
+      a ? this.a = 1 : this.b = 2;
     `);
 
     expect(transform(source)).toBe(expected);
