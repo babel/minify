@@ -7,6 +7,7 @@ module.exports = ({ Plugin, types: t }) => {
   const seen = Symbol('seen');
   const condExprSeen = Symbol('condExprSeen');
   const seqExprSeen = Symbol('seqExprSeen');
+  const shouldRevisit = Symbol('shouldRevisit');
 
   return {
     visitor: {
@@ -632,11 +633,21 @@ module.exports = ({ Plugin, types: t }) => {
           // oppurtinties for other transforms to happen. Let's revisit the funciton parent.
           // TODO: Look into changing the traversal order from bottom to up to avoid
           // having to revisit things.
-          const fn = path.scope.getFunctionParent().path;
-          fn.pushContext(path.context);
-          fn.visit();
-          fn.popContext();
+          const fn = path.scope.getFunctionParent().path.node;
+          fn[shouldRevisit] = true;
         }
+      },
+
+      Function: {
+        exit(path) {
+          if (!path.node[shouldRevisit]) {
+            return;
+          }
+          delete path.node[shouldRevisit];
+          path.pushContext(path.context);
+          path.visit();
+          path.popContext();
+        },
       },
 
       // turn blocked ifs into single statements
