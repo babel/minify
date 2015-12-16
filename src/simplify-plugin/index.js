@@ -131,7 +131,20 @@ module.exports = ({ Plugin, types: t }) => {
 
             let left  = path.get('left');
             let right = path.get('right');
-            if (left.baseTypeStrictlyMatches(right)) {
+            let strictMatch;
+
+            // TODO: Remove after the babel bug is fixed
+            // https://github.com/babel/babel/pull/3171
+            try {
+              strictMatch = left.baseTypeStrictlyMatches(right);
+            } catch (e) {
+              if (e.message.match(/maximum/i)) {
+                return;
+              }
+              throw e;
+            }
+
+            if (strictMatch) {
               node.operator = node.operator.slice(0, -1);
             }
           },
