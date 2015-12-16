@@ -688,7 +688,8 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should understand extraneous blocks', () => {
+  // TODO: Handle this (blocks that have no semantic meaning).
+  xit('should understand extraneous blocks', () => {
     const source = unpad(`
       function a() {
         var f = 25;
@@ -729,6 +730,129 @@ describe('dce-plugin', () => {
         d();
         b();
         b();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should understand closures', () => {
+    const source = unpad(`
+      function a() {
+        var f = 25;
+        function b() {
+          var f = "wow";
+          function c() {
+            f.bar();
+          }
+          c();
+          c();
+        }
+        function d() {
+          bar(f);
+        }
+        d();
+        d();
+        b();
+        b();
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        function b() {
+          function c() {
+            "wow".bar();
+          }
+          c();
+          c();
+        }
+        function d() {
+          bar(25);
+        }
+        d();
+        d();
+        b();
+        b();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle vars in if statements', () => {
+    const source = unpad(`
+      function a() {
+        if (x()) {
+          var foo = 1;
+        }
+        bar(foo);
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        if (x()) {
+          var foo = 1;
+        }
+        bar(foo);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle vars in if statements 2', () => {
+    const source = unpad(`
+      function a() {
+        if (x()) var foo = 1;
+        bar(foo);
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        if (x()) var foo = 1;
+        bar(foo);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle vars in for statements', () => {
+    const source = unpad(`
+      function a() {
+        for (;;) var foo = 1;
+        bar(foo);
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        for (;;) var foo = 1;
+        bar(foo);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle for statements 2', () => {
+    const source = unpad(`
+      function a() {
+        for (;;) {
+          var foo = 1;
+          bar(foo);
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        for (;;) {
+          bar(1);
+        }
       }
     `);
 

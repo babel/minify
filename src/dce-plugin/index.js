@@ -83,6 +83,19 @@ module.exports = ({ Plugin, types: t }) => {
               throw new Error('Expected only one reference');
             }
 
+            let parent = binding.path.parent;
+            if (t.isVariableDeclaration(parent)) {
+              parent = binding.path.parentPath.parent;
+            }
+
+            const refPath = binding.referencePaths[0];
+
+            // Make sure we share the parent with the node. In other words it's lexically defined
+            // and not in an if statement or otherwise.
+            if (!refPath.find(({ node }) => node === parent)) {
+              return;
+            }
+
             const replaced = replace(binding.referencePaths[0], {
               binding,
               scope,
