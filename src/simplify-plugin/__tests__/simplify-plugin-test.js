@@ -1487,4 +1487,24 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+
+  it('should keep directives', () => {
+    const source = unpad(`
+      function a() {
+        'use strict';
+        foo();
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        'use strict';
+
+        foo();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

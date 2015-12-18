@@ -567,11 +567,11 @@ module.exports = ({ Plugin, types: t }) => {
             return;
           }
 
-          if (statements.length > 1 || needsBlock(node, parent)) {
-                const n = t.blockStatement(statements);
-                n[seen] = true;
-                path.replaceWith(n);
-                return;
+          if (statements.length > 1 || needsBlock(node, parent) || node.directives) {
+            const n = t.blockStatement(statements, node.directives);
+            n[seen] = true;
+            path.replaceWith(n);
+            return;
           }
 
           if (statements.length) {
