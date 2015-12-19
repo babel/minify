@@ -944,4 +944,22 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should nore remove binding and assignment if the value is used', () => {
+    const source = unpad(`
+      function a() {
+        var x = 1;
+        while (a) wow = x += 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        var x = 1;
+        while (a) wow = x += 1;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

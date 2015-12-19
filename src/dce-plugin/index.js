@@ -45,12 +45,27 @@ module.exports = ({ Plugin, types: t }) => {
             // `bar(function foo() {})` foo is not referenced but it's used.
             continue;
           }
-          scope.removeBinding(name);
+
+          const mutations = [];
+          let bail = false;
+          // Make sure none of the assignments value is used
           binding.constantViolations.forEach(p => {
-            if (p !== binding.path) {
-              p.remove();
+            if (bail || p === binding.path) {
+              return;
             }
+
+            if (!p.parentPath.isExpressionStatement()) {
+              bail = true;
+            }
+
+            mutations.push(() => p.remove());
           });
+
+          if (bail) {
+            return;
+          }
+          mutations.forEach(f => f());
+          scope.removeBinding(name);
           binding.path.remove();
         } else if (binding.constant) {
           if (binding.path.isFunctionDeclaration() ||
