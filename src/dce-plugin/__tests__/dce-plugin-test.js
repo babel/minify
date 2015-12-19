@@ -111,6 +111,76 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  it('should not inline objects literals in loops', () => {
+    const source = unpad(`
+      function foo() {
+        var x = { y: 1 };
+        while (true) foo(x);
+        var y = { y: 1 };
+        for (;;) foo(y);
+        var z = ['foo'];
+        while (true) foo(z);
+        var bar = function () {};
+        while (true) foo(bar);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var x = { y: 1 };
+        while (true) foo(x);
+        var y = { y: 1 };
+        for (;;) foo(y);
+        var z = ['foo'];
+        while (true) foo(z);
+        var bar = function () {};
+        while (true) foo(bar);
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should inline objects in if statements', () => {
+    const source = unpad(`
+      function foo() {
+        var x = { y: 1 }, y = ['foo'], z = function () {};
+        if (wat) foo(x, y, z);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (wat) foo({ y: 1 }, ['foo'], function () {});
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it('should not inline objects in functions', () => {
+    const source = unpad(`
+      function foo() {
+        var x = { y: 1 },
+            y = ['foo'],
+            z = function () {};
+        f(function () {
+          foo(x, y , z);
+        });
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var x = { y: 1 },
+            y = ['foo'],
+            z = function () {};
+        f(function () {
+          foo(x, y, z);
+        });
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it('should remove side effectless statements', () => {
     const source = unpad(`
       function foo() {

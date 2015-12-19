@@ -95,9 +95,23 @@ module.exports = ({ Plugin, types: t }) => {
 
             const refPath = binding.referencePaths[0];
 
-            // Make sure we share the parent with the node. In other words it's lexically defined
+            // 1. Make sure we share the parent with the node. In other words it's lexically defined
             // and not in an if statement or otherwise.
-            if (!refPath.find(({ node }) => node === parent)) {
+            // 2. If the replacement is an object then we have to make sure we are not in a loop or a function
+            // because otherwise we'll be inlining and doing a lot more allocation than we have to
+            // which would also could affect correctness in that they are not the same reference.
+            let mayLoop = false;
+            const sharesRoot = refPath.find(({ node }) => {
+              if (!mayLoop) {
+                mayLoop = t.isWhileStatement(node) || t.isFor(node) || t.isFunction(node);
+              }
+              return node === parent;
+            });
+
+            // Anything that inherits from Object.
+            const isReplacementObj = t.isFunction(replacement) || t.isObjectExpression(replacement) ||
+                                     t.isArrayExpression(replacement);
+            if (!sharesRoot || (isReplacementObj && mayLoop)) {
               return;
             }
 
