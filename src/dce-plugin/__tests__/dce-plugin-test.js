@@ -140,6 +140,28 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  it('should not inline object literals in exprs in loops', () => {
+    const source = unpad(`
+      function a(p) {
+        var w = p || [];
+        f(function (foo) {
+          return w.concat(foo);
+        });
+      }
+    `);
+
+    const expected = unpad(`
+      function a(p) {
+        var w = p || [];
+        f(function (foo) {
+          return w.concat(foo);
+        });
+      }
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it('should inline objects in if statements', () => {
     const source = unpad(`
       function foo() {

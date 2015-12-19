@@ -1,5 +1,7 @@
 'use strict';
 
+const some = require('lodash.some');
+
 module.exports = ({ Plugin, types: t }) => {
 
   const main = {
@@ -124,8 +126,9 @@ module.exports = ({ Plugin, types: t }) => {
             });
 
             // Anything that inherits from Object.
-            const isReplacementObj = t.isFunction(replacement) || t.isObjectExpression(replacement) ||
-                                     t.isArrayExpression(replacement);
+            const isObj = (n) => t.isFunction(n) || t.isObjectExpression(n) || t.isArrayExpression(n);
+            const isReplacementObj = isObj(replacement) || some(replacement, isObj);
+
             if (!sharesRoot || (isReplacementObj && mayLoop)) {
               return;
             }
