@@ -984,4 +984,21 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should keep side-effectful assignment values', () => {
+    const source = unpad(`
+      function a() {
+        var x;
+        x = wow();
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {
+        wow();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

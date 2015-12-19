@@ -60,7 +60,11 @@ module.exports = ({ Plugin, types: t }) => {
               bail = true;
             }
 
-            mutations.push(() => p.remove());
+            if (p.isAssignmentExpression() && !p.get('right').isPure()) {
+              mutations.push(() => p.replaceWith(p.get('right')));
+            } else {
+              mutations.push(() => p.remove());
+            }
           });
 
           if (bail) {
