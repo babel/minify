@@ -46,6 +46,11 @@ module.exports = ({ Plugin, types: t }) => {
             continue;
           }
           scope.removeBinding(name);
+          binding.constantViolations.forEach(p => {
+            if (p !== binding.path) {
+              p.remove();
+            }
+          });
           binding.path.remove();
         } else if (binding.constant) {
           if (binding.path.isFunctionDeclaration() ||

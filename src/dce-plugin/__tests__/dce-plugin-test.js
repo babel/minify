@@ -858,4 +858,20 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should remove binding and assignment', () => {
+    const source = unpad(`
+      function a() {
+        var a, b, c;
+        a = 1;
+        b = 2;
+      }
+    `);
+
+    const expected = unpad(`
+      function a() {}
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
