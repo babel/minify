@@ -117,6 +117,52 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should simplify comparison operations', () => {
+    const source = `null === null;`;
+    const expected = `null == null;`;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should comparison operations 2', () => {
+    const source = unpad(`
+      var x = null;
+      x === null;
+    `);
+    const expected = unpad(`
+      var x = null;
+      null == x;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should not simplify comparison', () => {
+    const source = unpad(`
+      var x;
+      x === null;
+    `);
+    const expected = unpad(`
+      var x;
+      null === x;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should not simplify comparison', () => {
+    const source = unpad(`
+      var x;
+      if (wow) x = foo();
+      x === null;
+    `);
+    const expected = unpad(`
+      var x;
+      wow && (x = foo()), null === x;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should flip conditionals', () => {
     const source = `!foo ? 'foo' : 'bar';`;
     const expected = `foo ? 'bar' : 'foo';`;

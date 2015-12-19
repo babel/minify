@@ -122,6 +122,7 @@ module.exports = ({ Plugin, types: t }) => {
 
           // simplify comparison operations if we're 100% certain
           // that each value will always be of the same type
+
           function (path) {
             const { node } = path;
             let op = node.operator;
@@ -131,19 +132,7 @@ module.exports = ({ Plugin, types: t }) => {
 
             let left  = path.get('left');
             let right = path.get('right');
-            let strictMatch;
-
-            // TODO: Remove after the babel bug is fixed
-            // https://github.com/babel/babel/pull/3171
-            try {
-              strictMatch = left.baseTypeStrictlyMatches(right);
-            } catch (e) {
-              if (e.message.match(/maximum/i)) {
-                return;
-              }
-              throw e;
-            }
-
+            const strictMatch = left.baseTypeStrictlyMatches(right);
             if (strictMatch) {
               node.operator = node.operator.slice(0, -1);
             }
