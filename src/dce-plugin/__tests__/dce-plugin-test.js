@@ -636,6 +636,38 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  xit('should remove functions only called in themselves 3', () => {
+    const source = unpad(`
+      (function () {
+        function foo () {
+          console.log( 'this function was included!' );
+        }
+
+        function bar () {
+          console.log( 'this function was not' );
+          baz();
+        }
+
+        function baz () {
+          console.log( 'neither was this' );
+        }
+
+        foo();
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        function foo () {
+          console.log( 'this function was included!' );
+        }
+
+        foo();
+      })();
+    `);
+
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it('should remove dead if statements', () => {
     const source = unpad(`
       if (1) {
@@ -1002,7 +1034,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not fuck up', () => {
+  it('should not evaluate this binary expression to truthy', () => {
     const source = unpad(`
       function boo() {
         var bar = foo || [];
