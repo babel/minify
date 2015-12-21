@@ -1001,4 +1001,26 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not fuck up', () => {
+    const source = unpad(`
+      function boo() {
+        var bar = foo || [];
+        if (!bar || baz.length === 0) {
+          return 'wow';
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function boo() {
+        var bar = foo || [];
+        if (!bar || baz.length === 0) {
+          return 'wow';
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
