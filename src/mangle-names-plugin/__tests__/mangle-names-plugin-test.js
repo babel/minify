@@ -178,6 +178,34 @@ describe('mangle-names', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should be order indepedent', () => {
+    const source = unpad(`
+      function foo() {
+        (function bar() {
+          bar();
+          return function() {
+            var bar = wow();
+            bar.woo();
+          };
+        })();
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        (function a() {
+          a();
+          return function () {
+            var a = wow();
+            a.woo();
+          };
+        })();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
 
 function unpad(str) {

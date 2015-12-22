@@ -47,7 +47,7 @@ module.exports = ({ Plugin, types: t }) => {
       const { scope, node } = path;
 
       // A function decleration name maybe shadowed by a variable
-      // in the scope.
+      // in the scope. So we get it from the upper scope.
       let binding;
       if (t.isFunctionDeclaration(path.parent, { id: node })) {
         binding = scope.parent.getBinding(node.name);
