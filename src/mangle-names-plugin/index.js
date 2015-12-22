@@ -45,7 +45,21 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       const { scope, node } = path;
-      recordRef(this.refs, scope.getBinding(node.name), path);
+
+      // A function decleration name maybe shadowed by a variable
+      // in the scope.
+      let binding;
+      if (t.isFunctionDeclaration(path.parent, { id: node })) {
+        binding = scope.parent.getBinding(node.name);
+      } else {
+        binding = scope.getBinding(node.name);
+      }
+
+      if (!binding) {
+        return;
+      }
+
+      recordRef(this.refs, binding, path);
     },
 
     Literal({ node }) {
