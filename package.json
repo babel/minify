@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/facebook/babel-minify#readme",
   "dependencies": {
-    "babel-core": "^6.3.21",
+    "babel-core": "^6.3.26",
     "lodash.some": "^3.2.3"
   },
   "jest": {

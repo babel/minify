@@ -1055,4 +1055,22 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('eval the following to false', () => {
+    const source = unpad(`
+      function bar () {
+        var x = foo || 'boo';
+        bar = x === 'wow' ? ' ' + z : '';
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        var x = foo || 'boo';
+        bar = x === 'wow' ? ' ' + z : '';
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
