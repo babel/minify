@@ -1056,7 +1056,9 @@ module.exports = ({ Plugin, types: t }) => {
               if (node.consequent.argument) {
                 return;
               }
-            } else if (t.isContinueStatement(node.consequent)) {
+            } else if (t.isContinueStatement(node.consequent) &&
+              path.parentPath.parentPath.isLoop()
+            ) {
               if (node.consequent.label) {
                 return;
               }

@@ -1534,7 +1534,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-
   it('should keep directives', () => {
     const source = unpad(`
       function a() {
@@ -1548,6 +1547,29 @@ describe('simplify-plugin', () => {
         'use strict';
 
         foo();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle continue in nested if', () => {
+    const source = unpad(`
+      function wow() {
+        for(;;) {
+          if (foo) {
+            if (bar) {
+              continue;
+            }
+          }
+          wat();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function wow() {
+        for (;;) (!foo || !bar) && wat();
       }
     `);
 
