@@ -204,7 +204,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       ConditionalExpression: {
-        enter: [
+        exit: [
           // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
           // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
           function({ node }) {
@@ -305,6 +305,7 @@ module.exports = ({ Plugin, types: t }) => {
                 tests.push(next.node.test);
                 mutations.push(() => next.remove());
               } else {
+                alt = next.node;
                 break;
               }
             }

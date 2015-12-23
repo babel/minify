@@ -1575,4 +1575,16 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should handle continue in nested if', () => {
+    const source = unpad(`
+      x === null ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
+    `);
+
+    const expected = unpad(`
+      null === x || x === void 0 ? void 0 : x ? foo(x) : wat();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
