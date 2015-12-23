@@ -26,19 +26,13 @@ module.exports = ({ Plugin, types: t }) => {
 
       for (let name in scope.bindings) {
         let binding = scope.bindings[name];
+
         if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
           if (binding.path.isVariableDeclarator()) {
-
-            // Can't remove if in a for in statement `for (var x in wat)`.
-            if (binding.path.parentPath.parentPath && binding.path.parentPath.parentPath.isForInStatement()) {
-              continue;
-            }
-
-            if (binding.path.node.init && !scope.isPure(binding.path.node.init)) {
-              if (binding.path.parentPath.node.declarations.length === 1) {
-                binding.path.parentPath.replaceWith(binding.path.node.init);
-                scope.removeBinding(name);
-              }
+            if (binding.path.parentPath.parentPath &&
+              binding.path.parentPath.parentPath.isForInStatement()
+            ) {
+              // Can't remove if in a for in statement `for (var x in wat)`.
               continue;
             }
           } else if (!scope.isPure(binding.path.node)) {
@@ -68,11 +62,24 @@ module.exports = ({ Plugin, types: t }) => {
           });
 
           if (bail) {
-            return;
+            continue;
           }
+
+          if (binding.path.isVariableDeclarator() && binding.path.node.init &&
+              !scope.isPure(binding.path.node.init)
+          ) {
+            if (binding.path.parentPath.node.declarations.length !== 1) {
+              continue;
+            }
+
+            binding.path.parentPath.replaceWith(binding.path.node.init);
+          } else {
+            binding.path.remove();
+          }
+
           mutations.forEach(f => f());
           scope.removeBinding(name);
-          binding.path.remove();
+
         } else if (binding.constant) {
           if (binding.path.isFunctionDeclaration() ||
               (binding.path.isVariableDeclarator() && binding.path.get('init').isFunction())) {

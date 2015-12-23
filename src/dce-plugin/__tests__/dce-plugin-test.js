@@ -1073,4 +1073,23 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should get rid of the constant violations', () => {
+    const source = unpad(`
+      function bar () {
+        var x = foo();
+        x = bar();
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        foo();
+
+        bar();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
