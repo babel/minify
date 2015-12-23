@@ -96,9 +96,9 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         if (null !== foo) {
-            var bar;
-            bar = baz;
-          }
+          var bar;
+          bar = baz;
+        }
         return x(), x;
       }
     `);
@@ -1479,11 +1479,11 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         if (x) {
-            var f = wow;
-            delete x.x;
+          var f = wow;
+          delete x.x;
 
-            if (bar()) return;
-          }
+          if (bar()) return;
+        }
       }
     `);
 
@@ -1524,9 +1524,9 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         if (foo) {
-            if (bar) return !1;
-            if (baz) return !1;
-          }
+          if (bar) return !1;
+          if (baz) return !1;
+        }
         return !0;
       }
     `);

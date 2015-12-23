@@ -535,10 +535,6 @@ module.exports = ({ Plugin, types: t }) => {
         enter(path) {
           const { node, parent } = path;
 
-          if (node[seen]) {
-            return;
-          }
-
           const top = [];
           const bottom = [];
 
@@ -558,9 +554,7 @@ module.exports = ({ Plugin, types: t }) => {
           }
 
           if (statements.length > 1 || needsBlock(node, parent) || node.directives) {
-            const n = t.blockStatement(statements, node.directives);
-            n[seen] = true;
-            path.replaceWith(n);
+            node.body = statements;
             return;
           }
 
@@ -595,7 +589,6 @@ module.exports = ({ Plugin, types: t }) => {
             }
           }
 
-          delete node[seen];
           path.visit();
         },
       },
