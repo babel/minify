@@ -1622,10 +1622,10 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      var zx,
+      var x = 1,
+          z = 2,
           y,
-          x = 1,
-          z = 2;
+          zx;
     `);
 
     expect(transform(source)).toBe(expected);
