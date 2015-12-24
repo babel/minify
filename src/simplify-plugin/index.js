@@ -117,6 +117,7 @@ module.exports = ({ Plugin, types: t }) => {
           // consistency with comparisons and increases the length of
           // strings that gzip can match
           // typeof blah === 'function' -> 'function' === typeof blah
+
           function (path) {
             const { node } = path;
             const { right, left } = node;
@@ -130,7 +131,7 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
-                node.operator === '*' || node.operator === '+'
+                node.operator === '*'
             ) {
               node.left = right;
               node.right = left;

@@ -54,7 +54,7 @@ describe('simplify-plugin', () => {
 
   it(`should turn String(x) to x + ''`, () => {
     const source = `String(x);`;
-    const expected = `"" + x;`;
+    const expected = `x + "";`;
     expect(transform(source)).toBe(expected);
   });
 
@@ -1642,7 +1642,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      100 * x, 100 + x, x - 100, x / 100, 100 < x, void 0 === x;
+      100 * x, x + 100, x - 100, x / 100, 100 < x, void 0 === x;
     `);
 
     expect(transform(source)).toBe(expected);
