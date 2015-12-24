@@ -324,6 +324,24 @@ module.exports = ({ Plugin, types: t }) => {
       declars[0].init = path.node.right;
       path.remove();
     },
+
+    // Remove named function expression name. While this is dangerous as it changes
+    // `function.name` all minifiers do it and hence became a standard.
+    FunctionExpression(path) {
+      const id = path.get('id').node;
+      if (!id) {
+        return;
+      }
+
+      const { node, scope } = path;
+
+      const binding = scope.getBinding(id.name);
+
+      // Check if shadowed or is not referenced.
+      if (binding.path.node !== node || !binding.referenced) {
+        node.id = null;
+      }
+    },
   };
 
   return {

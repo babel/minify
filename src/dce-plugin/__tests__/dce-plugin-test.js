@@ -44,21 +44,6 @@ describe('dce-plugin', () => {
   });
 
   it('should not remove params (preserve fn.length)', () => {
-    const expected = unpad(`
-      _(function bar(p) {
-        return 1;
-      });
-      function foo(w) {
-        return 1;
-      }
-      foo();
-      foo();
-      var bar = function (a) {
-        return a;
-      };
-      bar();
-      bar();
-    `);
     const source = unpad(`
       _(function bar(p) {
         return 1;
@@ -75,6 +60,21 @@ describe('dce-plugin', () => {
       bar();
     `);
 
+    const expected = unpad(`
+      _(function (p) {
+        return 1;
+      });
+      function foo(w) {
+        return 1;
+      }
+      foo();
+      foo();
+      var bar = function (a) {
+        return a;
+      };
+      bar();
+      bar();
+    `);
     expect(transform(source)).toBe(expected);
   });
 
@@ -1087,6 +1087,70 @@ describe('dce-plugin', () => {
         foo();
 
         bar();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should remove names from NFE', () => {
+    const source = unpad(`
+      function bar() {
+        return function wow() {
+          return boo();
+        };
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        return function () {
+          return boo();
+        };
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should not remove names from NFE when referenced', () => {
+    const source = unpad(`
+      function bar() {
+        return function wow() {
+          return wow();
+        };
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        return function wow() {
+          return wow();
+        };
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should remove name from NFE when shadowed', () => {
+    const source = unpad(`
+      function bar() {
+        return function wow() {
+          var wow = foo;
+          wow();
+          return wow;
+        };
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        return function () {
+          var wow = foo;
+          wow();
+          return wow;
+        };
       }
     `);
 
