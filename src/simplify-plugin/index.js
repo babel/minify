@@ -18,6 +18,20 @@ module.exports = ({ Plugin, types: t }) => {
         }
       },
 
+      // Infinity -> 1 / 0
+      Identifier(path) {
+        if (path.node.name !== 'Infinity') {
+          return;
+        }
+
+        // It's a referenced identifier
+        if (path.scope.getBinding('Infinity')) {
+          return;
+        }
+
+        path.replaceWith(t.binaryExpression('/', t.numericLiteral(1), t.numericLiteral(0)));
+      },
+
       // { 'foo': 'bar' } -> { foo: 'bar' }
       Property: {
         exit({ node }) {
