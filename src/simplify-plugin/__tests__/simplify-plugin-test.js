@@ -1600,4 +1600,69 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should convert gaurded nots to ors', () => {
+    const source = unpad(`
+      !wat && bar !== foo && 1;
+    `);
+
+    const expected = unpad(`
+      wat || bar !== foo && 1;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should put the empty vars first', () => {
+    const source = unpad(`
+      var x = 1, y, z = 2;
+    `);
+
+    const expected = unpad(`
+      var y, x = 1, z = 2;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should put constants first', () => {
+    const source = unpad(`
+      x * 100;
+      x + 100;
+      x - 100;
+      x / 100;
+      x > 100;
+      x === void 0;
+    `);
+
+    const expected = unpad(`
+      100 * x, 100 + x, x - 100, x / 100, 100 > x, x === void 0;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should convert infinity to division over 0', () => {
+    const source = unpad(`
+      Infinity;
+    `);
+
+    const expected = unpad(`
+      1 / 0;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('function expression in sequennce doesnt need parens', () => {
+    const source = unpad(`
+      x, (function() {})();
+    `);
+
+    const expected = unpad(`
+      x, function() {}();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

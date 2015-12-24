@@ -1156,4 +1156,47 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should track purity', () => {
+   const source = unpad(`
+     function x(a) {
+       var l = a;
+       var x = l
+       foo(x);
+     }
+    `);
+
+    const expected = unpad(`
+      function x(a) {
+        foo(a);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should remove last break statement in switch', () => {
+   const source = unpad(`
+     switch (foo) {
+       case 'foo':
+         bar();
+         break;
+       case 'bar':
+         wow();
+         break;
+     }
+    `);
+
+    const expected = unpad(`
+     switch (foo) {
+       case 'foo':
+         bar();
+         break;
+       case 'bar':
+         wow();
+     }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
