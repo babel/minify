@@ -4,7 +4,6 @@ const isNodesEquiv = require('../utils/isNodesEquiv');
 
 module.exports = ({ Plugin, types: t }) => {
   const VOID_0 = t.unaryExpression('void', t.numericLiteral(0), true);
-  const seen = Symbol('seen');
   const condExprSeen = Symbol('condExprSeen');
   const seqExprSeen = Symbol('seqExprSeen');
   const shouldRevisit = Symbol('shouldRevisit');
