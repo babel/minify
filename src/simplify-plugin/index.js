@@ -119,18 +119,36 @@ module.exports = ({ Plugin, types: t }) => {
           // typeof blah === 'function' -> 'function' === typeof blah
           function (path) {
             const { node } = path;
-            if (node[seen]) {
+            const { right, left } = node;
+
+            // Make sure we have a constant on the right.
+            if (!t.isLiteral(right) && !isVoid0(right) &&
+                !(t.isUnaryExpression(right) && t.isLiteral(right.argument)) &&
+                !t.isObjectExpression(right) && !t.isArrayExpression(right)
+            ) {
               return;
             }
 
-            node[seen] = true;
-            if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 &&
-              path.get('right').isPure()
+            if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
+                node.operator === '*' || node.operator === '+'
             ) {
-              const left = node.left;
-              const right = node.right;
-              path.get('right').replaceWith(left);
-              path.get('left').replaceWith(right);
+              node.left = right;
+              node.right = left;
+              return;
+            }
+
+            if (t.BOOLEAN_NUMBER_BINARY_OPERATORS.indexOf(node.operator) >= 0) {
+              node.left = right;
+              node.right = left;
+              let operator;
+              switch (node.operator) {
+                case '>': operator = '<'; break;
+                case '<': operator = '>'; break;
+                case '>=': operator = '<='; break;
+                case '<=': operator = '>='; break;
+              }
+              node.operator = operator;
+              return;
             }
           },
 

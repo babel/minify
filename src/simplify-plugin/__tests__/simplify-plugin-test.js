@@ -54,7 +54,7 @@ describe('simplify-plugin', () => {
 
   it(`should turn String(x) to x + ''`, () => {
     const source = `String(x);`;
-    const expected = `x + "";`;
+    const expected = `"" + x;`;
     expect(transform(source)).toBe(expected);
   });
 
@@ -70,7 +70,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put pures first in binary expressions', () => {
+  it('should put constants first in binary expressions', () => {
     const source = `a === -1;`;
     const expected = `-1 === a;`;
     expect(transform(source)).toBe(expected);
@@ -175,7 +175,7 @@ describe('simplify-plugin', () => {
       var j = 0;
       for (var x = 0; x < 10; x++) console.log(i + x);
     `);
-    const expected = 'for (var i = 0, j = 0, x = 0; x < 10; x++) console.log(i + x);';
+    const expected = 'for (var i = 0, j = 0, x = 0; 10 > x; x++) console.log(i + x);';
 
     expect(transform(source).trim()).toBe(expected);
   });
@@ -201,7 +201,7 @@ describe('simplify-plugin', () => {
         console.log(x);
       }
     `);
-    const expected = 'for (var x = 0; x < 10; x++) console.log(x);';
+    const expected = 'for (var x = 0; 10 > x; x++) console.log(x);';
 
     expect(transform(source).trim()).toBe(expected);
   });
@@ -214,7 +214,7 @@ describe('simplify-plugin', () => {
       }
     `);
     const expected =
-      'for (var x = 0; x < 10; x++) console.log(x), console.log(x);';
+      'for (var x = 0; 10 > x; x++) console.log(x), console.log(x);';
 
     expect(transform(source).trim()).toBe(expected);
   });
@@ -234,7 +234,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       x(), y();
 
-      for (var x = 0; x < 10; x++) {
+      for (var x = 0; 10 > x; x++) {
         var z = foo();
         console.log(z), console.log(z);
       }
@@ -433,7 +433,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        for (x(), y(); i < 10; i++) z();
+        for (x(), y(); 10 > i; i++) z();
       }
     `);
 
@@ -451,7 +451,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        for (x(), y(), z(); i < 10; i++) z();
+        for (x(), y(), z(); 10 > i; i++) z();
       }
     `);
 
@@ -1576,13 +1576,13 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle continue in nested if', () => {
+  it('should merge two conditionals if the same consequent', () => {
     const source = unpad(`
       x === null ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
     `);
 
     const expected = unpad(`
-      null === x || x === void 0 ? void 0 : x ? foo(x) : wat();
+      null === x || void 0 === x ? void 0 : x ? foo(x) : wat();
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1642,7 +1642,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      100 * x, 100 + x, x - 100, x / 100, 100 > x, x === void 0;
+      100 * x, 100 + x, x - 100, x / 100, 100 < x, void 0 === x;
     `);
 
     expect(transform(source)).toBe(expected);
