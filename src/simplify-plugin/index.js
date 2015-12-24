@@ -385,6 +385,25 @@ module.exports = ({ Plugin, types: t }) => {
             );
             path.remove();
           },
+
+          function (path) {
+            const { node } = path;
+
+            if (node.declarations.length < 2) {
+              return;
+            }
+
+            let decls = [];
+            for (let decl of node.declarations) {
+              if (!decl.init) {
+                decls.unshift(decl);
+              } else {
+                decls.push(decl);
+              }
+            }
+
+            node.declarations = decls;
+          },
         ],
       },
 
