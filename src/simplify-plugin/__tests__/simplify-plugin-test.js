@@ -1587,4 +1587,17 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should convert gaurded nots to ors', () => {
+    const source = unpad(`
+      x();
+      if (!foo.bar) foo.bar = wat;
+    `);
+
+    const expected = unpad(`
+      x(), foo.bar || (foo.bar = wat);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

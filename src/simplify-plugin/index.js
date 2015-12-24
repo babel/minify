@@ -143,7 +143,7 @@ module.exports = ({ Plugin, types: t }) => {
       // Apply demorgan's law to save byte.
       // TODO: make sure no security vuln.
       LogicalExpression(path) {
-        if (!path.parentPath.isExpressionStatement()) {
+        if (!path.parentPath.isExpressionStatement() && !path.parentPath.isSequenceExpression()) {
           return;
         }
 
