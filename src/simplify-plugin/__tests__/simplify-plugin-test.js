@@ -827,7 +827,7 @@ describe('simplify-plugin', () => {
     // You can check if it's a conditional boom
     const expected = unpad(`
       function foo() {
-        return !bar && !far && !faz ? e : void 0;
+        return bar || far || faz ? void 0 : e;
       }
     `);
 
@@ -1418,7 +1418,6 @@ describe('simplify-plugin', () => {
       }
     `);
 
-    // TODO: figure out if we can simplify further using demorgan's law
     const expected = unpad(`
       function foo() {
         return x && (delete x.x, bar()) ? 2 : void (bar ? x() : y());
@@ -1606,9 +1605,12 @@ describe('simplify-plugin', () => {
   // TODO: this is harder than expected since the leftmost
   // is not a direct child of the expression statement
   // it feels unsafe.
-  xit('should convert gaurded nots to ors', () => {
+  it('should convert gaurded nots to ors', () => {
     const source = unpad(`
-      !wat && bar !== foo && 1;
+      if (!foo && foo !== bar) {
+        wow();
+        such();
+      }
     `);
 
     const expected = unpad(`

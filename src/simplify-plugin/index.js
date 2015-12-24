@@ -173,26 +173,30 @@ module.exports = ({ Plugin, types: t }) => {
         ],
       },
 
-      // Apply demorgan's law to save byte.
-      // TODO: make sure no security vuln.
-      LogicalExpression(path) {
-        if (!path.parentPath.isExpressionStatement() && !path.parentPath.isSequenceExpression()) {
-          return;
-        }
+      // Convert guarded expressions
+      // !a && b() --> a || b();
+      LogicalExpression: {
+        enter: [
+          function(path) {
+            if (!path.parentPath.isExpressionStatement() && !path.parentPath.isSequenceExpression()) {
+              return;
+            }
 
-        const { node } = path;
+            const { node } = path;
 
-        if (t.isUnaryExpression(node.left, { operator: '!' })) {
-          node.operator = node.operator === '&&' ? '||' : '&&';
-          node.left = node.left.argument;
-          return;
-        }
+            if (t.isUnaryExpression(node.left, { operator: '!' })) {
+              node.operator = node.operator === '&&' ? '||' : '&&';
+              node.left = node.left.argument;
+              return;
+            }
+          },
+        ],
       },
 
       UnaryExpression(path) {
         const { node } = path;
 
-        if (node.operator !== '!' || !node.prefix || node[unaryExprSeen]) {
+        if (node.operator !== '!' || node[unaryExprSeen]) {
           return;
         }
 
@@ -206,50 +210,40 @@ module.exports = ({ Plugin, types: t }) => {
         const newNode = flip(expr);
         newNode[unaryExprSeen] = true;
         path.replaceWith(newNode);
-
-        function flip(node) {
-          if (t.isUnaryExpression(node, { operator: '!', prefix: true })) {
-            return node.argument;
-          }
-
-          if (t.isLogicalExpression(node)) {
-            node.operator = node.operator === '&&' ? '||' : '&&';
-            node.right = flip(node.right);
-            node.left = flip(node.left);
-            return node;
-          }
-
-          if (t.isBinaryExpression(node)) {
-            let operator;
-            switch (node.operator) {
-              case '!==': operator = '==='; break;
-              case '===': operator = '!=='; break;
-              case '!=': operator = '=='; break;
-              case '==': operator = '!='; break;
-              case '>': operator = '<'; break;
-              case '<': operator = '>'; break;
-              case '>=': operator = '<='; break;
-              case '<=': operator = '>='; break;
-            }
-
-            if (operator) {
-              node.operator = operator;
-              return node;
-            }
-
-            // Falls through to unary expression
-          }
-
-          return t.unaryExpression('!', node);
-        }
       },
 
       ConditionalExpression: {
         exit: [
           // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
           // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
-          function({ node }) {
-            flipNegation(node);
+          function(path) {
+            if (!path.get('test').isLogicalExpression()) {
+              flipNegation(path.node);
+              return;
+            }
+
+            let total = 0;
+            let candidates = 0;
+
+            visit(path.node.test);
+
+            if (candidates / total > 0.5) {
+              path.node.test = flip(path.node.test);
+              [path.node.alternate, path.node.consequent] = [path.node.consequent, path.node.alternate];
+            }
+
+            function visit(node) {
+              total++;
+
+              if (t.isUnaryExpression(node, { operator: '!' })) {
+                candidates++;
+              }
+
+              if (t.isLogicalExpression(node)) {
+                visit(node.left);
+                visit(node.right);
+              }
+            }
           },
 
           // a ? x = foo : b ? x = bar : x = baz;
@@ -1330,5 +1324,41 @@ module.exports = ({ Plugin, types: t }) => {
     }
 
     path.visit();
+  }
+
+  function flip(node) {
+    if (t.isUnaryExpression(node, { operator: '!' })) {
+      return node.argument;
+    }
+
+    if (t.isLogicalExpression(node)) {
+      node.operator = node.operator === '&&' ? '||' : '&&';
+      node.right = flip(node.right);
+      node.left = flip(node.left);
+      return node;
+    }
+
+    if (t.isBinaryExpression(node)) {
+      let operator;
+      switch (node.operator) {
+        case '!==': operator = '==='; break;
+        case '===': operator = '!=='; break;
+        case '!=': operator = '=='; break;
+        case '==': operator = '!='; break;
+        case '>': operator = '<'; break;
+        case '<': operator = '>'; break;
+        case '>=': operator = '<='; break;
+        case '<=': operator = '>='; break;
+      }
+
+      if (operator) {
+        node.operator = operator;
+        return node;
+      }
+
+      // Falls through to unary expression
+    }
+
+    return t.unaryExpression('!', node);
   }
 };
