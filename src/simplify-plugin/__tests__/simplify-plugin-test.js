@@ -1671,4 +1671,78 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should turn early return else block into statement', () => {
+    const source = unpad(`
+      function x() {
+        for (;;) {
+          x();
+          if (foo) return 1;
+          else y();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function x() {
+        for (;;) {
+          x();
+
+          if (foo) return 1;
+          y();
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  // TODO: this is hard to do and is a bug in babel
+  // the problem arrises because we might need a block
+  // to make sure that the `else` statement doesn't
+  // get understood as part of some other nested if.
+  xit('should remove block', () => {
+    const source = unpad(`
+      function x() {
+        if (a) {
+          if (b) {
+            for(;;) {
+              if (a) b();
+            }
+          }
+        } else {
+          wat();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function x() {
+        if (a)
+          if (b) for (;;) a && b();
+        else wat();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  // TODO
+  xit('should merge things into throw statement seq expr', () => {
+    const source = unpad(`
+      function x() {
+        z();
+        throw y;
+      }
+    `);
+
+    const expected = unpad(`
+      function x() {
+        throw z(), y;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
 });
