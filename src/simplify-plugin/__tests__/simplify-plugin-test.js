@@ -823,9 +823,11 @@ describe('simplify-plugin', () => {
       }
     `);
 
+    // FIXME
+    // You can check if it's a conditional boom
     const expected = unpad(`
       function foo() {
-        return bar || far || faz ? void 0 : e;
+        return !bar && !far && !faz ? e : void 0;
       }
     `);
 
@@ -1745,4 +1747,54 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should negate early return if', () => {
+    const source = unpad(`
+      function x() {
+        if (!bar) return;
+        var x = foo;
+        if (!foo) return
+        if (y)
+          throw y;
+      }
+    `);
+
+    const expected = unpad(`
+      function x() {
+        if (bar) {
+          var x = foo;
+          if (foo && y) throw y;
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should not negate early return if', () => {
+    const source = unpad(`
+      function x() {
+        var x = foo;
+        if (hi) {
+          var y = z;
+          if (!foo) return;
+          if (x) throw y;
+        }
+        x();
+      }
+    `);
+
+    const expected = unpad(`
+      function x() {
+        var x = foo;
+        if (hi) {
+          var y = z;
+          if (!foo) return;
+          if (x) throw y;
+        }
+        x();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

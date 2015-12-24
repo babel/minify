@@ -427,23 +427,27 @@ module.exports = ({ Plugin, types: t }) => {
         ],
       },
 
-      // turn a for loop block block with single statement
-      // loops into just the single statement
-      For({ node, parent }) {
-        let block = node.body;
-        if (!block || !t.isBlockStatement(block)) {
-          return;
-        }
+      Function: {
+        enter: earlyReturnTransform,
 
-        let body = block.body;
-        if (body.length !== 1) {
-          return;
-        }
+        exit(path) {
+          // Useful to do on enter and exit because more oppurtinties can open.
+          earlyReturnTransform(path);
 
-        let first = body[0];
-        node.body = first;
+          if (!path.node[shouldRevisit]) {
+            return;
+          }
+          delete path.node[shouldRevisit];
+          path.pushContext(path.context);
+          path.visit();
+          path.popContext();
+        },
       },
 
+      For: {
+        enter: earlyContinueTransform,
+        exit: earlyContinueTransform,
+      },
 
       ForStatement: {
 
@@ -685,18 +689,6 @@ module.exports = ({ Plugin, types: t }) => {
           const fn = path.scope.getFunctionParent().path.node;
           fn[shouldRevisit] = true;
         }
-      },
-
-      Function: {
-        exit(path) {
-          if (!path.node[shouldRevisit]) {
-            return;
-          }
-          delete path.node[shouldRevisit];
-          path.pushContext(path.context);
-          path.visit();
-          path.popContext();
-        },
       },
 
       // turn blocked ifs into single statements
@@ -1087,61 +1079,6 @@ module.exports = ({ Plugin, types: t }) => {
               path.get('test').replaceWith(expr);
             }
           },
-
-          // Convert early returns and continues in if statements to negated
-          // ifs with the rest of the body in the consequent
-          function(path) {
-            const { node } = path;
-
-            if (!path.inList || node.alternate) {
-              return;
-            }
-
-            if (t.isReturnStatement(node.consequent) &&
-                path.parentPath.parentPath.isFunction()
-            ) {
-              if (node.consequent.argument) {
-                return;
-              }
-            } else if (t.isContinueStatement(node.consequent) &&
-              path.parentPath.parentPath.isLoop()
-            ) {
-              if (node.consequent.label) {
-                return;
-              }
-            } else {
-              return;
-            }
-
-            const statements = path.container.slice(path.key + 1);
-            if (!statements.length) {
-              path.replaceWith(t.expressionStatement(node.test));
-              return;
-            }
-
-            const test = node.test;
-            if (t.isBinaryExpression(test) && test.operator === '!==') {
-              test.operator = '===';
-            } else if (t.isBinaryExpression(test) && test.operator === '!=') {
-              test.operator = '==';
-            } else if (t.isUnaryExpression(test, { operator: '!' })) {
-              node.test = test.argument;
-            } else {
-              node.test = t.unaryExpression('!', node.test);
-            }
-
-            let l = statements.length;
-            while (l-- > 0) {
-              path.getSibling(path.key + 1).remove();
-            }
-
-            if (statements.length === 1) {
-              node.consequent = statements[0];
-            } else {
-              node.consequent = t.blockStatement(statements);
-            }
-            path.visit();
-          },
         ],
       },
 
@@ -1315,5 +1252,74 @@ module.exports = ({ Plugin, types: t }) => {
       t.isUnaryExpression(expr, { operator: 'void' })  &&
       t.isNumericLiteral(expr.argument, { value: 0 })
     );
+  }
+
+  function earlyReturnTransform(path) {
+    const { node } = path;
+
+    for (let i = node.body.body.length; i >= 0; i--) {
+      const statement = node.body.body[i];
+      if (t.isIfStatement(statement) && !statement.alternate &&
+          t.isReturnStatement(statement.consequent) && !statement.consequent.argument
+      ) {
+        genericEarlyExitTransform(path.get('body').get('body')[i]);
+      }
+    }
+  }
+
+  function earlyContinueTransform(path) {
+    const { node } = path;
+
+    if (!t.isBlockStatement(node.body)) {
+      return;
+    }
+
+    for (let i = node.body.body.length; i >= 0; i--) {
+      const statement = node.body.body[i];
+      if (t.isIfStatement(statement) && !statement.alternate &&
+          t.isContinueStatement(statement.consequent) && !statement.consequent.label
+      ) {
+        genericEarlyExitTransform(path.get('body').get('body')[i]);
+      }
+    }
+
+    // We may have reduced the body to a single statement.
+    if (node.body.body.length === 1) {
+      path.get('body').replaceWith(node.body.body[0]);
+    }
+  }
+
+  function genericEarlyExitTransform(path) {
+    const { node } = path;
+
+    const statements = path.container.slice(path.key + 1);
+    if (!statements.length) {
+      path.replaceWith(t.expressionStatement(node.test));
+      return;
+    }
+
+    const test = node.test;
+    if (t.isBinaryExpression(test) && test.operator === '!==') {
+      test.operator = '===';
+    } else if (t.isBinaryExpression(test) && test.operator === '!=') {
+      test.operator = '==';
+    } else if (t.isUnaryExpression(test, { operator: '!' })) {
+      node.test = test.argument;
+    } else {
+      node.test = t.unaryExpression('!', node.test);
+    }
+
+    let l = statements.length;
+    while (l-- > 0) {
+      path.getSibling(path.key + 1).remove();
+    }
+
+    if (statements.length === 1) {
+      node.consequent = statements[0];
+    } else {
+      node.consequent = t.blockStatement(statements);
+    }
+
+    path.visit();
   }
 };
