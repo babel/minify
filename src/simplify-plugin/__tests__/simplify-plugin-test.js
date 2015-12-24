@@ -619,7 +619,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        if (!a || !a.b || !a.b.c || !a.b.c()) for (; !0;) wat();
+        if (!(a && a.b && a.b.c && a.b.c())) for (; !0;) wat();
       }
    `);
 
@@ -1571,7 +1571,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function wow() {
-        for (;;) (!foo || !bar) && wat();
+        for (;;) foo && bar || wat();
       }
     `);
 
