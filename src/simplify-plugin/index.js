@@ -87,8 +87,8 @@ module.exports = ({ Plugin, types: t }) => {
 
         // (function() {})() -> !function() {}()
         if (t.isFunctionExpression(node.callee) &&
-            (t.isExpressionStatement(path.parent) ||
-             (t.isSequenceExpression(path.parent) && path.parent.expressions[0] === node))
+            (t.isExpressionStatement(parent) ||
+             (t.isSequenceExpression(parent) && parent.expressions[0] === node))
         ) {
           path.replaceWith(
             t.callExpression(
