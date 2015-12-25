@@ -922,60 +922,6 @@ module.exports = ({ Plugin, types: t }) => {
             }
           },
 
-          // Merge if statements with return values in sequence.
-          function(path) {
-            const { node } = path;
-
-            if (!path.inList || node.alternate ||
-                !(path.parentPath.parentPath && path.parentPath.parentPath.isFunction())
-            ) {
-              return;
-            }
-
-            if (!t.isReturnStatement(node.consequent)) {
-              return;
-            }
-
-            const exprs = [node.consequent.argument || VOID_0];
-            const tests = [node.test];
-            const mutations = [];
-            let i = 1;
-
-            while (path.getSibling(path.key + i).node) {
-              const next = path.getSibling(path.key + i);
-              if (!next.isIfStatement() || next.node.alternate) {
-                return;
-              }
-
-              if (!t.isReturnStatement(next.node.consequent)) {
-                return;
-              }
-
-              tests.push(next.node.test);
-              exprs.push(next.node.consequent.argument || VOID_0);
-              mutations.push(() => next.remove());
-              i++;
-            }
-
-            if (exprs.length < 2) {
-              // Will results in more bytes and destroy any wins we have
-              // (even the ones from gzip).
-              return;
-            }
-
-            const cond = exprs.reduceRight(
-              (alt, cons, ind) => t.conditionalExpression(
-                tests[ind],
-                cons,
-                alt
-              ),
-              VOID_0
-            );
-
-            mutations.forEach(f => f());
-            path.replaceWith(t.returnStatement(cond));
-          },
-
           // Make if statements with conditional returns in the body into
           // an if statement that guards the rest of the block.
           function(path) {
