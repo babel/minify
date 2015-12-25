@@ -7,7 +7,6 @@ module.exports = ({ Plugin, types: t }) => {
   const condExprSeen = Symbol('condExprSeen');
   const seqExprSeen = Symbol('seqExprSeen');
   const shouldRevisit = Symbol('shouldRevisit');
-  const unaryExprSeen = Symbol('unaryExprSeen');
   const flipSeen = Symbol('flipSeen');
 
   return {
@@ -220,15 +219,16 @@ module.exports = ({ Plugin, types: t }) => {
         exit: [
           // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
           // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
-          function(path) {
+          function flipIfOrConditional(path) {
+            const { node } = path;
             if (!path.get('test').isLogicalExpression()) {
-              flipNegation(path.node);
+              flipNegation(node);
               return;
             }
 
-            if (shouldFlip(path.node.test)) {
-              path.node.test = flip(path.node.test);
-              [path.node.alternate, path.node.consequent] = [path.node.consequent, path.node.alternate];
+            if (shouldFlip(node.test)) {
+              node.test = flip(node.test);
+              [node.alternate, node.consequent] = [node.consequent, node.alternate];
             }
           },
 
@@ -700,10 +700,6 @@ module.exports = ({ Plugin, types: t }) => {
           function(path) {
             const { node } = path;
 
-            coerceIf('consequent');
-            coerceIf('alternate');
-            flipNegation(node);
-
             // No alternate, make into a guarded expression
             if (node.consequent && !node.alternate &&
                 node.consequent.type === 'ExpressionStatement'
@@ -924,25 +920,6 @@ module.exports = ({ Plugin, types: t }) => {
               node.alternate = null;
               return;
             }
-
-            function coerceIf(key) {
-              let block = node[key];
-              if (!block || !t.isBlockStatement(block)) {
-                return;
-              }
-
-              let body = block.body;
-              if (body.length !== 1) {
-                return;
-              }
-
-              let first = body[0];
-              if (t.isVariableDeclaration(first) && first.kind !== 'let') {
-                return;
-              }
-
-              node[key] = first;
-            }
           },
 
           // Merge if statements with return values in sequence.
@@ -1051,22 +1028,6 @@ module.exports = ({ Plugin, types: t }) => {
               ret,
               null
             ));
-          },
-
-          function (path) {
-            const { node } = path;
-            const expr = node.test;
-
-            if (t.isUnaryExpression(expr) &&
-                t.isLogicalExpression(expr) &&
-                !t.isLogicalExpression(expr.left) &&
-                !t.isLogicalExpression(expr.right)
-            ) {
-              expr.operator = expr.operator === '&&' ? '||' : '&&';
-              expr.left = t.unaryExpression('!', expr.left);
-              expr.right = t.unaryExpression('!', expr.right);
-              path.get('test').replaceWith(expr);
-            }
           },
         ],
       },
@@ -1388,5 +1349,4 @@ module.exports = ({ Plugin, types: t }) => {
       }
     }
   }
-
 };
