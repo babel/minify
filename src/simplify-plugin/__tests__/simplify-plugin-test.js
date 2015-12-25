@@ -1602,9 +1602,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  // TODO: this is harder than expected since the leftmost
-  // is not a direct child of the expression statement
-  // it feels unsafe.
   it('should convert gaurded nots to ors', () => {
     const source = unpad(`
       if (!foo && foo !== bar) {
@@ -1614,7 +1611,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      wat || bar !== foo && 1;
+     foo || foo === bar || (wow(), such());
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1670,7 +1667,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      x, function() {}();
+      x, function () {}();
     `);
 
     expect(transform(source)).toBe(expected);
