@@ -69,7 +69,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       CallExpression(path) {
-        const { node } = path;
+        const { node, parent } = path;
 
         // Number(foo) -> +foo
         if (t.isIdentifier(node.callee, { name: 'Number' }) &&
@@ -86,10 +86,10 @@ module.exports = ({ Plugin, types: t }) => {
         }
 
         // (function() {})() -> !function() {}()
-        // Bug in babel https://github.com/babel/babel/issues/3052
-        /*
-        if (t.isFunctionExpression(node.callee)
-            && (t.isExpressionStatement(parent) || t.isSequenceExpression(parent))) {
+        if (t.isFunctionExpression(node.callee) &&
+            (t.isExpressionStatement(path.parent) ||
+             (t.isSequenceExpression(path.parent) && path.parent.expressions[0] === node))
+        ) {
           path.replaceWith(
             t.callExpression(
               t.unaryExpression('!', node.callee),
@@ -98,7 +98,6 @@ module.exports = ({ Plugin, types: t }) => {
           );
           return;
         }
-        */
       },
 
       // shorten booleans to a negation

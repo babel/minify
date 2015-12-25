@@ -336,21 +336,21 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit('should turn IIFE to negation', () => {
+  it('should turn IIFE to negation', () => {
     const source = unpad(`
       (function() {
         x();
       })();
-      y = (function() {
+      y = function () {
         x();
-      })();
+      }();
     `);
     const expected = unpad(`
       !function () {
         x();
-      }(), y = (function () {
+      }(), y = function () {
         x();
-      })();
+      }();
     `);
 
     expect(transform(source)).toBe(expected);
