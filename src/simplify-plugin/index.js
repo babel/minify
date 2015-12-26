@@ -985,6 +985,8 @@ module.exports = ({ Plugin, types: t }) => {
               null
             ));
           },
+
+          createPrevExpressionEater('if'),
         ],
       },
 
@@ -1229,6 +1231,8 @@ module.exports = ({ Plugin, types: t }) => {
 
             potentialBreak.remove();
           },
+
+          createPrevExpressionEater('switch'),
         ],
       },
     },
@@ -1522,6 +1526,14 @@ module.exports = ({ Plugin, types: t }) => {
   }
 
   function createPrevExpressionEater(keyword) {
+    let key;
+    switch (keyword) {
+      case 'switch': key = 'discriminant'; break;
+      case 'throw':
+      case 'return': key = 'argument'; break;
+      case 'if': key = 'test'; break;
+    }
+
     return function(path) {
       if (!path.inList) {
         return;
@@ -1534,11 +1546,11 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       let seq = prev.node.expression;
-      if (node.argument) {
+      if (node[key]) {
         if (t.isSequenceExpression(seq)) {
-          seq.expressions.push(node.argument);
+          seq.expressions.push(node[key]);
         } else {
-          seq = t.sequenceExpression([seq, node.argument]);
+          seq = t.sequenceExpression([seq, node[key]]);
         }
       } else {
         if (t.isSequenceExpression(seq)) {
@@ -1549,16 +1561,17 @@ module.exports = ({ Plugin, types: t }) => {
         }
       }
 
-      const type = keyword + 'Statement';
       if (seq) {
+        node[key] = seq;
         prev.remove();
-        path.replaceWith(t[type](seq));
 
         // Since we were able to merge some stuff it's possible that this has opened
         // oppurtinties for other transforms to happen.
         // TODO: Look into changing the traversal order from bottom to up to avoid
         // having to revisit things.
-        path.parentPath.parentPath.visit();
+        if (path.parentPath.parentPath) {
+          path.parentPath.parentPath.visit();
+        }
       }
     };
   }

@@ -88,6 +88,7 @@ describe('simplify-plugin', () => {
           var bar;
           bar = baz;
         }
+
         return x(), x;
       }
     `);
@@ -392,6 +393,7 @@ describe('simplify-plugin', () => {
         } catch (e) {
           1;
         }
+
         y();
         return 1;
       }
@@ -1220,9 +1222,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      x || foo();
-
-      if (null != r) for (;;);
+      if (x || foo(), null != r) for (;;);
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1307,11 +1307,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && !bar; i++) {
-        wat();
-
-        if (x) throw 1;
-      }
+      for (i = 1; i <= j && !bar; i++) if (wat(), x) throw 1;
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1330,11 +1326,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && bar; i++) {
-        wat();
-
-        if (x) throw 1;
-      }
+      for (i = 1; i <= j && bar; i++) if (wat(), x) throw 1;
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1470,9 +1462,8 @@ describe('simplify-plugin', () => {
       function foo() {
         if (x) {
           var f = wow;
-          delete x.x;
 
-          if (bar()) return;
+          if (delete x.x, bar()) return;
         }
       }
     `);
@@ -1676,9 +1667,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function x() {
         for (;;) {
-          x();
-
-          if (foo) return 1;
+          if (x(), foo) return 1;
           y();
         }
       }
@@ -1992,4 +1981,77 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should put sequence in switch test', () => {
+    const source = unpad(`
+      function bar() {
+        wow();
+        switch (foo) {
+          case 'foo':
+            throw x();
+            break;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        switch (wow(), foo) {
+          case 'foo':
+            throw x();
+
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should put sequence in if test', () => {
+    const source = unpad(`
+      function bar() {
+        wow();
+        if (foo) {
+          throw x();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        if (wow(), foo) throw x();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should convert non-return switch to conditionals', () => {
+    const source = unpad(`
+      function bar() {
+        switch (foo) {
+          case 'foo':
+            foo();
+            break;
+          case foo.bar:
+            wow();
+            wat();
+            break;
+          case shh:
+          case wow:
+            baa();
+            break;
+          default:
+            meh();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        'foo' === foo ? foo() : foo === foo.bar ? (wow(), wat()) : foo === shh || foo === wow ? baa() : meh();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
