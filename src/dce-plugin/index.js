@@ -3,6 +3,7 @@
 const some = require('lodash.some');
 
 module.exports = ({ Plugin, types: t }) => {
+  const shouldRevisit = Symbol('shouldRevisit');
 
   const main = {
     // remove side effectless statement
@@ -17,148 +18,156 @@ module.exports = ({ Plugin, types: t }) => {
     },
 
     // Remove bindings with no references.
-    Scope(path) {
-      if (path.isProgram()) {
-        return;
-      }
+    Scope: {
+      exit(path) {
+        if (path.node[shouldRevisit]) {
+          delete path.node[shouldRevisit];
+          path.visit();
+        }
+      },
 
-      const { scope } = path;
+      enter(path) {
+        if (path.isProgram()) {
+          return;
+        }
 
-      for (let name in scope.bindings) {
-        let binding = scope.bindings[name];
-
-        if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
-          if (binding.path.isVariableDeclarator()) {
-            if (binding.path.parentPath.parentPath &&
-              binding.path.parentPath.parentPath.isForInStatement()
-            ) {
-              // Can't remove if in a for in statement `for (var x in wat)`.
-              continue;
-            }
-          } else if (!scope.isPure(binding.path.node)) {
-            continue;
-          } else if (binding.path.isFunctionExpression()) {
-            // `bar(function foo() {})` foo is not referenced but it's used.
-            continue;
-          }
-
-          const mutations = [];
-          let bail = false;
-          // Make sure none of the assignments value is used
-          binding.constantViolations.forEach(p => {
-            if (bail || p === binding.path) {
-              return;
-            }
-
-            if (!p.parentPath.isExpressionStatement()) {
-              bail = true;
-            }
-
-            if (p.isAssignmentExpression() && !p.get('right').isPure()) {
-              mutations.push(() => p.replaceWith(p.get('right')));
-            } else {
-              mutations.push(() => p.remove());
-            }
-          });
-
-          if (bail) {
-            continue;
-          }
-
-          if (binding.path.isVariableDeclarator() && binding.path.node.init &&
-              !scope.isPure(binding.path.node.init)
-          ) {
-            if (binding.path.parentPath.node.declarations.length !== 1) {
-              continue;
-            }
-
-            binding.path.parentPath.replaceWith(binding.path.node.init);
-          } else {
-            binding.path.remove();
-          }
-
-          mutations.forEach(f => f());
-          scope.removeBinding(name);
-
-        } else if (binding.constant) {
-          if (binding.path.isFunctionDeclaration() ||
-              (binding.path.isVariableDeclarator() && binding.path.get('init').isFunction())) {
-                const fun = binding.path.isFunctionDeclaration() ? binding.path : binding.path.get('init');
-                let allInside = true;
-                for (let ref of binding.referencePaths) {
-                  if (!ref.find(p => p.node === fun.node)) {
-                    allInside = false;
-                    break;
-                  }
-                }
-
-                if (allInside) {
-                  scope.removeBinding(name);
-                  binding.path.remove();
-                  continue;
-                }
-          }
-
-          if (binding.references === 1 && binding.kind !== 'param' && binding.kind !== 'module' && binding.constant) {
-            let replacement = binding.path.node;
-            if (t.isVariableDeclarator(replacement)) {
-              replacement = replacement.init;
-            }
-            if (!replacement) {
-              continue;
-            }
-
-            if (!scope.isPure(replacement, true)) {
-              continue;
-            }
-
-            if (binding.referencePaths.length > 1) {
-              throw new Error('Expected only one reference');
-            }
-
-            let parent = binding.path.parent;
-            if (t.isVariableDeclaration(parent)) {
-              parent = binding.path.parentPath.parent;
-            }
-
-            const refPath = binding.referencePaths[0];
-
-            // 1. Make sure we share the parent with the node. In other words it's lexically defined
-            // and not in an if statement or otherwise.
-            // 2. If the replacement is an object then we have to make sure we are not in a loop or a function
-            // because otherwise we'll be inlining and doing a lot more allocation than we have to
-            // which would also could affect correctness in that they are not the same reference.
-            let mayLoop = false;
-            const sharesRoot = refPath.find(({ node }) => {
-              if (!mayLoop) {
-                mayLoop = t.isWhileStatement(node) || t.isFor(node) || t.isFunction(node);
+        const { scope } = path;
+        for (let name in scope.bindings) {
+          let binding = scope.bindings[name];
+          if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
+            if (binding.path.isVariableDeclarator()) {
+              if (binding.path.parentPath.parentPath &&
+                binding.path.parentPath.parentPath.isForInStatement()
+              ) {
+                // Can't remove if in a for in statement `for (var x in wat)`.
+                continue;
               }
-              return node === parent;
-            });
-
-            // Anything that inherits from Object.
-            const isObj = (n) => t.isFunction(n) || t.isObjectExpression(n) || t.isArrayExpression(n);
-            const isReplacementObj = isObj(replacement) || some(replacement, isObj);
-
-            if (!sharesRoot || (isReplacementObj && mayLoop)) {
-              return;
+            } else if (!scope.isPure(binding.path.node)) {
+              continue;
+            } else if (binding.path.isFunctionExpression()) {
+              // `bar(function foo() {})` foo is not referenced but it's used.
+              continue;
             }
 
-            const replaced = replace(binding.referencePaths[0], {
-              binding,
-              scope,
-              replacement,
+            const mutations = [];
+            let bail = false;
+            // Make sure none of the assignments value is used
+            binding.constantViolations.forEach(p => {
+              if (bail || p === binding.path) {
+                return;
+              }
+
+              if (!p.parentPath.isExpressionStatement()) {
+                bail = true;
+              }
+
+              if (p.isAssignmentExpression() && !p.get('right').isPure()) {
+                mutations.push(() => p.replaceWith(p.get('right')));
+              } else {
+                mutations.push(() => p.remove());
+              }
             });
 
-            if (replaced) {
-              scope.removeBinding(name);
-              if (binding.path.node) {
-                binding.path.remove();
+            if (bail) {
+              continue;
+            }
+
+            if (binding.path.isVariableDeclarator() && binding.path.node.init &&
+              !scope.isPure(binding.path.node.init)
+            ) {
+              if (binding.path.parentPath.node.declarations.length !== 1) {
+                continue;
+              }
+
+              binding.path.parentPath.replaceWith(binding.path.node.init);
+            } else {
+              updateReferences(binding.path, this);
+              binding.path.remove();
+            }
+
+            mutations.forEach(f => f());
+            scope.removeBinding(name);
+          } else if (binding.constant) {
+            if (binding.path.isFunctionDeclaration() ||
+                (binding.path.isVariableDeclarator() && binding.path.get('init').isFunction())) {
+                  const fun = binding.path.isFunctionDeclaration() ? binding.path : binding.path.get('init');
+                  let allInside = true;
+                  for (let ref of binding.referencePaths) {
+                    if (!ref.find(p => p.node === fun.node)) {
+                      allInside = false;
+                      break;
+                    }
+                  }
+
+                  if (allInside) {
+                    scope.removeBinding(name);
+                    updateReferences(binding.path, this);
+                    binding.path.remove();
+                    continue;
+                  }
+            }
+
+            if (binding.references === 1 && binding.kind !== 'param' && binding.kind !== 'module' && binding.constant) {
+              let replacement = binding.path.node;
+              if (t.isVariableDeclarator(replacement)) {
+                replacement = replacement.init;
+              }
+              if (!replacement) {
+                continue;
+              }
+
+              if (!scope.isPure(replacement, true)) {
+                continue;
+              }
+
+              if (binding.referencePaths.length > 1) {
+                throw new Error('Expected only one reference');
+              }
+
+              let parent = binding.path.parent;
+              if (t.isVariableDeclaration(parent)) {
+                parent = binding.path.parentPath.parent;
+              }
+
+              const refPath = binding.referencePaths[0];
+
+              // 1. Make sure we share the parent with the node. In other words it's lexically defined
+              // and not in an if statement or otherwise.
+              // 2. If the replacement is an object then we have to make sure we are not in a loop or a function
+              // because otherwise we'll be inlining and doing a lot more allocation than we have to
+              // which would also could affect correctness in that they are not the same reference.
+              let mayLoop = false;
+              const sharesRoot = refPath.find(({ node }) => {
+                if (!mayLoop) {
+                  mayLoop = t.isWhileStatement(node) || t.isFor(node) || t.isFunction(node);
+                }
+                return node === parent;
+              });
+
+              // Anything that inherits from Object.
+              const isObj = (n) => t.isFunction(n) || t.isObjectExpression(n) || t.isArrayExpression(n);
+              const isReplacementObj = isObj(replacement) || some(replacement, isObj);
+
+              if (!sharesRoot || (isReplacementObj && mayLoop)) {
+                continue;
+              }
+
+              const replaced = replace(binding.referencePaths[0], {
+                binding,
+                scope,
+                replacement,
+              });
+
+              if (replaced) {
+                scope.removeBinding(name);
+                if (binding.path.node) {
+                  binding.path.remove();
+                }
               }
             }
           }
         }
-      }
+      },
     },
 
     // Remove unreachable code.
@@ -348,7 +357,7 @@ module.exports = ({ Plugin, types: t }) => {
     visitor: {
       Program(path) {
         // We need to run this plugin in isolation.
-        path.traverse(main, {});
+        path.traverse(main, { functionToBindings: new Map() });
       },
     },
   };
@@ -400,5 +409,36 @@ module.exports = ({ Plugin, types: t }) => {
 
     path.replaceWith(replacement);
     return true;
+  }
+
+  function updateReferences(fnToDeletePath) {
+    if (!fnToDeletePath.isFunction()) {
+      return;
+    }
+
+    fnToDeletePath.traverse({
+      ReferencedIdentifier(path) {
+        const { node, scope } = path;
+        const binding = scope.getBinding(node.name);
+
+        if (!binding || !binding.path.isFunction() || binding.scope === scope || !binding.constant) {
+          return;
+        }
+
+        let index = binding.referencePaths.indexOf(path);
+        if (index === -1) {
+          return;
+        }
+        binding.references--;
+        binding.referencePaths.splice(index, 1);
+        if (binding.references === 0) {
+          binding.referenced = false;
+        }
+
+        if (binding.references <= 1) {
+          binding.scope.path.node[shouldRevisit] = true;
+        }
+      },
+    });
   }
 };

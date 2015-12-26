@@ -605,8 +605,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  // This fails now because it needs multiple passses or something.
-  xit('should remove functions only called in themselves 3', () => {
+  it('should remove functions only called in themselves 3', () => {
     const source = unpad(`
       function foo() {
         function boo() {}
@@ -625,7 +624,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  xit('should remove functions only called in themselves 3', () => {
+  it('should remove functions only called in themselves 3', () => {
     const source = unpad(`
       (function () {
         function foo () {
@@ -646,11 +645,10 @@ describe('dce-plugin', () => {
     `);
     const expected = unpad(`
       (function () {
-        function foo () {
-          console.log( 'this function was included!' );
-        }
 
-        foo();
+        (function () {
+          console.log('this function was included!');
+        })();
       })();
     `);
 
