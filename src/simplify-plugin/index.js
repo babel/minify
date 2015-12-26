@@ -1095,6 +1095,11 @@ module.exports = ({ Plugin, types: t }) => {
               consTestPairs.push([test, cons.argument]);
             }
 
+            // Bail if we have any remaining fallthrough
+            if (fallThru.length) {
+              return;
+            }
+
             // We need the default to be there to make sure there is an oppurtinity
             // not to return.
             if (!defaultCase) {
