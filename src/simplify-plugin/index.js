@@ -1047,6 +1047,75 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
+            const consTestPairs = [];
+            let fallThru = [];
+            let defaultCase;
+            for (let switchCase of node.cases) {
+              if (switchCase.consequent.length > 1) {
+                return;
+              }
+
+              const cons = switchCase.consequent[0];
+
+              if (!switchCase.test) {
+                defaultCase = switchCase;
+                if (!t.isReturnStatement(cons)) {
+                  return;
+                }
+                continue;
+              }
+
+              if (!switchCase.consequent.length) {
+                if (fallThru.length) {
+                  fallThru.push(switchCase.test);
+                } else {
+                  fallThru = [switchCase.test];
+                }
+                continue;
+              }
+
+              // TODO: can we void it?
+              if (!t.isReturnStatement(cons)) {
+                return;
+              }
+
+              let test = t.binaryExpression('===', node.discriminant, switchCase.test);
+              if (fallThru.length) {
+                test = fallThru.reduceRight(
+                  (right, test) => t.logicalExpression(
+                    '||',
+                    t.binaryExpression('===', node.discriminant, test),
+                    right
+                  ),
+                  test
+                );
+                fallThru = [];
+              }
+
+              consTestPairs.push([test, cons.argument]);
+            }
+
+            // We need the default to be there to make sure there is an oppurtinity
+            // not to return.
+            if (!defaultCase) {
+              return;
+            }
+
+            const cond = consTestPairs.reduceRight(
+              (alt, [test, cons]) => t.conditionalExpression(test, cons, alt),
+              defaultCase.consequent[0].argument
+            );
+
+            path.replaceWith(t.returnStatement(cond));
+          },
+
+          function(path) {
+            const { node } = path;
+
+            if (!node.cases.length) {
+              return;
+            }
+
             const lastCase = path.get('cases')[node.cases.length - 1];
             if (!lastCase.node.consequent.length) {
               return;
