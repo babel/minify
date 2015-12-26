@@ -1687,11 +1687,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  // TODO: this is hard to do and is a bug in babel
-  // the problem arrises because we might need a block
-  // to make sure that the `else` statement doesn't
-  // get understood as part of some other nested if.
-  xit('should remove block', () => {
+  it('should remove block', () => {
     const source = unpad(`
       function x() {
         if (a) {
@@ -1708,9 +1704,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function x() {
-        if (a)
-          if (b) for (;;) a && b();
-        else wat();
+        if (!a) wat();else if (b) for (;;) a && b();
       }
     `);
 
