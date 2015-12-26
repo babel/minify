@@ -1,6 +1,7 @@
 jest.autoMockOff();
 
 const babel = require('babel-core');
+const unpad = require('../../utils/unpad');
 
 function transform(code, replacements) {
   return babel.transform(code,  {
@@ -8,18 +9,6 @@ function transform(code, replacements) {
       [require('../index'), {replacements}],
     ],
   }).code;
-}
-
-function unpad(str) {
-  const lines = str.split('\n');
-  const m = lines[1] && lines[1].match(/^\s+/);
-  if (!m) {
-    return str;
-  }
-  const spaces = m[0].length;
-  return lines.map(
-    line => line.slice(spaces)
-  ).join('\n').trim();
 }
 
 describe('replace-plugin', () => {
