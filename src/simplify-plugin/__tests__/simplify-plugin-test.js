@@ -1978,4 +1978,35 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should convert non-return switch to conditionals', () => {
+    const source = unpad(`
+      function bar() {
+        switch (foo) {
+          case 'foo':
+            foo();
+            break;
+          case foo.bar:
+            wow();
+            wat();
+            break;
+          case shh:
+          case wow:
+            baa();
+            break;
+          default:
+            meh();
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        'foo' === foo ? foo() : foo === foo.bar ? (wow(), wat()) : foo === shh || foo === wow ? baa() : meh();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
 });

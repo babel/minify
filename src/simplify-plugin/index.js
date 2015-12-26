@@ -1143,6 +1143,84 @@ module.exports = ({ Plugin, types: t }) => {
             }
           },
 
+          // Convert switches into conditionals.
+          function(path) {
+            const { node } = path;
+
+            // Need to be careful of side-effects.
+            if (!t.isIdentifier(node.discriminant)) {
+              return;
+            }
+
+            if (!node.cases.length) {
+              return;
+            }
+
+            const exprTestPairs = [];
+            let fallThru = [];
+            let defaultExpr;
+            for (let switchCase of node.cases) {
+              if (!switchCase.test) {
+                if (switchCase.consequent.length !== 1) {
+                  return;
+                }
+                if (!t.isExpressionStatement(switchCase.consequent[0])) {
+                  return;
+                }
+                defaultExpr = switchCase.consequent[0].expression;
+                continue;
+              }
+
+              if (!switchCase.consequent.length) {
+                if (fallThru.length) {
+                  fallThru.push(switchCase.test);
+                } else {
+                  fallThru = [switchCase.test];
+                }
+                continue;
+              }
+
+              const [cons, breakStatement] = switchCase.consequent;
+              if (switchCase === node.cases[node.cases.length - 1]) {
+                if (breakStatement && !t.isBreakStatement(breakStatement)) {
+                  return;
+                }
+              } else if (!t.isBreakStatement(breakStatement)) {
+                return;
+              }
+
+              if (!t.isExpressionStatement(cons) || switchCase.consequent.length > 2) {
+                return;
+              }
+
+              let test = t.binaryExpression('===', node.discriminant, switchCase.test);
+              if (fallThru.length) {
+                test = fallThru.reduceRight(
+                  (right, test) => t.logicalExpression(
+                    '||',
+                    t.binaryExpression('===', node.discriminant, test),
+                    right
+                  ),
+                  test
+                );
+                fallThru = [];
+              }
+
+              exprTestPairs.push([test, cons.expression]);
+            }
+
+            if (fallThru.length) {
+              return;
+            }
+
+            const cond = exprTestPairs.reduceRight(
+              (alt, [test, cons]) => t.conditionalExpression(test, cons, alt),
+              defaultExpr || VOID_0
+            );
+
+            path.replaceWith(cond);
+          },
+
           function(path) {
             const { node } = path;
 
