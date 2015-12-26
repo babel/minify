@@ -1796,4 +1796,22 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('switch if to avoid blocking', () => {
+    const source = unpad(`
+      function x() {
+        if (a) {
+          if (b) for (;;) wow();
+        } else c();
+      }
+    `);
+
+    const expected = unpad(`
+      function x() {
+        if (!a) c();else if (b) for (;;) wow();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

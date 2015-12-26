@@ -921,6 +921,28 @@ module.exports = ({ Plugin, types: t }) => {
             }
           },
 
+          // If the consequent is if and the altenrate is not then
+          // switch them out. That way we know we don't have to print
+          // a block.x
+          function(path) {
+            const { node } = path;
+
+            if (!node.alternate) {
+              return;
+            }
+
+            if (!t.isIfStatement(node.consequent)) {
+              return;
+            }
+
+            if (t.isIfStatement(node.alternate)) {
+              return;
+            }
+
+            node.test = t.unaryExpression('!', node.test);
+            [node.alternate, node.consequent] = [node.consequent, node.alternate];
+          },
+
           // Make if statements with conditional returns in the body into
           // an if statement that guards the rest of the block.
           function(path) {
