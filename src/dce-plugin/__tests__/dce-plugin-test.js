@@ -1174,29 +1174,4 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
-
-  it('should remove last break statement in switch', () => {
-   const source = unpad(`
-     switch (foo) {
-       case 'foo':
-         bar();
-         break;
-       case 'bar':
-         wow();
-         break;
-     }
-    `);
-
-    const expected = unpad(`
-     switch (foo) {
-       case 'foo':
-         bar();
-         break;
-       case 'bar':
-         wow();
-     }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
 });

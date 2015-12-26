@@ -1027,6 +1027,22 @@ module.exports = ({ Plugin, types: t }) => {
           path.node.expressions = flatten(path.node);
         },
       },
+
+      SwitchStatement(path) {
+        const { node } = path;
+
+        if (!node.cases.length) {
+          return;
+        }
+
+        const lastCase = path.get('cases')[node.cases.length - 1];
+        const potentialBreak = lastCase.get('consequent')[lastCase.node.consequent.length - 1];
+        if (!t.isBreakStatement(potentialBreak)) {
+          return;
+        }
+
+        potentialBreak.remove();
+      },
     },
   };
 
