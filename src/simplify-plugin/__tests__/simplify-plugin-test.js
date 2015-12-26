@@ -1831,11 +1831,45 @@ describe('simplify-plugin', () => {
      switch (foo) {
        case 'foo':
          bar();
+
          break;
        case 'bar':
          wow();
 
      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should convert consequents in switch into sequence expressions', () => {
+    const source = unpad(`
+      function bar() {
+        switch (foo) {
+          case 'foo':
+            bar();
+            foo();
+            break;
+          case 'bar':
+            wow();
+            return wo;
+            break;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        switch (foo) {
+          case 'foo':
+            bar(), foo();
+
+            break;
+          case 'bar':
+            return wow(), wo;
+
+        }
+      }
     `);
 
     expect(transform(source)).toBe(expected);

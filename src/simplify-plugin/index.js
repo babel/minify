@@ -1028,20 +1028,38 @@ module.exports = ({ Plugin, types: t }) => {
         },
       },
 
-      SwitchStatement(path) {
+      SwitchCase(path) {
         const { node } = path;
 
-        if (!node.cases.length) {
+        if (!node.consequent.length) {
           return;
         }
 
-        const lastCase = path.get('cases')[node.cases.length - 1];
-        const potentialBreak = lastCase.get('consequent')[lastCase.node.consequent.length - 1];
-        if (!t.isBreakStatement(potentialBreak)) {
-          return;
-        }
+        node.consequent = toMultipleSequenceExpressions(node.consequent);
+      },
 
-        potentialBreak.remove();
+      SwitchStatement: {
+        exit: [
+          function(path) {
+            const { node } = path;
+
+            if (!node.cases.length) {
+              return;
+            }
+
+            const lastCase = path.get('cases')[node.cases.length - 1];
+            if (!lastCase.node.consequent.length) {
+              return;
+            }
+
+            const potentialBreak = lastCase.get('consequent')[lastCase.node.consequent.length - 1];
+            if (!t.isBreakStatement(potentialBreak)) {
+              return;
+            }
+
+            potentialBreak.remove();
+          },
+        ],
       },
     },
   };
