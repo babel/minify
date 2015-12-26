@@ -1718,7 +1718,7 @@ describe('simplify-plugin', () => {
   });
 
   // TODO
-  xit('should merge things into throw statement seq expr', () => {
+  it('should merge things into throw statement seq expr', () => {
     const source = unpad(`
       function x() {
         z();
