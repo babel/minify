@@ -1049,7 +1049,7 @@ module.exports = ({ Plugin, types: t }) => {
 
             const consTestPairs = [];
             let fallThru = [];
-            let defaultCase;
+            let defaultRet;
             for (let switchCase of node.cases) {
               if (switchCase.consequent.length > 1) {
                 return;
@@ -1058,10 +1058,10 @@ module.exports = ({ Plugin, types: t }) => {
               const cons = switchCase.consequent[0];
 
               if (!switchCase.test) {
-                defaultCase = switchCase;
                 if (!t.isReturnStatement(cons)) {
                   return;
                 }
+                defaultRet = cons;
                 continue;
               }
 
@@ -1102,16 +1102,34 @@ module.exports = ({ Plugin, types: t }) => {
 
             // We need the default to be there to make sure there is an oppurtinity
             // not to return.
-            if (!defaultCase) {
-              return;
+            if (!defaultRet) {
+              if (path.inList) {
+                const nextPath = path.getSibling(path.key + 1);
+                if (nextPath.isReturnStatement()) {
+                  defaultRet = nextPath.node;
+                  nextPath.remove();
+                } else {
+                  return;
+                }
+              } else {
+                return;
+              }
             }
 
             const cond = consTestPairs.reduceRight(
               (alt, [test, cons]) => t.conditionalExpression(test, cons, alt),
-              defaultCase.consequent[0].argument
+              defaultRet.argument || VOID_0
             );
 
             path.replaceWith(t.returnStatement(cond));
+
+            // Maybe now we can merge with some previous switch statement.
+            if (path.inList) {
+              const prev = path.getSibling(path.key - 1);
+              if (prev.isSwitchStatement()) {
+                prev.visit();
+              }
+            }
           },
 
           function(path) {

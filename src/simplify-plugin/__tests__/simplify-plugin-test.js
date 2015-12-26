@@ -1901,6 +1901,31 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should convert switch statements with next return as default to returns', () => {
+    const source = unpad(`
+      function bar() {
+        switch (foo) {
+          case 'foo':
+            return 1;
+          case foo.bar:
+            return 2;
+          case wow:
+            wow();
+            return 3;
+        }
+        return 0;
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        return 'foo' === foo ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should convert switch statements w/ fallthrough to return', () => {
     const source = unpad(`
       function bar() {
