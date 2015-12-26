@@ -447,7 +447,7 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  xit('should remove empty returns', () => {
+  it('should remove empty returns', () => {
      const source = unpad(`
        function foo() {
          lol();

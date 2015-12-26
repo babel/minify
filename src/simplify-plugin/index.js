@@ -639,44 +639,68 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       // Try to merge previous statements into a sequence
-      ReturnStatement(path) {
-        if (!path.inList) {
-          return;
-        }
+      ReturnStatement: {
+        enter: [
+          function(path) {
+            if (!path.inList) {
+              return;
+            }
 
-        const { node } = path;
-        const prev = path.getSibling(path.key - 1);
-        if (!prev.isExpressionStatement()) {
-          return;
-        }
+            const { node } = path;
+            const prev = path.getSibling(path.key - 1);
+            if (!prev.isExpressionStatement()) {
+              return;
+            }
 
-        let seq = prev.node.expression;
-        if (node.argument) {
-          if (t.isSequenceExpression(seq)) {
-            seq.expressions.push(node.argument);
-          } else {
-            seq = t.sequenceExpression([seq, node.argument]);
-          }
-        } else {
-          if (t.isSequenceExpression(seq)) {
-            const lastExpr = seq.expressions[seq.expressions.length - 1];
-            seq.expressions[seq.expressions.length - 1] = t.unaryExpression('void', lastExpr);
-          } else {
-            seq = t.unaryExpression('void', seq);
-          }
-        }
+            let seq = prev.node.expression;
+            if (node.argument) {
+              if (t.isSequenceExpression(seq)) {
+                seq.expressions.push(node.argument);
+              } else {
+                seq = t.sequenceExpression([seq, node.argument]);
+              }
+            } else {
+              if (t.isSequenceExpression(seq)) {
+                const lastExpr = seq.expressions[seq.expressions.length - 1];
+                seq.expressions[seq.expressions.length - 1] = t.unaryExpression('void', lastExpr);
+              } else {
+                seq = t.unaryExpression('void', seq);
+              }
+            }
 
-        if (seq) {
-          prev.remove();
-          path.replaceWith(t.returnStatement(seq));
+            if (seq) {
+              prev.remove();
+              path.replaceWith(t.returnStatement(seq));
 
-          // Since we were able to merge some stuff it's possible that this has opened
-          // oppurtinties for other transforms to happen. Let's revisit the funciton parent.
-          // TODO: Look into changing the traversal order from bottom to up to avoid
-          // having to revisit things.
-          const fn = path.scope.getFunctionParent().path.node;
-          fn[shouldRevisit] = true;
-        }
+              // Since we were able to merge some stuff it's possible that this has opened
+              // oppurtinties for other transforms to happen. Let's revisit the funciton parent.
+              // TODO: Look into changing the traversal order from bottom to up to avoid
+              // having to revisit things.
+              const fn = path.scope.getFunctionParent().path.node;
+              fn[shouldRevisit] = true;
+            }
+          },
+
+          // Remove return if last statement with no argument.
+          function(path) {
+            const { node } = path;
+
+            if (!path.parentPath.parentPath.isFunction() ||
+                path.getSibling(path.key + 1).node
+            ) {
+              return;
+            }
+
+            if (!node.argument)  {
+              path.remove();
+              return;
+            }
+
+            if (t.isUnaryExpression(node.argument, { operator: 'void' })) {
+              path.replaceWith(node.argument.argument);
+            }
+          },
+        ],
       },
 
       // turn blocked ifs into single statements
