@@ -1819,7 +1819,7 @@ describe('simplify-plugin', () => {
    const source = unpad(`
      switch (foo) {
        case 'foo':
-         bar();
+         throw bar();
          break;
        case 'bar':
          wow();
@@ -1830,8 +1830,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
      switch (foo) {
        case 'foo':
-         bar();
-
+         throw bar();
          break;
        case 'bar':
          wow();
@@ -1920,6 +1919,30 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function bar() {
         return 'foo' === foo ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('if last statement in function should consider the default return a void', () => {
+    const source = unpad(`
+      function bar() {
+        switch (foo) {
+          case 'foo':
+            return 1;
+          case foo.bar:
+            return 2;
+          case wow:
+            wow();
+            return 3;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function bar() {
+        return 'foo' === foo ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : void 0;
       }
     `);
 

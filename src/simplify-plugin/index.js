@@ -1040,8 +1040,16 @@ module.exports = ({ Plugin, types: t }) => {
 
       SwitchStatement: {
         exit: [
+
+          // Convert switch statements with all returns in their cases
+          // to return conditional.
           function(path) {
             const { node } = path;
+
+            // Need to be careful of side-effects.
+            if (!t.isIdentifier(node.discriminant)) {
+              return;
+            }
 
             if (!node.cases.length) {
               return;
@@ -1108,6 +1116,9 @@ module.exports = ({ Plugin, types: t }) => {
                 if (nextPath.isReturnStatement()) {
                   defaultRet = nextPath.node;
                   nextPath.remove();
+                } else if (!nextPath.node && path.parentPath.parentPath.isFunction()) {
+                  // If this is the last statement in a function we just fake a void return.
+                  defaultRet = t.returnStatement(VOID_0);
                 } else {
                   return;
                 }
