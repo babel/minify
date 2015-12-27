@@ -2054,4 +2054,19 @@ describe('simplify-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not change type', () => {
+    const source = unpad(`
+      function x(a) {
+        return !!a;
+      }
+    `);
+
+    const expected = unpad(`
+      function x(a) {
+        return !!a;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

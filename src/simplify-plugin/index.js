@@ -216,6 +216,14 @@ module.exports = ({ Plugin, types: t }) => {
 
         const expr = node.argument;
 
+        // We need to make sure that the return type will always be boolean.
+        if (!(t.isLogicalExpression(expr) || t.isConditionalExpression(expr) || t.isBinaryExpression(expr))) {
+          return;
+        }
+        if (t.isBinaryExpression(expr) && t.COMPARISON_BINARY_OPERATORS.indexOf(expr.operator) === -1) {
+          return;
+        }
+
         if (shouldFlip(expr, 1)) {
           const newNode = flip(expr);
           newNode[flipSeen] = true;
