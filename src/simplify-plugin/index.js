@@ -476,7 +476,14 @@ module.exports = ({ Plugin, types: t }) => {
               }
             }
 
-            node.declarations = empty.concat(inits);
+            // This is based on exprimintation but there is a significant
+            // imrpovement when we place empty vars at the top in smaller
+            // files. Whereas it hurts in larger files.
+            if (this.fitsInSlidingWindow) {
+              node.declarations = empty.concat(inits);
+            } else {
+              node.declarations = inits.concat(empty);
+            }
           },
         ],
       },
@@ -633,7 +640,11 @@ module.exports = ({ Plugin, types: t }) => {
         },
       },
 
-      Program({ node }) {
+      Program(path) {
+        // An approximation of the resultant gzipped code after minification
+        this.fitsInSlidingWindow = (path.getSource().length / 10) < 33000;
+
+        const { node } = path;
         const statements = toMultipleSequenceExpressions(node.body);
         if (!statements.length) {
           return;

@@ -2134,4 +2134,27 @@ describe('simplify-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should convert empty blocks to empty statements', () => {
+    const source = unpad(`
+      function foo() {
+        for (i in p) {}
+        for (; ;) {}
+        switch(1) {}
+        try { a } catch(e) {}
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        for (i in p);
+        for (;;);
+        switch (1) {}
+        try {
+          a;
+        } catch (e) {}
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
