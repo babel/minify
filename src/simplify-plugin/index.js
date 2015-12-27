@@ -458,7 +458,7 @@ module.exports = ({ Plugin, types: t }) => {
             path.remove();
           },
 
-          // Put vars with no init at the end.
+          // Put vars with no init at the top.
           function (path) {
             const { node } = path;
 
@@ -476,7 +476,7 @@ module.exports = ({ Plugin, types: t }) => {
               }
             }
 
-            node.declarations = inits.concat(empty);
+            node.declarations = empty.concat(inits);
           },
         ],
       },

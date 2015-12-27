@@ -1597,14 +1597,15 @@ describe('simplify-plugin', () => {
 
   it('should put the empty vars first', () => {
     const source = unpad(`
-      var x = 1, y, z = 2, zx;
+      var x = 1, y, z = 2, zx, a;
     `);
 
     const expected = unpad(`
-      var x = 1,
-          z = 2,
-          y,
-          zx;
+      var y,
+          zx,
+          a,
+          x = 1,
+          z = 2;
     `);
 
     expect(transform(source)).toBe(expected);
