@@ -11,6 +11,15 @@ module.exports = ({ Plugin, types: t }) => {
 
   return {
     visitor: {
+      Statement: {
+        exit(path) {
+          if (path.node[shouldRevisit]) {
+            delete path.node[shouldRevisit];
+            path.visit();
+          }
+        },
+      },
+
       // undefined -> void 0
       ReferencedIdentifier(path) {
         if (path.node.name === 'undefined') {
@@ -425,10 +434,9 @@ module.exports = ({ Plugin, types: t }) => {
           if (!path.node[shouldRevisit]) {
             return;
           }
+
           delete path.node[shouldRevisit];
-          path.pushContext(path.context);
           path.visit();
-          path.popContext();
         },
       },
 
@@ -1569,8 +1577,8 @@ module.exports = ({ Plugin, types: t }) => {
         // oppurtinties for other transforms to happen.
         // TODO: Look into changing the traversal order from bottom to up to avoid
         // having to revisit things.
-        if (path.parentPath.parentPath) {
-          path.parentPath.parentPath.visit();
+        if (path.parentPath.parent) {
+          path.parentPath.parent[shouldRevisit] = true;
         }
       }
     };
