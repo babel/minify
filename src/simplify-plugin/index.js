@@ -698,6 +698,11 @@ module.exports = ({ Plugin, types: t }) => {
             return;
           }
 
+          if (node.body.length === 0) {
+            path.replaceWith(t.emptyStatement());
+            return;
+          }
+
           // Check if oppurtinties to merge statements are available.
           const statements = node.body;
           if (!statements.length) {
@@ -1455,7 +1460,8 @@ module.exports = ({ Plugin, types: t }) => {
 
   function needsBlock(node, parent) {
     return (t.isFunction(parent) && node === parent.body) ||
-           t.isTryStatement(parent) || t.isCatchClause(parent);
+           t.isTryStatement(parent) || t.isCatchClause(parent) ||
+           t.isSwitchStatement(parent);
   }
 
   function isVoid0(expr) {
