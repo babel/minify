@@ -2070,4 +2070,20 @@ describe('simplify-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not change type', () => {
+    const source = unpad(`
+      function x(a, b) {
+        a = a || b;
+        return b === a || !a;
+      }
+    `);
+
+    const expected = unpad(`
+      function x(a, b) {
+        return a = a || b, b === a || !a;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

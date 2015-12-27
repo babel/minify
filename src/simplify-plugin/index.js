@@ -183,6 +183,8 @@ module.exports = ({ Plugin, types: t }) => {
 
       // Convert guarded expressions
       // !a && b() --> a || b();
+      // This could change the return result of the expression so we only do it
+      // on things where the result is ignored.
       LogicalExpression: {
         enter: [
           function(path) {
@@ -192,7 +194,9 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            if (!path.parentPath.isExpressionStatement() && !path.parentPath.isSequenceExpression()) {
+            if (!path.parentPath.isExpressionStatement() &&
+                !(path.parentPath.isSequenceExpression() && path.parentPath.parentPath.isExpressionStatement())
+            ) {
               return;
             }
 
