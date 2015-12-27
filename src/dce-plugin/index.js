@@ -415,6 +415,36 @@ module.exports = ({ Plugin, types: t }) => {
         node.id = null;
       }
     },
+
+    // Put the `var` in the left if feasible.
+    ForInStatement(path) {
+      const left = path.get('left');
+      if (!left.isIdentifier()) {
+        return;
+      }
+
+      const binding = path.scope.getBinding(left.node.name);
+      if (binding.scope.getFunctionParent() !== path.scope.getFunctionParent()) {
+        return;
+      }
+
+      if (!binding.path.isVariableDeclarator()) {
+        return;
+      }
+
+      // If it has company then it's probably more efficient to keep.
+      if (binding.path.parent.declarations.length > 1) {
+        return;
+      }
+
+      // meh
+      if (binding.path.node.init) {
+        return;
+      }
+
+      binding.path.remove();
+      path.node.left = t.variableDeclaration('var', [t.variableDeclarator(left.node)]);
+    },
   };
 
   return {

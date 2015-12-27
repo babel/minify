@@ -1196,4 +1196,43 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should put the var in the for in', () => {
+   const source = unpad(`
+     function x(a) {
+       var x;
+       wow();
+       for (x in a) wow();
+     }
+    `);
+
+    const expected = unpad(`
+     function x(a) {
+       wow();
+       for (var x in a) wow();
+     }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should put the var in the for in only when the var is alone', () => {
+   const source = unpad(`
+     function x(a) {
+       var x, y;
+       wow(y);
+       for (x in a) wow(y);
+     }
+    `);
+
+    const expected = unpad(`
+     function x(a) {
+       var x, y;
+       wow(y);
+       for (x in a) wow(y);
+     }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
