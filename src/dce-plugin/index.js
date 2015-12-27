@@ -8,7 +8,7 @@ module.exports = ({ Plugin, types: t }) => {
   const main = {
     // remove side effectless statement
     ExpressionStatement(path) {
-      if (path.get('expression').isPure() && !path.isCompletionRecord()) {
+      if (path.get('expression').isPure()) {
         if (!path.parentPath.isBlockStatement()) {
           path.replaceWith(t.emptyStatement());
         } else {
