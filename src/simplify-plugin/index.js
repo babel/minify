@@ -866,16 +866,21 @@ module.exports = ({ Plugin, types: t }) => {
                   return;
                 }
 
-                path.replaceWith(
-                  t.returnStatement(
-                    t.conditionalExpression(
-                      node.test,
-                      node.consequent.argument || VOID_0,
-                      VOID_0
+                // This would only be worth it if the previous statement was an if
+                // because then we may merge to create a conditional.
+                if (path.getSibling(path.key - 1).isIfStatement()) {
+                  path.replaceWith(
+                    t.returnStatement(
+                      t.conditionalExpression(
+                        node.test,
+                        node.consequent.argument || VOID_0,
+                        VOID_0
+                      )
                     )
-                  )
-                );
-                return;
+                  );
+                  return;
+                }
+
               }
 
               if (t.isReturnStatement(node.alternate) && !node.consequent) {
@@ -884,16 +889,19 @@ module.exports = ({ Plugin, types: t }) => {
                   return;
                 }
 
-                path.replaceWith(
-                  t.returnStatement(
-                    t.conditionalExpression(
-                      node.test,
-                      node.alternate.argument || VOID_0,
-                      VOID_0
+                // Same as above.
+                if (path.getSibling(path.key - 1).isIfStatement()) {
+                  path.replaceWith(
+                    t.returnStatement(
+                      t.conditionalExpression(
+                        node.test,
+                        node.alternate.argument || VOID_0,
+                        VOID_0
+                      )
                     )
-                  )
-                );
-                return;
+                  );
+                  return;
+                }
               }
             }
 

@@ -814,11 +814,9 @@ describe('simplify-plugin', () => {
       }
     `);
 
-    // FIXME
-    // You can check if it's a conditional boom
     const expected = unpad(`
       function foo() {
-        return bar || far || faz ? void 0 : e;
+        if (!bar && !far && !faz) return e;
       }
     `);
 
@@ -1440,7 +1438,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        return x && (delete x.x, bar()) ? x : void 0;
+        if (x && (delete x.x, bar())) return x;
       }
     `);
 
