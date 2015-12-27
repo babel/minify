@@ -211,28 +211,70 @@ module.exports = ({ Plugin, types: t }) => {
         ],
       },
 
-      UnaryExpression(path) {
-        const { node } = path;
+      UnaryExpression: {
+        enter: [
 
-        if (node.operator !== '!' || node[flipSeen]) {
-          return;
-        }
+          // Demorgans.
+          function(path) {
+            const { node } = path;
 
-        const expr = node.argument;
+            if (node.operator !== '!' || node[flipSeen]) {
+              return;
+            }
 
-        // We need to make sure that the return type will always be boolean.
-        if (!(t.isLogicalExpression(expr) || t.isConditionalExpression(expr) || t.isBinaryExpression(expr))) {
-          return;
-        }
-        if (t.isBinaryExpression(expr) && t.COMPARISON_BINARY_OPERATORS.indexOf(expr.operator) === -1) {
-          return;
-        }
+            const expr = node.argument;
 
-        if (shouldFlip(expr, 1)) {
-          const newNode = flip(expr);
-          newNode[flipSeen] = true;
-          path.replaceWith(newNode);
-        }
+            // We need to make sure that the return type will always be boolean.
+            if (!(t.isLogicalExpression(expr) || t.isConditionalExpression(expr) || t.isBinaryExpression(expr))) {
+              return;
+            }
+            if (t.isBinaryExpression(expr) && t.COMPARISON_BINARY_OPERATORS.indexOf(expr.operator) === -1) {
+              return;
+            }
+
+            if (shouldFlip(expr, 1)) {
+              const newNode = flip(expr);
+              newNode[flipSeen] = true;
+              path.replaceWith(newNode);
+            }
+          },
+
+          // !(a, b, c) -> a, b, !c
+          function(path) {
+            const { node } = path;
+
+            if (node.operator !== '!') {
+              return;
+            }
+
+            if (!t.isSequenceExpression(node.argument)) {
+              return;
+            }
+
+            const seq = node.argument.expressions;
+            const expr = seq[seq.length - 1];
+            seq[seq.length - 1] = t.unaryExpression('!', expr);
+            path.replaceWith(node.argument);
+          },
+
+          // !(a ? b : c) -> a ? !b : !c
+          function(path) {
+            const { node } = path;
+
+            if (node.operator !== '!') {
+              return;
+            }
+
+            if (!t.isConditional(node.argument)) {
+              return;
+            }
+
+            const cond = node.argument;
+            cond.alternate = t.unaryExpression('!', cond.alternate);
+            cond.consequent = t.unaryExpression('!', cond.consequent);
+            path.replaceWith(node.argument);
+          },
+        ],
       },
 
       ConditionalExpression: {

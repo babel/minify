@@ -1289,7 +1289,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      for (i = 1; i <= j && !(foo(), bar); i++);
+      for (i = 1; i <= j && (foo(), !bar); i++);
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1350,7 +1350,7 @@ describe('simplify-plugin', () => {
 
     // TODO: only apply ! unary to last in seq expr
     const expected = unpad(`
-      for (i = 1; i <= j && !(foo(), bar); i++) {
+      for (i = 1; i <= j && (foo(), !bar); i++) {
         if (wat(), x) throw 1;
         hi();
       }
@@ -2083,6 +2083,28 @@ describe('simplify-plugin', () => {
       function x(a, b) {
         return a = a || b, b === a || !a;
       }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should apply unary to only the last element of a sequence expr', () => {
+    const source = unpad(`
+      !(a, b, c);
+    `);
+
+    const expected = unpad(`
+      a, b, !c;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should apply unary to both sides of the conditional', () => {
+    const source = unpad(`
+      !(a ? b : c);
+    `);
+
+    const expected = unpad(`
+      a ? !b : !c;
     `);
     expect(transform(source)).toBe(expected);
   });
