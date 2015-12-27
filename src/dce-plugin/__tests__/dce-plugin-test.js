@@ -903,8 +903,10 @@ describe('dce-plugin', () => {
 
     const expected = unpad(`
       function a() {
+        var foo;
+
         if (x()) {
-          var foo = 1;
+          foo = 1;
         }
         bar(foo);
       }
@@ -923,7 +925,9 @@ describe('dce-plugin', () => {
 
     const expected = unpad(`
       function a() {
-        if (x()) var foo = 1;
+        var foo;
+
+        if (x()) foo = 1;
         bar(foo);
       }
     `);
@@ -941,7 +945,9 @@ describe('dce-plugin', () => {
 
     const expected = unpad(`
       function a() {
-        for (;;) var foo = 1;
+        var foo;
+
+        for (;;) foo = 1;
         bar(foo);
       }
     `);
@@ -1156,6 +1162,35 @@ describe('dce-plugin', () => {
     const expected = unpad(`
       function x(a) {
         foo(a);
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should latch on to exisiting vars', () => {
+   const source = unpad(`
+     function x(a) {
+       if (a) {
+         var x = a.wat;
+         foo(x);
+       }
+       var z = a.foo, b = b.bar;
+       return z + b;
+     }
+    `);
+
+    const expected = unpad(`
+      function x(a) {
+        if (a) {
+          x = a.wat;
+
+          foo(x);
+        }
+        var z = a.foo,
+            b = b.bar,
+            x;
+        return z + b;
       }
     `);
 

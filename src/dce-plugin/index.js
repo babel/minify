@@ -17,6 +17,70 @@ module.exports = ({ Plugin, types: t }) => {
       }
     },
 
+    Function: {
+
+      // Let's take all the vars in a function that are not in the top level scope and hoist them
+      // with the first var declaration in the top-level scope. This transform in itself may
+      // not yield much returns (or even can be marginally harmful to size). However it's great
+      // for taking away statements from blocks that can be only expressions which the `simplify`
+      // plugin can turn into other things (e.g. if => conditional).
+      exit(path) {
+        const { node, scope } = path;
+        const seen = new Set();
+        const declars = [];
+        for (let name in scope.bindings) {
+          let binding = scope.bindings[name];
+          if (!binding.path.isVariableDeclarator()) {
+            continue;
+          }
+
+          const declarPath = binding.path.parentPath;
+          if (seen.has(declarPath)) {
+            continue;
+          }
+          seen.add(declarPath);
+
+          if (declarPath.parentPath.isForInStatement()) {
+            continue;
+          }
+
+          if (declarPath.parentPath.parentPath.isFunction()) {
+            continue;
+          }
+
+          if (!declarPath.node || !declarPath.node.declarations) {
+            continue;
+          }
+
+          const assignmentSequence = [];
+          for (let declar of declarPath.node.declarations) {
+            declars.push(declar);
+            if (declar.init) {
+              assignmentSequence.push(t.assignmentExpression('=', declar.id, declar.init));
+              declar.init = null;
+            }
+          }
+
+          if (assignmentSequence.length) {
+            declarPath.replaceWith(t.sequenceExpression(assignmentSequence));
+          } else {
+            declarPath.remove();
+          }
+        }
+
+        if (declars.length) {
+          for (let statement of node.body.body) {
+            if (t.isVariableDeclaration(statement)) {
+              statement.declarations.push(...declars);
+              return;
+            }
+          }
+          const varDecl = t.variableDeclaration('var', declars);
+          node.body.body.unshift(varDecl);
+        }
+      },
+    },
+
     // Remove bindings with no references.
     Scope: {
       exit(path) {
