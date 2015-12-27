@@ -8,10 +8,55 @@ module.exports = ({ Plugin, types: t }) => {
   return {
     visitor: {
 
-      // TODO: look into evaluating binding too (could result in more code, but gzip?)
+      // Evaluate string expressions that are next to each other
+      // but are not actually a binary expression.
+      // "a" + b + "c" + "d" -> "a" + b + "cd"
+      BinaryExpression(path) {
+        let literal, bin;
+        if (path.get('right').isStringLiteral()) {
+          literal = path.get('right');
+          if (path.get('left').isBinaryExpression({ operator: '+' })) {
+            bin = path.get('left');
+          } else {
+            return;
+          }
+        } else if (path.get('left').isStringLiteral()) {
+          literal = path.get('left');
+          if (path.get('right').isBinaryExpression({ operator: '+' })) {
+            bin = path.get('right');
+          } else {
+            return;
+          }
+        } else {
+          return;
+        }
 
+        const relevant = getLeaf(bin, literal.key);
+
+        if (!relevant) {
+          return;
+        }
+
+        const value = literal.key === 'right'
+                                    ? relevant.node.value + literal.node.value
+                                    : literal.node.value + relevant.node.value;
+
+        relevant.replaceWith(t.stringLiteral(value));
+        path.replaceWith(bin.node);
+
+        function getLeaf(path, direction) {
+          if (path.isStringLiteral()) {
+            return path;
+          } else if (path.isBinaryExpression({ operator: '+' })) {
+            return getLeaf(path.get(direction), direction);
+          }
+        }
+      },
+
+      // TODO: look into evaluating binding too (could result in more code, but gzip?)
       Expression(path) {
         const { node } = path;
+
         if (node[seen]) {
           return;
         }
