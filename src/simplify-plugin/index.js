@@ -138,8 +138,9 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
+            // Commutative operators.
             if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
-                node.operator === '*'
+               ['*', '^', '&', '|'].indexOf(node.operator) >= 0
             ) {
               node.left = right;
               node.right = left;
