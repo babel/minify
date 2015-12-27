@@ -741,9 +741,8 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function bar() {
         var z;
-        c();
 
-        for (z in { a: 1 }) x(z);
+        for (z in c(), { a: 1 }) x(z);
         z();
       }
     `);
@@ -2116,6 +2115,23 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       !a && b ? c : b;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should merge previous expressions in the for loop right', () => {
+    const source = unpad(`
+      function foo() {
+        x = 1;
+        a();
+        for (var a in b) wow();
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        for (var a in x = 1, a(), b) wow();
+      }
     `);
     expect(transform(source)).toBe(expected);
   });

@@ -1060,6 +1060,8 @@ module.exports = ({ Plugin, types: t }) => {
         path.replaceWith(t.forStatement(null, node.test, null, node.body));
       },
 
+      ForInStatement:createPrevExpressionEater('for-in'),
+
       // Flatten sequence expressions.
       SequenceExpression: {
         exit(path) {
@@ -1597,6 +1599,7 @@ module.exports = ({ Plugin, types: t }) => {
       case 'throw':
       case 'return': key = 'argument'; break;
       case 'if': key = 'test'; break;
+      case 'for-in': key = 'right'; break;
     }
 
     return function(path) {
