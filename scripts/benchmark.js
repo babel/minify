@@ -21,7 +21,7 @@ if (!filename) {
 }
 
 const table = new Table({
-  head: ['', 'raw', 'raw win', 'gzip', 'gzip win', 'parse time'],
+  head: ['', 'raw', 'raw win', 'gzip', 'gzip win', 'parse time', 'run'],
   chars: {
     top: '',
     'top-mid': '' ,
@@ -55,7 +55,7 @@ function test(name, callback) {
   const start = Date.now();
   const result = callback(code);
   const end = Date.now();
-  const now = end - start;
+  const run = end - start;
 
   fs.writeFileSync('.test_gen_' + name + '.js', result);
 
@@ -72,6 +72,7 @@ function test(name, callback) {
     raw: result.length,
     gzip: gzipped.length,
     parse: parseNow,
+    run: run,
   });
 }
 
@@ -89,8 +90,9 @@ test('babel', function (code, callback) {
               value: true,
             },
           }],
-        }
+        },
       ],
+      require('../src/constant-folding-plugin'),
       require('../src/dce-plugin'),
       require('../src/simplify-plugin'),
 
@@ -131,6 +133,7 @@ results.forEach(function (result, i) {
     bytes(result.gzip),
     Math.round(((gzippedCode.length / result.gzip) * 100) - 100) + '%',
     Math.round(result.parse) + 'ms',
+    Math.round(result.run) + 'ms',
   ];
 
   const style = chalk.yellow;

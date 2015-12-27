@@ -3,6 +3,7 @@ require('babel-jest/node_modules/babel-core').register();
 var babel  = require('babel-core');
 
 var plugins = [
+  require('./src/constant-folding-plugin'),
   require('./src/dce-plugin'),
   require('./src/simplify-plugin'),
   require('./src/mangle-names-plugin'),
