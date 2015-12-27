@@ -2108,4 +2108,15 @@ describe('simplify-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should flip alt and cons if condition is unary', () => {
+    const source = unpad(`
+      !(!a && b) ? b : c
+    `);
+
+    const expected = unpad(`
+      !a && b ? c : b;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

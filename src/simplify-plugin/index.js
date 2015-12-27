@@ -278,7 +278,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       ConditionalExpression: {
-        exit: [
+        enter: [
           // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
           // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
           function flipIfOrConditional(path) {
@@ -293,7 +293,9 @@ module.exports = ({ Plugin, types: t }) => {
               [node.alternate, node.consequent] = [node.consequent, node.alternate];
             }
           },
+        ],
 
+        exit: [
           // a ? x = foo : b ? x = bar : x = baz;
           // x = a ? foo : b ? bar : baz;
           function(topPath) {
