@@ -1,44 +1,77 @@
 module.exports = ({ Plugin, types: t }) => {
-  const mangleNamesVisitors = {
-    Scope({ scope }) {
-      const bindings = scope.bindings;
-      scope.bindings = {};
+  function mangleNames(refs, charset, depth) {
+    const entries = Array.from(refs.entries());
+    entries.forEach(([binding, paths]) => {
+      if (binding.scope.getFunctionParent().path.isProgram()) {
+        return;
+      }
+      if (binding.path.isLabeledStatement()) {
+        return;
+      }
 
-      const names = Object.keys(bindings);
+      const scopes = new Set();
+      scopes.add(binding.scope);
+      for (let path of paths) {
+        scopes.add(path.scope);
+      }
 
+      let newName;
       let i = 0;
-      for (let name of names) {
-        let binding = bindings[name];
 
-        if (binding.path.isLabeledStatement()) {
-          continue;
-        }
+      do {
+        newName = charset.getIdentifier(i);
+        i += 1;
+      } while (!(t.isValidIdentifier(newName)
+          && canUse(newName, scopes, refs)));
 
-        let bindingRefs = this.refs.get(binding);
-        if (!bindingRefs) {
-          continue;
-        }
+      // WARNING: this is a destructive operation, use scope.rename for
+      // a safer operation, however, it does full tree traversal for every
+      // rename:
+      delete binding.scope.bindings[paths[0].node.name];
+      binding.scope.bindings[newName] = binding;
+      for (let path of paths) {
+        path.node.name = newName;
+      }
+    });
+  }
 
-        let newName;
-
-        do {
-          newName = this.charset.getIdentifier(i);
-          i += 1;
-        } while (!(t.isValidIdentifier(newName)
-            && canUse(newName, scope, bindingRefs, this.refs)));
-
-        // WARNING: this is a destructive operation, use scope.rename for
-        // a safer operation, however, it does full tree traversal for every
-        // rename:
-        scope.bindings[newName] = binding;
+  function canUse(name, scopes, refsMap) {
+    for (let scope of scopes) {
+      // Competing binding in the definition scope.
+      const competingBinding = scope.getBinding(name);
+      if (competingBinding) {
+        /**
+         * Go through all references then crawl their scopes upwards,
+         * looking to see if one of these references is in this scope.
+         */
+        const bindingRefs = refsMap.get(competingBinding);
         for (let ref of bindingRefs) {
-          ref.node.name = newName;
+          let myScope = ref.scope;
+          do {
+            if (myScope === scope) {
+              return false;
+            }
+            myScope = myScope.parent;
+          } while (myScope);
         }
       }
-    },
-  };
+    }
+    return true;
+  }
+
 
   const collectVisitor = {
+    Scope({ scope }) {
+      let i = 0;
+      let parent = scope.parent;
+      while (parent) {
+        i++;
+        parent = parent.parent;
+      }
+
+      this.depth.set(scope, i);
+    },
+
     'ReferencedIdentifier|BindingIdentifier'(path) {
       if (path.parentPath.isLabeledStatement()) {
         return;
@@ -78,53 +111,29 @@ module.exports = ({ Plugin, types: t }) => {
   return {
     visitor: {
       Program(path) {
-        // If the source code is small then considering the source program
-        // text is not good because it creates non-determinisim.
-        // Found that in general the source : minified ratio is ~ 1 : 3
-        const shouldConsiderSource = (path.getSource().length / 3) > 32000;
+        // If the source code is small then we're going to assume that the user
+        // is running on this on single files before bundling. Therefore we
+        // need to achieve as much determinisim and we will not do any frequency
+        // sorting on the character set. Currently the number is pretty arbitrary.
+        const shouldConsiderSource = path.getSource().length > 70000;
 
         const charset = new Charset(shouldConsiderSource);
         // We want to take control of the sequencing and make sure our visitors
         // run in isolation.
         const refs = new Map();
+        const depth = new Map();
         path.traverse(collectVisitor, {
           refs,
           charset,
+          depth,
         });
 
         charset.sort();
 
-        path.traverse(mangleNamesVisitors, {
-          refs,
-          charset,
-        });
+        mangleNames(refs, charset, depth);
       },
     },
   };
-
-  function canUse(name, scope, refs, refsMap) {
-    // Competing binding in the definition scope.
-    const competingBinding = scope.getBinding(name);
-    if (competingBinding) {
-      /**
-       * Go through all references then crawl their scopes upwards,
-       * looking to see if one of these references is in this scope.
-       */
-      const bindingRefs = refsMap.get(competingBinding);
-      for (let ref of bindingRefs) {
-        let myScope = ref.scope;
-        do {
-          if (myScope === scope) {
-            return false;
-          }
-          myScope = myScope.parent;
-        } while (myScope);
-
-      }
-      return true;
-    }
-    return true;
-  }
 
   function recordRef(refs, binding, refPath) {
     if (!refs.has(binding)) {

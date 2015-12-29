@@ -100,11 +100,11 @@ describe('mangle-names', () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(c, d, e) {
-          b(c, d, e);
+        function d(e, a, b) {
+          c(e, a, b);
         }
 
-        function b() {}
+        function c() {}
       }
     `);
 
@@ -166,10 +166,10 @@ describe('mangle-names', () => {
 
     const expected = unpad(`
       function foo() {
-        function a(c, d, e) {
-          b(c, d, e);
+        function a(b, c, d) {
+          e(b, c, d);
         }
-        function b() {
+        function e() {
           var a = who();
           a.bam();
         }
@@ -202,6 +202,56 @@ describe('mangle-names', () => {
             a.woo();
           };
         })();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle only think in function scopes', () => {
+    const source = unpad(`
+      function foo() {
+        function xx(bar, baz) {
+          if (1) {
+            yy(bar, baz);
+          }
+        }
+        function yy(){}
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function a(b, c) {
+          if (1) {
+            d(b, c);
+          }
+        }
+        function d() {}
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should be fine with shadowing 2', () => {
+    const source = unpad(`
+      function foo() {
+        function xx(bar, baz) {
+          return function(boo, foo) {
+            bar(boo, foo);
+          };
+        }
+        function yy(){}
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function a(b, c) {
+          return function (a, c) {
+            b(a, c);
+          };
+        }
+        function b() {}
       }
     `);
 
