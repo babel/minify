@@ -94,7 +94,8 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
-        // (function() {})() -> !function() {}()
+        /* (function() {})() -> !function() {}()
+        There is a bug in babel in printing this. Disabling for now.
         if (t.isFunctionExpression(node.callee) &&
             (t.isExpressionStatement(parent) ||
              (t.isSequenceExpression(parent) && parent.expressions[0] === node))
@@ -106,7 +107,7 @@ module.exports = ({ Plugin, types: t }) => {
             )
           );
           return;
-        }
+        }*/
       },
 
       // shorten booleans to a negation
