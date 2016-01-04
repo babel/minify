@@ -257,4 +257,31 @@ describe('mangle-names', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not be confused by scopes', () => {
+    const source = unpad(`
+      function foo() {
+        function bar() {
+          var baz;
+          if (baz) {
+            bam();
+          }
+        }
+        function bam() {}
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function a() {
+          var b;
+          if (b) {
+            c();
+          }
+        }
+        function c() {}
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

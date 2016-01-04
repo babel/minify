@@ -10,9 +10,9 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       const scopes = new Set();
-      scopes.add(binding.scope);
+      scopes.add(binding.scope.getFunctionParent());
       for (let path of paths) {
-        scopes.add(path.scope);
+        scopes.add(path.scope.getFunctionParent());
       }
 
       let newName;
