@@ -78,7 +78,7 @@ module.exports = ({ Plugin, types: t }) => {
       },
 
       CallExpression(path) {
-        const { node, parent } = path;
+        const { node } = path;
 
         // Number(foo) -> +foo
         if (t.isIdentifier(node.callee, { name: 'Number' }) &&

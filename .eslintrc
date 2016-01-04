@@ -93,7 +93,7 @@
     "no-catch-shadow": 1,            // disallow the catch clause parameter name being the same as a variable in the outer scope (off by default in the node environment)
     "no-delete-var": 1,              // disallow deletion of variables
     "no-label-var": 1,               // disallow labels that share a name with a variable
-    "no-shadow": 1,                  // disallow declaration of variables already declared in the outer scope
+    "no-shadow": 0,                  // disallow declaration of variables already declared in the outer scope
     "no-shadow-restricted-names": 1, // disallow shadowing of names such as arguments
     "no-undef": 2,                   // disallow use of undeclared variables unless mentioned in a /*global */ block.
     "no-undefined": 0,               // disallow use of undefined variable (off by default)
@@ -153,7 +153,7 @@
   // The following rules are included for compatibility with JSHint and JSLint. While the names of the rules may not match up with the JSHint/JSLint counterpart, the functionality is the same.
 
     "max-depth": 0,                  // specify the maximum depth that blocks can be nested (off by default)
-    "max-len": [2, 120, 4],           // specify the maximum length of a line in your program (off by default)
+    "max-len": [1, 120, 4],           // specify the maximum length of a line in your program (off by default)
     "max-params": 0,                 // limits the number of parameters that can be used in the function declaration. (off by default)
     "max-statements": 0,             // specify the maximum number of statement allowed in a function (off by default)
     "no-bitwise": 0,                 // disallow use of bitwise operators (off by default)
