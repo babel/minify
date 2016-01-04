@@ -93,10 +93,9 @@ test('babel', function (code, callback) {
         },
       ],
       require('../src/constant-folding-plugin'),
+      require('../src/mangle-names-plugin'),
       require('../src/dce-plugin'),
       require('../src/simplify-plugin'),
-
-      require('../src/mangle-names-plugin'),
     ],
     minified: true,
     comments: false,
