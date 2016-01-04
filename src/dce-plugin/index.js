@@ -25,9 +25,15 @@ module.exports = ({ Plugin, types: t }) => {
       // for taking away statements from blocks that can be only expressions which the `simplify`
       // plugin can turn into other things (e.g. if => conditional).
       exit(path) {
+        // This hurts gzip size.
+        if (!this.optimizeRawSize) {
+          return;
+        }
+
         const { node, scope } = path;
         const seen = new Set();
         const declars = [];
+        const mutations = [];
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
           if (!binding.path.isVariableDeclarator()) {
@@ -57,22 +63,23 @@ module.exports = ({ Plugin, types: t }) => {
             declars.push(declar);
             if (declar.init) {
               assignmentSequence.push(t.assignmentExpression('=', declar.id, declar.init));
-              declar.init = null;
+              mutations.push(() => declar.init = null);
             }
           }
 
           if (assignmentSequence.length) {
-            declarPath.replaceWith(t.sequenceExpression(assignmentSequence));
+            mutations.push(() => declarPath.replaceWith(t.sequenceExpression(assignmentSequence)));
           } else {
-            declarPath.remove();
+            mutations.push(() => declarPath.remove());
           }
         }
 
         if (declars.length) {
+          mutations.forEach(f => f());
           for (let statement of node.body.body) {
             if (t.isVariableDeclaration(statement)) {
               statement.declarations.push(...declars);
-              return;
+             return;
             }
           }
           const varDecl = t.variableDeclaration('var', declars);
@@ -451,7 +458,7 @@ module.exports = ({ Plugin, types: t }) => {
     visitor: {
       Program(path) {
         // We need to run this plugin in isolation.
-        path.traverse(main, { functionToBindings: new Map() });
+        path.traverse(main, { functionToBindings: new Map(), optimizeRawSize: this.opts.optimizeRawSize });
       },
     },
   };

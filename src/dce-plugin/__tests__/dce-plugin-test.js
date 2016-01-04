@@ -3,9 +3,9 @@ jest.autoMockOff();
 const babel = require('babel-core');
 const unpad = require('../../utils/unpad');
 
-function transform(code) {
+function transform(code, options) {
   return babel.transform(code,  {
-    plugins: [require('../index')],
+    plugins: [[require('../index'), options]],
   }).code;
 }
 
@@ -903,10 +903,8 @@ describe('dce-plugin', () => {
 
     const expected = unpad(`
       function a() {
-        var foo;
-
         if (x()) {
-          foo = 1;
+          var foo = 1;
         }
         bar(foo);
       }
@@ -925,9 +923,7 @@ describe('dce-plugin', () => {
 
     const expected = unpad(`
       function a() {
-        var foo;
-
-        if (x()) foo = 1;
+        if (x()) var foo = 1;
         bar(foo);
       }
     `);
@@ -945,9 +941,7 @@ describe('dce-plugin', () => {
 
     const expected = unpad(`
       function a() {
-        var foo;
-
-        for (;;) foo = 1;
+        for (;;) var foo = 1;
         bar(foo);
       }
     `);
@@ -1194,7 +1188,7 @@ describe('dce-plugin', () => {
       }
     `);
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source, { optimizeRawSize: true })).toBe(expected);
   });
 
   it('should put the var in the for in', () => {
