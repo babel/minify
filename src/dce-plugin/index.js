@@ -180,8 +180,10 @@ module.exports = ({ Plugin, types: t }) => {
 
             if (binding.references === 1 && binding.kind !== 'param' && binding.kind !== 'module' && binding.constant) {
               let replacement = binding.path.node;
+              let replacementPath = binding.path;
               if (t.isVariableDeclarator(replacement)) {
                 replacement = replacement.init;
+                replacementPath = replacementPath.get('init');
               }
               if (!replacement) {
                 continue;
@@ -195,12 +197,35 @@ module.exports = ({ Plugin, types: t }) => {
                 throw new Error('Expected only one reference');
               }
 
+              let bail = false;
+              const refPath = binding.referencePaths[0];
+
+              if (replacementPath.isIdentifier()) {
+                bail = refPath.scope.getBinding(replacement.name) !== scope.getBinding(replacement.name);
+              } else {
+                replacementPath.traverse({
+                  Function(path) {
+                    path.skip();
+                  },
+
+                  ReferencedIdentifier({ node }) {
+                    if (bail) {
+                      return;
+                    }
+                    bail = refPath.scope.getBinding(node.name) !== scope.getBinding(node.name);
+                  },
+                });
+              }
+
+              if (bail) {
+                return;
+              }
+
               let parent = binding.path.parent;
               if (t.isVariableDeclaration(parent)) {
                 parent = binding.path.parentPath.parent;
               }
 
-              const refPath = binding.referencePaths[0];
 
               // 1. Make sure we share the parent with the node. In other words it's lexically defined
               // and not in an if statement or otherwise.
@@ -490,12 +515,6 @@ module.exports = ({ Plugin, types: t }) => {
 
     // Same name, different binding.
     if (scope.getBinding(path.node.name) !== binding) {
-      return;
-    }
-
-    if (t.isIdentifier(replacement) &&
-        path.scope.getBinding(replacement.name) !== scope.getBinding(replacement.name)
-    ) {
       return;
     }
 

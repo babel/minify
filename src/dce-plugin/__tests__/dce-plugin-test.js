@@ -1259,4 +1259,30 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('inlining should check name collision for expressions', () => {
+   const source = unpad(`
+     function foo() {
+       var a = c + d;
+       function x(c, d) {
+         return a;
+       }
+       x();
+       x();
+     }
+  `);
+
+    const expected = unpad(`
+      function foo() {
+        var a = c + d;
+        function x(c, d) {
+          return a;
+        }
+        x();
+        x();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
