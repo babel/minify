@@ -439,6 +439,10 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
+      if (binding.path.parentPath.parentPath.isForInStatement({ left: binding.path.parent })) {
+        return;
+      }
+
       // If it has company then it's probably more efficient to keep.
       if (binding.path.parent.declarations.length > 1) {
         return;
