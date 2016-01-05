@@ -69,6 +69,11 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
+        // -0 maybe compared via dividing and then checking against -Infinity
+        if (t.isUnaryExpression(node, { operator: '-' }) && t.isNumericLiteral(node.argument, { value: 0 })) {
+          return;
+        }
+
         // We have a transform that converts true/false to !0/!1
         if (t.isUnaryExpression(node, { operator: '!' }) && t.isNumericLiteral(node.argument)) {
           if (node.argument.value === 0 || node.argument.value === 1) {

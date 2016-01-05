@@ -34,4 +34,15 @@ describe('constant-folding-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should skip -0', () => {
+    const source = unpad(`
+      -0;
+    `);
+
+    const expected = unpad(`
+      -0;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
