@@ -2157,4 +2157,15 @@ describe('simplify-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should flip binary expressions', () => {
+    const source = unpad(`
+      if (!(!a && b == a && !b && b < a)) for(;;) a();
+    `);
+
+    const expected = unpad(`
+      if (a || b != a || b || !(b < a)) for (;;) a();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
