@@ -1575,10 +1575,6 @@ module.exports = ({ Plugin, types: t }) => {
           case '===': operator = '!=='; break;
           case '!=': operator = '=='; break;
           case '==': operator = '!='; break;
-          case '>': operator = '<='; break;
-          case '<': operator = '>='; break;
-          case '>=': operator = '<'; break;
-          case '<=': operator = '>'; break;
         }
 
         if (operator) {
@@ -1611,7 +1607,7 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
-      if (!t.isBinaryExpression(node)) {
+      if (!(t.isBinaryExpression(node) && t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) > -1)) {
         // Binary expressions wouldn't hurut because we know how to flip them
         savings--;
       }
