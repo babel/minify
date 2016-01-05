@@ -1229,4 +1229,34 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('inlining should check name collision', () => {
+   const source = unpad(`
+     function foo() {
+       var a = 1;
+       var b = a;
+       function x(a) {
+         return a + b;
+       }
+       x();
+       x();
+       return a;
+     }
+  `);
+
+    const expected = unpad(`
+      function foo() {
+        var a = 1;
+        var b = a;
+        function x(a) {
+          return a + b;
+        }
+        x();
+        x();
+        return a;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

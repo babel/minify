@@ -489,6 +489,12 @@ module.exports = ({ Plugin, types: t }) => {
       return;
     }
 
+    if (t.isIdentifier(replacement) &&
+        path.scope.getBinding(replacement.name) !== scope.getBinding(replacement.name)
+    ) {
+      return;
+    }
+
     // Don't want to put functions in loops in stuff.
     if ((t.isClass(replacement) || t.isFunction(replacement))
         && scope !== path.scope) {
