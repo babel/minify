@@ -1575,10 +1575,10 @@ module.exports = ({ Plugin, types: t }) => {
           case '===': operator = '!=='; break;
           case '!=': operator = '=='; break;
           case '==': operator = '!='; break;
-          case '>': operator = '<'; break;
-          case '<': operator = '>'; break;
-          case '>=': operator = '<='; break;
-          case '<=': operator = '>='; break;
+          case '>': operator = '<='; break;
+          case '<': operator = '>='; break;
+          case '>=': operator = '<'; break;
+          case '<=': operator = '>'; break;
         }
 
         if (operator) {
