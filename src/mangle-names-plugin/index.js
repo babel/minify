@@ -22,7 +22,7 @@ module.exports = ({ Plugin, types: t }) => {
         newName = charset.getIdentifier(i);
         i += 1;
       } while (!(t.isValidIdentifier(newName)
-          && canUse(newName, scopes, refs)));
+          && canUse(newName, binding.scope.getFunctionParent(), scopes, refs)));
 
       // WARNING: this is a destructive operation, use scope.rename for
       // a safer operation, however, it does full tree traversal for every
@@ -35,11 +35,16 @@ module.exports = ({ Plugin, types: t }) => {
     });
   }
 
-  function canUse(name, scopes, refsMap) {
+  function canUse(name, originalBindingScope, scopes, refsMap) {
     for (let scope of scopes) {
       // Competing binding in the definition scope.
       const competingBinding = scope.getBinding(name);
       if (competingBinding) {
+        // If the competing binding shadows the originalBinding then we can't use it.
+        if (competingBinding.scope.path.find(({ node }) => node === originalBindingScope.path.node)) {
+          return false;
+        }
+
         /**
          * Go through all references then crawl their scopes upwards,
          * looking to see if one of these references is in this scope.
@@ -48,7 +53,7 @@ module.exports = ({ Plugin, types: t }) => {
         for (let ref of bindingRefs) {
           let myScope = ref.scope;
           do {
-            if (myScope === scope) {
+            if (myScope.path.node === scope.path.node) {
               return false;
             }
             myScope = myScope.parent;

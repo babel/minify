@@ -284,4 +284,48 @@ describe('mangle-names', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not be confused by scopes (closures)', () => {
+    const source = unpad(`
+      function foo() {
+        function bar(baz) {
+          return function() {
+            bam();
+          };
+        }
+        function bam() {}
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function a(b) {
+          return function () {
+            c();
+          };
+        }
+        function c() {}
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle recursion', () => {
+    const source = unpad(`
+      function bar() {
+        function foo(a, b, c) {
+          foo(a,b,c);
+        }
+      }
+    `);
+    const expected = unpad(`
+      function bar() {
+        function d(e, a, b) {
+          d(e, a, b);
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
