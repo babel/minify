@@ -38,10 +38,14 @@ describe('constant-folding-plugin', () => {
   it('should skip -0', () => {
     const source = unpad(`
       -0;
+      +-0;
+      +0;
     `);
 
     const expected = unpad(`
       -0;
+      -0;
+      0;
     `);
     expect(transform(source)).toBe(expected);
   });

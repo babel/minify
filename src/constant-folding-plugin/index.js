@@ -96,9 +96,14 @@ module.exports = ({ Plugin, types: t }) => {
             return;
           }
 
-          // We have a different visitor that convert booleans to unaries
-          if (typeof res.value === 'boolean') {
-
+          // Preserve -0
+          if (typeof res.value === 'number' && res.value === 0) {
+            if (1 / res.value === -Infinity) {
+              const node = t.unaryExpression('-', t.numericLiteral(0));
+              node[seen] = true;
+              path.replaceWith(node);
+              return;
+            }
           }
 
           const node = t.valueToNode(res.value);
