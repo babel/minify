@@ -328,4 +328,25 @@ describe('mangle-names', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should handle global name conflict', () => {
+    const source = unpad(`
+      function e() {
+        function foo() {
+          b = bar();
+        }
+        function bar() {}
+      }
+    `);
+    const expected = unpad(`
+      function e() {
+        function a() {
+          b = c();
+        }
+        function c() {}
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

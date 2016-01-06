@@ -36,7 +36,15 @@ module.exports = ({ Plugin, types: t }) => {
   }
 
   function canUse(name, originalBindingScope, scopes, refsMap) {
+    if (originalBindingScope.hasGlobal(name)) {
+      return false;
+    }
+
     for (let scope of scopes) {
+      if (scope.hasGlobal(name)) {
+        return false;
+      }
+
       // Competing binding in the definition scope.
       const competingBinding = scope.getBinding(name);
       if (competingBinding) {
