@@ -456,6 +456,10 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       const binding = path.scope.getBinding(left.node.name);
+      if (!binding) {
+        return;
+      }
+
       if (binding.scope.getFunctionParent() !== path.scope.getFunctionParent()) {
         return;
       }
