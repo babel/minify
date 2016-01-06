@@ -1183,7 +1183,7 @@ module.exports = ({ Plugin, types: t }) => {
                 fallThru = [];
               }
 
-              consTestPairs.push([test, cons.argument]);
+              consTestPairs.push([test, cons.argument || VOID_0]);
             }
 
             // Bail if we have any remaining fallthrough
