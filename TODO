@@ -5,7 +5,7 @@ Backbone.js numbers (passing tests):
 
 ```
         raw     raw win gzip   gzip win parse time run
-babel   21.77kB 221%    7.29kB 170%     2ms        1201ms
+babel   21.75kB 222%    7.28kB 170%     2ms        1243ms
 uglify  21.82kB 220%    7.32kB 169%     1ms        359ms
 closure 21.67kB 223%    7.37kB 167%     2ms        3455ms
 ```
@@ -13,7 +13,7 @@ closure 21.67kB 223%    7.37kB 167%     2ms        3455ms
 FB:
 ```
         raw      raw win gzip    gzip win parse time run
-babe   l 194.8kB 98%     48.57kB 51%      15ms       5615ms
+babel   194.8kB  98%     48.56kB 51%      13ms       4438ms
 uglify  196.99kB 96%     48.95kB 49%      14ms       1608ms
 closure 192.94kB 100%    49.42kB 48%      16ms       8665ms
 jsxmin  205.97kB 87%     51.29kB 43%      15ms       2ms
@@ -22,7 +22,7 @@ jsxmin  205.97kB 87%     51.29kB 43%      15ms       2ms
 React:
 ```
         raw      raw win gzip    gzip win parse time run
-babel   176.3kB  255%    52.95kB 168%     16ms       5777ms
+babel   176.13kB 256%    52.78kB 169%     12ms       6163ms
 closure 171.46kB 265%    52.97kB 168%     12ms       9785ms
 uglify  176.41kB 255%    53.18kB 167%     12ms       2187ms
 ```
@@ -31,6 +31,7 @@ jquery:
 ```
         raw     raw win gzip    gzip win parse time run
 uglify  94.4kB  217%    32.82kB 157%     8ms        1449ms
+babel   93.69kB 220%    32.83kB 157%     14ms       5961ms
 babel   93.69kB 220%    32.89kB 157%     8ms        5950ms
 closure 94.23kB 218%    33.38kB 153%     10ms       9001ms
 ```
