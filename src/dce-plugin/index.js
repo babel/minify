@@ -218,7 +218,7 @@ module.exports = ({ Plugin, types: t }) => {
               }
 
               if (bail) {
-                return;
+                continue;
               }
 
               let parent = binding.path.parent;
