@@ -11,9 +11,6 @@ const zlib   = require('zlib');
 const fs     = require('fs');
 const path   = require('path');
 
-
-require('babel-jest/node_modules/babel-core').register();
-
 const filename = process.argv[2];
 if (!filename) {
   console.error('Error: No filename specified');
