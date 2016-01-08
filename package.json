@@ -25,7 +25,7 @@
   "dependencies": {
     "babel-core": "^6.4.0",
     "babel-traverse": "^6.3.26",
-    "lodash.some": "^3.2.3"
+    "lodash": "^3.10.1"
   },
   "jest": {
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
