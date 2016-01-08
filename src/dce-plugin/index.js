@@ -1,6 +1,6 @@
 'use strict';
 
-const some = require('lodash');
+const { some } = require('lodash');
 
 module.exports = ({ Plugin, types: t }) => {
   const shouldRevisit = Symbol('shouldRevisit');
