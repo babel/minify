@@ -81,7 +81,7 @@ test('babel', function (code, callback) {
     sourceType: 'script',
     plugins: [
       [
-        require('../src/replace-plugin'),
+        require('../lib/replace-plugin'),
         {
           replacements: [{
             identifierName: '__DEV__',
@@ -92,16 +92,16 @@ test('babel', function (code, callback) {
           }],
         },
       ],
-      require('../src/constant-folding-plugin'),
-      require('../src/mangle-names-plugin'),
-      require('../src/dce-plugin'),
-      require('../src/simplify-plugin'),
+      require('../lib/constant-folding-plugin'),
+      require('../lib/mangle-names-plugin'),
+      require('../lib/dce-plugin'),
+      require('../lib/simplify-plugin'),
     ],
     minified: true,
     comments: false,
   }).code;
 });
-
+/*
 if (filename.match(/fb\.js/)) {
   test('jsxmin', function (code, callback) {
     return fs.readFileSync(path.join(__dirname, 'fb-jsmin.js'));
