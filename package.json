@@ -19,7 +19,8 @@
   },
   "files": [
     "lib",
-    "bin"
+    "bin",
+    "index.js"
   ],
   "homepage": "https://github.com/facebook/babel-minify#readme",
   "dependencies": {
