@@ -5,6 +5,7 @@ module.exports = ({ Plugin, types: t }) => {
       if (binding.scope.getFunctionParent().path.isProgram()) {
         return;
       }
+
       if (binding.path.isLabeledStatement()) {
         return;
       }
@@ -86,11 +87,18 @@ module.exports = ({ Plugin, types: t }) => {
     },
 
     'ReferencedIdentifier|BindingIdentifier'(path) {
+      const { scope, node } = path;
+
       if (path.parentPath.isLabeledStatement()) {
         return;
       }
 
-      const { scope, node } = path;
+      // Ignore break and continue statements.
+      if (path.parentPath.isContinueStatement() || path.parentPath.isBreakStatement()) {
+        if (path.parent.label === node) {
+          return;
+        }
+      }
 
       // A function decleration name maybe shadowed by a variable
       // in the scope. So we get it from the upper scope.

@@ -150,6 +150,53 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should labels conflicting with bindings', () => {
+    const source = unpad(`
+      function foo() {
+        meh: for (;;) {
+          var meh;
+          break meh;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        meh: for (;;) {
+          var a;
+          break meh;
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://phabricator.babeljs.io/T6957
+  xit('labels should not shadow bindings', () => {
+    const source = unpad(`
+      function foo() {
+        var meh;
+        meh: for (;;) {
+          break meh;
+        }
+        return meh;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        var a;
+        meh: for (;;) {
+          break meh;
+        }
+        return a;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should be order indepedent', () => {
     const source = unpad(`
       function foo() {
