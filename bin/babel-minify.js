@@ -45,5 +45,5 @@ process.stdin.on('data', function(d) {
 
 process.stdin.on('end', function() {
   var res = require('../').compile(code, { replacements: replacements });
-  console.log(res.code);
+  process.stdout.write(res.code);
 });
