@@ -38,6 +38,10 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
+        if (path.parentPath.isObjectProperty({ key: path.node })) {
+          return;
+        }
+
         path.replaceWith(t.binaryExpression('/', t.numericLiteral(1), t.numericLiteral(0)));
       },
 
