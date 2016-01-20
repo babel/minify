@@ -480,6 +480,7 @@ module.exports = ({ Plugin, types: t }) => {
 
       removeOrVoid(binding.path);
       path.node.left = t.variableDeclaration('var', [t.variableDeclarator(left.node)]);
+      binding.path = path.get('left');
     },
   };
 

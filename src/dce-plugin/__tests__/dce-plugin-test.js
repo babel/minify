@@ -1331,4 +1331,22 @@ describe('dce-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('it should update binding path', () => {
+    const source = unpad(`
+      function foo() {
+        var key;
+        for (key in o);
+        for (key in o2);
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        for (var key in o);
+        for (key in o2);
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
