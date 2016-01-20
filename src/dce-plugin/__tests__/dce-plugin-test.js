@@ -1285,4 +1285,50 @@ describe('dce-plugin', () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it('should replace with empty statement if in body position 1', () => {
+    const source = unpad(`
+      function foo() {
+        var a = 0;
+        while (wat()) a += 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        while (wat());
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should replace with empty statement if in body position 2', () => {
+    const source = unpad(`
+      function foo() {
+        while (wat()) 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        while (wat());
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should replace with empty statement if in body position 3', () => {
+    const source = unpad(`
+      function foo() {
+        while (wat()) var x;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        while (wat());
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

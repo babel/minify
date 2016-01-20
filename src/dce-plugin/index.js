@@ -9,11 +9,7 @@ module.exports = ({ Plugin, types: t }) => {
     // remove side effectless statement
     ExpressionStatement(path) {
       if (path.get('expression').isPure()) {
-        if (!path.parentPath.isBlockStatement()) {
-          path.replaceWith(t.emptyStatement());
-        } else {
-          path.remove();
-        }
+        removeOrVoid(path);
       }
     },
 
@@ -70,7 +66,7 @@ module.exports = ({ Plugin, types: t }) => {
           if (assignmentSequence.length) {
             mutations.push(() => declarPath.replaceWith(t.sequenceExpression(assignmentSequence)));
           } else {
-            mutations.push(() => declarPath.remove());
+            mutations.push(() => removeOrVoid(declarPath));
           }
         }
 
@@ -135,7 +131,7 @@ module.exports = ({ Plugin, types: t }) => {
               if (p.isAssignmentExpression() && !p.get('right').isPure()) {
                 mutations.push(() => p.replaceWith(p.get('right')));
               } else {
-                mutations.push(() => p.remove());
+                mutations.push(() => removeOrVoid(p));
               }
             });
 
@@ -153,7 +149,7 @@ module.exports = ({ Plugin, types: t }) => {
               binding.path.parentPath.replaceWith(binding.path.node.init);
             } else {
               updateReferences(binding.path, this);
-              binding.path.remove();
+              removeOrVoid(binding.path);
             }
 
             mutations.forEach(f => f());
@@ -173,7 +169,7 @@ module.exports = ({ Plugin, types: t }) => {
                   if (allInside) {
                     scope.removeBinding(name);
                     updateReferences(binding.path, this);
-                    binding.path.remove();
+                    removeOrVoid(binding.path);
                     continue;
                   }
             }
@@ -257,7 +253,7 @@ module.exports = ({ Plugin, types: t }) => {
               if (replaced) {
                 scope.removeBinding(name);
                 if (binding.path.node) {
-                  binding.path.remove();
+                  removeOrVoid(binding.path);
                 }
               }
             }
@@ -281,7 +277,7 @@ module.exports = ({ Plugin, types: t }) => {
         }
 
         if (purge && !p.isFunctionDeclaration()) {
-          p.remove();
+          removeOrVoid(p);
         }
       }
     },
@@ -335,7 +331,7 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       if (noNext) {
-        path.remove();
+        removeOrVoid(path);
       }
     },
 
@@ -378,7 +374,7 @@ module.exports = ({ Plugin, types: t }) => {
             path.replaceWithMultiple(toStatements(alternate));
             return;
           } else {
-            path.remove();
+            removeOrVoid(path);
           }
         }
 
@@ -427,7 +423,7 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
       declars[0].init = path.node.right;
-      path.remove();
+      removeOrVoid(path);
     },
 
     // Remove named function expression name. While this is dangerous as it changes
@@ -482,7 +478,7 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
-      binding.path.remove();
+      removeOrVoid(binding.path);
       path.node.left = t.variableDeclaration('var', [t.variableDeclarator(left.node)]);
     },
   };
@@ -574,5 +570,28 @@ module.exports = ({ Plugin, types: t }) => {
         }
       },
     });
+  }
+
+  // If we can't remove the expression we'll just replace it with an empty statement.
+  function removeOrVoid(path) {
+    // If we are working with the expression of an expression statement we want to deal
+    // with the expression statement instead.
+    if (path.parentPath.isExpressionStatement({ expression: path.node })) {
+      path = path.parentPath;
+    }
+
+    // If we are working with a variable declarator and there is only one then
+    // we need to look at the parent.
+    if (path.isVariableDeclarator() && path.parent.declarations[0] === path.node &&
+        path.parent.declarations.length === 1
+    ) {
+      path = path.parentPath;
+    }
+
+    if (!path.inList) {
+      path.replaceWith(t.emptyStatement());
+    } else {
+      path.remove();
+    }
   }
 };
