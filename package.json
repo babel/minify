@@ -30,6 +30,7 @@
   },
   "jest": {
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+    "testPathIgnorePatterns": ["lib"],
     "preprocessorIgnorePatterns": [
       "<rootDir>/node_modules/"
     ]
