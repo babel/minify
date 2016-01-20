@@ -61,6 +61,10 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
+        if (path.isLiteral()) {
+          return;
+        }
+
         if (!path.isPure()) {
           return;
         }
