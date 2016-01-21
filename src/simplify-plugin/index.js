@@ -106,7 +106,7 @@ module.exports = ({ Plugin, types: t }) => {
         ) {
           path.replaceWith(
             t.callExpression(
-              t.unaryExpression('!', node.callee),
+              t.unaryExpression('!', node.callee, true),
               node.arguments
             )
           );
@@ -259,7 +259,7 @@ module.exports = ({ Plugin, types: t }) => {
 
             const seq = node.argument.expressions;
             const expr = seq[seq.length - 1];
-            seq[seq.length - 1] = t.unaryExpression('!', expr);
+            seq[seq.length - 1] = t.unaryExpression('!', expr, true);
             path.replaceWith(node.argument);
           },
 
@@ -276,8 +276,8 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             const cond = node.argument;
-            cond.alternate = t.unaryExpression('!', cond.alternate);
-            cond.consequent = t.unaryExpression('!', cond.consequent);
+            cond.alternate = t.unaryExpression('!', cond.alternate, true);
+            cond.consequent = t.unaryExpression('!', cond.consequent, true);
             path.replaceWith(node.argument);
           },
         ],
@@ -562,7 +562,7 @@ module.exports = ({ Plugin, types: t }) => {
             }
 
             if (t.isBreakStatement(bodyNode.consequent, { label: null })) {
-              node.test = t.logicalExpression('&&', node.test, t.unaryExpression('!', bodyNode.test));
+              node.test = t.logicalExpression('&&', node.test, t.unaryExpression('!', bodyNode.test, true));
               node.body = bodyNode.alternate || t.emptyStatement();
               return;
             }
@@ -623,7 +623,7 @@ module.exports = ({ Plugin, types: t }) => {
 
           rest.push(...statements.slice(i + 1));
 
-          const test = breakAt === 'consequent' ? t.unaryExpression('!', ifStatement.test) : ifStatement.test;
+          const test = breakAt === 'consequent' ? t.unaryExpression('!', ifStatement.test, true) : ifStatement.test;
           let expr;
           if (exprs.length === 1) {
             expr = t.sequenceExpression([exprs[0], test]);
@@ -849,7 +849,7 @@ module.exports = ({ Plugin, types: t }) => {
                     t.conditionalExpression(
                       node.test,
                       node.consequent.argument || VOID_0,
-                      t.unaryExpression('void', node.alternate.expression)
+                      t.unaryExpression('void', node.alternate.expression, true)
                     )
                   )
                 );
@@ -873,7 +873,7 @@ module.exports = ({ Plugin, types: t }) => {
                   t.returnStatement(
                     t.conditionalExpression(
                       node.test,
-                      t.unaryExpression('void', node.consequent.expression),
+                      t.unaryExpression('void', node.consequent.expression, true),
                       node.alternate.argument || VOID_0
                     )
                   )
@@ -973,7 +973,7 @@ module.exports = ({ Plugin, types: t }) => {
                     t.conditionalExpression(
                       node.test,
                       node.consequent.argument,
-                      t.unaryExpression('void', nextExpr)
+                      t.unaryExpression('void', nextExpr, true)
                     )
                   )
                 );
@@ -1022,7 +1022,7 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            node.test = t.unaryExpression('!', node.test);
+            node.test = t.unaryExpression('!', node.test, true);
             [node.alternate, node.consequent] = [node.consequent, node.alternate];
           },
 
@@ -1528,7 +1528,7 @@ module.exports = ({ Plugin, types: t }) => {
     } else if (t.isUnaryExpression(test, { operator: '!' })) {
       node.test = test.argument;
     } else {
-      node.test = t.unaryExpression('!', node.test);
+      node.test = t.unaryExpression('!', node.test, true);
     }
 
     let l = statements.length;
@@ -1589,7 +1589,7 @@ module.exports = ({ Plugin, types: t }) => {
         // Falls through to unary expression
       }
 
-      return t.unaryExpression('!', node);
+      return t.unaryExpression('!', node, true);
     }
   }
 
@@ -1649,9 +1649,9 @@ module.exports = ({ Plugin, types: t }) => {
       } else {
         if (t.isSequenceExpression(seq)) {
           const lastExpr = seq.expressions[seq.expressions.length - 1];
-          seq.expressions[seq.expressions.length - 1] = t.unaryExpression('void', lastExpr);
+          seq.expressions[seq.expressions.length - 1] = t.unaryExpression('void', lastExpr, true);
         } else {
-          seq = t.unaryExpression('void', seq);
+          seq = t.unaryExpression('void', seq, true);
         }
       }
 
