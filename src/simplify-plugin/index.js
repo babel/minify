@@ -42,6 +42,10 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
+        if (path.parentPath.isMemberExpression()) {
+          return;
+        }
+
         path.replaceWith(t.binaryExpression('/', t.numericLiteral(1), t.numericLiteral(0)));
       },
 

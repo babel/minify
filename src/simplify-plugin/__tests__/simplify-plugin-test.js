@@ -1652,6 +1652,18 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should not convert infinity when its a property', () => {
+    const source = unpad(`
+      x.Infinity;
+    `);
+
+    const expected = unpad(`
+      x.Infinity;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('function expression in sequennce doesnt need parens', () => {
     const source = unpad(`
       x, (function() {})();
