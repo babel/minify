@@ -74,7 +74,8 @@ module.exports = ({ Plugin, types: t }) => {
         }
 
         // -0 maybe compared via dividing and then checking against -Infinity
-        if (t.isUnaryExpression(node, { operator: '-' }) && t.isNumericLiteral(node.argument, { value: 0 })) {
+        // Also -X will always be -X.
+        if (t.isUnaryExpression(node, { operator: '-' }) && t.isNumericLiteral(node.argument)) {
           return;
         }
 
@@ -103,7 +104,7 @@ module.exports = ({ Plugin, types: t }) => {
           // Preserve -0
           if (typeof res.value === 'number' && res.value === 0) {
             if (1 / res.value === -Infinity) {
-              const node = t.unaryExpression('-', t.numericLiteral(0));
+              const node = t.unaryExpression('-', t.numericLiteral(0), true);
               node[seen] = true;
               path.replaceWith(node);
               return;
