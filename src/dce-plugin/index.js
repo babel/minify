@@ -566,7 +566,7 @@ module.exports = ({ Plugin, types: t }) => {
           binding.referenced = false;
         }
 
-        if (binding.references <= 1) {
+        if (binding.references <= 1 && binding.scope.path.node) {
           binding.scope.path.node[shouldRevisit] = true;
         }
       },
