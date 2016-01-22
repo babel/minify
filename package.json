@@ -24,13 +24,15 @@
   ],
   "homepage": "https://github.com/facebook/babel-minify#readme",
   "dependencies": {
-    "babel-core": "^6.4.0",
+    "babel-core": "^6.4.5",
     "babel-traverse": "^6.3.26",
     "lodash": "^3.10.1"
   },
   "jest": {
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-    "testPathPattern": ["src"],
+    "testPathPattern": [
+      "src"
+    ],
     "preprocessorIgnorePatterns": [
       "<rootDir>/node_modules/"
     ]
