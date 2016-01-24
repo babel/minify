@@ -1,12 +1,14 @@
 'use strict';
 
 module.exports = ({ Plugin, types: t }) => {
+  const removeOrVoid = require('../utils/removeOrVoid')(t);
+
   const visitor = {
     // Remove the call if it stands on it's own.
     ExpressionStatement(path) {
       const { node } = path;
       if (isEmptyFunction(node.expression)) {
-        path.remove();
+        removeOrVoid(path);
       }
     },
 
