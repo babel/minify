@@ -1,24 +1,32 @@
 'use strict';
 
 module.exports = ({ Plugin, types: t }) => {
+  const visitor = {
+    // Remove the call if it stands on it's own.
+    ExpressionStatement(path) {
+      const { node } = path;
+      if (isEmptyFunction(node.expression)) {
+        path.remove();
+      }
+    },
+
+    // If we're not in an expression statement we can't remove
+    // the call.
+    CallExpression(path) {
+      const { node } = path;
+      if (isEmptyFunction(node)) {
+        path.replaceWith(t.booleanLiteral(false));
+      }
+    },
+  };
+
   return {
     visitor: {
-
-      // Remove the call if it stands on it's own.
-      ExpressionStatement(path) {
-        const { node } = path;
-        if (isEmptyFunction(node.expression)) {
-          path.remove();
-        }
-      },
-
-      // If we're not in an expression statement we can't remove
-      // the call.
-      CallExpression(path) {
-        const { node } = path;
-        if (isEmptyFunction(node)) {
-          path.replaceWith(t.booleanLiteral(false));
-        }
+      // Unfortunately we have to do it in a seperate pass to ensure that
+      // the expression statements are removed otherwise the calls may
+      // end in conditionals or sequence expressions.
+      Program(path) {
+        path.traverse(visitor, {});
       },
     },
   };
