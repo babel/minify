@@ -7,12 +7,18 @@ var plugins = [
 ];
 
 exports.compile = function(code, options) {
-  if (options && options.replacements && options.replacements.length) {
-    plugins.unshift([
-      require('./lib/replace-plugin'),
-      { replacements: options.replacements },
-    ]);
+  if (options) {
+    if (options.emptyFunction) {
+      plugins.unshift(require('./lib/emptyFunction-plugin'));
+    }
+    if (options.replacements && options.replacements.length) {
+      plugins.unshift([
+        require('./lib/replace-plugin'),
+        { replacements: options.replacements },
+      ]);
+    }
   }
+
   return babel.transform(code, {
     sourceType: 'script',
     plugins: plugins,
