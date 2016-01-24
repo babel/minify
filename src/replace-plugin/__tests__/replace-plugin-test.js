@@ -126,4 +126,39 @@ describe('replace-plugin', () => {
 
     expect(transform(source, replacements)).toBe(expected);
   });
+
+  it('should replace multiple member expressions', () => {
+    const replacements = [
+      {
+        identifierName: 'console',
+        member: 'log',
+        replacement: {
+          type: 'identifier',
+          value: 'emptyFunction',
+        },
+      },
+      {
+        identifierName: 'console',
+        member: 'error',
+        replacement: {
+          type: 'identifier',
+          value: 'emptyFunction',
+        },
+      },
+    ];
+
+    const source = unpad(`
+      console.log('wat');
+      (console.log)('wat');
+      console.error('wat');
+    `);
+
+    const expected = unpad(`
+      emptyFunction('wat');
+      emptyFunction('wat');
+      emptyFunction('wat');
+    `);
+
+    expect(transform(source, replacements)).toBe(expected);
+  });
 });

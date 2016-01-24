@@ -1,22 +1,32 @@
 'use strict';
 
 module.exports = ({ Plugin, types: t }) => {
+  const NO_MEMBER = Symbol('no member');
+
   const replaceVisitor = {
     ReferencedIdentifier(path) {
-      const options = this.replacements[path.node.name];
-      if (!options) {
+      const { node } = path;
+      const optionsMap = this.replacements[node.name];
+      if (!optionsMap) {
         return;
       }
 
-      if (options.member) {
-        if (!path.parentPath.isMemberExpression()) {
-          return;
+      let options;
+      if (path.parentPath.isMemberExpression({ object: node })) {
+        const { property } = path.parent;
+        const key = t.isIdentifier(property) && property.name;
+        if (typeof key === 'string') {
+          options = optionsMap[key];
+          path = path.parentPath;
         }
-        const { property } = path.parentPath.node;
-        if (!t.isIdentifier(property) || property.name !== options.member) {
-          return;
-        }
-        path = path.parentPath;
+      }
+
+      if (!options) {
+        options = optionsMap[NO_MEMBER];
+      }
+
+      if (!options) {
+        return;
       }
 
       path.replaceWith(options.node);
@@ -60,7 +70,14 @@ module.exports = ({ Plugin, types: t }) => {
               member,
             };
 
-            map[identifierName] = options;
+            if (!map[identifierName]) {
+              map[identifierName] = {};
+            }
+
+            if (member && map[identifierName][member]) {
+              throw new Error(`Replacement collision ${identifierName}.${member}`);
+            }
+            map[identifierName][member || NO_MEMBER] = options;
           }
         });
 
