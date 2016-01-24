@@ -3,29 +3,28 @@
 module.exports = ({ Plugin, types: t }) => {
   return {
     visitor: {
-      Identifier(path) {
+
+      // Remove the call if it stands on it's own.
+      ExpressionStatement(path) {
         const { node } = path;
-        if (node.name !== 'emptyFunction') {
-          return;
+        if (isEmptyFunction(node.expression)) {
+          path.remove();
         }
+      },
 
-        if (!path.parentPath.isCallExpression()) {
-          if (path.parentPath.isExpressionStatement()) {
-            path.parentPath.remove();
-          } else {
-            path.replaceWith(t.booleanLiteral(false));
-          }
-          return;
+      // If we're not in an expression statement we can't remove
+      // the call.
+      CallExpression(path) {
+        const { node } = path;
+        if (isEmptyFunction(node)) {
+          path.replaceWith(t.booleanLiteral(false));
         }
-
-        const call = path.parentPath;
-        if (call.parentPath.isExpressionStatement()) {
-          call.parentPath.remove();
-          return;
-        }
-
-        call.replaceWith(t.booleanLiteral(false));
       },
     },
   };
+
+  function isEmptyFunction(node) {
+    return t.isCallExpression(node) &&
+           t.isIdentifier(node.callee, { name: 'emptyFunction' });
+  }
 };

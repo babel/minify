@@ -10,15 +10,6 @@ function transform(code) {
 }
 
 describe('constant-folding-plugin', () => {
-  it('should remove identifier expr statements', () => {
-    const source = unpad(`
-      emptyFunction
-    `);
-
-    const expected = '';
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should remove call expressions', () => {
     const source = unpad(`
       emptyFunction('how long', '?');
