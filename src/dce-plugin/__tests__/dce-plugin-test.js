@@ -1349,4 +1349,14 @@ describe('dce-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  xit('it should evaluate and remove falsy code', () => {
+    const source = unpad(`
+      foo(0 && bar());
+    `);
+    const expected = unpad(`
+      foo(0);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
