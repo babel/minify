@@ -59,6 +59,13 @@ module.exports = ({ Plugin, types: t }) => {
          * looking to see if one of these references is in this scope.
          */
         const bindingRefs = refsMap.get(competingBinding);
+
+        // If we don't have references for this binding then it must be a new one
+        // introduced by this transform. This will rarely happen so it's fine to ignore it.
+        if (!bindingRefs) {
+          return false;
+        }
+
         for (let ref of bindingRefs) {
           let myScope = ref.scope;
           do {
@@ -73,6 +80,7 @@ module.exports = ({ Plugin, types: t }) => {
     return true;
   }
 
+  const hop = Object.prototype.hasOwnProperty;
 
   const collectVisitor = {
     Scope({ scope }) {
@@ -113,7 +121,9 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
-      recordRef(this.refs, binding, path);
+      if (!hop.call(this.blacklist, node.name)) {
+        recordRef(this.refs, binding, path);
+      }
     },
 
     Literal({ node }) {
@@ -147,6 +157,7 @@ module.exports = ({ Plugin, types: t }) => {
           refs,
           charset,
           depth,
+          blacklist: this.opts.mangleBlacklist || Object.create(null),
         });
 
         charset.sort();

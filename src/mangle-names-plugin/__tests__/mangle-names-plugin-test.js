@@ -3,9 +3,11 @@ jest.autoMockOff();
 const babel = require('babel-core');
 const unpad = require('../../utils/unpad');
 
-function transform(code) {
+function transform(code, options = {}) {
   return babel.transform(code,  {
-    plugins: [require('../index')],
+    plugins: [
+      [require('../index'), options],
+    ],
   }).code;
 }
 
@@ -395,5 +397,22 @@ describe('mangle-names', () => {
     `);
 
     expect(transform(source)).toBe(expected);
+  });
+
+  it('should handle global name', () => {
+    const source = unpad(`
+      function foo() {
+        var bar = 1;
+        var baz = 2;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        var bar = 1;
+        var a = 2;
+      }
+    `);
+    expect(transform(source, { mangleBlacklist: {foo: true, bar: true }})).toBe(expected);
   });
 });
