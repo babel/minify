@@ -65,6 +65,9 @@ module.exports = ({ Plugin, types: t }) => {
     canUse(newName, binding) {
       const { scopeToRefNames, scopeToChildren } = this;
 
+      // Visit all scopes from the binding (definition) scope and all
+      // children scope downwards ignoring scopes with their own definition.
+      // And check if any of them references a `newName` variable.
       const visited = new Set();
       const toVisit = [binding.scope.getFunctionParent()];
 
@@ -76,11 +79,7 @@ module.exports = ({ Plugin, types: t }) => {
         }
 
         const scopeReferences = scopeToRefNames.get(scope);
-        if (!scopeReferences) {
-          throw new Error('Encountered a scope with no information about');
-        }
-
-        if (scopeReferences[newName]) {
+        if (scopeReferences && scopeReferences[newName]) {
           return false;
         }
 
@@ -89,10 +88,27 @@ module.exports = ({ Plugin, types: t }) => {
         const children = scopeToChildren.get(scope);
         if (children) {
           for (let scopeToVisit of children) {
-            if (!visited.has(scopeToVisit)) {
+            if (!visited.has(scopeToVisit) &&
+                !scopeToVisit.hasOwnBinding(newName)) {
               toVisit.push(scopeToVisit);
             }
           }
+        }
+      }
+
+      // Visit all binding reference paths and make sure there is no name
+      // collisions in their respective scopes and their parent scopes (to
+      // protect against shadowing)
+      const paths = this.bindingToRefPaths.get(binding);
+      const defScope = binding.scope.getFunctionParent();
+      for (let path of paths) {
+        let scope = path.scope.getFunctionParent();
+        while (scope && scope !== defScope) {
+          const scopeReferences = scopeToRefNames.get(scope);
+          if (scopeReferences && scopeReferences[newName]) {
+            return false;
+          }
+          scope = scope.parent;
         }
       }
 
