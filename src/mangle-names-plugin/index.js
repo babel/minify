@@ -1,99 +1,157 @@
 module.exports = ({ Plugin, types: t }) => {
-  function mangleNames(refs, charset, depth) {
-    const entries = Array.from(refs.entries());
-    entries.forEach(([binding, paths]) => {
-      if (binding.scope.getFunctionParent().path.isProgram()) {
-        return;
-      }
-
-      if (binding.path.isLabeledStatement()) {
-        return;
-      }
-
-      const scopes = new Set();
-      scopes.add(binding.scope.getFunctionParent());
-      for (let path of paths) {
-        scopes.add(path.scope.getFunctionParent());
-      }
-
-      let newName;
-      let i = 0;
-
-      do {
-        newName = charset.getIdentifier(i);
-        i += 1;
-      } while (!(t.isValidIdentifier(newName)
-          && canUse(newName, binding.scope.getFunctionParent(), scopes, refs)));
-
-      // WARNING: this is a destructive operation, use scope.rename for
-      // a safer operation, however, it does full tree traversal for every
-      // rename:
-      delete binding.scope.bindings[paths[0].node.name];
-      binding.scope.bindings[newName] = binding;
-      for (let path of paths) {
-        path.node.name = newName;
-      }
-    });
-  }
-
-  function canUse(name, originalBindingScope, scopes, refsMap) {
-    if (originalBindingScope.hasGlobal(name)) {
-      return false;
-    }
-
-    for (let scope of scopes) {
-      if (scope.hasGlobal(name)) {
-        return false;
-      }
-
-      // Competing binding in the definition scope.
-      const competingBinding = scope.getBinding(name);
-      if (competingBinding) {
-        // If the competing binding shadows the originalBinding then we can't use it.
-        if (competingBinding.scope.path.find(({ node }) => node === originalBindingScope.path.node)) {
-          return false;
-        }
-
-        /**
-         * Go through all references then crawl their scopes upwards,
-         * looking to see if one of these references is in this scope.
-         */
-        const bindingRefs = refsMap.get(competingBinding);
-
-        // If we don't have references for this binding then it must be a new one
-        // introduced by this transform. This will rarely happen so it's fine to ignore it.
-        if (!bindingRefs) {
-          return false;
-        }
-
-        for (let ref of bindingRefs) {
-          let myScope = ref.scope;
-          do {
-            if (myScope.path.node === scope.path.node) {
-              return false;
-            }
-            myScope = myScope.parent;
-          } while (myScope);
-        }
-      }
-    }
-    return true;
-  }
-
   const hop = Object.prototype.hasOwnProperty;
 
-  const collectVisitor = {
-    Scope({ scope }) {
-      let i = 0;
-      let parent = scope.parent;
-      while (parent) {
-        i++;
-        parent = parent.parent;
+  class Mangler {
+    constructor(charset, program, blacklist) {
+      this.charset = charset;
+      this.program = program;
+      this.blacklist = blacklist;
+
+      // scope => {name => true}
+      this.scopeToRefNames = new Map();
+      // binding => [path, path ...]
+      this.bindingToRefPaths = new Map();
+      // scope => set(scopes)
+      this.scopeToChildren = new Map();
+    }
+
+    recordRefName(scope, name) {
+      const { scopeToRefNames } = this;
+
+      const refNames = scopeToRefNames.get(scope) || Object.create(null);
+      scope = scope.getFunctionParent();
+      if (!scopeToRefNames.has(scope)) {
+        scopeToRefNames.set(scope, refNames);
+      }
+      refNames[name] = true;
+    }
+
+    recordBindingPath(binding, path) {
+      const { bindingToRefPaths, scopeToChildren } = this;
+      const paths = bindingToRefPaths.get(binding) || [];
+      if (!bindingToRefPaths.has(binding)) {
+        bindingToRefPaths.set(binding, paths);
+      }
+      paths.push(path);
+
+      const scope = binding.scope.getFunctionParent();
+
+      this.recordRefName(scope, binding.identifier.name);
+      this.recordRefName(path.scope, binding.identifier.name);
+
+      // Program scope.
+      if (!scope.parent) {
+        return;
       }
 
-      this.depth.set(scope, i);
-    },
+      const parentScope = scope.parent.getFunctionParent();
+      const scopes = scopeToChildren.get(parentScope) || new Set();
+      if (!scopeToChildren.has(parentScope)) {
+        scopeToChildren.set(parentScope, scopes);
+      }
+      scopes.add(scope);
+    }
 
+    run() {
+      this.program.traverse(collectVisitor, {
+        recordBindingPath: (binding, path) => this.recordBindingPath(binding, path),
+        charset: this.charset,
+      });
+
+      this.charset.sort();
+      this.mangle();
+    }
+
+    canUse(newName, binding) {
+      const { scopeToRefNames, scopeToChildren } = this;
+
+      const visited = new Set();
+      const toVisit = [binding.scope.getFunctionParent()];
+
+      while (toVisit.length) {
+        const scope = toVisit.pop();
+
+        if (scope.hasGlobal(newName)) {
+          return false;
+        }
+
+        const scopeReferences = scopeToRefNames.get(scope);
+        if (!scopeReferences) {
+          throw new Error('Encountered a scope with no information about');
+        }
+
+        if (scopeReferences[newName]) {
+          return false;
+        }
+
+        visited.add(scope);
+
+        const children = scopeToChildren.get(scope);
+        if (children) {
+          for (let scopeToVisit of children) {
+            if (!visited.has(scopeToVisit)) {
+              toVisit.push(scopeToVisit);
+            }
+          }
+        }
+      }
+
+      return true;
+    }
+
+    updateScopeInfo(binding, newName) {
+      const scope = binding.scope.getFunctionParent();
+      const scopeReferences = this.scopeToRefNames.get(scope);
+      if (!scopeReferences) {
+        throw new Error('Encountered a scope with no information about');
+      }
+
+      const oldName = binding.identifier.name;
+      delete scopeReferences[oldName];
+      scopeReferences[newName] = true;
+
+      const paths = this.bindingToRefPaths.get(binding);
+      for (let path of paths) {
+        const refNames = this.scopeToRefNames.get(path.scope.getFunctionParent());
+        delete refNames[oldName];
+        refNames[newName] = true;
+        path.node.name = newName;
+      }
+
+      delete binding.scope.bindings[oldName];
+      binding.identifier.name = newName;
+      scope.bindings[newName] = binding;
+    }
+
+    mangle() {
+      const { bindingToRefPaths, charset } = this;
+      const entries = Array.from(bindingToRefPaths.entries());
+      entries.forEach(([binding, paths]) => {
+        if (hop.call(this.blacklist, binding.identifier.name)) {
+          return;
+        }
+
+        if (binding.scope.getFunctionParent().path.isProgram()) {
+          return;
+        }
+        if (binding.path.isLabeledStatement()) {
+          return;
+        }
+
+        let newName;
+        let i = 0;
+
+        do {
+          newName = charset.getIdentifier(i);
+          i += 1;
+        } while (!t.isValidIdentifier(newName) || !this.canUse(newName, binding));
+
+        this.updateScopeInfo(binding, newName);
+      });
+    }
+  }
+
+  const collectVisitor = {
     'ReferencedIdentifier|BindingIdentifier'(path) {
       const { scope, node } = path;
 
@@ -108,7 +166,7 @@ module.exports = ({ Plugin, types: t }) => {
         }
       }
 
-      // A function decleration name maybe shadowed by a variable
+      // A function declaration name maybe shadowed by a variable
       // in the scope. So we get it from the upper scope.
       let binding;
       if (t.isFunctionDeclaration(path.parent, { id: node })) {
@@ -121,9 +179,7 @@ module.exports = ({ Plugin, types: t }) => {
         return;
       }
 
-      if (!hop.call(this.blacklist, node.name)) {
-        recordRef(this.refs, binding, path);
-      }
+      this.recordBindingPath(binding, path);
     },
 
     Literal({ node }) {
@@ -149,30 +205,11 @@ module.exports = ({ Plugin, types: t }) => {
         const shouldConsiderSource = path.getSource().length > 70000;
 
         const charset = new Charset(shouldConsiderSource);
-        // We want to take control of the sequencing and make sure our visitors
-        // run in isolation.
-        const refs = new Map();
-        const depth = new Map();
-        path.traverse(collectVisitor, {
-          refs,
-          charset,
-          depth,
-          blacklist: this.opts.mangleBlacklist || Object.create(null),
-        });
-
-        charset.sort();
-
-        mangleNames(refs, charset, depth);
+        const mangler = new Mangler(charset, path, this.opts.mangleBlacklist || {});
+        mangler.run();
       },
     },
   };
-
-  function recordRef(refs, binding, refPath) {
-    if (!refs.has(binding)) {
-      refs.set(binding, []);
-    }
-    refs.get(binding).push(refPath);
-  }
 };
 
 const CHARSET = ('abcdefghijklmnopqrstuvwxyz' +
