@@ -146,7 +146,16 @@ module.exports = ({ Plugin, types: t }) => {
 
       delete binding.scope.bindings[oldName];
       binding.identifier.name = newName;
-      scope.bindings[newName] = binding;
+
+      // Although we don't support block scoping for now (we expect things to be
+      // run through es2015 preset), we may get a let binding by virtue of being
+      // inside a catch clause. If that's the case then we want to maintain bindings
+      // on the the actual scope.
+      if (binding.kind === 'let') {
+        binding.scope.bindings[newName] = binding;
+      } else {
+        scope.bindings[newName] = binding;
+      }
     }
 
     mangle() {

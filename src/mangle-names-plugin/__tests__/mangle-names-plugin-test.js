@@ -447,4 +447,22 @@ describe('mangle-names', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should handle try/catch', () => {
+    const source = unpad(`
+      function xoo() {
+        var e;
+        try {} catch (e) {
+
+        }
+      }
+    `);
+    const expected = unpad(`
+      function xoo() {
+        var a;
+        try {} catch (b) {}
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
