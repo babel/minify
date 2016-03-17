@@ -26,8 +26,29 @@ module.exports = ({ Plugin, types: t }) => {
       refNames[name] = true;
     }
 
+    recordScope(scope) {
+      const { scopeToChildren } = this;
+
+      scope = scope.getFunctionParent();
+
+      // Program scope.
+      if (!scope.parent) {
+        return;
+      }
+
+      while (scope.parent) {
+        const parentScope = scope.parent.getFunctionParent();
+        const scopes = scopeToChildren.get(parentScope) || new Set();
+        if (!scopeToChildren.has(parentScope)) {
+          scopeToChildren.set(parentScope, scopes);
+        }
+        scopes.add(scope);
+        scope = parentScope;
+      }
+    }
+
     recordBindingPath(binding, path) {
-      const { bindingToRefPaths, scopeToChildren } = this;
+      const { bindingToRefPaths } = this;
       const paths = bindingToRefPaths.get(binding) || [];
       if (!bindingToRefPaths.has(binding)) {
         bindingToRefPaths.set(binding, paths);
@@ -38,23 +59,12 @@ module.exports = ({ Plugin, types: t }) => {
 
       this.recordRefName(scope, binding.identifier.name);
       this.recordRefName(path.scope, binding.identifier.name);
-
-      // Program scope.
-      if (!scope.parent) {
-        return;
-      }
-
-      const parentScope = scope.parent.getFunctionParent();
-      const scopes = scopeToChildren.get(parentScope) || new Set();
-      if (!scopeToChildren.has(parentScope)) {
-        scopeToChildren.set(parentScope, scopes);
-      }
-      scopes.add(scope);
     }
 
     run() {
       this.program.traverse(collectVisitor, {
         recordBindingPath: (binding, path) => this.recordBindingPath(binding, path),
+        recordScope: scope => this.recordScope(scope),
         charset: this.charset,
       });
 
@@ -168,6 +178,10 @@ module.exports = ({ Plugin, types: t }) => {
   }
 
   const collectVisitor = {
+    Scope({ scope }) {
+      this.recordScope(scope);
+    },
+
     'ReferencedIdentifier|BindingIdentifier'(path) {
       const { scope, node } = path;
 

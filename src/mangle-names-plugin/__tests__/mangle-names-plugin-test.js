@@ -415,4 +415,36 @@ describe('mangle-names', () => {
     `);
     expect(transform(source, { mangleBlacklist: {foo: true, bar: true }})).toBe(expected);
   });
+
+  it('should handle deeply nested paths with no bindings', () => {
+    const source = unpad(`
+      function xoo() {
+        function foo(zz, xx, yy) {
+          function bar(zip, zap, zop) {
+            return function(bar) {
+              zap();
+              return function() {
+                zip();
+              }
+            }
+          }
+        }
+      }
+    `);
+    const expected = unpad(`
+      function xoo() {
+        function a(b, c, d) {
+          function e(a, b, c) {
+            return function (c) {
+              b();
+              return function () {
+                a();
+              };
+            };
+          }
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
