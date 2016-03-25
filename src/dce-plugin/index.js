@@ -1,5 +1,6 @@
 'use strict';
 
+const traverse = require('babel-traverse').default;
 const { some } = require('lodash');
 
 module.exports = ({ Plugin, types: t }) => {
@@ -520,10 +521,28 @@ module.exports = ({ Plugin, types: t }) => {
       return;
     }
 
-    // Don't want to put functions in loops in stuff.
-    if ((t.isClass(replacement) || t.isFunction(replacement))
-        && scope !== path.scope) {
-          return;
+    // We don't want to move code around to different scopes because:
+    // 1. Original bindings that is referenced could be shadowed
+    // 2. Moving defintions to potentially hot code is bad
+    if (scope !== path.scope) {
+      if (t.isClass(replacement) || t.isFunction(replacement)) {
+        return;
+      }
+
+      let bail = false;
+      traverse(replacement, {
+        Function(path) {
+          if (bail) {
+            return;
+          }
+          bail = true;
+          path.stop();
+        },
+      }, scope);
+
+      if (bail) {
+        return;
+      }
     }
 
     // Avoid recursion.

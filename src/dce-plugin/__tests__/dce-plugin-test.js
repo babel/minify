@@ -1359,4 +1359,40 @@ describe('dce-plugin', () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it('should not move functions into other scopes', () => {
+    const source = unpad(`
+      function foo() {
+        var a = 1;
+        var bar = { x: {z: a, v: a} };
+        var wow = { x: 1 };
+        var baz = { x: function() {} };
+        var boo = { x: { y: function () {} } };
+
+        function moo() {
+          var a = 2;
+          maa(wow, bar, baz, boo, a, a);
+        }
+
+        return moo;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        var a = 1;
+        var bar = { x: { z: a, v: a } };
+
+        var baz = { x: function () {} };
+        var boo = { x: { y: function () {} } };
+
+        return function () {
+          var a = 2;
+          maa({ x: 1 }, bar, baz, boo, a, a);
+        };
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
