@@ -99,12 +99,6 @@ test('babel', function (code, callback) {
   }).code;
 });
 
-if (filename.match(/fb\.js/)) {
-  test('jsxmin', function (code, callback) {
-    return fs.readFileSync(path.join(__dirname, 'fb-jsmin.js'));
-  });
-}
-
 test('closure', function (code, callback) {
   return child.execSync(
     'java -jar ' + path.join(__dirname, 'gcc.jar') + ' --jscomp_off=uselessCode --js ' + filename
