@@ -1,3 +1,39 @@
+## babel-minify
+
+A collection of minification babel plugins.
+
+## Plugins
+
+### simplify-plugin
+
+This plugin will transform code in mainly two ways:
+
+1. Reduce as much statements as possible into expressions
+2. Make expressions as uniform as possible for better compressibility
+
+### mangle-names-plugin
+
+Context and scope aware variable renaming.
+
+### constant-folding-plugin
+
+Tries to evaluate expressions and inline the result. For now only deals with
+numbers and strings.
+
+### dce-plugin
+
+Dead code elimination plugin. Inlines bindings when possible. Tries to evaluate expressions and prunes unreachable as a result.
+
+### replace-plugin
+
+Replaces matching nodes in the tree with a given replacement node. For example
+you can replace `process.NODE_ENV` with `"production"`.
+
+### emptyFunction-plugin
+
+This mostly a Facebook-specific transform that removes noop function
+calls. However, can be generalized to detect and remove noops.
+
 Some benchmarks:
 
 
