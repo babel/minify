@@ -1382,13 +1382,13 @@ describe('dce-plugin', () => {
       function foo() {
         var a = 1;
         var bar = { x: { z: a, v: a } };
-
+        var wow = { x: 1 };
         var baz = { x: function () {} };
         var boo = { x: { y: function () {} } };
 
         return function () {
           var a = 2;
-          maa({ x: 1 }, bar, baz, boo, a, a);
+          maa(wow, bar, baz, boo, a, a);
         };
       }
     `);
