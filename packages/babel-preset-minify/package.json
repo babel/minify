@@ -1,0 +1,23 @@
+{
+  "name": "babel-preset-minify",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-preset-minify",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-preset"
+  ],
+  "dependencies": {
+    "babel-plugin-minify-constant-folding": "^0.0.0",
+    "babel-plugin-minify-dead-code-elimination": "^0.0.0",
+    "babel-plugin-minify-empty-function": "^0.0.0",
+    "babel-plugin-minify-mangle-names": "^0.0.0",
+    "babel-plugin-minify-replace": "^0.0.0",
+    "babel-plugin-minify-simplify": "^0.0.0"
+  },
+  "devDependencies": {}
+}

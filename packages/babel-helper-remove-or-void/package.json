@@ -1,0 +1,16 @@
+{
+  "name": "babel-helper-remove-or-void",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-helper-remove-or-void",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
