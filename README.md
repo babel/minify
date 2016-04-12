@@ -1,41 +1,40 @@
 ## babel-minify
 
-A collection of minification babel plugins.
+A collection of babel minification plugins.
 
 ## Plugins
 
-### simplify-plugin
+### [simplify-plugin](/src/simplify-plugin)
 
 This plugin will transform code in mainly two ways:
 
 1. Reduce as much statements as possible into expressions
 2. Make expressions as uniform as possible for better compressibility
 
-### mangle-names-plugin
+### [mangle-names-plugin](/src/mangle-names-plugin)
 
 Context and scope aware variable renaming.
 
-### constant-folding-plugin
+### [constant-folding-plugin](/src/constant-folding-plugin)
 
 Tries to evaluate expressions and inline the result. For now only deals with
 numbers and strings.
 
-### dce-plugin
+### [dce-plugin](/src/dce-plugin)
 
 Dead code elimination plugin. Inlines bindings when possible. Tries to evaluate expressions and prunes unreachable as a result.
 
-### replace-plugin
+### [replace-plugin](/src/replace-plugin)
 
 Replaces matching nodes in the tree with a given replacement node. For example
 you can replace `process.NODE_ENV` with `"production"`.
 
-### emptyFunction-plugin
+### [emptyFunction-plugin](/src/emptyFunction-plugin)
 
 This mostly a Facebook-specific transform that removes noop function
 calls. However, can be generalized to detect and remove noops.
 
 Some benchmarks:
-
 
 Backbone.js:
 
@@ -54,7 +53,7 @@ closure 171.46kB 265%    52.97kB 168%     12ms       9785ms
 uglify  176.41kB 255%    53.18kB 167%     12ms       2187ms
 ```
 
-jquery:
+jQuery:
 ```
         raw     raw win gzip    gzip win parse time run
 uglify  94.4kB  217%    32.82kB 157%     8ms        1449ms
