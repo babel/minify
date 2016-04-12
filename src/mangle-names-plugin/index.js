@@ -259,7 +259,7 @@ class Charset {
     this.shouldConsider = shouldConsider;
     this.chars = CHARSET.slice();
     this.frequency = {};
-    this.chars.forEach(c => this.frequency[c] = 0);
+    this.chars.forEach(c => { this.frequency[c] = 0; });
     this.finalized = false;
   }
 

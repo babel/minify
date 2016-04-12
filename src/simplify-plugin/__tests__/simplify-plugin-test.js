@@ -18,56 +18,56 @@ describe('simplify-plugin', () => {
   });
 
   it('should strip unnecessary property literal qoutes', () => {
-    const source = `var x = { 'foo': 'bar' };`;
-    const expected = `var x = { foo: 'bar' };`;
+    const source = 'var x = { \'foo\': \'bar\' };';
+    const expected = 'var x = { foo: \'bar\' };';
     expect(transform(source)).toBe(expected);
   });
 
   it('should strip unnecessary property literal qoutes for numbers', () => {
-    const source = `var x = { '1': 'bar' };`;
-    const expected = `var x = { 1: 'bar' };`;
+    const source = 'var x = { \'1\': \'bar\' };';
+    const expected = 'var x = { 1: \'bar\' };';
     expect(transform(source)).toBe(expected);
   });
 
   it('should turn subscript into dot', () => {
-    const source = `foo['1'];`;
-    const expected = `foo[1];`;
+    const source = 'foo[\'1\'];';
+    const expected = 'foo[1];';
     expect(transform(source)).toBe(expected);
   });
 
   it('should turn Number(x) to +x', () => {
-    const source = `Number(x);`;
-    const expected = `+x;`;
+    const source = 'Number(x);';
+    const expected = '+x;';
     expect(transform(source)).toBe(expected);
   });
 
-  it(`should turn String(x) to x + ''`, () => {
-    const source = `String(x);`;
-    const expected = `x + "";`;
+  it('should turn String(x) to x + \'\'', () => {
+    const source = 'String(x);';
+    const expected = 'x + "";';
     expect(transform(source)).toBe(expected);
   });
 
   it('should shorten bool', () => {
-    const source = `true; false;`;
-    const expected = `!0, !1;`;
+    const source = 'true; false;';
+    const expected = '!0, !1;';
     expect(transform(source)).toBe(expected);
   });
 
   it('should put values first in binary expressions', () => {
-    const source = `a === 1;`;
-    const expected = `1 === a;`;
+    const source = 'a === 1;';
+    const expected = '1 === a;';
     expect(transform(source)).toBe(expected);
   });
 
   it('should put constants first in binary expressions', () => {
-    const source = `a === -1;`;
-    const expected = `-1 === a;`;
+    const source = 'a === -1;';
+    const expected = '-1 === a;';
     expect(transform(source)).toBe(expected);
   });
 
   it('should put pures first in binary expressions 2', () => {
-    const source = `a === null;`;
-    const expected = `null === a;`;
+    const source = 'a === null;';
+    const expected = 'null === a;';
     expect(transform(source)).toBe(expected);
   });
 
@@ -96,20 +96,20 @@ describe('simplify-plugin', () => {
   });
 
   it('should put pures first in binary expressions 2', () => {
-    const source = `a === {};`;
-    const expected = `({}) === a;`;
+    const source = 'a === {};';
+    const expected = '({}) === a;';
     expect(transform(source)).toBe(expected);
   });
 
   it('should simplify comparison', () => {
-    const source = `'function' === typeof a;`;
-    const expected = `'function' == typeof a;`;
+    const source = '\'function\' === typeof a;';
+    const expected = '\'function\' == typeof a;';
     expect(transform(source)).toBe(expected);
   });
 
   it('should simplify comparison operations', () => {
-    const source = `null === null;`;
-    const expected = `null == null;`;
+    const source = 'null === null;';
+    const expected = 'null == null;';
     expect(transform(source)).toBe(expected);
   });
 
@@ -154,8 +154,8 @@ describe('simplify-plugin', () => {
   });
 
   it('should flip conditionals', () => {
-    const source = `!foo ? 'foo' : 'bar';`;
-    const expected = `foo ? 'bar' : 'foo';`;
+    const source = '!foo ? \'foo\' : \'bar\';';
+    const expected = 'foo ? \'bar\' : \'foo\';';
     expect(transform(source)).toBe(expected);
   });
 
