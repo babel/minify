@@ -61,7 +61,7 @@ module.exports = ({ Plugin, types: t }) => {
             declars.push(declar);
             if (declar.init) {
               assignmentSequence.push(t.assignmentExpression('=', declar.id, declar.init));
-              mutations.push(() => declar.init = null);
+              mutations.push(() => { declar.init = null; });
             }
           }
 
