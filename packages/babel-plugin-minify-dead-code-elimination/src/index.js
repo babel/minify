@@ -1,9 +1,8 @@
 'use strict';
 
-const traverse = require('babel-traverse').default;
 const { some } = require('lodash');
 
-module.exports = ({ Plugin, types: t }) => {
+module.exports = ({ Plugin, types: t, traverse }) => {
   const removeOrVoid = require('babel-helper-remove-or-void')(t);
   const shouldRevisit = Symbol('shouldRevisit');
 

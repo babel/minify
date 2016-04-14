@@ -1,6 +1,6 @@
 'use strict';
 
-const { types } = require('babel-core');
+const t = require('babel-types');
 
 function equiv(a, b) {
   if (typeof a !== 'object' || typeof a !== 'object' || a == null || b == null) {
@@ -11,7 +11,7 @@ function equiv(a, b) {
     return false;
   }
 
-  const fields = Object.keys(types.NODE_FIELDS[a.type]);
+  const fields = Object.keys(t.NODE_FIELDS[a.type]);
 
   for (let field of fields) {
     if (typeof a[field] !== typeof b[field]) {

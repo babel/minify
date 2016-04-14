@@ -1,8 +1,6 @@
 'use strict';
 
-const traverse = require('babel-traverse').default;
-
-module.exports = ({ Plugin, types: t }) => {
+module.exports = ({ Plugin, types: t, traverse }) => {
   const seen = Symbol('seen');
 
   return {
