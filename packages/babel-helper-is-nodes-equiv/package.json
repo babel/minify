@@ -11,8 +11,6 @@
   "keywords": [
     "babel-plugin"
   ],
-  "dependencies": {
-    "babel-types": "^6.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {}
 }

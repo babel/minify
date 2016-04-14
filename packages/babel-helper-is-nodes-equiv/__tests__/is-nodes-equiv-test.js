@@ -2,7 +2,7 @@ jest.autoMockOff();
 
 const babel = require('babel-core');
 const t = babel.types;
-const isNodesEquiv = require('../src/index');
+const isNodesEquiv = require('../src/index')(t);
 
 function parse(code) {
   return babel.transform(code).ast.program;

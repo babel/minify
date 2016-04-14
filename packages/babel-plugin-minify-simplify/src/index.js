@@ -1,8 +1,7 @@
 'use strict';
 
-const isNodesEquiv = require('babel-helper-is-nodes-equiv');
-
 module.exports = ({ Plugin, types: t }) => {
+  const isNodesEquiv = require('babel-helper-is-nodes-equiv')(t);
   const VOID_0 = t.unaryExpression('void', t.numericLiteral(0), true);
   const condExprSeen = Symbol('condExprSeen');
   const seqExprSeen = Symbol('seqExprSeen');
