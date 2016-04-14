@@ -78,7 +78,7 @@ test('babel', function (code, callback) {
     sourceType: 'script',
     plugins: [
       [
-        require('../lib/replace-plugin'),
+        require('../packages/babel-plugin-minify-replace'),
         {
           replacements: [{
             identifierName: '__DEV__',
@@ -89,10 +89,10 @@ test('babel', function (code, callback) {
           }],
         },
       ],
-      require('../lib/constant-folding-plugin'),
-      require('../lib/mangle-names-plugin'),
-      require('../lib/dce-plugin'),
-      require('../lib/simplify-plugin'),
+      require('../packages/babel-plugin-minify-constant-folding'),
+      require('../packages/babel-plugin-minify-mangle-names'),
+      require('../packages/babel-plugin-minify-dead-code-elimination'),
+      require('../packages/babel-plugin-minify-simplify'),
     ],
     minified: true,
     comments: false,
