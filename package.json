@@ -4,8 +4,8 @@
   "author": "amasad",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "publish": "git pull origin master --rebase && lerna publish",
-    "publish-internal": "NPM_DIST_TAG=internal ./node_modules/.bin/lerna publish --skip-git",
+    "publish": "git pull origin master --rebase && npm run build && lerna publish",
+    "publish-internal": "git pull origin master --rebase && npm run build && NPM_DIST_TAG=internal ./node_modules/.bin/lerna publish --skip-git",
     "updated": "lerna updated",
     "test": "eslint src/ && jest",
     "build": "gulp build",
