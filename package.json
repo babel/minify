@@ -4,6 +4,8 @@
   "author": "amasad",
   "scripts": {
     "bootstrap": "lerna bootstrap",
+    "publish": "git pull origin master --rebase && lerna publish",
+    "updated": "lerna updated",
     "test": "eslint src/ && jest",
     "build": "gulp build",
     "watch": "gulp watch"
@@ -20,7 +22,8 @@
   "dependencies": {
     "babel-core": "^6.4.5",
     "babel-traverse": "^6.3.26",
-    "lodash": "^3.10.1"
+    "lodash": "^3.10.1",
+    "lerna": "2.0.0-beta.6"
   },
   "devDependencies": {
     "babel-cli": "^6.4.0",
@@ -36,7 +39,7 @@
     "gulp-newer": "^1.1.0",
     "gulp-util": "^3.0.7",
     "jest-cli": "^0.6.1",
-    "lerna": "2.0.0-beta.3",
+    "lerna": "^2.0.0-beta.6",
     "through2": "^2.0.1",
     "uglify-js": "^2.6.2"
   }
