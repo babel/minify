@@ -5,6 +5,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "publish": "git pull origin master --rebase && lerna publish",
+    "publish-internal": "NPM_DIST_TAG=internal ./node_modules/.bin/lerna --skip-git",
     "updated": "lerna updated",
     "test": "eslint src/ && jest",
     "build": "gulp build",
