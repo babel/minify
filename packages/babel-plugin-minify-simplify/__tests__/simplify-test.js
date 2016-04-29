@@ -41,6 +41,20 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('shouldn\'t change referenced identifiers', () => {
+    const source = unpad(`
+      (function (Boolean, String, Number) {
+        return Boolean(a), String(b), Number(c);
+      })(MyBoolean, MyString, MyNumber);
+    `);
+    const expected = unpad(`
+      (function (Boolean, String, Number) {
+        return Boolean(a), String(b), Number(c);
+      })(MyBoolean, MyString, MyNumber);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should turn Number(x) to +x', () => {
     const source = 'Number(x);';
     const expected = '+x;';
