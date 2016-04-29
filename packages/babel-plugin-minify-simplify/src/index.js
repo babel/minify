@@ -87,6 +87,13 @@ module.exports = ({ Plugin, types: t }) => {
       CallExpression(path) {
         const { node } = path;
 
+        // Boolean(foo) -> !!foo
+        if (t.isIdentifier(node.callee, { name: 'Boolean' }) &&
+          node.arguments.length === 1) {
+          path.replaceWith(t.unaryExpression('!', t.unaryExpression('!', node.arguments[0], true), true));
+          return;
+        }
+
         // Number(foo) -> +foo
         if (t.isIdentifier(node.callee, { name: 'Number' }) &&
           node.arguments.length === 1) {

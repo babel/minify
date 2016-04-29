@@ -35,6 +35,12 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('should turn Boolean(x) to !!x', () => {
+    const source = 'Boolean(x);';
+    const expected = '!!x;';
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should turn Number(x) to +x', () => {
     const source = 'Number(x);';
     const expected = '+x;';
