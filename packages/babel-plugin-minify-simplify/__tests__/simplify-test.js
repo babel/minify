@@ -681,6 +681,16 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it('earlyReturnTransform: it shouldn\'t error on shorthand arrow functions', () => {
+    const source = unpad(`
+      const f = () => a;
+    `);
+    const expected = unpad(`
+      const f = () => a;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should merge function blocks into sequence expressions', () => {
     const source = unpad(`
       function foo() {

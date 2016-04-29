@@ -1482,6 +1482,10 @@ module.exports = ({ Plugin, types: t }) => {
   function earlyReturnTransform(path) {
     const { node } = path;
 
+    if (!t.isBlockStatement(node.body)) {
+      return;
+    }
+
     for (let i = node.body.body.length; i >= 0; i--) {
       const statement = node.body.body[i];
       if (t.isIfStatement(statement) && !statement.alternate &&
