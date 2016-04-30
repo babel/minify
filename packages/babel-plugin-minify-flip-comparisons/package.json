@@ -1,0 +1,18 @@
+{
+  "name": "babel-plugin-minify-flip-comparisons",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-minify-flip-comparisons",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {
+    "babel-helper-is-void-0": "^0.0.0"
+  },
+  "devDependencies": {}
+}

@@ -11,54 +11,6 @@ function transform(code) {
 }
 
 describe('simplify-plugin', () => {
-  it('should put values first in binary expressions', () => {
-    const source = 'a === 1;';
-    const expected = '1 === a;';
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should put constants first in binary expressions', () => {
-    const source = 'a === -1;';
-    const expected = '-1 === a;';
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should put pures first in binary expressions 2', () => {
-    const source = 'a === null;';
-    const expected = 'null === a;';
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should put pures first in binary expressions 3', () => {
-    const source = unpad(`
-      function foo() {
-        if (foo !== null) {
-          var bar;
-          bar = baz;
-        }
-        x();
-        return x;
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        if (null !== foo) {
-          var bar;
-          bar = baz;
-        }
-
-        return x(), x;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should put pures first in binary expressions 2', () => {
-    const source = 'a === {};';
-    const expected = '({}) === a;';
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should simplify comparison', () => {
     const source = '\'function\' === typeof a;';
     const expected = '\'function\' == typeof a;';
@@ -78,7 +30,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       var x = null;
-      null == x;
+      x == null;
     `);
 
     expect(transform(source)).toBe(expected);
@@ -91,7 +43,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       var x;
-      null === x;
+      x === null;
     `);
 
     expect(transform(source)).toBe(expected);
@@ -105,7 +57,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       var x;
-      wow && (x = foo()), null === x;
+      wow && (x = foo()), x === null;
     `);
 
     expect(transform(source)).toBe(expected);
@@ -123,7 +75,7 @@ describe('simplify-plugin', () => {
       var j = 0;
       for (var x = 0; x < 10; x++) console.log(i + x);
     `);
-    const expected = 'for (var i = 0, j = 0, x = 0; 10 > x; x++) console.log(i + x);';
+    const expected = 'for (var i = 0, j = 0, x = 0; x < 10; x++) console.log(i + x);';
 
     expect(transform(source).trim()).toBe(expected);
   });
@@ -149,7 +101,7 @@ describe('simplify-plugin', () => {
         console.log(x);
       }
     `);
-    const expected = 'for (var x = 0; 10 > x; x++) console.log(x);';
+    const expected = 'for (var x = 0; x < 10; x++) console.log(x);';
 
     expect(transform(source).trim()).toBe(expected);
   });
@@ -162,7 +114,7 @@ describe('simplify-plugin', () => {
       }
     `);
     const expected =
-      'for (var x = 0; 10 > x; x++) console.log(x), console.log(x);';
+      'for (var x = 0; x < 10; x++) console.log(x), console.log(x);';
 
     expect(transform(source).trim()).toBe(expected);
   });
@@ -182,7 +134,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       x(), y();
 
-      for (var x = 0; 10 > x; x++) {
+      for (var x = 0; x < 10; x++) {
         var z = foo();
         console.log(z), console.log(z);
       }
@@ -237,7 +189,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        return a && null != a.b ? (1 == a.c-- && delete a.c, a.b) : bar(a);
+        return a && a.b != null ? (a.c-- == 1 && delete a.c, a.b) : bar(a);
       }
     `);
 
@@ -258,7 +210,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        return a && null != a.b ? (1 == a.c-- && delete a.c, a.b) : bar(a);
+        return a && a.b != null ? (a.c-- == 1 && delete a.c, a.b) : bar(a);
       }
     `);
 
@@ -383,7 +335,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        for (x(), y(); 10 > i; i++) z();
+        for (x(), y(); i < 10; i++) z();
       }
     `);
 
@@ -401,7 +353,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        for (x(), y(), z(); 10 > i; i++) z();
+        for (x(), y(), z(); i < 10; i++) z();
       }
     `);
 
@@ -509,7 +461,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        return a && null != a.b ? 1 == a.c-- ? void 0 : a.b : bar(a);
+        return a && a.b != null ? a.c-- == 1 ? void 0 : a.b : bar(a);
       }
     `);
 
@@ -835,7 +787,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         for (; 1;) {
-          if (null === a) return void b();
+          if (a === null) return void b();
           a(), b();
         }
       }
@@ -1519,7 +1471,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      null === x || undefined === x ? undefined : x ? foo(x) : wat();
+      x === null || undefined === x ? undefined : x ? foo(x) : wat();
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1564,23 +1516,6 @@ describe('simplify-plugin', () => {
           a,
           x = 1,
           z = 2;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should put constants first', () => {
-    const source = unpad(`
-      x * 100;
-      x + 100;
-      x - 100;
-      x / 100;
-      x > 100;
-      x === void 0;
-    `);
-
-    const expected = unpad(`
-      100 * x, x + 100, x - 100, x / 100, 100 < x, void 0 === x;
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1810,7 +1745,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function bar() {
-        return 'foo' === foo ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : 0;
+        return foo === 'foo' ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : 0;
       }
     `);
 
@@ -1835,7 +1770,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function bar() {
-        return 'foo' === foo ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : 0;
+        return foo === 'foo' ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : 0;
       }
     `);
 
@@ -1859,7 +1794,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function bar() {
-        return 'foo' === foo ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : void 0;
+        return foo === 'foo' ? 1 : foo === foo.bar ? 2 : foo === wow ? (wow(), 3) : void 0;
       }
     `);
 
@@ -1890,7 +1825,7 @@ describe('simplify-plugin', () => {
     /*eslint max-len: 0 */
     const expected = unpad(`
       function bar() {
-        return 'foo' === foo ? 1 : foo === foo.bar || foo === wow ? (wow(), 3) : foo === boo ? 4 : foo === baz || foo === wat ? 5 : 0;
+        return foo === 'foo' ? 1 : foo === foo.bar || foo === wow ? (wow(), 3) : foo === boo ? 4 : foo === baz || foo === wat ? 5 : 0;
       }
     `);
 
@@ -1920,7 +1855,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function bar() {
-        'foo' === foo ? foo() : foo === foo.bar ? (wow(), wat()) : foo === shh || foo === wow ? baa() : meh();
+        foo === 'foo' ? foo() : foo === foo.bar ? (wow(), wat()) : foo === shh || foo === wow ? baa() : meh();
       }
     `);
 
@@ -1994,7 +1929,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function bar() {
-        'foo' === foo ? foo() : foo === foo.bar ? (wow(), wat()) : foo === shh || foo === wow ? baa() : meh();
+        foo === 'foo' ? foo() : foo === foo.bar ? (wow(), wat()) : foo === shh || foo === wow ? baa() : meh();
       }
     `);
 
