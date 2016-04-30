@@ -11,58 +11,6 @@ function transform(code) {
 }
 
 describe('simplify-plugin', () => {
-  it('should simplify comparison', () => {
-    const source = '\'function\' === typeof a;';
-    const expected = '\'function\' == typeof a;';
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should simplify comparison operations', () => {
-    const source = 'null === null;';
-    const expected = 'null == null;';
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should comparison operations 2', () => {
-    const source = unpad(`
-      var x = null;
-      x === null;
-    `);
-    const expected = unpad(`
-      var x = null;
-      x == null;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should not simplify comparison', () => {
-    const source = unpad(`
-      var x;
-      x === null;
-    `);
-    const expected = unpad(`
-      var x;
-      x === null;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should not simplify comparison', () => {
-    const source = unpad(`
-      var x;
-      if (wow) x = foo();
-      x === null;
-    `);
-    const expected = unpad(`
-      var x;
-      wow && (x = foo()), x === null;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should flip conditionals', () => {
     const source = '!foo ? \'foo\' : \'bar\';';
     const expected = 'foo ? \'bar\' : \'foo\';';
@@ -189,7 +137,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        return a && a.b != null ? (a.c-- == 1 && delete a.c, a.b) : bar(a);
+        return a && a.b != null ? (a.c-- === 1 && delete a.c, a.b) : bar(a);
       }
     `);
 
@@ -210,7 +158,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        return a && a.b != null ? (a.c-- == 1 && delete a.c, a.b) : bar(a);
+        return a && a.b != null ? (a.c-- === 1 && delete a.c, a.b) : bar(a);
       }
     `);
 
@@ -461,7 +409,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        return a && a.b != null ? a.c-- == 1 ? void 0 : a.b : bar(a);
+        return a && a.b != null ? a.c-- === 1 ? void 0 : a.b : bar(a);
       }
     `);
 
