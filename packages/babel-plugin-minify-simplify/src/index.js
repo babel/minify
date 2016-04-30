@@ -110,16 +110,6 @@ module.exports = ({ Plugin, types: t }) => {
         }*/
       },
 
-      // shorten booleans to a negation
-      // true -> !0
-      // false -> !1
-      Literal(path) {
-        const { node } = path;
-        if (typeof node.value === 'boolean') {
-          path.replaceWith(t.unaryExpression('!', t.numericLiteral(+!node.value), true));
-        }
-      },
-
       BinaryExpression: {
         enter: [
           // flip comparisons with a pure right hand value, this ensures

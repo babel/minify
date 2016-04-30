@@ -41,12 +41,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should shorten bool', () => {
-    const source = 'true; false;';
-    const expected = '!0, !1;';
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should put values first in binary expressions', () => {
     const source = 'a === 1;';
     const expected = '1 === a;';
@@ -562,7 +556,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        for (; !0;) bar();
+        for (; true;) bar();
       }
     `);
 
@@ -580,7 +574,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        for (var bar = baz; !0;) bar();
+        for (var bar = baz; true;) bar();
       }
     `);
 
@@ -605,7 +599,7 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       function foo() {
-        if (!(a && a.b && a.b.c && a.b.c())) for (; !0;) wat();
+        if (!(a && a.b && a.b.c && a.b.c())) for (; true;) wat();
       }
    `);
 
@@ -771,8 +765,8 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         if (a) {
-            if (b()) return !1;
-        } else if (c()) return !0;
+            if (b()) return false;
+        } else if (c()) return true;
       }
     `);
 
@@ -1497,10 +1491,10 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function foo() {
         if (foo) {
-          if (bar) return !1;
-          if (baz) return !1;
+          if (bar) return false;
+          if (baz) return false;
         }
-        return !0;
+        return true;
       }
     `);
 
