@@ -11,12 +11,6 @@ function transform(code) {
 }
 
 describe('simplify-plugin', () => {
-  it('should turn undefined into void 0', () => {
-    const expected = 'void 0;';
-    const source = 'undefined;';
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should strip unnecessary property literal qoutes', () => {
     const source = 'var x = { \'foo\': \'bar\' };';
     const expected = 'var x = { foo: \'bar\' };';
@@ -1561,7 +1555,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      null === x || void 0 === x ? void 0 : x ? foo(x) : wat();
+      null === x || undefined === x ? undefined : x ? foo(x) : wat();
     `);
 
     expect(transform(source)).toBe(expected);

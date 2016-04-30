@@ -19,13 +19,6 @@ module.exports = ({ Plugin, types: t }) => {
         },
       },
 
-      // undefined -> void 0
-      ReferencedIdentifier(path) {
-        if (path.node.name === 'undefined') {
-          path.replaceWith(VOID_0);
-        }
-      },
-
       // Infinity -> 1 / 0
       Identifier(path) {
         if (path.node.name !== 'Infinity') {
