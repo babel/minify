@@ -19,25 +19,11 @@ module.exports = ({ Plugin, types: t }) => {
         },
       },
 
+      /* (function() {})() -> !function() {}()
+      There is a bug in babel in printing this. Disabling for now.
       CallExpression(path) {
         const { node } = path;
 
-        // Number(foo) -> +foo
-        if (t.isIdentifier(node.callee, { name: 'Number' }) &&
-          node.arguments.length === 1) {
-          path.replaceWith(t.unaryExpression('+', node.arguments[0], true));
-          return;
-        }
-
-        // String(foo) -> foo + ''
-        if (t.isIdentifier(node.callee, { name: 'String' }) &&
-          node.arguments.length === 1) {
-          path.replaceWith(t.binaryExpression('+', node.arguments[0], t.stringLiteral('')));
-          return;
-        }
-
-        /* (function() {})() -> !function() {}()
-        There is a bug in babel in printing this. Disabling for now.
         if (t.isFunctionExpression(node.callee) &&
             (t.isExpressionStatement(parent) ||
              (t.isSequenceExpression(parent) && parent.expressions[0] === node))
@@ -49,8 +35,9 @@ module.exports = ({ Plugin, types: t }) => {
             )
           );
           return;
-        }*/
+        }
       },
+      */
 
       BinaryExpression: {
         enter: [

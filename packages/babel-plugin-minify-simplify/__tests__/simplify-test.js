@@ -11,18 +11,6 @@ function transform(code) {
 }
 
 describe('simplify-plugin', () => {
-  it('should turn Number(x) to +x', () => {
-    const source = 'Number(x);';
-    const expected = '+x;';
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should turn String(x) to x + \'\'', () => {
-    const source = 'String(x);';
-    const expected = 'x + "";';
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should put values first in binary expressions', () => {
     const source = 'a === 1;';
     const expected = '1 === a;';
