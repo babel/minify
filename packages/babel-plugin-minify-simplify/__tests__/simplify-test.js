@@ -1616,42 +1616,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert infinity to division over 0', () => {
-    const source = unpad(`
-      Infinity;
-    `);
-
-    const expected = unpad(`
-      1 / 0;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should not convert infinity when its a property', () => {
-    const source = unpad(`
-      var x = { Infinity: 0 };
-    `);
-
-    const expected = unpad(`
-      var x = { Infinity: 0 };
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should not convert infinity when its a property', () => {
-    const source = unpad(`
-      x.Infinity;
-    `);
-
-    const expected = unpad(`
-      x.Infinity;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
   it('function expression in sequennce doesnt need parens', () => {
     const source = unpad(`
       x, (function() {})();
