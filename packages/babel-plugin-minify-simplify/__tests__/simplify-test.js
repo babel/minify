@@ -11,12 +11,6 @@ function transform(code) {
 }
 
 describe('simplify-plugin', () => {
-  it('should turn subscript into dot', () => {
-    const source = 'foo[\'1\'];';
-    const expected = 'foo[1];';
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should turn Number(x) to +x', () => {
     const source = 'Number(x);';
     const expected = '+x;';
@@ -1014,7 +1008,7 @@ describe('simplify-plugin', () => {
     const expected = unpad(`
       function lawl() {
         var a = 1;
-        return b ? c : a ? void bar() : d ? g ? (this.s = morebutts, wat) : boo : (haha(), butts);
+        return b ? c : a ? void bar() : d ? g ? (this['s'] = morebutts, wat) : boo : (haha(), butts);
       }
     `);
     expect(transform(source)).toBe(expected);
