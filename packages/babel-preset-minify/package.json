@@ -12,12 +12,17 @@
     "babel-preset"
   ],
   "dependencies": {
+    "babel-plugin-minify-booleans": "^0.0.0",
+    "babel-plugin-minify-computed-member-expressions": "^0.0.0",
+    "babel-plugin-minify-computed-properties": "^0.0.0",
     "babel-plugin-minify-constant-folding": "^0.0.0",
     "babel-plugin-minify-dead-code-elimination": "^0.0.0",
+    "babel-plugin-minify-infinity": "^0.0.0",
     "babel-plugin-minify-mangle-names": "^0.0.0",
     "babel-plugin-minify-replace": "^0.0.0",
-    "babel-plugin-minify-undefined": "^0.0.0",
-    "babel-plugin-minify-simplify": "^0.0.0"
+    "babel-plugin-minify-simplify": "^0.0.0",
+    "babel-plugin-minify-type-constructors": "^0.0.0",
+    "babel-plugin-minify-undefined": "^0.0.0"
   },
   "devDependencies": {}
 }
