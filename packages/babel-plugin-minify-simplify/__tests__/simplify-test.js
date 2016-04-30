@@ -11,18 +11,6 @@ function transform(code) {
 }
 
 describe('simplify-plugin', () => {
-  it('should strip unnecessary property literal qoutes', () => {
-    const source = 'var x = { \'foo\': \'bar\' };';
-    const expected = 'var x = { foo: \'bar\' };';
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should strip unnecessary property literal qoutes for numbers', () => {
-    const source = 'var x = { \'1\': \'bar\' };';
-    const expected = 'var x = { 1: \'bar\' };';
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should turn subscript into dot', () => {
     const source = 'foo[\'1\'];';
     const expected = 'foo[1];';
