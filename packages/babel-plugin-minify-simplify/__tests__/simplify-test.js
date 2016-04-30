@@ -500,7 +500,7 @@ describe('simplify-plugin', () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        lol || (doThings(), doOtherThings());
+        !lol && (doThings(), doOtherThings());
       }
       function bar(a) {
         if (!lol) try {
@@ -1078,7 +1078,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      if (x || foo(), null != r) for (;;);
+      if (!x && foo(), null != r) for (;;);
     `);
 
     expect(transform(source).trim()).toBe(expected.trim());
@@ -1432,7 +1432,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-      x(), foo.bar || (foo.bar = wat);
+      x(), !foo.bar && (foo.bar = wat);
     `);
 
     expect(transform(source)).toBe(expected);
@@ -1447,7 +1447,7 @@ describe('simplify-plugin', () => {
     `);
 
     const expected = unpad(`
-     foo || foo === bar || (wow(), such());
+      !foo && foo !== bar && (wow(), such());
     `);
 
     expect(transform(source)).toBe(expected);

@@ -1,9 +1,9 @@
 {
-  "name": "babel-plugin-minify-simplify",
+  "name": "babel-helper-flip-expressions",
   "version": "0.0.0",
   "description": "",
   "homepage": "https://github.com/amasad/babel-minify#readme",
-  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-minify-simplify",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-helper-flip-expressions",
   "bugs": "https://github.com/amasad/babel-minify/issues",
   "author": "amasad",
   "license": "MIT",
@@ -11,9 +11,6 @@
   "keywords": [
     "babel-plugin"
   ],
-  "dependencies": {
-    "babel-helper-flip-expressions": "^0.0.0",
-    "babel-helper-is-nodes-equiv": "^0.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {}
 }
