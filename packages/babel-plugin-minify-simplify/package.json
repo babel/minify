@@ -13,7 +13,8 @@
   ],
   "dependencies": {
     "babel-helper-flip-expressions": "^0.0.0",
-    "babel-helper-is-nodes-equiv": "^0.0.0"
+    "babel-helper-is-nodes-equiv": "^0.0.0",
+    "babel-helper-to-multiple-sequence-expressions": "^0.0.0"
   },
   "devDependencies": {}
 }

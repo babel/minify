@@ -1,0 +1,16 @@
+{
+  "name": "babel-helper-to-multiple-sequence-expressions",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-helper-to-multiple-sequence-expressions",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
