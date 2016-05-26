@@ -209,6 +209,13 @@ module.exports = ({ Plugin, types: t }) => {
           function(path) {
             const { node } = path;
 
+            if (path.evaluateTruthy(node) === false) {
+              path.replaceWith(node.left);
+            }
+          },
+          function(path) {
+            const { node } = path;
+
             if (node[flipSeen]) {
               return;
             }
