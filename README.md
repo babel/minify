@@ -194,13 +194,13 @@ $ npm run bootstrap
 Then you can either run:
 
 ```sh
-$ make build
+$ npm run build
 ```
 
 to build Babel **once** or:
 
 ```sh
-$ make watch
+$ npm run watch
 ```
 
 to have Babel build itself then incrementally build files on change.
