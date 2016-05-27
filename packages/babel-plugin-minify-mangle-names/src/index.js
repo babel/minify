@@ -222,7 +222,9 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       // Doesn't take care of local eval bindings yet
-      if (node.name === "eval" && path.parent.type === 'CallExpression') {
+      if (node.name === "eval" &&
+          path.parent.type === 'CallExpression' &&
+          !path.scope.getBinding('eval')) {
         this.setScopeUnsafe();
       }
 

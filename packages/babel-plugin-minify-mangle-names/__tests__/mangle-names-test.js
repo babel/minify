@@ -5,6 +5,7 @@ const unpad = require('../../../utils/unpad');
 
 function transform(code, options = {}) {
   return babel.transform(code,  {
+    sourceType: 'script',
     plugins: [
       [require('../src/index'), options],
     ],
@@ -489,6 +490,24 @@ describe('mangle-names', () => {
             var a = 1;
           })();
         })();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should mangle names with local eval bindings', () => {
+    const source = unpad(`
+      function eval() {}
+      function foo() {
+        var bar = 1;
+        eval('...');
+      }
+    `);
+    const expected = unpad(`
+      function eval() {}
+      function foo() {
+        var a = 1;
+        eval('...');
       }
     `);
     expect(transform(source)).toBe(expected);
