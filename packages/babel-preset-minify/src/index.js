@@ -1,4 +1,5 @@
 module.exports = {
+  minified: true,
   plugins: [
     require('babel-plugin-minify-constant-folding'),
     require('babel-plugin-minify-dead-code-elimination'),
