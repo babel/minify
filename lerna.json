@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "publishConfig": {
     "ignore": [
-      "*.md"
+      "*.md",
+      "__tests__"
     ]
   }
 }
