@@ -1,4 +1,9 @@
 {
-  "lerna": "2.0.0-beta.13",
-  "version": "0.0.0"
+  "lerna": "2.0.0-beta.19",
+  "version": "0.0.0",
+  "publishConfig": {
+    "ignore": [
+      "*.md"
+    ]
+  }
 }

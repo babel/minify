@@ -23,8 +23,7 @@
   "dependencies": {
     "babel-core": "^6.4.5",
     "babel-traverse": "^6.3.26",
-    "lodash": "^3.10.1",
-    "lerna": "2.0.0-beta.13"
+    "lodash": "^3.10.1"
   },
   "devDependencies": {
     "babel-cli": "^6.4.0",
@@ -40,7 +39,7 @@
     "gulp-newer": "^1.1.0",
     "gulp-util": "^3.0.7",
     "jest-cli": "^0.6.1",
-    "lerna": "^2.0.0-beta.6",
+    "lerna": "2.0.0-beta.19",
     "through2": "^2.0.1",
     "uglify-js": "^2.6.2"
   }
