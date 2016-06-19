@@ -1423,18 +1423,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge two conditionals if the same consequent', () => {
-    const source = unpad(`
-      x === null ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
-    `);
-
-    const expected = unpad(`
-      x === null || undefined === x ? undefined : x ? foo(x) : wat();
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should convert gaurded nots to ors', () => {
     const source = unpad(`
       x();
@@ -2005,56 +1993,6 @@ describe('simplify-plugin', () => {
 
     const expected = unpad(`
       if (a || b != a || b || !(b < a)) for (;;) a();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it('should simplify falsy logical expressions', function() {
-    let source = unpad(`
-      alert(0 && new Foo());
-    `);
-    let expected = unpad(`
-      alert(0);
-    `);
-    expect(transform(source)).toBe(expected);
-
-    source = unpad(`
-      if (0 && something()) for(;;);
-    `);
-    expected = unpad(`
-      if (0) for (;;);
-    `);
-    expect(transform(source)).toBe(expected);
-
-    source = unpad(`
-      alert(false && new Foo());
-    `);
-    expected = unpad(`
-      alert(!1);
-    `);
-    expect(transform(source)).toBe(expected);
-
-    source = unpad(`
-      alert(undefined && new Foo());
-    `);
-    expected = unpad(`
-      alert(void 0);
-    `);
-    expect(transform(source)).toBe(expected);
-
-    source = unpad(`
-      alert(null && new Foo());
-    `);
-    expected = unpad(`
-      alert(null);
-    `);
-    expect(transform(source)).toBe(expected);
-
-    source = unpad(`
-      alert("" && new Foo());
-    `);
-    expected = unpad(`
-      alert("");
     `);
     expect(transform(source)).toBe(expected);
   });

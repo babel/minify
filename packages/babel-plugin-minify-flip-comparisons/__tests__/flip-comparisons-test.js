@@ -10,7 +10,19 @@ function transform(code) {
   }).code;
 }
 
-describe('boolean-plugin', () => {
+describe('flip-comparisons', () => {
+  it('should merge two conditionals if the same consequent', () => {
+    const source = unpad(`
+      x === null ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
+    `);
+
+    const expected = unpad(`
+      null === x ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it('should put values first in binary expressions', () => {
     const source = 'a === 1;';
     const expected = '1 === a;';
