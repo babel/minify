@@ -1,9 +1,9 @@
 {
-  "name": "babel-plugin-minify-simplify",
+  "name": "babel-plugin-minify-flip-comparisons",
   "version": "0.0.0",
   "description": "",
   "homepage": "https://github.com/amasad/babel-minify#readme",
-  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-minify-simplify",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-minify-flip-comparisons",
   "bugs": "https://github.com/amasad/babel-minify/issues",
   "author": "amasad",
   "license": "MIT",
@@ -12,9 +12,7 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-flip-expressions": "^0.0.0",
-    "babel-helper-is-nodes-equiv": "^0.0.0",
-    "babel-helper-to-multiple-sequence-expressions": "^0.0.0"
+    "babel-helper-is-void-0": "^0.0.0"
   },
   "devDependencies": {}
 }

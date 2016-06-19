@@ -2,11 +2,13 @@
 
 module.exports = ({ Plugin, types: t }) => {
   const isNodesEquiv = require('babel-helper-is-nodes-equiv')(t);
+  const flipExpressions = require('babel-helper-flip-expressions')(t);
+  const toMultipleSequenceExpressions = require('babel-helper-to-multiple-sequence-expressions')(t);
+
   const VOID_0 = t.unaryExpression('void', t.numericLiteral(0), true);
   const condExprSeen = Symbol('condExprSeen');
   const seqExprSeen = Symbol('seqExprSeen');
   const shouldRevisit = Symbol('shouldRevisit');
-  const flipSeen = Symbol('flipSeen');
 
   return {
     visitor: {
@@ -15,71 +17,6 @@ module.exports = ({ Plugin, types: t }) => {
           if (path.node[shouldRevisit]) {
             delete path.node[shouldRevisit];
             path.visit();
-          }
-        },
-      },
-
-      // undefined -> void 0
-      ReferencedIdentifier(path) {
-        if (path.node.name === 'undefined') {
-          path.replaceWith(VOID_0);
-        }
-      },
-
-      // Infinity -> 1 / 0
-      Identifier(path) {
-        if (path.node.name !== 'Infinity') {
-          return;
-        }
-
-        // It's a referenced identifier
-        if (path.scope.getBinding('Infinity')) {
-          return;
-        }
-
-        if (path.parentPath.isObjectProperty({ key: path.node })) {
-          return;
-        }
-
-        if (path.parentPath.isMemberExpression()) {
-          return;
-        }
-
-        path.replaceWith(t.binaryExpression('/', t.numericLiteral(1), t.numericLiteral(0)));
-      },
-
-      // { 'foo': 'bar' } -> { foo: 'bar' }
-      Property: {
-        exit({ node }) {
-          let key = node.key;
-          if (!t.isStringLiteral(key)) {
-            return;
-          }
-
-          if (key.value.match(/^\d+$/)) {
-            node.key = t.numericLiteral(parseInt(node.key.value, 10));
-            node.computed = false;
-          } else if (t.isValidIdentifier(key.value)) {
-            node.key = t.identifier(key.value);
-            node.computed = false;
-          }
-        },
-      },
-
-      // foo['bar'] -> foo.bar
-      MemberExpression: {
-        exit({ node }) {
-          let prop = node.property;
-          if (!node.computed || !t.isStringLiteral(prop)) {
-            return;
-          }
-
-          if (prop.value.match(/^\d+$/)) {
-            node.property = t.numericLiteral(parseInt(prop.value, 10));
-            node.computed = false;
-          } else if (t.isValidIdentifier(prop.value)) {
-            node.property = t.identifier(prop.value);
-            node.computed = false;
           }
         },
       },
@@ -127,116 +64,6 @@ module.exports = ({ Plugin, types: t }) => {
         }*/
       },
 
-      // shorten booleans to a negation
-      // true -> !0
-      // false -> !1
-      Literal(path) {
-        const { node } = path;
-        if (typeof node.value === 'boolean') {
-          path.replaceWith(t.unaryExpression('!', t.numericLiteral(+!node.value), true));
-        }
-      },
-
-      BinaryExpression: {
-        enter: [
-          // flip comparisons with a pure right hand value, this ensures
-          // consistency with comparisons and increases the length of
-          // strings that gzip can match
-          // typeof blah === 'function' -> 'function' === typeof blah
-
-          function (path) {
-            const { node } = path;
-            const { right, left } = node;
-
-            // Make sure we have a constant on the right.
-            if (!t.isLiteral(right) && !isVoid0(right) &&
-                !(t.isUnaryExpression(right) && t.isLiteral(right.argument)) &&
-                !t.isObjectExpression(right) && !t.isArrayExpression(right)
-            ) {
-              return;
-            }
-
-            // Commutative operators.
-            if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
-               ['*', '^', '&', '|'].indexOf(node.operator) >= 0
-            ) {
-              node.left = right;
-              node.right = left;
-              return;
-            }
-
-            if (t.BOOLEAN_NUMBER_BINARY_OPERATORS.indexOf(node.operator) >= 0) {
-              node.left = right;
-              node.right = left;
-              let operator;
-              switch (node.operator) {
-                case '>': operator = '<'; break;
-                case '<': operator = '>'; break;
-                case '>=': operator = '<='; break;
-                case '<=': operator = '>='; break;
-              }
-              node.operator = operator;
-              return;
-            }
-          },
-
-          // simplify comparison operations if we're 100% certain
-          // that each value will always be of the same type
-
-          function (path) {
-            const { node } = path;
-            let op = node.operator;
-            if (op !== '===' && op !== '!==') {
-              return;
-            }
-
-            let left  = path.get('left');
-            let right = path.get('right');
-            const strictMatch = left.baseTypeStrictlyMatches(right);
-            if (strictMatch) {
-              node.operator = node.operator.slice(0, -1);
-            }
-          },
-        ],
-      },
-
-      // Convert guarded expressions
-      // !a && b() --> a || b();
-      // This could change the return result of the expression so we only do it
-      // on things where the result is ignored.
-      LogicalExpression: {
-        enter: [
-          function(path) {
-            const { node } = path;
-
-            if (path.evaluateTruthy(node) === false) {
-              path.replaceWith(node.left);
-            }
-          },
-          function(path) {
-            const { node } = path;
-
-            if (node[flipSeen]) {
-              return;
-            }
-
-            if (!path.parentPath.isExpressionStatement() &&
-                !(path.parentPath.isSequenceExpression() && path.parentPath.parentPath.isExpressionStatement())
-            ) {
-              return;
-            }
-
-            // Start counting savings from one since we can ignore the last
-            // expression.
-            if (shouldFlip(node, 1)) {
-              const newNode = flip(node, true);
-              newNode[flipSeen] = true;
-              path.replaceWith(newNode);
-            }
-          },
-        ],
-      },
-
       UnaryExpression: {
         enter: [
 
@@ -244,7 +71,7 @@ module.exports = ({ Plugin, types: t }) => {
           function(path) {
             const { node } = path;
 
-            if (node.operator !== '!' || node[flipSeen]) {
+            if (node.operator !== '!' || flipExpressions.hasSeen(node)) {
               return;
             }
 
@@ -258,9 +85,8 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            if (shouldFlip(expr, 1)) {
-              const newNode = flip(expr);
-              newNode[flipSeen] = true;
+            if (flipExpressions.shouldFlip(expr, 1)) {
+              const newNode = flipExpressions.flip(expr);
               path.replaceWith(newNode);
             }
           },
@@ -314,8 +140,8 @@ module.exports = ({ Plugin, types: t }) => {
               return;
             }
 
-            if (shouldFlip(node.test)) {
-              node.test = flip(node.test);
+            if (flipExpressions.shouldFlip(node.test)) {
+              node.test = flipExpressions.flip(node.test);
               [node.alternate, node.consequent] = [node.consequent, node.alternate];
             }
           },
@@ -1386,103 +1212,6 @@ module.exports = ({ Plugin, types: t }) => {
     }
   }
 
-  function toMultipleSequenceExpressions(statements) {
-    let retStatements = [];
-    let bailed;
-    do {
-      let res = convert(statements);
-      bailed = res.bailed;
-      let {seq, bailedAtIndex} = res;
-      if (seq) {
-        retStatements.push(t.expressionStatement(seq));
-      }
-      if (bailed && statements[bailedAtIndex]) {
-        retStatements.push(statements[bailedAtIndex]);
-      }
-      if (bailed) {
-        statements = statements.slice(bailedAtIndex + 1);
-        if (!statements.length) {
-          bailed = false;
-        }
-      }
-    } while (bailed);
-
-    return retStatements;
-
-    function convert(nodes) {
-      let exprs = [];
-
-      for (let i = 0; i < nodes.length; i++) {
-        let bail = () => {
-          let seq;
-          if (exprs.length === 1) {
-            seq = exprs[0];
-          } else if (exprs.length) {
-            seq = t.sequenceExpression(exprs);
-          }
-
-          return {
-            seq,
-            bailed: true,
-            bailedAtIndex: i,
-          };
-        };
-
-        let node = nodes[i];
-        if (t.isExpression(node)) {
-          exprs.push(node);
-        } else if (t.isExpressionStatement(node)) {
-          exprs.push(node.expression);
-        } else if (t.isIfStatement(node)) {
-          let consequent;
-          if (node.consequent) {
-            const res = convert([node.consequent]);
-            if (res.bailed) {
-              return bail();
-            }
-            consequent = res.seq;
-          }
-          let alternate;
-          if (node.alternate) {
-            const res = convert([node.alternate]);
-            if (res.bailed) {
-              return bail();
-            }
-            alternate = res.seq;
-          }
-
-          if (!alternate && !consequent) {
-            exprs.push(node.test);
-          } else if (!alternate) {
-            exprs.push(t.logicalExpression('&&', node.test, consequent));
-          } else if (!consequent) {
-            exprs.push(t.logicalExpression('||', node.test, alternate));
-          } else {
-            exprs.push(t.conditionalExpression(node.test, consequent, alternate));
-          }
-        } else if (t.isBlockStatement(node)) {
-          const res = convert(node.body);
-          if (res.bailed) {
-            return bail();
-          }
-          exprs.push(res.seq);
-        } else {
-          return bail();
-        }
-      }
-
-      let seq;
-      if (exprs.length === 1) {
-        seq = exprs[0];
-      } else if (exprs.length) {
-        seq = t.sequenceExpression(exprs);
-      }
-
-      seq = seq;
-      return { seq };
-    }
-  }
-
   function needsBlock(node, parent) {
     return (t.isFunction(parent) && node === parent.body) ||
            t.isTryStatement(parent) || t.isCatchClause(parent) ||
@@ -1567,79 +1296,6 @@ module.exports = ({ Plugin, types: t }) => {
     }
 
     path.visit();
-  }
-
-  function flip(node, resultNotUsed) {
-    let lastNodeDesc;
-    const ret = visit(node);
-
-    if (resultNotUsed && lastNodeDesc) {
-      const { parent, key } = lastNodeDesc;
-      if (parent && key && t.isUnaryExpression(parent[key], { operator: '!' })) {
-        parent[key] = parent[key].argument;
-      }
-    }
-
-    return ret;
-
-    function visit(node, parent, key) {
-      lastNodeDesc = { parent, key };
-
-      if (t.isUnaryExpression(node, { operator: '!' })) {
-        return node.argument;
-      }
-
-      if (t.isLogicalExpression(node)) {
-        node.operator = node.operator === '&&' ? '||' : '&&';
-        node.left = visit(node.left, node, 'left');
-        node.right = visit(node.right, node, 'right');
-        return node;
-      }
-
-      if (t.isBinaryExpression(node)) {
-        let operator;
-        switch (node.operator) {
-          case '!==': operator = '==='; break;
-          case '===': operator = '!=='; break;
-          case '!=': operator = '=='; break;
-          case '==': operator = '!='; break;
-        }
-
-        if (operator) {
-          node.operator = operator;
-          return node;
-        }
-
-        // Falls through to unary expression
-      }
-
-      return t.unaryExpression('!', node, true);
-    }
-  }
-
-  // Takes an expressions and determines if it has
-  // more nodes that could benifit from flipping than not.
-  function shouldFlip(topNode, savings = 0) {
-    visit(topNode);
-    return savings > 0;
-
-    function visit(node) {
-      if (t.isUnaryExpression(node, { operator: '!' })) {
-        savings++;
-        return;
-      }
-
-      if (t.isLogicalExpression(node)) {
-        visit(node.left);
-        visit(node.right);
-        return;
-      }
-
-      if (!(t.isBinaryExpression(node) && t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) > -1)) {
-        // Binary expressions wouldn't hurut because we know how to flip them
-        savings--;
-      }
-    }
   }
 
   function createPrevExpressionEater(keyword) {
