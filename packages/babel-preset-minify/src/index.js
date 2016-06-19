@@ -1,4 +1,5 @@
 module.exports = {
+  minified: true,
   plugins: [
     require('babel-plugin-minify-booleans'),
     require('babel-plugin-minify-computed-member-expressions'),

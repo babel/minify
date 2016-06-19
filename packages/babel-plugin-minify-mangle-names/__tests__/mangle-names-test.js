@@ -5,6 +5,7 @@ const unpad = require('../../../utils/unpad');
 
 function transform(code, options = {}) {
   return babel.transform(code,  {
+    sourceType: 'script',
     plugins: [
       [require('../src/index'), options],
     ],
@@ -152,7 +153,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should labels conflicting with bindings', () => {
+  it('should not have labels conflicting with bindings', () => {
     const source = unpad(`
       function foo() {
         meh: for (;;) {
@@ -199,7 +200,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should be order indepedent', () => {
+  it('should be order independent', () => {
     const source = unpad(`
       function foo() {
         function bar(aaa, bbb, ccc) {
@@ -229,7 +230,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should be order indepedent', () => {
+  it('should be order independent', () => {
     const source = unpad(`
       function foo() {
         (function bar() {
@@ -461,6 +462,52 @@ describe('mangle-names', () => {
       function xoo() {
         var a;
         try {} catch (b) {}
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should not mangle vars in scope with eval' , () => {
+    const source = unpad(`
+      function foo() {
+        var inScopeOuter = 1;
+        (function () {
+          var inScopeInner = 2;
+          eval("inScopeInner + inScopeOuter");
+          (function () {
+            var outOfScope = 1;
+          })();
+        })();
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var inScopeOuter = 1;
+        (function () {
+          var inScopeInner = 2;
+          eval("inScopeInner + inScopeOuter");
+          (function () {
+            var a = 1;
+          })();
+        })();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should mangle names with local eval bindings', () => {
+    const source = unpad(`
+      function eval() {}
+      function foo() {
+        var bar = 1;
+        eval('...');
+      }
+    `);
+    const expected = unpad(`
+      function eval() {}
+      function foo() {
+        var a = 1;
+        eval('...');
       }
     `);
     expect(transform(source)).toBe(expected);

@@ -21,11 +21,35 @@ module.exports = ({ Plugin, types: t }) => {
         },
       },
 
-      /* (function() {})() -> !function() {}()
-      There is a bug in babel in printing this. Disabling for now.
       CallExpression(path) {
         const { node } = path;
 
+        // Boolean(foo) -> !!foo
+        if (t.isIdentifier(node.callee, { name: 'Boolean' }) &&
+          node.arguments.length === 1 &&
+          !path.scope.getBinding('Boolean')) {
+          path.replaceWith(t.unaryExpression('!', t.unaryExpression('!', node.arguments[0], true), true));
+          return;
+        }
+
+        // Number(foo) -> +foo
+        if (t.isIdentifier(node.callee, { name: 'Number' }) &&
+          node.arguments.length === 1 &&
+          !path.scope.getBinding('Number')) {
+          path.replaceWith(t.unaryExpression('+', node.arguments[0], true));
+          return;
+        }
+
+        // String(foo) -> foo + ''
+        if (t.isIdentifier(node.callee, { name: 'String' }) &&
+          node.arguments.length === 1 &&
+          !path.scope.getBinding('String')) {
+          path.replaceWith(t.binaryExpression('+', node.arguments[0], t.stringLiteral('')));
+          return;
+        }
+
+        /* (function() {})() -> !function() {}()
+        There is a bug in babel in printing this. Disabling for now.
         if (t.isFunctionExpression(node.callee) &&
             (t.isExpressionStatement(parent) ||
              (t.isSequenceExpression(parent) && parent.expressions[0] === node))
@@ -37,9 +61,108 @@ module.exports = ({ Plugin, types: t }) => {
             )
           );
           return;
-        }
+        }*/
       },
-      */
+
+      BinaryExpression: {
+        enter: [
+          // flip comparisons with a pure right hand value, this ensures
+          // consistency with comparisons and increases the length of
+          // strings that gzip can match
+          // typeof blah === 'function' -> 'function' === typeof blah
+
+          function (path) {
+            const { node } = path;
+            const { right, left } = node;
+
+            // Make sure we have a constant on the right.
+            if (!t.isLiteral(right) && !isVoid0(right) &&
+                !(t.isUnaryExpression(right) && t.isLiteral(right.argument)) &&
+                !t.isObjectExpression(right) && !t.isArrayExpression(right)
+            ) {
+              return;
+            }
+
+            // Commutative operators.
+            if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
+               ['*', '^', '&', '|'].indexOf(node.operator) >= 0
+            ) {
+              node.left = right;
+              node.right = left;
+              return;
+            }
+
+            if (t.BOOLEAN_NUMBER_BINARY_OPERATORS.indexOf(node.operator) >= 0) {
+              node.left = right;
+              node.right = left;
+              let operator;
+              switch (node.operator) {
+                case '>': operator = '<'; break;
+                case '<': operator = '>'; break;
+                case '>=': operator = '<='; break;
+                case '<=': operator = '>='; break;
+              }
+              node.operator = operator;
+              return;
+            }
+          },
+
+          // simplify comparison operations if we're 100% certain
+          // that each value will always be of the same type
+
+          function (path) {
+            const { node } = path;
+            let op = node.operator;
+            if (op !== '===' && op !== '!==') {
+              return;
+            }
+
+            let left  = path.get('left');
+            let right = path.get('right');
+            const strictMatch = left.baseTypeStrictlyMatches(right);
+            if (strictMatch) {
+              node.operator = node.operator.slice(0, -1);
+            }
+          },
+        ],
+      },
+
+      // Convert guarded expressions
+      // !a && b() --> a || b();
+      // This could change the return result of the expression so we only do it
+      // on things where the result is ignored.
+      LogicalExpression: {
+        enter: [
+          function(path) {
+            const { node } = path;
+
+            if (path.evaluateTruthy(node) === false) {
+              path.replaceWith(node.left);
+            }
+          },
+          function(path) {
+            const { node } = path;
+
+            if (node[flipSeen]) {
+              return;
+            }
+
+            if (!path.parentPath.isExpressionStatement() &&
+                !(path.parentPath.isSequenceExpression() && path.parentPath.parentPath.isExpressionStatement())
+            ) {
+              return;
+            }
+
+            // Start counting savings from one since we can ignore the last
+            // expression.
+            if (shouldFlip(node, 1)) {
+              const newNode = flip(node, true);
+              newNode[flipSeen] = true;
+              path.replaceWith(newNode);
+            }
+          },
+        ],
+      },
 
       UnaryExpression: {
         enter: [
@@ -1204,6 +1327,10 @@ module.exports = ({ Plugin, types: t }) => {
 
   function earlyReturnTransform(path) {
     const { node } = path;
+
+    if (!t.isBlockStatement(node.body)) {
+      return;
+    }
 
     for (let i = node.body.body.length; i >= 0; i--) {
       const statement = node.body.body[i];

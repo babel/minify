@@ -51,7 +51,7 @@ function foo2() { f(); }
 
 ### [minify-empty-function](/packages/babel-plugin-minify-empty-function)
 
-This mostly a Facebook-specific transform that removes noop function
+This is mostly a Facebook-specific transform that removes noop function
 calls. However, can be generalized to detect and remove noops.
 
 ### [minify-mangle-names](/packages/babel-plugin-minify-mangle-names)
@@ -124,7 +124,7 @@ function foo2() {
 **Out**
 ```js
 function foo() {
-  x &&)a();
+  x && a();
 }
 function foo2() {
   x ? a() : b();
@@ -194,13 +194,13 @@ $ npm run bootstrap
 Then you can either run:
 
 ```sh
-$ make build
+$ npm run build
 ```
 
 to build Babel **once** or:
 
 ```sh
-$ make watch
+$ npm run watch
 ```
 
 to have Babel build itself then incrementally build files on change.

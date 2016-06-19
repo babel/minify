@@ -64,7 +64,20 @@ module.exports = ({ Plugin, types: t }) => {
     run() {
       this.program.traverse(collectVisitor, {
         recordBindingPath: (binding, path) => this.recordBindingPath(binding, path),
-        recordScope: scope => this.recordScope(scope),
+        recordScope: scope => {
+          this.currentScope = scope;
+          this.recordScope(scope);
+        },
+        setScopeUnsafe: () => {
+          let scope = this.currentScope;
+          if (scope) {
+            scope.unsafe = true;
+            while (scope.parent) {
+              scope = scope.parent;
+              scope.unsafe = true;
+            }
+          }
+        },
         charset: this.charset,
       });
 
@@ -166,6 +179,9 @@ module.exports = ({ Plugin, types: t }) => {
           return;
         }
 
+        if (binding.scope.unsafe) {
+          return;
+        }
         if (binding.scope.getFunctionParent().path.isProgram()) {
           return;
         }
@@ -203,6 +219,13 @@ module.exports = ({ Plugin, types: t }) => {
         if (path.parent.label === node) {
           return;
         }
+      }
+
+      // Doesn't take care of local eval bindings yet
+      if (node.name === "eval" &&
+          path.parent.type === 'CallExpression' &&
+          !path.scope.getBinding('eval')) {
+        this.setScopeUnsafe();
       }
 
       // A function declaration name maybe shadowed by a variable
