@@ -1,0 +1,16 @@
+{
+  "name": "babel-plugin-transform-remove-debugger",
+  "version": "6.8.0",
+  "description": "Remove debugger statements",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-transform-remove-debugger",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
