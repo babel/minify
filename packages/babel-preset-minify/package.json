@@ -23,7 +23,8 @@
     "babel-plugin-minify-simplify": "^0.0.0",
     "babel-plugin-minify-type-constructors": "^0.0.0",
     "babel-plugin-minify-undefined": "^0.0.0",
-    "babel-plugin-transform-member-expression-literals": "^6.8.0"
+    "babel-plugin-transform-member-expression-literals": "^6.8.0",
+    "babel-plugin-transform-merge-sibling-variables": "^6.8.0"
   },
   "devDependencies": {}
 }

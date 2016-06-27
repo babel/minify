@@ -17,32 +17,6 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('concat vars in for loops', () => {
-    const source = unpad(`
-      var i = 0;
-      var j = 0;
-      for (var x = 0; x < 10; x++) console.log(i + x);
-    `);
-    const expected = 'for (var i = 0, j = 0, x = 0; x < 10; x++) console.log(i + x);';
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it('concat vars', () => {
-    const source = unpad(`
-      var i = 0;
-      var x = 0;
-      var y = 0;
-    `);
-    const expected = unpad(`
-      var i = 0,
-          x = 0,
-          y = 0;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
   it('should turn for loop block to a single statement', () => {
     const source = unpad(`
       for (var x = 0; x < 10; x++) {

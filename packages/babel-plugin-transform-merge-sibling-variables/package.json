@@ -1,0 +1,16 @@
+{
+  "name": "babel-plugin-transform-merge-sibling-variables",
+  "version": "6.8.0",
+  "description": "Merge sibling variables into one.",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-transform-merge-sibling-variables",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

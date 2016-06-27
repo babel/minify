@@ -11,6 +11,7 @@ module.exports = {
     require('babel-plugin-minify-simplify'),
     require('babel-plugin-minify-type-constructors'),
     require('babel-plugin-minify-undefined'),
-    require('babel-plugin-transform-member-expression-literals')
+    require('babel-plugin-transform-member-expression-literals'),
+    require('babel-plugin-transform-merge-sibling-variables'),
   ],
 };
