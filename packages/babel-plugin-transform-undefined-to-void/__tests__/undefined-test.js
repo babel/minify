@@ -11,8 +11,14 @@ function transform(code) {
 
 describe('undefined-plugin', () => {
   it('should turn undefined into void 0', () => {
-    const source = 'undefined;';
-    const expected = 'void 0;';
+    const source = 'var foo;foo === undefined;';
+    const expected = 'var foo;foo === void 0;';
+    expect(transform(source)).toBe(expected);
+  });
+
+  it('should turn undefined into void 0 in a MemberExpression', () => {
+    const source = 'var foo;foo === undefined.foo;';
+    const expected = 'var foo;foo === (void 0).foo;';
     expect(transform(source)).toBe(expected);
   });
 });

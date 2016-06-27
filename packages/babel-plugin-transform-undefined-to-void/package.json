@@ -1,9 +1,9 @@
 {
-  "name": "babel-plugin-minify-undefined",
-  "version": "0.0.0",
-  "description": "",
+  "name": "babel-plugin-transform-undefined-to-void",
+  "version": "6.8.0",
+  "description": "Replace references to `undefined` with `void 0`",
   "homepage": "https://github.com/amasad/babel-minify#readme",
-  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-minify-undefined",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-transform-undefined-to-void",
   "bugs": "https://github.com/amasad/babel-minify/issues",
   "author": "amasad",
   "license": "MIT",
