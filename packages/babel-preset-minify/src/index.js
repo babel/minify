@@ -1,7 +1,6 @@
 module.exports = {
   minified: true,
   plugins: [
-    require('babel-plugin-minify-computed-properties'),
     require('babel-plugin-minify-constant-folding'),
     require('babel-plugin-minify-dead-code-elimination'),
     require('babel-plugin-minify-infinity'),
@@ -13,5 +12,6 @@ module.exports = {
     require('babel-plugin-transform-member-expression-literals'),
     require('babel-plugin-transform-merge-sibling-variables'),
     require('babel-plugin-transform-minify-booleans'),
+    require('babel-plugin-transform-property-literals'),
   ],
 };
