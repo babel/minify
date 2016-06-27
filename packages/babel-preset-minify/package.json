@@ -12,7 +12,6 @@
     "babel-preset"
   ],
   "dependencies": {
-    "babel-plugin-minify-computed-properties": "^0.0.0",
     "babel-plugin-minify-constant-folding": "^0.0.0",
     "babel-plugin-minify-dead-code-elimination": "^0.0.0",
     "babel-plugin-minify-flip-comparisons": "^0.0.0",
@@ -24,7 +23,9 @@
     "babel-plugin-minify-undefined": "^0.0.0",
     "babel-plugin-transform-member-expression-literals": "^6.8.0",
     "babel-plugin-transform-merge-sibling-variables": "^6.8.0",
-    "babel-plugin-transform-minify-booleans": "^6.8.0"
+    "babel-plugin-transform-minify-booleans": "^6.8.0",
+    "babel-plugin-transform-property-literals": "^6.8.0",
+    "babel-plugin-transform-simplify-comparison-operators": "^6.8.0"
   },
   "devDependencies": {}
 }

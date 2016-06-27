@@ -10,7 +10,7 @@ function transform(code) {
   }).code;
 }
 
-describe('strict-equals-plugin', () => {
+describe('simplify-comparison-operators-plugin', () => {
   it('should simplify comparison', () => {
     const source = '\'function\' === typeof a;';
     const expected = '\'function\' == typeof a;';
@@ -49,7 +49,7 @@ describe('strict-equals-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not simplify comparison', () => {
+  it('should not simplify comparison 2', () => {
     const source = unpad(`
       var x;
       if (wow) x = foo();
@@ -62,5 +62,15 @@ describe('strict-equals-plugin', () => {
     `);
 
     expect(transform(source)).toBe(expected);
+  });
+
+  it('should not simplify comparison if already simplified', function() {
+    const source = 'typeof 1 == "number";';
+    expect(transform(source)).toBe(source);
+  });
+
+  it('should not simplify comparison if not equality check', function() {
+    const source = 'a > b;';
+    expect(transform(source)).toBe(source);
   });
 });

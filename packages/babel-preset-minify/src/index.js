@@ -13,5 +13,6 @@ module.exports = {
     require('babel-plugin-transform-merge-sibling-variables'),
     require('babel-plugin-transform-minify-booleans'),
     require('babel-plugin-transform-property-literals'),
+    require('babel-plugin-transform-simplify-comparison-operators'),
   ],
 };
