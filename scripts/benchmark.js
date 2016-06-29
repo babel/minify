@@ -73,6 +73,14 @@ function test(name, callback) {
   });
 }
 
+test('minify-preset', function (code, callback) {
+  return babel.transform(code, {
+    sourceType: 'script',
+    presets: [require('../packages/babel-preset-minify')],
+    comments: false,
+  }).code;
+});
+
 test('babel', function (code, callback) {
   return babel.transform(code, {
     sourceType: 'script',
