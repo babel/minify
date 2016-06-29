@@ -553,5 +553,41 @@ describe("mangle-names", () => {
     `);
 
     expect(transform(source)).toBe(expected);
-  })
+  });
+
+  it('should keep mangled named consistent across scopes when defined later on', () => {
+    const source = unpad(`
+      (function() {
+        function foo() {
+          {
+            var baz = true;
+
+            {
+              bar();
+            }
+          }
+        }
+
+        function bar() {}
+      }());
+    `);
+
+    const expected = unpad(`
+      (function() {
+        function a() {
+          {
+            var b = true;
+
+            {
+              c();
+            }
+          }
+        }
+
+        function c() {}
+      }());
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
