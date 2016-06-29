@@ -1,4 +1,4 @@
-module.exports = ({ Plugin, types: t }) => {
+module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
@@ -98,7 +98,7 @@ module.exports = ({ Plugin, types: t }) => {
 
         // Don't collide params with id.
         // TODO only do this if the param is in the same function head
-        if (existing.kind === 'hoisted' && binding.kind === 'param') {
+        if (existing.kind === "hoisted" && binding.kind === "param") {
           return false;
         }
 
@@ -120,7 +120,7 @@ module.exports = ({ Plugin, types: t }) => {
   }
 
   const collectVisitor = {
-    'ReferencedIdentifier|BindingIdentifier'(path) {
+    "ReferencedIdentifier|BindingIdentifier"(path) {
       const { scope, node } = path;
 
       // Node is a label.
@@ -134,12 +134,12 @@ module.exports = ({ Plugin, types: t }) => {
       }
 
       // Doesn't take care of local eval bindings yet
-      if (node.name === 'eval' && path.parent.type === 'CallExpression' && !path.scope.getBinding('eval')) {
+      if (node.name === "eval" && path.parent.type === "CallExpression" && !path.scope.getBinding("eval")) {
         // Mark all scopes from this one up as unsafe.
         let evalScope = scope;
         do {
           this.unsafeScopes.add(evalScope);
-        } while(evalScope = evalScope.parent);
+        } while (evalScope = evalScope.parent);
       }
 
       // Retrieve the binding.

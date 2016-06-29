@@ -1,8 +1,8 @@
 jest.autoMockOff();
 
-const traverse = require('babel-traverse').default;
-const babel    = require('babel-core');
-const unpad    = require('../../../utils/unpad');
+const traverse = require("babel-traverse").default;
+const babel    = require("babel-core");
+const unpad    = require("../../../utils/unpad");
 
 function transform(code, options = {}) {
   return babel.transform(code,  {
@@ -231,7 +231,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should be order independent 2', () => {
+  it("should be order independent 2", () => {
     const source = unpad(`
       function foo() {
         (function bar() {
@@ -514,7 +514,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should integrate with block scoping plugin', () => {
+  it("should integrate with block scoping plugin", () => {
     const srcTxt = unpad(`
       function f(x) {
         for (let i = 0; i; i++) {
@@ -526,13 +526,13 @@ describe("mangle-names", () => {
     `);
 
     const first = babel.transform(srcTxt, {
-      plugins: ['transform-es2015-block-scoping'],
+      plugins: ["transform-es2015-block-scoping"],
     });
 
     traverse.clearCache();
 
     const source = babel.transformFromAst(first.ast, null, {
-      plugins: [require('../src/index')],
+      plugins: [require("../src/index")],
     }).code;
 
     const expected = unpad(`
@@ -555,7 +555,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should keep mangled named consistent across scopes when defined later on', () => {
+  it("should keep mangled named consistent across scopes when defined later on", () => {
     const source = unpad(`
       (function() {
         function foo() {
