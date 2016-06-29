@@ -1,16 +1,16 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
-    plugins: [require('../src/index')],
+    plugins: [require("../src/index")],
   }).code;
 }
 
-describe('constant-folding-plugin', () => {
-  it('should evaluate some expressions', () => {
+describe("constant-folding-plugin", () => {
+  it("should evaluate some expressions", () => {
     const source = unpad(`
       "a" + "b"
       2 * 3;
@@ -35,7 +35,7 @@ describe('constant-folding-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should skip -0', () => {
+  it("should skip -0", () => {
     const source = unpad(`
       -0;
       +-0;

@@ -1,13 +1,13 @@
-'use strict';
+"use strict";
 
-module.exports = function({ types: t }) {
+module.exports = function() {
   return {
     visitor: {
       CallExpression(path) {
-       if (path.get('callee').matchesPattern('console', true)) {
-         path.remove();
-       }
-     },
+        if (path.get("callee").matchesPattern("console", true)) {
+          path.remove();
+        }
+      },
     },
   };
 };

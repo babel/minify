@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-module.exports = function({ types: t }) {
+module.exports = function() {
   return {
     visitor: {
       // simplify comparison operations if we're 100% certain
@@ -8,12 +8,12 @@ module.exports = function({ types: t }) {
       BinaryExpression(path) {
         const { node } = path;
         let op = node.operator;
-        if (op !== '===' && op !== '!==') {
+        if (op !== "===" && op !== "!==") {
           return;
         }
 
-        let left  = path.get('left');
-        let right = path.get('right');
+        let left  = path.get("left");
+        let right = path.get("right");
         const strictMatch = left.baseTypeStrictlyMatches(right);
         if (strictMatch) {
           node.operator = node.operator.slice(0, -1);

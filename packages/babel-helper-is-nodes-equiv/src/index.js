@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
 module.exports = function(t) {
   function equiv(a, b) {
-    if (typeof a !== 'object' || typeof a !== 'object' || a == null || b == null) {
+    if (typeof a !== "object" || typeof a !== "object" || a == null || b == null) {
       return a === b;
     }
 

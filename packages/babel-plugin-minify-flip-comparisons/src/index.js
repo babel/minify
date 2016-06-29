@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
 module.exports = function({ types: t }) {
-  const isVoid0 = require('babel-helper-is-void-0')(t);
+  const isVoid0 = require("babel-helper-is-void-0")(t);
 
   return {
     visitor: {
@@ -23,7 +23,7 @@ module.exports = function({ types: t }) {
 
         // Commutative operators.
         if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
-           ['*', '^', '&', '|'].indexOf(node.operator) >= 0
+           ["*", "^", "&", "|"].indexOf(node.operator) >= 0
         ) {
           node.left = right;
           node.right = left;
@@ -35,10 +35,10 @@ module.exports = function({ types: t }) {
           node.right = left;
           let operator;
           switch (node.operator) {
-            case '>': operator = '<'; break;
-            case '<': operator = '>'; break;
-            case '>=': operator = '<='; break;
-            case '<=': operator = '>='; break;
+          case ">": operator = "<"; break;
+          case "<": operator = ">"; break;
+          case ">=": operator = "<="; break;
+          case "<=": operator = ">="; break;
           }
           node.operator = operator;
           return;

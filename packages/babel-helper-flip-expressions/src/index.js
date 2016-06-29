@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-const flipSeen = Symbol('flipSeen');
+const flipSeen = Symbol("flipSeen");
 
 module.exports = function(t) {
   return {
@@ -15,7 +15,7 @@ module.exports = function(t) {
       return savings > 0;
 
       function visit(node) {
-        if (t.isUnaryExpression(node, { operator: '!' })) {
+        if (t.isUnaryExpression(node, { operator: "!" })) {
           savings++;
           return;
         }
@@ -41,7 +41,7 @@ module.exports = function(t) {
 
       if (resultNotUsed && lastNodeDesc) {
         const { parent, key } = lastNodeDesc;
-        if (parent && key && t.isUnaryExpression(parent[key], { operator: '!' })) {
+        if (parent && key && t.isUnaryExpression(parent[key], { operator: "!" })) {
           parent[key] = parent[key].argument;
         }
       }
@@ -51,24 +51,24 @@ module.exports = function(t) {
       function visit(node, parent, key) {
         lastNodeDesc = { parent, key };
 
-        if (t.isUnaryExpression(node, { operator: '!' })) {
+        if (t.isUnaryExpression(node, { operator: "!" })) {
           return node.argument;
         }
 
         if (t.isLogicalExpression(node)) {
-          node.operator = node.operator === '&&' ? '||' : '&&';
-          node.left = visit(node.left, node, 'left');
-          node.right = visit(node.right, node, 'right');
+          node.operator = node.operator === "&&" ? "||" : "&&";
+          node.left = visit(node.left, node, "left");
+          node.right = visit(node.right, node, "right");
           return node;
         }
 
         if (t.isBinaryExpression(node)) {
           let operator;
           switch (node.operator) {
-            case '!==': operator = '==='; break;
-            case '===': operator = '!=='; break;
-            case '!=': operator = '=='; break;
-            case '==': operator = '!='; break;
+          case "!==": operator = "==="; break;
+          case "===": operator = "!=="; break;
+          case "!=": operator = "=="; break;
+          case "==": operator = "!="; break;
           }
 
           if (operator) {
@@ -79,7 +79,7 @@ module.exports = function(t) {
           // Falls through to unary expression
         }
 
-        return t.unaryExpression('!', node, true);
+        return t.unaryExpression("!", node, true);
       }
     },
   };

@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-module.exports = ({ Plugin, types: t }) => {
-  const NO_MEMBER = Symbol('no member');
+module.exports = ({ types: t }) => {
+  const NO_MEMBER = Symbol("no member");
 
   const replaceVisitor = {
     ReferencedIdentifier(path) {
@@ -15,7 +15,7 @@ module.exports = ({ Plugin, types: t }) => {
       if (path.parentPath.isMemberExpression({ object: node })) {
         const { property } = path.parent;
         const key = t.isIdentifier(property) && property.name;
-        if (typeof key === 'string') {
+        if (typeof key === "string") {
           options = optionsMap[key];
           path = path.parentPath;
         }
@@ -59,7 +59,7 @@ module.exports = ({ Plugin, types: t }) => {
             // Convert to a node, we only allow identifiers and literals as replacements
             if (!replacement.type.match(/literal|identifier/i)) {
               throw new Error(
-                'Only literals and identifier are supported as replacements'
+                "Only literals and identifier are supported as replacements"
               );
             }
 

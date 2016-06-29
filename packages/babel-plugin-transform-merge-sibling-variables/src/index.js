@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-module.exports = function({ types: t }) {
+module.exports = function() {
   return {
     visitor: {
       VariableDeclaration: {
@@ -37,7 +37,7 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            let init = next.get('init');
+            let init = next.get("init");
             if (!init.isVariableDeclaration({ kind: node.kind })) {
               return;
             }

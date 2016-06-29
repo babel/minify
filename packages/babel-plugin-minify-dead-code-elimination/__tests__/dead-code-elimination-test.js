@@ -1,29 +1,29 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const unpad = require("../../../utils/unpad");
 
 function transform(code, options) {
   return babel.transform(code,  {
-    plugins: [[require('../src/index'), options]],
+    plugins: [[require("../src/index"), options]],
   }).code;
 }
 
-describe('dce-plugin', () => {
-  it('should remove bindings with no references', () => {
-    const source = 'function foo() {var x = 1;}';
-    const expected = 'function foo() {}';
+describe("dce-plugin", () => {
+  it("should remove bindings with no references", () => {
+    const source = "function foo() {var x = 1;}";
+    const expected = "function foo() {}";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should keep bindings in the global namespace ', () => {
-    const source = 'var x = 1;';
-    const expected = 'var x = 1;';
+  it("should keep bindings in the global namespace ", () => {
+    const source = "var x = 1;";
+    const expected = "var x = 1;";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle impure right-hands', () => {
-    const source = 'function foo() { var x = f(); }';
+  it("should handle impure right-hands", () => {
+    const source = "function foo() { var x = f(); }";
     const expected = unpad(`
       function foo() {
         f();
@@ -32,7 +32,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not remove params (preserve fn.length)', () => {
+  it("should not remove params (preserve fn.length)", () => {
     const source = unpad(`
       _(function bar(p) {
         return 1;
@@ -67,7 +67,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should inline binding with one reference', () => {
+  it("should inline binding with one reference", () => {
     const source = unpad(`
       function foo() {
         var x = 1;
@@ -84,7 +84,7 @@ describe('dce-plugin', () => {
   });
 
   // This isn't considered pure. (it should)
-  it('should inline binding with one reference 2', () => {
+  it("should inline binding with one reference 2", () => {
     const source = unpad(`
       function foo() {
         var y = 1, x = { y: y };
@@ -100,7 +100,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not inline objects literals in loops', () => {
+  it("should not inline objects literals in loops", () => {
     const source = unpad(`
       function foo() {
         var x = { y: 1 };
@@ -129,7 +129,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not inline object literals in exprs in loops', () => {
+  it("should not inline object literals in exprs in loops", () => {
     const source = unpad(`
       function a(p) {
         var w = p || [];
@@ -151,7 +151,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should inline objects in if statements', () => {
+  it("should inline objects in if statements", () => {
     const source = unpad(`
       function foo() {
         var x = { y: 1 }, y = ['foo'], z = function () {};
@@ -167,7 +167,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not inline objects in functions', () => {
+  it("should not inline objects in functions", () => {
     const source = unpad(`
       function foo() {
         var x = { y: 1 },
@@ -192,7 +192,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove side effectless statements', () => {
+  it("should remove side effectless statements", () => {
     const source = unpad(`
       function foo() {
         1;
@@ -205,7 +205,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should work with multiple scopes', () => {
+  it("should work with multiple scopes", () => {
     const expected = unpad(`
       function x() {
         function y() {
@@ -229,7 +229,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should inline function decl', () => {
+  it("should inline function decl", () => {
     const expected = unpad(`
       function foo() {
         (function () {
@@ -249,7 +249,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should inline function expressions', () => {
+  it("should inline function expressions", () => {
     const source = unpad(`
       function foo() {
         var x = function() {
@@ -269,7 +269,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not inline in a different scope', () => {
+  it("should not inline in a different scope", () => {
     const source = unpad(`
       function foo() {
         var x = function (a) {
@@ -290,7 +290,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should handle recursion', () => {
+  it("should handle recursion", () => {
     const source = unpad(`
       function baz() {
         var bar = function foo(config) {
@@ -310,7 +310,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should handle recursion 2', () => {
+  it("should handle recursion 2", () => {
     const source = unpad(`
       function baz() {
         var foo = function foo(config) {
@@ -331,7 +331,7 @@ describe('dce-plugin', () => {
   });
 
 
-  it('should handle mutual recursion', () => {
+  it("should handle mutual recursion", () => {
     const source = unpad(`
       function baz() {
         function foo() {
@@ -356,7 +356,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not inline vars with multiple references', () => {
+  it("should not inline vars with multiple references", () => {
     const source = unpad(`
       function foo() {
         var x = function() {
@@ -386,7 +386,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove redundant returns' , () => {
+  it("should remove redundant returns" , () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -406,7 +406,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove redundant returns part 2' , () => {
+  it("should remove redundant returns part 2" , () => {
     const source = unpad(`
       function foo() {
         y();
@@ -422,7 +422,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove redundant returns (complex)' , () => {
+  it("should remove redundant returns (complex)" , () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -447,7 +447,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should keep needed returns' , () => {
+  it("should keep needed returns" , () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -470,7 +470,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove code unreachable after return', () => {
+  it("should remove code unreachable after return", () => {
     const source = unpad(`
       function foo() {
         z();
@@ -487,7 +487,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should be fine with fun decl after return', () => {
+  it("should be fine with fun decl after return", () => {
     const source = unpad(`
       function foo() {
         z();
@@ -512,7 +512,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should handle returns that were orphaned', () => {
+  it("should handle returns that were orphaned", () => {
     const source = unpad(`
       var a = true;
       function foo() {
@@ -528,7 +528,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should handle returns that were orphaned 2', () => {
+  it("should handle returns that were orphaned 2", () => {
     const source = unpad(`
       var a = true;
       function foo() {
@@ -546,7 +546,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should handle orphaned + redundant returns' , () => {
+  it("should handle orphaned + redundant returns" , () => {
     const source = unpad(`
       var x = true;
       function foo() {
@@ -571,7 +571,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove functions only called in themselves', () => {
+  it("should remove functions only called in themselves", () => {
     const source = unpad(`
       function foo() {
         function baz() {
@@ -583,12 +583,12 @@ describe('dce-plugin', () => {
         }
       }
     `);
-    const expected = 'function foo() {}';
+    const expected = "function foo() {}";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove functions only called in themselves 2', () => {
+  it("should remove functions only called in themselves 2", () => {
     const source = unpad(`
       function foo() {
         var baz = function () {
@@ -600,12 +600,12 @@ describe('dce-plugin', () => {
         };
       }
     `);
-    const expected = 'function foo() {}';
+    const expected = "function foo() {}";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove functions only called in themselves 3', () => {
+  it("should remove functions only called in themselves 3", () => {
     const source = unpad(`
       function foo() {
         function boo() {}
@@ -619,12 +619,12 @@ describe('dce-plugin', () => {
         }
       }
     `);
-    const expected = 'function foo() {}';
+    const expected = "function foo() {}";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove functions only called in themselves 3', () => {
+  it("should remove functions only called in themselves 3", () => {
     const source = unpad(`
       (function () {
         function foo () {
@@ -655,7 +655,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove dead if statements', () => {
+  it("should remove dead if statements", () => {
     const source = unpad(`
       if (1) {
         foo();
@@ -675,7 +675,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove empty if statements block', () => {
+  it("should remove empty if statements block", () => {
     const source = unpad(`
       if (a) {
       } else {
@@ -698,19 +698,19 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should evaluate conditional expressions', () => {
-    const source = 'true ? a() : b();';
-    const expected = 'a();';
+  it("should evaluate conditional expressions", () => {
+    const source = "true ? a() : b();";
+    const expected = "a();";
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should evaluate conditional expressions 2', () => {
-    const source = 'false ? a() : b();';
-    const expected = 'b();';
+  it("should evaluate conditional expressions 2", () => {
+    const source = "false ? a() : b();";
+    const expected = "b();";
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not remove needed expressions', () => {
+  it("should not remove needed expressions", () => {
     const source = unpad(`
       var n = 1;
       if (foo) n;
@@ -724,7 +724,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should not remove needed expressions', () => {
+  it("should not remove needed expressions", () => {
     const source = unpad(`
       function foo(a) {
         var a = a ? a : a;
@@ -738,7 +738,7 @@ describe('dce-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should join the assignment and def', () => {
+  it("should join the assignment and def", () => {
     const source = unpad(`
       var x;
       x = 1;
@@ -751,7 +751,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not replace the wrong things', () => {
+  it("should not replace the wrong things", () => {
     const source = unpad(`
       function foo() {
         var n = 1;
@@ -776,7 +776,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle case blocks ', () => {
+  it("should handle case blocks ", () => {
     const source = unpad(`
       function a() {
         switch (foo) {
@@ -800,7 +800,7 @@ describe('dce-plugin', () => {
   });
 
   // TODO: Handle this (blocks that have no semantic meaning).
-  xit('should understand extraneous blocks', () => {
+  xit("should understand extraneous blocks", () => {
     const source = unpad(`
       function a() {
         var f = 25;
@@ -847,7 +847,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should understand closures', () => {
+  it("should understand closures", () => {
     const source = unpad(`
       function a() {
         var f = 25;
@@ -891,7 +891,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle vars in if statements', () => {
+  it("should handle vars in if statements", () => {
     const source = unpad(`
       function a() {
         if (x()) {
@@ -913,7 +913,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle vars in if statements 2', () => {
+  it("should handle vars in if statements 2", () => {
     const source = unpad(`
       function a() {
         if (x()) var foo = 1;
@@ -931,7 +931,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle vars in for statements', () => {
+  it("should handle vars in for statements", () => {
     const source = unpad(`
       function a() {
         for (;;) var foo = 1;
@@ -949,7 +949,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle for statements 2', () => {
+  it("should handle for statements 2", () => {
     const source = unpad(`
       function a() {
         for (;;) {
@@ -970,7 +970,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should remove binding and assignment', () => {
+  it("should remove binding and assignment", () => {
     const source = unpad(`
       function a() {
         var a, b, c;
@@ -986,7 +986,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should nore remove binding and assignment if the value is used', () => {
+  it("should nore remove binding and assignment if the value is used", () => {
     const source = unpad(`
       function a() {
         var x = 1;
@@ -1004,7 +1004,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should keep side-effectful assignment values', () => {
+  it("should keep side-effectful assignment values", () => {
     const source = unpad(`
       function a() {
         var x;
@@ -1021,7 +1021,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not evaluate this binary expression to truthy', () => {
+  it("should not evaluate this binary expression to truthy", () => {
     const source = unpad(`
       function boo() {
         var bar = foo || [];
@@ -1043,7 +1043,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('eval the following to false', () => {
+  it("eval the following to false", () => {
     const source = unpad(`
       function bar () {
         var x = foo || 'boo';
@@ -1061,7 +1061,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should get rid of the constant violations', () => {
+  it("should get rid of the constant violations", () => {
     const source = unpad(`
       function bar () {
         var x = foo();
@@ -1080,7 +1080,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should remove names from NFE', () => {
+  it("should remove names from NFE", () => {
     const source = unpad(`
       function bar() {
         return function wow() {
@@ -1100,7 +1100,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not remove names from NFE when referenced', () => {
+  it("should not remove names from NFE when referenced", () => {
     const source = unpad(`
       function bar() {
         return function wow() {
@@ -1120,7 +1120,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should remove name from NFE when shadowed', () => {
+  it("should remove name from NFE when shadowed", () => {
     const source = unpad(`
       function bar() {
         return function wow() {
@@ -1144,8 +1144,8 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should track purity', () => {
-   const source = unpad(`
+  it("should track purity", () => {
+    const source = unpad(`
      function x(a) {
        var l = a;
        var x = l
@@ -1162,8 +1162,8 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should latch on to exisiting vars', () => {
-   const source = unpad(`
+  it("should latch on to exisiting vars", () => {
+    const source = unpad(`
      function x(a) {
        if (a) {
          var x = a.wat;
@@ -1191,8 +1191,8 @@ describe('dce-plugin', () => {
     expect(transform(source, { optimizeRawSize: true })).toBe(expected);
   });
 
-  it('should put the var in the for in', () => {
-   const source = unpad(`
+  it("should put the var in the for in", () => {
+    const source = unpad(`
      function x(a) {
        var x;
        wow();
@@ -1210,8 +1210,8 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put the var in the for in only when the var is alone', () => {
-   const source = unpad(`
+  it("should put the var in the for in only when the var is alone", () => {
+    const source = unpad(`
      function x(a) {
        var x, y;
        wow(y);
@@ -1230,8 +1230,8 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('inlining should check name collision', () => {
-   const source = unpad(`
+  it("inlining should check name collision", () => {
+    const source = unpad(`
      function foo() {
        var a = 1;
        var b = a;
@@ -1260,8 +1260,8 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('inlining should check name collision for expressions', () => {
-   const source = unpad(`
+  it("inlining should check name collision for expressions", () => {
+    const source = unpad(`
      function foo() {
        var a = c + d;
        function x(c, d) {
@@ -1286,7 +1286,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should replace with empty statement if in body position 1', () => {
+  it("should replace with empty statement if in body position 1", () => {
     const source = unpad(`
       function foo() {
         var a = 0;
@@ -1302,7 +1302,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should replace with empty statement if in body position 2', () => {
+  it("should replace with empty statement if in body position 2", () => {
     const source = unpad(`
       function foo() {
         while (wat()) 1;
@@ -1317,7 +1317,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should replace with empty statement if in body position 3', () => {
+  it("should replace with empty statement if in body position 3", () => {
     const source = unpad(`
       function foo() {
         while (wat()) var x;
@@ -1332,7 +1332,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('it should update binding path', () => {
+  it("it should update binding path", () => {
     const source = unpad(`
       function foo() {
         var key;
@@ -1350,7 +1350,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit('it should evaluate and remove falsy code', () => {
+  xit("it should evaluate and remove falsy code", () => {
     const source = unpad(`
       foo(0 && bar());
     `);
@@ -1360,7 +1360,7 @@ describe('dce-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not move functions into other scopes', () => {
+  it("should not move functions into other scopes", () => {
     const source = unpad(`
       function foo() {
         var a = 1;

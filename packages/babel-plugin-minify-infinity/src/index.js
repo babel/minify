@@ -1,17 +1,17 @@
-'use strict';
+"use strict";
 
 module.exports = function({ types: t }) {
-  const INFINITY = t.binaryExpression('/', t.numericLiteral(1), t.numericLiteral(0));
+  const INFINITY = t.binaryExpression("/", t.numericLiteral(1), t.numericLiteral(0));
   return {
     visitor: {
       // Infinity -> 1 / 0
       Identifier(path) {
-        if (path.node.name !== 'Infinity') {
+        if (path.node.name !== "Infinity") {
           return;
         }
 
         // It's a referenced identifier
-        if (path.scope.getBinding('Infinity')) {
+        if (path.scope.getBinding("Infinity")) {
           return;
         }
 

@@ -1,7 +1,7 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const plugin = require('../src/index');
+const babel = require("babel-core");
+const plugin = require("../src/index");
 
 function transform(code) {
   return babel.transform(code,  {
@@ -9,16 +9,16 @@ function transform(code) {
   }).code;
 }
 
-describe('remove-debugger-plugin', () => {
-  it('should remove debugger', () => {
-    const source = 'debugger;';
-    const expected = '';
+describe("remove-debugger-plugin", () => {
+  it("should remove debugger", () => {
+    const source = "debugger;";
+    const expected = "";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should remove debugger only', () => {
-    const source = 'debugger; 1;';
-    const expected = '1;';
+  it("should remove debugger only", () => {
+    const source = "debugger; 1;";
+    const expected = "1;";
     expect(transform(source)).toBe(expected);
   });
 });

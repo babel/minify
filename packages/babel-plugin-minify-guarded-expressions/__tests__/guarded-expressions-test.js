@@ -1,8 +1,8 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const plugin = require('../src/index');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const plugin = require("../src/index");
+const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
@@ -10,8 +10,8 @@ function transform(code) {
   }).code;
 }
 
-describe('guarded-expressions-plugin', () => {
-  it('should flip logical expressions', () => {
+describe("guarded-expressions-plugin", () => {
+  it("should flip logical expressions", () => {
     const source = unpad(`
       !x && foo();
     `);
@@ -23,7 +23,7 @@ describe('guarded-expressions-plugin', () => {
     expect(transform(source).trim()).toBe(expected.trim());
   });
 
-  it('should simplify falsy logical expressions', function() {
+  it("should simplify falsy logical expressions", function() {
     let source = unpad(`
       alert(0 && new Foo());
     `);

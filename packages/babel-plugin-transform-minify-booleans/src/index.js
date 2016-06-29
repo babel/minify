@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
 module.exports = function({ types: t }) {
-  const TRUE = t.unaryExpression('!', t.numericLiteral(0), true);
-  const FALSE = t.unaryExpression('!', t.numericLiteral(1), true);
+  const TRUE = t.unaryExpression("!", t.numericLiteral(0), true);
+  const FALSE = t.unaryExpression("!", t.numericLiteral(1), true);
 
   return {
     visitor: {

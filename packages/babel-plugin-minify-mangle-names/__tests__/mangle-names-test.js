@@ -1,19 +1,19 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const unpad = require("../../../utils/unpad");
 
 function transform(code, options = {}) {
   return babel.transform(code,  {
-    sourceType: 'script',
+    sourceType: "script",
     plugins: [
-      [require('../src/index'), options],
+      [require("../src/index"), options],
     ],
   }).code;
 }
 
-describe('mangle-names', () => {
-  it('should not mangle names in the global namespace', () => {
+describe("mangle-names", () => {
+  it("should not mangle names in the global namespace", () => {
     const source = unpad(`
       var Foo = 1;
     `);
@@ -24,7 +24,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should mangle names', () => {
+  it("should mangle names", () => {
     const source = unpad(`
       function foo() {
         var xxx = 1;
@@ -45,7 +45,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle name collisions', () => {
+  it("should handle name collisions", () => {
     const source = unpad(`
       function foo() {
         var x = 2;
@@ -68,7 +68,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should be fine with shadowing', () => {
+  it("should be fine with shadowing", () => {
     const source = unpad(`
       var a = 1;
       function foo() {
@@ -91,7 +91,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not shadow outer references', () => {
+  it("should not shadow outer references", () => {
     const source = unpad(`
       function bar() {
         function foo(a, b, c) {
@@ -114,7 +114,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should mangle args', () => {
+  it("should mangle args", () => {
     const expected = unpad(`
       function foo(a) {
         if (a) {
@@ -133,7 +133,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should ignore labels', () => {
+  it("should ignore labels", () => {
     const source = unpad(`
       function foo() {
         meh: for (;;) {
@@ -153,7 +153,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not have labels conflicting with bindings', () => {
+  it("should not have labels conflicting with bindings", () => {
     const source = unpad(`
       function foo() {
         meh: for (;;) {
@@ -176,7 +176,7 @@ describe('mangle-names', () => {
   });
 
   // https://phabricator.babeljs.io/T6957
-  xit('labels should not shadow bindings', () => {
+  xit("labels should not shadow bindings", () => {
     const source = unpad(`
       function foo() {
         var meh;
@@ -200,7 +200,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should be order independent', () => {
+  it("should be order independent", () => {
     const source = unpad(`
       function foo() {
         function bar(aaa, bbb, ccc) {
@@ -230,7 +230,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should be order independent', () => {
+  it("should be order independent", () => {
     const source = unpad(`
       function foo() {
         (function bar() {
@@ -258,7 +258,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle only think in function scopes', () => {
+  it("should handle only think in function scopes", () => {
     const source = unpad(`
       function foo() {
         function xx(bar, baz) {
@@ -283,7 +283,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should be fine with shadowing 2', () => {
+  it("should be fine with shadowing 2", () => {
     const source = unpad(`
       function foo() {
         function xx(bar, baz) {
@@ -308,7 +308,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not be confused by scopes', () => {
+  it("should not be confused by scopes", () => {
     const source = unpad(`
       function foo() {
         function bar() {
@@ -335,7 +335,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not be confused by scopes (closures)', () => {
+  it("should not be confused by scopes (closures)", () => {
     const source = unpad(`
       function foo() {
         function bar(baz) {
@@ -360,7 +360,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle recursion', () => {
+  it("should handle recursion", () => {
     const source = unpad(`
       function bar() {
         function foo(a, b, c) {
@@ -379,7 +379,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle global name conflict', () => {
+  it("should handle global name conflict", () => {
     const source = unpad(`
       function e() {
         function foo() {
@@ -400,7 +400,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle global name', () => {
+  it("should handle global name", () => {
     const source = unpad(`
       function foo() {
         var bar = 1;
@@ -417,7 +417,7 @@ describe('mangle-names', () => {
     expect(transform(source, { mangleBlacklist: {foo: true, bar: true }})).toBe(expected);
   });
 
-  it('should handle deeply nested paths with no bindings', () => {
+  it("should handle deeply nested paths with no bindings", () => {
     const source = unpad(`
       function xoo() {
         function foo(zz, xx, yy) {
@@ -449,7 +449,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle try/catch', () => {
+  it("should handle try/catch", () => {
     const source = unpad(`
       function xoo() {
         var e;
@@ -467,7 +467,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not mangle vars in scope with eval' , () => {
+  it("should not mangle vars in scope with eval" , () => {
     const source = unpad(`
       function foo() {
         var inScopeOuter = 1;
@@ -495,7 +495,7 @@ describe('mangle-names', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should mangle names with local eval bindings', () => {
+  it("should mangle names with local eval bindings", () => {
     const source = unpad(`
       function eval() {}
       function foo() {

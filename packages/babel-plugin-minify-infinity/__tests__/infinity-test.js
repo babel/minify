@@ -1,8 +1,8 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const plugin = require('../src/index');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const plugin = require("../src/index");
+const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
@@ -10,8 +10,8 @@ function transform(code) {
   }).code;
 }
 
-describe('boolean-plugin', () => {
-  it('should convert infinity to division over 0', () => {
+describe("boolean-plugin", () => {
+  it("should convert infinity to division over 0", () => {
     const source = unpad(`
       Infinity;
     `);
@@ -23,7 +23,7 @@ describe('boolean-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not convert infinity when its a property', () => {
+  it("should not convert infinity when its a property", () => {
     const source = unpad(`
       var x = { Infinity: 0 };
     `);
@@ -35,7 +35,7 @@ describe('boolean-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not convert infinity when its a property', () => {
+  it("should not convert infinity when its a property", () => {
     const source = unpad(`
       x.Infinity;
     `);
