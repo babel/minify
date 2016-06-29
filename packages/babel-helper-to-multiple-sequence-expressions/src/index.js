@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = function(t) {
   return function toMultipleSequenceExpressions(statements) {
@@ -69,9 +69,9 @@ module.exports = function(t) {
           if (!alternate && !consequent) {
             exprs.push(node.test);
           } else if (!alternate) {
-            exprs.push(t.logicalExpression('&&', node.test, consequent));
+            exprs.push(t.logicalExpression("&&", node.test, consequent));
           } else if (!consequent) {
-            exprs.push(t.logicalExpression('||', node.test, alternate));
+            exprs.push(t.logicalExpression("||", node.test, alternate));
           } else {
             exprs.push(t.conditionalExpression(node.test, consequent, alternate));
           }
@@ -93,6 +93,7 @@ module.exports = function(t) {
         seq = t.sequenceExpression(exprs);
       }
 
+      /* eslint-disable no-self-assign */
       seq = seq;
       return { seq };
     }

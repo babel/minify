@@ -8,6 +8,6 @@
     "jest": true
   },
   "rules": {
-
+    "max-len": [1, 120, 4]
   }
 }

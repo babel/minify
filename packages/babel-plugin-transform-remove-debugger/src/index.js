@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-module.exports = function({ types: t }) {
+module.exports = function() {
   return {
     visitor: {
       DebuggerStatement(path) {

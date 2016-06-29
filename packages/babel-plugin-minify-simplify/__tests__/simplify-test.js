@@ -1,8 +1,8 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const plugin = require('../src/index');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const plugin = require("../src/index");
+const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
@@ -10,25 +10,25 @@ function transform(code) {
   }).code;
 }
 
-describe('simplify-plugin', () => {
-  it('should flip conditionals', () => {
-    const source = '!foo ? \'foo\' : \'bar\';';
-    const expected = 'foo ? \'bar\' : \'foo\';';
+describe("simplify-plugin", () => {
+  it("should flip conditionals", () => {
+    const source = "!foo ? 'foo' : 'bar';";
+    const expected = "foo ? 'bar' : 'foo';";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should turn for loop block to a single statement', () => {
+  it("should turn for loop block to a single statement", () => {
     const source = unpad(`
       for (var x = 0; x < 10; x++) {
         console.log(x);
       }
     `);
-    const expected = 'for (var x = 0; x < 10; x++) console.log(x);';
+    const expected = "for (var x = 0; x < 10; x++) console.log(x);";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should turn block statements to sequence expr', () => {
+  it("should turn block statements to sequence expr", () => {
     const source = unpad(`
       for (var x = 0; x < 10; x++) {
         console.log(x);
@@ -36,12 +36,12 @@ describe('simplify-plugin', () => {
       }
     `);
     const expected =
-      'for (var x = 0; x < 10; x++) console.log(x), console.log(x);';
+      "for (var x = 0; x < 10; x++) console.log(x), console.log(x);";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should the program into as much sequence exprs', () => {
+  it("should the program into as much sequence exprs", () => {
     const source = unpad(`
       x();
       y();
@@ -66,7 +66,7 @@ describe('simplify-plugin', () => {
   });
 
 
-  it('should turn if to gaurded expression', () => {
+  it("should turn if to gaurded expression", () => {
     const source = unpad(`
       function foo() {
         if (x) a();
@@ -81,7 +81,7 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should turn if statement to conditional', () => {
+  it("should turn if statement to conditional", () => {
     const source = unpad(`
       function foo() {
         if (x) a();
@@ -97,7 +97,7 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should turn this into a conditional', () => {
+  it("should turn this into a conditional", () => {
     const source = unpad(`
       function foo(a) {
         if (a && a.b != null) {
@@ -118,7 +118,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should turn this into a conditional', () => {
+  it("should turn this into a conditional", () => {
     const source = unpad(`
       function foo(a) {
         if (a && a.b != null) {
@@ -139,7 +139,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should turn this into a conditional', () => {
+  it("should turn this into a conditional", () => {
     const source = unpad(`
       function foo(a) {
         if (a) {
@@ -158,7 +158,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit('should turn IIFE to negation', () => {
+  xit("should turn IIFE to negation", () => {
     const source = unpad(`
       (function() {
         x();
@@ -178,7 +178,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should remove the else block if early return', () => {
+  it("should remove the else block if early return", () => {
     const source = unpad(`
     function foo() {
       if (1) {
@@ -199,7 +199,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge blocks into a return with sequence expr', () => {
+  it("should merge blocks into a return with sequence expr", () => {
     const source = unpad(`
       function foo() {
         y();
@@ -217,7 +217,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge blocks into a return with sequence expr', () => {
+  it("should merge blocks into a return with sequence expr", () => {
     const source = unpad(`
       function foo() {
         try {
@@ -246,7 +246,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge expressions into the init part of for', () => {
+  it("should merge expressions into the init part of for", () => {
     const source = unpad(`
       function foo() {
         x();
@@ -264,7 +264,7 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should merge statements into the init part of for even when there are others', () => {
+  it("should merge statements into the init part of for even when there are others", () => {
     const source = unpad(`
       function foo() {
         x();
@@ -282,15 +282,15 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it('should remove empty returns', () => {
-     const source = unpad(`
+  it("should remove empty returns", () => {
+    const source = unpad(`
        function foo() {
          lol();
          return;
        }
      `);
 
-     const expected = unpad(`
+    const expected = unpad(`
        function foo() {
          lol();
        }
@@ -299,8 +299,8 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge if statements with following expressions using void', () => {
-     const source = unpad(`
+  it("should merge if statements with following expressions using void", () => {
+    const source = unpad(`
        function foo() {
          if(window.self != window.top) {
            if(__DEV__) {
@@ -312,7 +312,7 @@ describe('simplify-plugin', () => {
        }
      `);
 
-     const expected = unpad(`
+    const expected = unpad(`
        function foo() {
          return window.self == window.top ? void lol() : void (__DEV__ && console.log('lol', name));
        }
@@ -321,8 +321,8 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not try to merge `if` when there are multiple statements to follow', () => {
-     const source = unpad(`
+  it("should not try to merge `if` when there are multiple statements to follow", () => {
+    const source = unpad(`
        function foo() {
          if(window.self != window.top) {
            if(__DEV__) {
@@ -335,7 +335,7 @@ describe('simplify-plugin', () => {
        }
      `);
 
-     const expected = unpad(`
+    const expected = unpad(`
        function foo() {
          if (window.self != window.top) return void (__DEV__ && console.log('lol', name));
          lol();
@@ -349,7 +349,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle missing return arg when merging if statements', () => {
+  it("should handle missing return arg when merging if statements", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -369,7 +369,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle returns with no args', () => {
+  it("should handle returns with no args", () => {
     const source = unpad(`
       function foo(a) {
         if (a && a.b != null) {
@@ -390,7 +390,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert whiles to fors', () => {
+  it("should convert whiles to fors", () => {
     const source = unpad(`
       function foo(a) {
         while(true) {
@@ -407,7 +407,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert whiles to fors and merge vars', () => {
+  it("should convert whiles to fors and merge vars", () => {
     const source = unpad(`
       function foo(a) {
         var bar = baz;
@@ -425,7 +425,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should combine returns', () => {
+  it("should combine returns", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -450,8 +450,8 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert early returns to negated if blocks', () => {
-     const source = unpad(`
+  it("should convert early returns to negated if blocks", () => {
+    const source = unpad(`
       function foo(a) {
         if (lol) return;
         doThings();
@@ -494,7 +494,7 @@ describe('simplify-plugin', () => {
   });
 
 
-  it('should remove early return when no other statements', () => {
+  it("should remove early return when no other statements", () => {
     const source = unpad(`
       function foo() {
         wow();
@@ -513,7 +513,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('earlyReturnTransform: it shouldn\'t error on shorthand arrow functions', () => {
+  it("earlyReturnTransform: it shouldn't error on shorthand arrow functions", () => {
     const source = unpad(`
       const f = () => a;
     `);
@@ -523,7 +523,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge function blocks into sequence expressions', () => {
+  it("should merge function blocks into sequence expressions", () => {
     const source = unpad(`
       function foo() {
         a();
@@ -570,7 +570,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge function blocks into sequence expressions (part 2)', () => {
+  it("should merge function blocks into sequence expressions (part 2)", () => {
     const source = unpad(`
       function bar() {
         var z;
@@ -592,7 +592,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge if statements when there is no alternate', () => {
+  it("should merge if statements when there is no alternate", () => {
     const source = unpad(`
       if (a) {
         if (b) {
@@ -607,7 +607,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not merge if statements if changes semantics', () => {
+  it("should not merge if statements if changes semantics", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -627,7 +627,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge if/return statements', () => {
+  it("should merge if/return statements", () => {
     const source = unpad(`
       function foo() {
         if (a) return b;
@@ -645,7 +645,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge if/return statements 2', () => {
+  it("should merge if/return statements 2", () => {
     const source = unpad(`
       function foo() {
         if (bar) return;
@@ -665,7 +665,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge return statements with expression in between', () => {
+  it("should merge return statements with expression in between", () => {
     const source = unpad(`
       function foo() {
         if (a) return b;
@@ -683,7 +683,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should hoist functions', () => {
+  it("should hoist functions", () => {
     const source = unpad(`
       function foo() {
         a();
@@ -702,7 +702,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not return inside a loop', () => {
+  it("should not return inside a loop", () => {
     const source = unpad(`
       function foo() {
         while(1) {
@@ -729,7 +729,7 @@ describe('simplify-plugin', () => {
   });
 
 
-  it('should make if with one return into a conditional', () => {
+  it("should make if with one return into a conditional", () => {
     const source = unpad(`
       function foo() {
         if (b) {
@@ -750,7 +750,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should make if with one return into a conditional 2', () => {
+  it("should make if with one return into a conditional 2", () => {
     const source = unpad(`
       function foo() {
         if (b) {
@@ -770,7 +770,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should make if with one return into a conditional 3', () => {
+  it("should make if with one return into a conditional 3", () => {
     const source = unpad(`
       function foo() {
         if (b) {
@@ -790,7 +790,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should make if with one return into a conditional 4', () => {
+  it("should make if with one return into a conditional 4", () => {
     const source = unpad(`
       function foo() {
         if (b) {
@@ -810,7 +810,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not merge if', () => {
+  it("should not merge if", () => {
     const source = unpad(`
       if (x) {
         try {
@@ -835,10 +835,10 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge expressions into if statements test');
-  it('should understand continue statements');
+  it("should merge expressions into if statements test");
+  it("should understand continue statements");
 
-  it('should handle do while statements', () => {
+  it("should handle do while statements", () => {
     const source = unpad(`
       do {
         foo();
@@ -851,7 +851,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle multiple interplays of if statements and returns', () => {
+  it("should handle multiple interplays of if statements and returns", () => {
     const source = unpad(`
       function lawl() {
         var a = 1;
@@ -886,7 +886,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle empty blocks in if statements', () => {
+  it("should handle empty blocks in if statements", () => {
     const source = unpad(`
       if (a) {
       } else {
@@ -910,7 +910,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('re-arrange conditionals for assignment', () => {
+  it("re-arrange conditionals for assignment", () => {
     const source = unpad(`
       var x;
       if (a) {
@@ -930,7 +930,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should bail on re-arranging conditionals for assignment', () => {
+  it("should bail on re-arranging conditionals for assignment", () => {
     const source = unpad(`
       var x;
       if (a) {
@@ -950,7 +950,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should bail on re-arranging conditionals for assignment', () => {
+  it("should bail on re-arranging conditionals for assignment", () => {
     const source = unpad(`
       var x;
       if (a) {
@@ -970,7 +970,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('re-arranging conditionals for assignment member exprs', () => {
+  it("re-arranging conditionals for assignment member exprs", () => {
     const source = unpad(`
       if (a) {
         x.b = foo;
@@ -988,7 +988,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('re-arranging conditionals for assignment with operators', () => {
+  it("re-arranging conditionals for assignment with operators", () => {
     const source = unpad(`
       if (a) {
         x.b += foo;
@@ -1006,7 +1006,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should bail on different operators', () => {
+  it("should bail on different operators", () => {
     const source = unpad(`
       if (a) {
         x.b += foo;
@@ -1024,7 +1024,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should bail on different member exprs', () => {
+  it("should bail on different member exprs", () => {
     const source = unpad(`
       if (a) {
         this.a = 1;
@@ -1040,7 +1040,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should turn continue into negated if', () => {
+  it("should turn continue into negated if", () => {
     const source = unpad(`
       for (var p in foo) {
         if (p) continue;
@@ -1055,7 +1055,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should flip logical expressions', () => {
+  it("should flip logical expressions", () => {
     const source = unpad(`
       !x && foo();
       if (!(null == r)) for (;;);
@@ -1068,7 +1068,7 @@ describe('simplify-plugin', () => {
     expect(transform(source).trim()).toBe(expected.trim());
   });
 
-  it('should flip logical expressions 2', () => {
+  it("should flip logical expressions 2", () => {
     const source = unpad(`
       if (!(1 !== foo || !bar)) for (;;);
     `);
@@ -1080,7 +1080,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should combine to a single return statement', () => {
+  it("should combine to a single return statement", () => {
     const source = unpad(`
       function foo() {
         if (foo) {
@@ -1105,7 +1105,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should inline break condition in for test', () => {
+  it("should inline break condition in for test", () => {
     const source = unpad(`
       for (i = 1; i <= j; i++) {
         if (bar) break;
@@ -1119,7 +1119,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should inline break condition in for test 2', () => {
+  it("should inline break condition in for test 2", () => {
     const source = unpad(`
       for (i = 1; i <= j; i++) {
         foo();
@@ -1134,7 +1134,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should inline break condition in for test 3', () => {
+  it("should inline break condition in for test 3", () => {
     const source = unpad(`
       for (i = 1; i <= j; i++) {
         if (bar) {
@@ -1153,7 +1153,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should inline break condition in for test 4', () => {
+  it("should inline break condition in for test 4", () => {
     const source = unpad(`
       for (i = 1; i <= j; i++) {
         if (bar) {
@@ -1173,7 +1173,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should inline break condition in for test 5', () => {
+  it("should inline break condition in for test 5", () => {
     const source = unpad(`
       for (i = 1; i <= j; i++) {
         foo();
@@ -1198,7 +1198,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge conditional returns into test', () => {
+  it("should merge conditional returns into test", () => {
     const source = unpad(`
       function foo() {
         if (x) {
@@ -1223,7 +1223,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should bail on mrege conditional return into test', () => {
+  it("should bail on mrege conditional return into test", () => {
     const source = unpad(`
       function foo() {
         if (x) {
@@ -1249,7 +1249,7 @@ describe('simplify-plugin', () => {
   });
 
 
-  it('should merge conditional return into test 2', () => {
+  it("should merge conditional return into test 2", () => {
     const source = unpad(`
       function foo() {
         if (x) {
@@ -1268,7 +1268,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle return argument', () => {
+  it("should handle return argument", () => {
     const source = unpad(`
       function foo() {
         if (x) {
@@ -1287,7 +1287,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should bail on conditional return into test', () => {
+  it("should bail on conditional return into test", () => {
     const source = unpad(`
       function foo() {
         if (x) {
@@ -1311,7 +1311,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should recombine after continue merging', () => {
+  it("should recombine after continue merging", () => {
     const source = unpad(`
       for (;;) {
         a = b;
@@ -1327,7 +1327,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not assume undefined', () => {
+  it("should not assume undefined", () => {
     const source = unpad(`
       function foo() {
         if (foo) {
@@ -1355,7 +1355,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should keep directives', () => {
+  it("should keep directives", () => {
     const source = unpad(`
       function a() {
         'use strict';
@@ -1374,7 +1374,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should handle continue in nested if', () => {
+  it("should handle continue in nested if", () => {
     const source = unpad(`
       function wow() {
         for(;;) {
@@ -1397,7 +1397,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert gaurded nots to ors', () => {
+  it("should convert gaurded nots to ors", () => {
     const source = unpad(`
       x();
       if (!foo.bar) foo.bar = wat;
@@ -1410,7 +1410,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert gaurded nots to ors', () => {
+  it("should convert gaurded nots to ors", () => {
     const source = unpad(`
       if (!foo && foo !== bar) {
         wow();
@@ -1425,7 +1425,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put the empty vars first', () => {
+  it("should put the empty vars first", () => {
     const source = unpad(`
       var x = 1, y, z = 2, zx, a;
     `);
@@ -1441,7 +1441,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('function expression in sequennce doesnt need parens', () => {
+  it("function expression in sequennce doesnt need parens", () => {
     const source = unpad(`
       x, (function() {})();
     `);
@@ -1453,7 +1453,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should turn early return else block into statement', () => {
+  it("should turn early return else block into statement", () => {
     const source = unpad(`
       function x() {
         for (;;) {
@@ -1476,7 +1476,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should remove block', () => {
+  it("should remove block", () => {
     const source = unpad(`
       function x() {
         if (a) {
@@ -1501,7 +1501,7 @@ describe('simplify-plugin', () => {
   });
 
   // TODO
-  it('should merge things into throw statement seq expr', () => {
+  it("should merge things into throw statement seq expr", () => {
     const source = unpad(`
       function x() {
         z();
@@ -1518,7 +1518,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should negate early return if', () => {
+  it("should negate early return if", () => {
     const source = unpad(`
       function x() {
         if (!bar) return;
@@ -1541,7 +1541,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not negate early return if', () => {
+  it("should not negate early return if", () => {
     const source = unpad(`
       function x() {
         var x = foo;
@@ -1569,7 +1569,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('switch if to avoid blocking', () => {
+  it("switch if to avoid blocking", () => {
     const source = unpad(`
       function x() {
         if (a) {
@@ -1587,8 +1587,8 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should remove last break statement in switch', () => {
-   const source = unpad(`
+  it("should remove last break statement in switch", () => {
+    const source = unpad(`
      switch (foo) {
        case 'foo':
          throw bar();
@@ -1613,7 +1613,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert consequents in switch into sequence expressions', () => {
+  it("should convert consequents in switch into sequence expressions", () => {
     const source = unpad(`
       function bar() {
         switch (foo) {
@@ -1646,7 +1646,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert switch statements to returns', () => {
+  it("should convert switch statements to returns", () => {
     const source = unpad(`
       function bar() {
         switch (foo) {
@@ -1672,7 +1672,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert switch statements with next return as default to returns', () => {
+  it("should convert switch statements with next return as default to returns", () => {
     const source = unpad(`
       function bar() {
         switch (foo) {
@@ -1697,7 +1697,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('if last statement in function should consider the default return a void', () => {
+  it("if last statement in function should consider the default return a void", () => {
     const source = unpad(`
       function bar() {
         switch (foo) {
@@ -1721,7 +1721,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert switch statements w/ fallthrough to return', () => {
+  it("should convert switch statements w/ fallthrough to return", () => {
     const source = unpad(`
       function bar() {
         switch (foo) {
@@ -1752,7 +1752,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert non-return switch to conditionals', () => {
+  it("should convert non-return switch to conditionals", () => {
     const source = unpad(`
       function bar() {
         switch (foo) {
@@ -1782,7 +1782,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put sequence in switch test', () => {
+  it("should put sequence in switch test", () => {
     const source = unpad(`
       function bar() {
         wow();
@@ -1807,7 +1807,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put sequence in if test', () => {
+  it("should put sequence in if test", () => {
     const source = unpad(`
       function bar() {
         wow();
@@ -1826,7 +1826,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert non-return switch to conditionals', () => {
+  it("should convert non-return switch to conditionals", () => {
     const source = unpad(`
       function bar() {
         switch (foo) {
@@ -1856,7 +1856,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not change type', () => {
+  it("should not change type", () => {
     const source = unpad(`
       function x(a) {
         return !!a;
@@ -1871,7 +1871,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not change type', () => {
+  it("should not change type", () => {
     const source = unpad(`
       function x(a, b) {
         a = a || b;
@@ -1887,7 +1887,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should apply unary to only the last element of a sequence expr', () => {
+  it("should apply unary to only the last element of a sequence expr", () => {
     const source = unpad(`
       !(a, b, c);
     `);
@@ -1898,7 +1898,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should apply unary to both sides of the conditional', () => {
+  it("should apply unary to both sides of the conditional", () => {
     const source = unpad(`
       !(a ? b : c);
     `);
@@ -1909,7 +1909,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should flip alt and cons if condition is unary', () => {
+  it("should flip alt and cons if condition is unary", () => {
     const source = unpad(`
       !(!a && b) ? b : c
     `);
@@ -1920,7 +1920,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should merge previous expressions in the for loop right', () => {
+  it("should merge previous expressions in the for loop right", () => {
     const source = unpad(`
       function foo() {
         x = 1;
@@ -1937,7 +1937,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should convert empty blocks to empty statements', () => {
+  it("should convert empty blocks to empty statements", () => {
     const source = unpad(`
       function foo() {
         for (i in p) {}
@@ -1960,7 +1960,7 @@ describe('simplify-plugin', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should flip binary expressions', () => {
+  it("should flip binary expressions", () => {
     const source = unpad(`
       if (!(!a && b == a && !b && b < a)) for(;;) a();
     `);

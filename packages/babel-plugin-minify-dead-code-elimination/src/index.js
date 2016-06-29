@@ -1,15 +1,15 @@
-'use strict';
+"use strict";
 
-const { some } = require('lodash');
+const { some } = require("lodash");
 
-module.exports = ({ Plugin, types: t, traverse }) => {
-  const removeOrVoid = require('babel-helper-remove-or-void')(t);
-  const shouldRevisit = Symbol('shouldRevisit');
+module.exports = ({ types: t, traverse }) => {
+  const removeOrVoid = require("babel-helper-remove-or-void")(t);
+  const shouldRevisit = Symbol("shouldRevisit");
 
   const main = {
     // remove side effectless statement
     ExpressionStatement(path) {
-      if (path.get('expression').isPure()) {
+      if (path.get("expression").isPure()) {
         removeOrVoid(path);
       }
     },
@@ -59,7 +59,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
           for (let declar of declarPath.node.declarations) {
             declars.push(declar);
             if (declar.init) {
-              assignmentSequence.push(t.assignmentExpression('=', declar.id, declar.init));
+              assignmentSequence.push(t.assignmentExpression("=", declar.id, declar.init));
               mutations.push(() => { declar.init = null; });
             }
           }
@@ -72,14 +72,14 @@ module.exports = ({ Plugin, types: t, traverse }) => {
         }
 
         if (declars.length) {
-          mutations.forEach(f => f());
+          mutations.forEach((f) => f());
           for (let statement of node.body.body) {
             if (t.isVariableDeclaration(statement)) {
               statement.declarations.push(...declars);
-             return;
+              return;
             }
           }
-          const varDecl = t.variableDeclaration('var', declars);
+          const varDecl = t.variableDeclaration("var", declars);
           node.body.body.unshift(varDecl);
         }
       },
@@ -102,7 +102,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
         const { scope } = path;
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
-          if (!binding.referenced && binding.kind !== 'param' && binding.kind !== 'module') {
+          if (!binding.referenced && binding.kind !== "param" && binding.kind !== "module") {
             if (binding.path.isVariableDeclarator()) {
               if (binding.path.parentPath.parentPath &&
                 binding.path.parentPath.parentPath.isForInStatement()
@@ -120,7 +120,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
             const mutations = [];
             let bail = false;
             // Make sure none of the assignments value is used
-            binding.constantViolations.forEach(p => {
+            binding.constantViolations.forEach((p) => {
               if (bail || p === binding.path) {
                 return;
               }
@@ -129,8 +129,8 @@ module.exports = ({ Plugin, types: t, traverse }) => {
                 bail = true;
               }
 
-              if (p.isAssignmentExpression() && !p.get('right').isPure()) {
-                mutations.push(() => p.replaceWith(p.get('right')));
+              if (p.isAssignmentExpression() && !p.get("right").isPure()) {
+                mutations.push(() => p.replaceWith(p.get("right")));
               } else {
                 mutations.push(() => removeOrVoid(p));
               }
@@ -153,34 +153,34 @@ module.exports = ({ Plugin, types: t, traverse }) => {
               removeOrVoid(binding.path);
             }
 
-            mutations.forEach(f => f());
+            mutations.forEach((f) => f());
             scope.removeBinding(name);
           } else if (binding.constant) {
             if (binding.path.isFunctionDeclaration() ||
-                (binding.path.isVariableDeclarator() && binding.path.get('init').isFunction())) {
-                  const fun = binding.path.isFunctionDeclaration() ? binding.path : binding.path.get('init');
-                  let allInside = true;
-                  for (let ref of binding.referencePaths) {
-                    if (!ref.find(p => p.node === fun.node)) {
-                      allInside = false;
-                      break;
-                    }
-                  }
+                (binding.path.isVariableDeclarator() && binding.path.get("init").isFunction())) {
+              const fun = binding.path.isFunctionDeclaration() ? binding.path : binding.path.get("init");
+              let allInside = true;
+              for (let ref of binding.referencePaths) {
+                if (!ref.find((p) => p.node === fun.node)) {
+                  allInside = false;
+                  break;
+                }
+              }
 
-                  if (allInside) {
-                    scope.removeBinding(name);
-                    updateReferences(binding.path, this);
-                    removeOrVoid(binding.path);
-                    continue;
-                  }
+              if (allInside) {
+                scope.removeBinding(name);
+                updateReferences(binding.path, this);
+                removeOrVoid(binding.path);
+                continue;
+              }
             }
 
-            if (binding.references === 1 && binding.kind !== 'param' && binding.kind !== 'module' && binding.constant) {
+            if (binding.references === 1 && binding.kind !== "param" && binding.kind !== "module" && binding.constant) {
               let replacement = binding.path.node;
               let replacementPath = binding.path;
               if (t.isVariableDeclarator(replacement)) {
                 replacement = replacement.init;
-                replacementPath = replacementPath.get('init');
+                replacementPath = replacementPath.get("init");
               }
               if (!replacement) {
                 continue;
@@ -191,7 +191,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
               }
 
               if (binding.referencePaths.length > 1) {
-                throw new Error('Expected only one reference');
+                throw new Error("Expected only one reference");
               }
 
               let bail = false;
@@ -265,7 +265,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
 
     // Remove unreachable code.
     BlockStatement(path) {
-      const paths = path.get('body');
+      const paths = path.get("body");
 
       let purge = false;
 
@@ -338,7 +338,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
 
     ConditionalExpression(path) {
       const { node } = path;
-      const evaluateTest = path.get('test').evaluateTruthy();
+      const evaluateTest = path.get("test").evaluateTruthy();
       if (evaluateTest === true) {
         path.replaceWith(node.consequent);
       } else if (evaluateTest === false) {
@@ -351,7 +351,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
         const { node } = path;
         let { consequent, alternate, test } = node;
 
-        const evaluateTest = path.get('test').evaluateTruthy();
+        const evaluateTest = path.get("test").evaluateTruthy();
 
         // we can check if a test will be truthy 100% and if so then we can inline
         // the consequent and completely ignore the alternate
@@ -398,7 +398,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
         ) {
           node.consequent = node.alternate;
           node.alternate = null;
-          node.test = t.unaryExpression('!', test, true);
+          node.test = t.unaryExpression("!", test, true);
         }
       },
     },
@@ -406,7 +406,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
     // Join assignment and definition when in sequence.
     // var x; x = 1; -> var x = 1;
     AssignmentExpression(path) {
-      if (!path.get('left').isIdentifier() ||
+      if (!path.get("left").isIdentifier() ||
           !path.parentPath.isExpressionStatement()
       ) {
         return;
@@ -419,7 +419,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
 
       const declars = prev.node.declarations;
       if (declars.length !== 1 || declars[0].init ||
-          declars[0].id.name !== path.get('left').node.name
+          declars[0].id.name !== path.get("left").node.name
       ) {
         return;
       }
@@ -430,7 +430,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
     FunctionExpression(path) {
-      const id = path.get('id').node;
+      const id = path.get("id").node;
       if (!id) {
         return;
       }
@@ -447,7 +447,7 @@ module.exports = ({ Plugin, types: t, traverse }) => {
 
     // Put the `var` in the left if feasible.
     ForInStatement(path) {
-      const left = path.get('left');
+      const left = path.get("left");
       if (!left.isIdentifier()) {
         return;
       }
@@ -480,8 +480,8 @@ module.exports = ({ Plugin, types: t, traverse }) => {
       }
 
       removeOrVoid(binding.path);
-      path.node.left = t.variableDeclaration('var', [t.variableDeclarator(left.node)]);
-      binding.path = path.get('left').get('declarations')[0];
+      path.node.left = t.variableDeclaration("var", [t.variableDeclarator(left.node)]);
+      binding.path = path.get("left").get("declarations")[0];
     },
   };
 

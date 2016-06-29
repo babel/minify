@@ -1,8 +1,8 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const plugin = require('../src/index');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const plugin = require("../src/index");
+const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
@@ -10,8 +10,8 @@ function transform(code) {
   }).code;
 }
 
-describe('flip-comparisons', () => {
-  it('should merge two conditionals if the same consequent', () => {
+describe("flip-comparisons", () => {
+  it("should merge two conditionals if the same consequent", () => {
     const source = unpad(`
       x === null ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
     `);
@@ -23,25 +23,25 @@ describe('flip-comparisons', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put values first in binary expressions', () => {
-    const source = 'a === 1;';
-    const expected = '1 === a;';
+  it("should put values first in binary expressions", () => {
+    const source = "a === 1;";
+    const expected = "1 === a;";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put constants first in binary expressions', () => {
-    const source = 'a === -1;';
-    const expected = '-1 === a;';
+  it("should put constants first in binary expressions", () => {
+    const source = "a === -1;";
+    const expected = "-1 === a;";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put pures first in binary expressions 2', () => {
-    const source = 'a === null;';
-    const expected = 'null === a;';
+  it("should put pures first in binary expressions 2", () => {
+    const source = "a === null;";
+    const expected = "null === a;";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put pures first in binary expressions 3', () => {
+  it("should put pures first in binary expressions 3", () => {
     const source = unpad(`
       function foo() {
         if (foo !== null) {
@@ -65,13 +65,13 @@ describe('flip-comparisons', () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put pures first in binary expressions 2', () => {
-    const source = 'a === {};';
-    const expected = '({}) === a;';
+  it("should put pures first in binary expressions 2", () => {
+    const source = "a === {};";
+    const expected = "({}) === a;";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should put constants first', () => {
+  it("should put constants first", () => {
     const source = unpad(`
       x * 100;
       x + 100;

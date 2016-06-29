@@ -1,23 +1,23 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const unpad = require("../../../utils/unpad");
 
 function transform(code, replacements) {
   return babel.transform(code,  {
     plugins: [
-      [require('../src/index'), {replacements}],
+      [require("../src/index"), {replacements}],
     ],
   }).code;
 }
 
-describe('replace-plugin', () => {
-  it('should replace identifiers', () => {
+describe("replace-plugin", () => {
+  it("should replace identifiers", () => {
     const replacements = [
       {
-        identifierName: '__DEV__',
+        identifierName: "__DEV__",
         replacement: {
-          type: 'numericLiteral',
+          type: "numericLiteral",
           value: 0,
         },
       },
@@ -44,12 +44,12 @@ describe('replace-plugin', () => {
     expect(transform(source, replacements)).toBe(expected);
   });
 
-  it('should only replace actual full identifiers', () => {
+  it("should only replace actual full identifiers", () => {
     const replacements = [
       {
-        identifierName: '__DEV__',
+        identifierName: "__DEV__",
         replacement: {
-          type: 'numericLiteral',
+          type: "numericLiteral",
           value: 0,
         },
       },
@@ -76,12 +76,12 @@ describe('replace-plugin', () => {
     expect(transform(source, replacements)).toBe(expected);
   });
 
-  it('should replace with boolean', () => {
+  it("should replace with boolean", () => {
     const replacements = [
       {
-        identifierName: '__DEV__',
+        identifierName: "__DEV__",
         replacement: {
-          type: 'booleanLiteral',
+          type: "booleanLiteral",
           value: true,
         },
       },
@@ -102,14 +102,14 @@ describe('replace-plugin', () => {
     expect(transform(source, replacements)).toBe(expected);
   });
 
-  it('should replace member expressions', () => {
+  it("should replace member expressions", () => {
     const replacements = [
       {
-        identifierName: 'console',
-        member: 'log',
+        identifierName: "console",
+        member: "log",
         replacement: {
-          type: 'identifier',
-          value: 'emptyFunction',
+          type: "identifier",
+          value: "emptyFunction",
         },
       },
     ];
@@ -127,22 +127,22 @@ describe('replace-plugin', () => {
     expect(transform(source, replacements)).toBe(expected);
   });
 
-  it('should replace multiple member expressions', () => {
+  it("should replace multiple member expressions", () => {
     const replacements = [
       {
-        identifierName: 'console',
-        member: 'log',
+        identifierName: "console",
+        member: "log",
         replacement: {
-          type: 'identifier',
-          value: 'emptyFunction',
+          type: "identifier",
+          value: "emptyFunction",
         },
       },
       {
-        identifierName: 'console',
-        member: 'error',
+        identifierName: "console",
+        member: "error",
         replacement: {
-          type: 'identifier',
-          value: 'emptyFunction',
+          type: "identifier",
+          value: "emptyFunction",
         },
       },
     ];

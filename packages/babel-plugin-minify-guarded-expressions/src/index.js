@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
 module.exports = function({ types: t }) {
-  const flipExpressions = require('babel-helper-flip-expressions')(t);
+  const flipExpressions = require("babel-helper-flip-expressions")(t);
 
   return {
     visitor: {

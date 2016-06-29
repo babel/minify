@@ -64,7 +64,7 @@ module.exports = ({ Plugin, types: t }) => {
     run() {
       this.program.traverse(collectVisitor, {
         recordBindingPath: (binding, path) => this.recordBindingPath(binding, path),
-        recordScope: scope => {
+        recordScope: (scope) => {
           this.currentScope = scope;
           this.recordScope(scope);
         },
@@ -142,7 +142,7 @@ module.exports = ({ Plugin, types: t }) => {
       const scope = binding.scope.getFunctionParent();
       const scopeReferences = this.scopeToRefNames.get(scope);
       if (!scopeReferences) {
-        throw new Error('Encountered a scope with no information about');
+        throw new Error("Encountered a scope with no information about");
       }
 
       const oldName = binding.identifier.name;
@@ -164,7 +164,7 @@ module.exports = ({ Plugin, types: t }) => {
       // run through es2015 preset), we may get a let binding by virtue of being
       // inside a catch clause. If that's the case then we want to maintain bindings
       // on the the actual scope.
-      if (binding.kind === 'let') {
+      if (binding.kind === "let") {
         binding.scope.bindings[newName] = binding;
       } else {
         scope.bindings[newName] = binding;
@@ -207,7 +207,7 @@ module.exports = ({ Plugin, types: t }) => {
       this.recordScope(scope);
     },
 
-    'ReferencedIdentifier|BindingIdentifier'(path) {
+    "ReferencedIdentifier|BindingIdentifier"(path) {
       const { scope, node } = path;
 
       if (path.parentPath.isLabeledStatement()) {
@@ -223,8 +223,8 @@ module.exports = ({ Plugin, types: t }) => {
 
       // Doesn't take care of local eval bindings yet
       if (node.name === 'eval' &&
-          path.parent.type === 'CallExpression' &&
-          !path.scope.getBinding('eval')) {
+          path.parent.type === "CallExpression" &&
+          !path.scope.getBinding("eval")) {
         this.setScopeUnsafe();
       }
 
@@ -249,8 +249,8 @@ module.exports = ({ Plugin, types: t }) => {
     },
 
     Identifier(path) {
-      if ((path.parentPath.isMemberExpression() && path.key === 'property') ||
-          (path.parentPath.isObjectProperty() && path.key === 'key')
+      if ((path.parentPath.isMemberExpression() && path.key === "property") ||
+          (path.parentPath.isObjectProperty() && path.key === "key")
       ) {
         this.charset.consider(path.node.name);
       }
@@ -274,15 +274,15 @@ module.exports = ({ Plugin, types: t }) => {
   };
 };
 
-const CHARSET = ('abcdefghijklmnopqrstuvwxyz' +
-                 'ABCDEFGHIJKLMNOPQRSTUVWXYZ$_').split('');
+const CHARSET = ("abcdefghijklmnopqrstuvwxyz" +
+                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
 
 class Charset {
   constructor(shouldConsider) {
     this.shouldConsider = shouldConsider;
     this.chars = CHARSET.slice();
     this.frequency = {};
-    this.chars.forEach(c => { this.frequency[c] = 0; });
+    this.chars.forEach((c) => { this.frequency[c] = 0; });
     this.finalized = false;
   }
 
@@ -291,7 +291,7 @@ class Charset {
       return;
     }
 
-    str.split('').forEach(c => {
+    str.split("").forEach((c) => {
       if (this.frequency[c] != null) {
         this.frequency[c]++;
       }
@@ -310,10 +310,10 @@ class Charset {
 
   getIdentifier(num) {
     if (!this.finalized) {
-      throw new Error('Should sort first');
+      throw new Error("Should sort first");
     }
 
-    let ret = '';
+    let ret = "";
     num++;
     do {
       num--;

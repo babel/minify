@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-module.exports = ({ Plugin, types: t }) => {
-  const removeOrVoid = require('babel-helper-remove-or-void')(t);
+module.exports = ({ types: t }) => {
+  const removeOrVoid = require("babel-helper-remove-or-void")(t);
 
   const visitor = {
     // Remove the call if it stands on it's own.
@@ -35,6 +35,6 @@ module.exports = ({ Plugin, types: t }) => {
 
   function isEmptyFunction(node) {
     return t.isCallExpression(node) &&
-           t.isIdentifier(node.callee, { name: 'emptyFunction' });
+           t.isIdentifier(node.callee, { name: "emptyFunction" });
   }
 };

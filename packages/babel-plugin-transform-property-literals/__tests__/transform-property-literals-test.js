@@ -1,8 +1,8 @@
 jest.autoMockOff();
 
-const babel = require('babel-core');
-const plugin = require('../src/index');
-const unpad = require('../../../utils/unpad');
+const babel = require("babel-core");
+const plugin = require("../src/index");
+const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
@@ -10,20 +10,20 @@ function transform(code) {
   }).code;
 }
 
-describe('transform-property-literals-plugin', () => {
-  it('should strip unnecessary property literal qoutes', () => {
-    const source = 'var x = { \'foo\': \'bar\' };';
-    const expected = 'var x = { foo: \'bar\' };';
+describe("transform-property-literals-plugin", () => {
+  it("should strip unnecessary property literal qoutes", () => {
+    const source = "var x = { 'foo': 'bar' };";
+    const expected = "var x = { foo: 'bar' };";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should strip unnecessary property literal qoutes for numbers', () => {
-    const source = 'var x = { \'1\': \'bar\' };';
-    const expected = 'var x = { 1: \'bar\' };';
+  it("should strip unnecessary property literal qoutes for numbers", () => {
+    const source = "var x = { '1': 'bar' };";
+    const expected = "var x = { 1: 'bar' };";
     expect(transform(source)).toBe(expected);
   });
 
-  it('should not transform invalid identifiers', () => {
+  it("should not transform invalid identifiers", () => {
     const source = unpad(`
       ({
         "default": null,
@@ -33,7 +33,7 @@ describe('transform-property-literals-plugin', () => {
     expect(transform(source)).toBe(source);
   });
 
-  it('should not transform non-string properties', () => {
+  it("should not transform non-string properties", () => {
     const source = unpad(`
       ({
         foo: null
@@ -42,7 +42,7 @@ describe('transform-property-literals-plugin', () => {
     expect(transform(source)).toBe(source);
   });
 
-  it('should not transform propety keys that are computed', () => {
+  it("should not transform propety keys that are computed", () => {
     const source = unpad(`
       ({
         [a]: null
