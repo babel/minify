@@ -573,7 +573,7 @@ describe("mangle-names", () => {
     `);
 
     const expected = unpad(`
-      (function() {
+      (function () {
         function a() {
           {
             var b = true;
@@ -585,7 +585,7 @@ describe("mangle-names", () => {
         }
 
         function c() {}
-      }());
+      })();
     `);
 
     expect(transform(source)).toBe(expected);
