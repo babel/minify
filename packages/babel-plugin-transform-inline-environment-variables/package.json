@@ -1,0 +1,16 @@
+{
+  "name": "babel-plugin-transform-inline-environment-variables",
+  "version": "6.8.0",
+  "description": "Inline environment variables.",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-plugin-transform-inline-environment-variables",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
