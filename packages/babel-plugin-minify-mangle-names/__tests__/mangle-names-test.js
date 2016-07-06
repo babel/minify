@@ -590,4 +590,28 @@ describe("mangle-names", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should correctly mangle in nested loops", () => {
+    const source = unpad(`
+      (function () {
+        for (let x in foo) {
+          for (let y in foo[x]) {
+            alert(foo[x][y]);
+          }
+        }
+      })();
+    `);
+
+    const expected = unpad(`
+      (function () {
+        for (let a in foo) {
+          for (let b in foo[a {
+            alert(foo[a][b]);
+          }
+        }
+      })();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

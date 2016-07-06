@@ -115,16 +115,6 @@ module.exports = ({ types: t }) => {
         }
       }
 
-      for (const referencePath of binding.referencePaths) {
-        let scope = referencePath.scope;
-
-        do {
-          if (scope.bindings[name]) {
-            return false;
-          }
-        } while ((scope = scope.parent) && scope !== binding.scope)
-      }
-
       return true;
     }
   }
