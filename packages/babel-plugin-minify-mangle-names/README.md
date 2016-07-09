@@ -13,8 +13,14 @@ $ npm install babel-plugin-minify-mangle-names
 **.babelrc**
 
 ```json
+// without options
 {
   "plugins": ["minify-mangle-names"]
+}
+
+// with options
+{
+  "plugins": ["minify-mangle-names", { "mangleBlacklist": { "foo": true, "bar": true} }]
 }
 ```
 
