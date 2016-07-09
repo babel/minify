@@ -1,5 +1,21 @@
 # babel-plugin-minify-guarded-expressions
 
+## Example
+
+**In**
+
+```javascript
+!x && foo();
+alert(0 && new Foo());
+```
+
+**Out**
+
+```javascript
+x || foo();
+alert(0);
+```
+
 ## Installation
 
 ```sh

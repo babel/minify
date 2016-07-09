@@ -1,5 +1,22 @@
 # babel-plugin-minify-empty-function
 
+## Example
+
+**In**
+
+```javascript
+function emptyFunction(){}
+emptyFunction('how long','?');
+foo(emptyFunction('how long', '?'));
+```
+
+**Out**
+
+```javascript
+function emptyFunction(){}
+foo(false);
+```
+
 ## Installation
 
 ```sh
