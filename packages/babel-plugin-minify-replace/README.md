@@ -13,8 +13,20 @@ $ npm install babel-plugin-minify-replace
 **.babelrc**
 
 ```json
+// without options
 {
   "plugins": ["minify-replace"]
+}
+
+// with plugins
+{
+  "plugins": ["minify-replace", {
+    "identifierName": "__DEV__",
+    "replacement": {
+      "type": "booleanLiteral",
+      "value": true
+    }
+  }]
 }
 ```
 
