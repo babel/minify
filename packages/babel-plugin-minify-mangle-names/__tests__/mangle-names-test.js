@@ -115,17 +115,17 @@ describe("mangle-names", () => {
   });
 
   it("should mangle args", () => {
-    const expected = unpad(`
-      function foo(a) {
-        if (a) {
-          console.log(a);
-        }
-      }
-    `);
     const source = unpad(`
       function foo(xxx) {
         if (xxx) {
           console.log(xxx);
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo(a) {
+        if (a) {
+          console.log(a);
         }
       }
     `);
