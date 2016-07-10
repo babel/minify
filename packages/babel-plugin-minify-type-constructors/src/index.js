@@ -26,6 +26,47 @@ function replaceArray(t, path) {
   }
 }
 
+function replaceObject(t, path) {
+  const { node } = path;
+  if (t.isIdentifier(node.callee, { name: "Object" }) &&
+    !path.scope.getBinding("Object")) {
+
+    const isVoid0 = require("babel-helper-is-void-0")(t);
+    const arg = node.arguments[0];
+    const binding = arg && t.isIdentifier(arg) && path.scope.getBinding(arg.name);
+
+    // Object() -> {}
+    if (node.arguments.length === 0) {
+      path.replaceWith(t.objectExpression([]));
+
+    // Object([]) -> []
+    } else if (arg.type === "ArrayExpression" ||
+      t.isFunctionExpression(arg)) {
+      path.replaceWith(arg);
+
+    // Object(null) -> {}
+    } else if (isVoid0(arg) ||
+      arg.name === "undefined" ||
+      arg.type === "NullLiteral" ||
+      arg.type === "ObjectExpression" && arg.properties.length === 0) {
+      path.replaceWith(t.objectExpression([]));
+
+    // Object(localFn) -> localFn
+    } else if (binding && binding.path.isFunction()) {
+      path.replaceWith(arg);
+
+    // Object({a:b}) -> {a:b}
+    } else if (arg.type === "ObjectExpression") {
+      path.replaceWith(arg);
+
+    // new Object(a) -> Object(a)
+    } else if (node.type === "NewExpression") {
+      path.replaceWith(t.callExpression(node.callee, node.arguments));
+    }
+    return true;
+  }
+}
+
 module.exports = function({ types: t }) {
   return {
     visitor: {
@@ -60,10 +101,20 @@ module.exports = function({ types: t }) {
         if (replaceArray(t, path)) {
           return;
         }
+
+        // Object() -> {}
+        if (replaceObject(t, path)) {
+          return;
+        }
       },
       NewExpression(path) {
         // new Array() -> []
         if (replaceArray(t, path)) {
+          return;
+        }
+
+        // new Object() -> {}
+        if (replaceObject(t, path)) {
           return;
         }
       },

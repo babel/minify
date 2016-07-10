@@ -11,6 +11,8 @@
   "keywords": [
     "babel-plugin"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "babel-helper-is-void-0": "^0.0.0"
+  },
   "devDependencies": {}
 }

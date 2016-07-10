@@ -101,16 +101,123 @@ describe("type-constructors-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("shouldn't change referenced identifiers", () => {
+  it("should turn Object() to {}", () => {
+    const source = "var x = Object();";
+    const expected = "var x = {};";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should turn new Object() to {}", () => {
+    const source = "var x = new Object();";
+    const expected = "var x = {};";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should change Object(null|undefined) to {}", () => {
     const source = unpad(`
-      (function (Boolean, String, Number, Array) {
-        return Boolean(a), String(b), Number(c), Array(d);
-      })(MyBoolean, MyString, MyNumber, MyArray);
+      [
+        Object(null),
+        Object(undefined),
+        new Object(void 0)
+      ]
+    `);
+    const expected = "[{}, {}, {}];";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should change Object({a:b}) to {a:b}", () => {
+    const source = unpad(`
+      [
+        Object({}),
+        Object({a:b}),
+        Object({a:b, c:d}),
+      ]
+    `);// todo: add Object(Array())
+    const expected = "[{}, { a: b }, { a: b, c: d }];";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should change Object([]) to []", () => {
+    const source = unpad(`
+      [
+        Object([]),
+        Object([1]),
+        Object([1,2]),
+        new Object([null])
+      ]
+    `);// todo: add Object(Array())
+    const expected = "[[], [1], [1, 2], [null]];";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should change Object(localFn) to localFn", () => {
+    const source = unpad(`
+      function a() {};
+      [
+        Object(function () {}),
+        new Object(a),
+        Object(Array)
+      ]
     `);
     const expected = unpad(`
-      (function (Boolean, String, Number, Array) {
-        return Boolean(a), String(b), Number(c), Array(d);
-      })(MyBoolean, MyString, MyNumber, MyArray);
+      function a() {};
+      [function () {}, a, Object(Array)];
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("shouldn't change Object(value) for unrecognized values", () => {
+    const source = unpad(`
+      [
+        Object("undefined"),
+        Object(nulled),
+        Object(0),
+        Object(false),
+        Object(stuff())
+      ]
+    `);
+    const expected = "[Object(\"undefined\"), Object(nulled), Object(0), Object(false), Object(stuff())];";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should change new Object(value) to Object(value) for unrecognized values", () => {
+    const source = unpad(`
+      [
+        new Object("function"),
+        new Object(Symbol),
+        new Object(true),
+        new Object(1),
+        new Object(call({ me: true }))
+      ]
+    `);
+    const expected = "[Object(\"function\"), Object(Symbol), Object(true), Object(1), Object(call({ me: true }))];";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should change Object() to ({}) in ambiguous contexts", () => {
+    const source = unpad(`
+      new Object();
+      var foo = () => Object();
+      var bar = () => Object({ baz: 3 });
+    `);
+    const expected = unpad(`
+      ({});
+      var foo = () => ({});
+      var bar = () => ({ baz: 3 });
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("shouldn't change referenced identifiers", () => {
+    const source = unpad(`
+      (function (Boolean, String, Number, Array, Object) {
+        return Boolean(a), String(b), Number(c), Array(d), Object(d);
+      })(MyBoolean, MyString, MyNumber, MyArray, MyObject);
+    `);
+    const expected = unpad(`
+      (function (Boolean, String, Number, Array, Object) {
+        return Boolean(a), String(b), Number(c), Array(d), Object(d);
+      })(MyBoolean, MyString, MyNumber, MyArray, MyObject);
     `);
     expect(transform(source)).toBe(expected);
   });
