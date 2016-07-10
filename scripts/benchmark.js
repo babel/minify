@@ -43,7 +43,7 @@ const table = new Table({
   },
 });
 
-const results = [];
+let results = [];
 
 const code = fs.readFileSync(filename, 'utf8');
 const gzippedCode = zlib.gzipSync(code);
@@ -124,7 +124,7 @@ results = results.sort(function (a, b) {
 });
 
 results.forEach(function (result, i) {
-  const row = [
+  let row = [
     chalk.bold(result.name),
     bytes(result.raw),
     Math.round(((code.length / result.raw) * 100) - 100) + '%',
@@ -134,7 +134,7 @@ results.forEach(function (result, i) {
     Math.round(result.run) + 'ms',
   ];
 
-  const style = chalk.yellow;
+  let style = chalk.yellow;
   if (i === 0) {
     style = chalk.green;
   }
