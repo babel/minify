@@ -13,8 +13,14 @@ $ npm install babel-plugin-minify-dead-code-elimination
 **.babelrc**
 
 ```json
+// without options
 {
   "plugins": ["minify-dead-code-elimination"]
+}
+
+// with options
+{
+  "plugins": ["minify-dead-code-elimination", { "optimizeRawSize": true }]
 }
 ```
 
