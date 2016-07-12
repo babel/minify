@@ -537,17 +537,17 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function f(a) {
-        var b = function (c) {
-          var e = void 0;
-          if (e) return {
+        var e = function (b) {
+          var h = void 0;
+          if (h) return {
             v: void 0
           };
-          g(() => e);
+          g(() => h);
         };
 
-        for (var c = 0; c; c++) {
-          var d = b(c);
-          if (typeof d === "object") return d.v;
+        for (var b = 0; b; b++) {
+          var c = e(b);
+          if (typeof c === "object") return c.v;
         }
       }
     `);
@@ -605,7 +605,7 @@ describe("mangle-names", () => {
     const expected = unpad(`
       (function () {
         for (let a in foo) {
-          for (let b in foo[a {
+          for (let b in foo[a]) {
             alert(foo[a][b]);
           }
         }

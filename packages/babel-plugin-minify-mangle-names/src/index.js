@@ -26,6 +26,7 @@ module.exports = ({ types: t }) => {
 
     mangle() {
       for (const [binding, identifierPaths] of this.bindings.entries()) {
+
         // Check if the scope is safe.
         if (this.unsafeScopes.has(binding.scope)) {
           continue;
@@ -69,6 +70,7 @@ module.exports = ({ types: t }) => {
     }
 
     canUse(name, binding, identifierPaths) {
+
       let scope = binding.scope;
       if (scope.hasGlobal(name)) {
         return false;
@@ -89,6 +91,7 @@ module.exports = ({ types: t }) => {
 
       for (const scope of scopes) {
         const existing = scope.getBinding(name);
+
         if (!existing || existing === binding) continue;
 
         // Don't shadow any bindings in this scope.
@@ -119,7 +122,7 @@ module.exports = ({ types: t }) => {
         let scope = referencePath.scope;
 
         do {
-          if (scope.bindings[name]) {
+          if (scope.getBinding(name)) {
             return false;
           }
         } while ((scope = scope.parent) && scope !== binding.scope);
