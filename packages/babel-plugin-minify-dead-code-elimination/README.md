@@ -1,5 +1,7 @@
 # babel-plugin-minify-dead-code-elimination
 
+Inlines bindings when possible. Tries to evaluate expressions and prunes unreachable as a result.
+
 ## Example
 
 **In**

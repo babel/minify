@@ -1,5 +1,7 @@
 # babel-plugin-minify-mangle-names
 
+Context- and scope- aware variable renaming.
+
 ## Example
 
 **In**

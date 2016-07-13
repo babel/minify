@@ -1,6 +1,6 @@
 # babel-plugin-minify-replace
 
-Configurable "search and replace" plugin
+Configurable "search and replace" plugin. Replaces matching nodes in the tree with a given replacement node. For example you can replace `process.NODE_ENV` with `"production"`.
 
 ## Example
 

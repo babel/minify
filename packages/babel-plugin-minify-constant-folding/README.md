@@ -1,5 +1,7 @@
 # babel-plugin-minify-constant-folding
 
+Tries to evaluate expressions and inline the result. For now only deals with numbers and strings.
+
 ## Example
 
 **In**
@@ -7,11 +9,7 @@
 ```javascript
 "a" + "b"
 2 * 3;
-1/3;
 4 | 3;
-a(), b();
-var x = 1;
-foo(x);
 "b" + a + "c" + "d" + g + z + "f" + "h" + "z"
 ```
 
@@ -20,11 +18,7 @@ foo(x);
 ```javascript
 "ab";
 6;
-1 / 3;
 7;
-a(), b();
-var x = 1;
-foo(x);
 "b" + a + "cd" + g + z + "fhz";
 ```
 

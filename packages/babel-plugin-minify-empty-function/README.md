@@ -1,5 +1,7 @@
 # babel-plugin-minify-empty-function
 
+This is mostly a Facebook-specific transform that removes noop function calls. However, can be generalized to detect and remove noops.
+
 ## Example
 
 **In**
