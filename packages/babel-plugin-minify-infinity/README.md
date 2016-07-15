@@ -1,5 +1,19 @@
 # babel-plugin-minify-infinity
 
+## Example
+
+**In**
+
+```javascript
+Infinity;
+```
+
+**Out**
+
+```javascript
+1 / 0;
+```
+
 ## Installation
 
 ```sh

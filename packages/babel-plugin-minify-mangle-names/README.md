@@ -1,5 +1,33 @@
 # babel-plugin-minify-mangle-names
 
+Context- and scope- aware variable renaming.
+
+## Example
+
+**In**
+
+```javascript
+var globalVariableName = 42;
+function foo() {
+  var longLocalVariableName = 1;
+  if (longLocalVariableName) {
+    console.log(longLocalVariableName);
+  }
+}
+```
+
+**Out**
+
+```javascript
+var globalVariableName = 42;
+function foo() {
+  var a = 1;
+  if (a) {
+    console.log(a);
+  }
+}
+```
+
 ## Installation
 
 ```sh
