@@ -1,8 +1,8 @@
 <h1 align="center">babel-minify</h1>
 
-<div align="center">
+<p align="center">
   <strong>An ES6+ aware minifier based on the Babel toolchain.</strong>
-</div>
+</p>
 
 <p align="center">
   <a href="https://travis-ci.org/amasad/babel-minify"><img alt="Travis Status" src="https://img.shields.io/travis/amasad/babel-minify/master.svg?style=flat&label=travis"></a>
