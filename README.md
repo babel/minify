@@ -30,11 +30,11 @@ Equivalent to:
 
 ## [Babel preset](http://babeljs.io/docs/plugins/#presets)
 
-Works just like any other preset (like `es2015`).
-
 | Package | Version | Dependencies | DevDependencies |
 |--------|-------|------------|----------|
 | [`babel-preset-minify`](/packages/babel-preset-minify) | [![npm](https://img.shields.io/npm/v/babel-preset-minify.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-preset-minify) | [![Dependency Status](https://david-dm.org/amasad/babel-minify.svg?path=packages/babel-preset-minify)](https://david-dm.org/amasad/babel-minify?path=packages/babel-preset-minify) | [![devDependency Status](https://david-dm.org/amasad/babel-minify/dev-status.svg?path=packages/babel-preset-minify)](https://david-dm.org/amasad/babel-minify?path=packages/babel-preset-minify#info=devDependencies) |
+
+It's a babel preset (like `babel-preset-es2015`).
 
 ### Usage
 
@@ -81,7 +81,19 @@ The npm package `babel-preset-minify` is at the path `packages/babel-preset-mini
 | [`babel-plugin-transform-simplify-comparison-operators`](/packages/babel-plugin-transform-simplify-comparison-operators) | [![npm](https://img.shields.io/npm/v/babel-plugin-transform-simplify-comparison-operators.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-plugin-transform-simplify-comparison-operators) | [![Dependency Status](https://david-dm.org/amasad/babel-minify.svg?path=packages/babel-plugin-transform-simplify-comparison-operators)](https://david-dm.org/amasad/babel-minify?path=packages/babel-plugin-transform-simplify-comparison-operators) | [![devDependency Status](https://david-dm.org/amasad/babel-minify/dev-status.svg?path=packages/babel-plugin-transform-simplify-comparison-operators)](https://david-dm.org/amasad/babel-minify?path=packages/babel-plugin-transform-simplify-comparison-operators#info=devDependencies) |
 | [`babel-plugin-transform-undefined-to-void`](/packages/babel-plugin-transform-undefined-to-void) | [![npm](https://img.shields.io/npm/v/babel-plugin-transform-undefined-to-void.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-plugin-transform-undefined-to-void) | [![Dependency Status](https://david-dm.org/amasad/babel-minify.svg?path=packages/babel-plugin-transform-undefined-to-void)](https://david-dm.org/amasad/babel-minify?path=packages/babel-plugin-transform-undefined-to-void) | [![devDependency Status](https://david-dm.org/amasad/babel-minify/dev-status.svg?path=packages/babel-plugin-transform-undefined-to-void)](https://david-dm.org/amasad/babel-minify?path=packages/babel-plugin-transform-undefined-to-void#info=devDependencies) |
 
-### Other
+### Usage
+
+> Normally you wouldn't be consuming the plugins directly since the preset is available.
+
+Add to your `.babelrc`'s plugins array.
+
+```
+{
+  "plugins": ["babel-plugin-transform-undefined-to-void"]
+}
+```
+
+## Other
 
 | Package | Version | Dependencies | DevDependencies |
 |--------|-------|------------|----------|
