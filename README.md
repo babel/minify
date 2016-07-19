@@ -21,7 +21,8 @@
 
 This is simple wrapper around the regular `babel-cli` and thus takes in the same [cli options](http://babeljs.io/docs/usage/cli/#options) as running babel on its own. You can use this if you don't already use babel or want to run it standalone.
 
-Example usage:
+### Usage
+
 `babel-minify src -d lib`
 
 Equivalent to:
@@ -35,11 +36,13 @@ Works just like any other preset (like `es2015`).
 |--------|-------|------------|----------|
 | [`babel-preset-minify`](/packages/babel-preset-minify) | [![npm](https://img.shields.io/npm/v/babel-preset-minify.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-preset-minify) | [![Dependency Status](https://david-dm.org/amasad/babel-minify.svg?path=packages/babel-preset-minify)](https://david-dm.org/amasad/babel-minify?path=packages/babel-preset-minify) | [![devDependency Status](https://david-dm.org/amasad/babel-minify/dev-status.svg?path=packages/babel-preset-minify)](https://david-dm.org/amasad/babel-minify?path=packages/babel-preset-minify#info=devDependencies) |
 
+### Usage
+
 You'll most likely want to use it only in the production environment. Check out the [env docs](http://babeljs.io/docs/usage/babelrc/#env-option) for more help.
 
 > Options specific to a certain environment are merged into and overwrite non-env specific options.
 
-Example `.babelrc`:
+`.babelrc`:
 
 ```
 {
