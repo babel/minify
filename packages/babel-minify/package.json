@@ -1,0 +1,22 @@
+{
+  "name": "babel-minify",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "https://github.com/amasad/babel-minify#readme",
+  "repository": "https://github.com/amasad/babel-minify/tree/master/packages/babel-minify",
+  "bugs": "https://github.com/amasad/babel-minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "bin": {
+    "babel-minify": "./bin/babel-minify.js"
+  },
+  "keywords": [
+    "babel-preset"
+  ],
+  "dependencies": {
+    "babel-preset-minify": "^0.0.0",
+    "babel-cli": "^6.10.1"
+  },
+  "devDependencies": {}
+}
