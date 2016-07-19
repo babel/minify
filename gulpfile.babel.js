@@ -36,7 +36,8 @@ export function build() {
 }
 
 export const watch = gulp.series(build, () => {
-  gulp.watch(scripts, { debounceDelay: 200 }, build);
+  gulp.watch(scripts, { debounceDelay: 200 }, build)
+    .on('error', () => {});
 });
 
 export default build;
