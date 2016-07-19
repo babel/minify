@@ -1395,4 +1395,21 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should preserve vars from the removed block", () => {
+    const source = unpad(`
+      if (0) {var a = foo()}
+      if (0) var b = foo();
+      if (1) { } else { var c = foo() }
+      if (0) var d = bar(); else { }
+    `);
+    const expected = unpad(`
+      var a;
+      var b;
+      var c;
+      var d;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
