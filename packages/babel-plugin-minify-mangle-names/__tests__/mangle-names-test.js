@@ -462,7 +462,7 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function xoo() {
         var a;
-        try {} catch (a) {}
+        try {} catch (b) {}
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -550,6 +550,48 @@ describe("mangle-names", () => {
           if (typeof c === "object") return c.v;
         }
       }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should integrate with block scoping plugin 2", () => {
+    const srcTxt = unpad(`
+      (function () {
+        function bar() {
+          if (smth) {
+            let entries = blah();
+            entries();
+          }
+          foo();
+        }
+        function foo() { }
+        module.exports = { bar };
+      })();
+    `);
+
+    const first = babel.transform(srcTxt, {
+      plugins: ["transform-es2015-block-scoping"],
+    });
+
+    traverse.clearCache();
+
+    const source = babel.transformFromAst(first.ast, null, {
+      plugins: [require("../src/index")],
+    }).code;
+
+    const expected = unpad(`
+      (function () {
+        function b() {
+          if (smth) {
+            var a = blah();
+            a();
+          }
+          d();
+        }
+        function d() {}
+        module.exports = { bar: b };
+      })();
     `);
 
     expect(transform(source)).toBe(expected);

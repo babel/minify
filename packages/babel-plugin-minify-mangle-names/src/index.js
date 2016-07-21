@@ -12,6 +12,9 @@ module.exports = ({ types: t }) => {
 
       // <Binding, NodePath[]>
       this.bindings = new Map;
+
+      // <Scope, Set<string>>
+      this.usedFunctionBindings = new Map;
     }
 
     run() {
@@ -37,8 +40,9 @@ module.exports = ({ types: t }) => {
           continue;
         }
 
-        // TODO
-        if (hop.call(this.blacklist, binding.identifier.name)) {
+        // Don't magnle if this exists in the blacklist
+        const oldName = binding.identifier.name;
+        if (hop.call(this.blacklist, oldName)) {
           continue;
         }
 
@@ -49,6 +53,18 @@ module.exports = ({ types: t }) => {
           newName = this.charset.getIdentifier(i);
           i++;
         } while (!t.isValidIdentifier(newName) || !this.canUse(newName, binding, identifierPaths));
+
+        // Register binding names as used to prevent them new bindings from being mangled inside
+        // that could shadow.
+        for (let path of identifierPaths) {
+          const funcScope = path.scope.getFunctionParent();
+          let used = this.usedFunctionBindings.get(funcScope);
+          if (!used) {
+            used = new Set;
+            this.usedFunctionBindings.set(funcScope, used);
+          }
+          used.add(newName);
+        }
 
         this.rename(newName, binding, identifierPaths);
       }
@@ -69,11 +85,25 @@ module.exports = ({ types: t }) => {
       }
     }
 
-    canUse(name, binding, identifierPaths) {
+    canUseInFunction(name, scope) {
+      const used = this.usedFunctionBindings.get(scope);
+      return !used || !used.has(name);
+    }
 
+    canUse(name, binding, identifierPaths) {
       let scope = binding.scope;
       if (scope.hasGlobal(name)) {
         return false;
+      }
+
+      // Check name against names of references that appear in this function
+      const funcScope = scope.getFunctionParent();
+      if (!this.canUseInFunction(name, funcScope)) return false;
+
+      // Check that references to this variable aren't inside a function that has it used.
+      for (let path of identifierPaths) {
+        let funcParent = path.scope.getFunctionParent();
+        if (!this.canUseInFunction(name, funcParent)) return false;
       }
 
       // Collect scopes that we'll check for collisions in.
@@ -84,7 +114,6 @@ module.exports = ({ types: t }) => {
 
       // Build a list of scope ancestors.
       const parentScopes = [];
-      const funcScope = scope.getFunctionParent();
       do {
         parentScopes.push(scope);
       } while ((scope = scope.parent) && scope !== funcScope);
