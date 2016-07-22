@@ -1,5 +1,25 @@
 # babel-plugin-minify-type-constructors
 
+**Note:** Not recommended if full support for IE8 and lower is required. [Details](https://github.com/amasad/babel-minify/pull/45#discussion_r70181249)
+
+## Example
+
+**In**
+
+```javascript
+Boolean(x);
+Number(x);
+String(x);
+```
+
+**Out**
+
+```javascript
+!!x;
++x;
+x + "";
+```
+
 ## Installation
 
 ```sh

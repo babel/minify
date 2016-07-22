@@ -1,5 +1,25 @@
 # babel-plugin-minify-flip-comparisons
 
+## Example
+
+**In**
+
+```javascript
+const foo = a === 1;
+if (bar !== null) {
+  var baz = 0;
+}
+```
+
+**Out**
+
+```javascript
+const foo = 1 === a;
+if (null !== bar) {
+  var baz = 0;
+}
+```
+
 ## Installation
 
 ```sh

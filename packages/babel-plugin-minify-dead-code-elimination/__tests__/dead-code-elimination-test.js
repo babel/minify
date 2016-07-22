@@ -206,15 +206,6 @@ describe("dce-plugin", () => {
   });
 
   it("should work with multiple scopes", () => {
-    const expected = unpad(`
-      function x() {
-        function y() {
-          console.log(1);
-        }
-        y();
-        y();
-      }
-    `);
     const source = unpad(`
       function x() {
         var i = 1;
@@ -225,24 +216,33 @@ describe("dce-plugin", () => {
         y();
       }
     `);
+    const expected = unpad(`
+      function x() {
+        function y() {
+          console.log(1);
+        }
+        y();
+        y();
+      }
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should inline function decl", () => {
-    const expected = unpad(`
-      function foo() {
-        (function () {
-          return 1;
-        })();
-      }
-    `);
     const source = unpad(`
       function foo() {
         function x() {
           return 1;
         }
         x();
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        (function () {
+          return 1;
+        })();
       }
     `);
 

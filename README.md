@@ -1,151 +1,75 @@
 ## babel-minify
 
-A collection of babel minification plugins.
+An ES6+ aware minifier based on the Babel toolchain.
 
-[![Build Status](https://img.shields.io/travis/amasad/babel-minify/master.svg?style=flat)](https://travis-ci.org/amasad/babel-minify)
+> babel-minify is consumable via API, CLI, or babel preset.
 
-babel-minify is consumable via API, CLI, or babel preset.
+<p align="center">
+  <a href="https://travis-ci.org/amasad/babel-minify"><img alt="Travis Status" src="https://img.shields.io/travis/amasad/babel-minify/master.svg?style=flat&label=travis"></a>
+  <a href="https://slack.babeljs.io/"><img alt="Slack Status" src="https://slack.babeljs.io/badge.svg"></a>
+</p>
 
-## Plugins
+Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
 
-### [minify-constant-folding](/packages/babel-plugin-minify-constant-folding)
+## CLI
+- [babel-minify](/packages/babel-minify)
 
-Tries to evaluate expressions and inline the result. For now only deals with
-numbers and strings.
+A simple wrapper around `babel-cli` and thus takes in the same [cli options](http://babeljs.io/docs/usage/cli/#options).
 
-**In**
-```js
-  "a" + "b"
-  2 * 3;
-  4 | 3;
-  "b" + a + "c" + "d" + g + z + "f" + "h" + "z"
+`babel-minify src -d lib` -> `babel src -d lib --presets=minify`
+
+## Preset
+
+Works just like any other preset (like `es2015`).
+
+- [babel-preset-minify](/packages/babel-preset-minify)
+
+You'll most likely want to use it only in the production environment. Check out the [env docs](http://babeljs.io/docs/usage/babelrc/#env-option) for more help.
+
+> Options specific to a certain environment are merged into and overwrite non-env specific options.
+
+Example `.babelrc`:
+
 ```
-
-**Out**
-```js
-  "ab";
-  6;
-  7;
-  "b" + a + "cd" + g + z + "fhz";
-```
-
-### [minify-dead-code-elimination](/packages/babel-plugin-minify-dead-code-elimination)
-
-Dead code elimination plugin. Inlines bindings when possible. Tries to evaluate expressions and prunes unreachable as a result.
-
-**In**
-```js
-function foo() {
-  var x = 1;
-}
-function foo2() {
-  var x = f();
-}
-```
-
-**Out**
-```js
-function foo() {}
-function foo2() { f(); }
-```
-
-### [minify-empty-function](/packages/babel-plugin-minify-empty-function)
-
-This is mostly a Facebook-specific transform that removes noop function
-calls. However, can be generalized to detect and remove noops.
-
-### [minify-mangle-names](/packages/babel-plugin-minify-mangle-names)
-
-Context and scope aware variable renaming.
-
-**In**
-```js
-var longVariableName = 1;
-var longVariableName2 = 2;
-```
-
-**Out**
-```js
-var a = 1;
-var b = 2;
-```
-
-### [minify-replace](/packages/babel-plugin-minify-replace)
-
-Replaces matching nodes in the tree with a given replacement node. For example
-you can replace `process.NODE_ENV` with `"production"`.
-
-**Plugin Options**
-```js
 {
-    replacements: [
-        {
-            identifierName: '__DEV__',
-            replacement: {
-              type: 'numericLiteral',
-              value: 0,
-            }
-        }
-    ]
+  "presets": ["es2015"],
+  "env": {
+    "production": {
+      "presets": ["minify"]
+    }
+  }
 }
 ```
 
-**In**
-```js
-if (__DEV__) {
-  foo();
-}
-```
+Then you'll need to set the env variable which could be something like `BABEL_ENV=production npm run build`
 
-**Out**
-```js
-if (0) {
-  foo();
-}
-```
+## Plugins (in `babel-preset-minify`)
 
-### [minify-simplify](/packages/babel-plugin-minify-simplify)
+The `babel-minify` repo is a monorepo similar to [babel](https://github.com/babel/babel) itself. It is comprised of a bunch of npm packages.
 
-This plugin will transform code in mainly two ways:
+- [babel-plugin-minify-constant-folding](/packages/babel-plugin-minify-constant-folding)
+- [babel-plugin-minify-dead-code-elimination](/packages/babel-plugin-minify-dead-code-elimination)
+- [babel-plugin-minify-flip-comparisons](/packages/babel-plugin-minify-flip-comparisons)
+- [babel-plugin-minify-guarded-expressions](/packages/babel-plugin-minify-guarded-expressions)
+- [babel-plugin-minify-infinity](/packages/babel-plugin-minify-infinity)
+- [babel-plugin-minify-mangle-names](/packages/babel-plugin-minify-mangle-names)
+- [babel-plugin-minify-replace](/packages/babel-plugin-minify-replace)
+- [babel-plugin-minify-simplify](/packages/babel-plugin-minify-simplify)
+- [babel-plugin-minify-type-constructors](/packages/babel-plugin-minify-type-constructors)
+- [babel-plugin-transform-member-expression-literals](/packages/babel-plugin-transform-member-expression-literals)
+- [babel-plugin-transform-merge-sibling-variables](/packages/babel-plugin-transform-merge-sibling-variables)
+- [babel-plugin-transform-minify-booleans](/packages/babel-plugin-transform-minify-booleans)
+- [babel-plugin-transform-property-literals](/packages/babel-plugin-transform-property-literals)
+- [babel-plugin-transform-simplify-comparison-operators](/packages/babel-plugin-transform-simplify-comparison-operators)
+- [babel-plugin-transform-undefined-to-void](/packages/babel-plugin-transform-undefined-to-void)
 
-1. Reduce as much statements as possible into expressions
+### Other
 
-**In**
-```js
-function foo() {
-  if (x) a();
-}
-function foo2() {
-  if (x) a();
-  else b();
-}
-```
-
-**Out**
-```js
-function foo() {
-  x && a();
-}
-function foo2() {
-  x ? a() : b();
-}
-```
-
-2. Make expressions as uniform as possible for better compressibility
-
-**In**
-```js
-undefined
-foo['bar']
-Number(foo)
-```
-
-**Out**
-```js
-void 0
-foo.bar
-+foo
-```
+- [babel-plugin-minify-empty-function](/packages/babel-plugin-minify-empty-function)
+- [babel-plugin-transform-inline-environment-variables](/packages/babel-plugin-transform-inline-environment-variables)
+- [babel-plugin-transform-node-env-inline](/packages/babel-plugin-transform-node-env-inline)
+- [babel-plugin-transform-remove-console](/packages/babel-plugin-transform-remove-console)
+- [babel-plugin-transform-remove-debugger](/packages/babel-plugin-transform-remove-debugger)
 
 ## Benchmarks
 
@@ -180,32 +104,3 @@ closure 94.23kB 218%    33.38kB 153%     10ms       9001ms
 ```
 
 Run with: ``./scripts/benchmark.js ./scripts/fixtures/jquery.js`
-
-## Contributing
-
-### Setup
-```sh
-$ git clone https://github.com/amasad/babel-minify
-$ cd babel-minify
-$ npm install
-$ npm run bootstrap
-```
-
-Then you can either run:
-
-```sh
-$ npm run build
-```
-
-to build Babel **once** or:
-
-```sh
-$ npm run watch
-```
-
-to have Babel build itself then incrementally build files on change.
-
-To run tests:
-```sh
-$ npm test
-```
