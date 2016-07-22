@@ -1,4 +1,4 @@
-module.exports = ({ Plugin, types: t }) => {
+module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
@@ -7,241 +7,201 @@ module.exports = ({ Plugin, types: t }) => {
       this.program = program;
       this.blacklist = blacklist;
 
-      // scope => {name => true}
-      this.scopeToRefNames = new Map();
-      // binding => [path, path ...]
-      this.bindingToRefPaths = new Map();
-      // scope => set(scopes)
-      this.scopeToChildren = new Map();
-    }
+      // unsafe scopes that contain an `eval`
+      this.unsafeScopes = new Set;
 
-    recordRefName(scope, name) {
-      const { scopeToRefNames } = this;
+      // <Binding, NodePath[]>
+      this.bindings = new Map;
 
-      const refNames = scopeToRefNames.get(scope) || Object.create(null);
-      scope = scope.getFunctionParent();
-      if (!scopeToRefNames.has(scope)) {
-        scopeToRefNames.set(scope, refNames);
-      }
-      refNames[name] = true;
-    }
-
-    recordScope(scope) {
-      const { scopeToChildren } = this;
-
-      scope = scope.getFunctionParent();
-
-      // Program scope.
-      if (!scope.parent) {
-        return;
-      }
-
-      while (scope.parent) {
-        const parentScope = scope.parent.getFunctionParent();
-        const scopes = scopeToChildren.get(parentScope) || new Set();
-        if (!scopeToChildren.has(parentScope)) {
-          scopeToChildren.set(parentScope, scopes);
-        }
-        scopes.add(scope);
-        scope = parentScope;
-      }
-    }
-
-    recordBindingPath(binding, path) {
-      const { bindingToRefPaths } = this;
-      const paths = bindingToRefPaths.get(binding) || [];
-      if (!bindingToRefPaths.has(binding)) {
-        bindingToRefPaths.set(binding, paths);
-      }
-      paths.push(path);
-
-      const scope = binding.scope.getFunctionParent();
-
-      this.recordRefName(scope, binding.identifier.name);
-      this.recordRefName(path.scope, binding.identifier.name);
+      // <Scope, Set<string>>
+      this.usedFunctionBindings = new Map;
     }
 
     run() {
-      this.program.traverse(collectVisitor, {
-        recordBindingPath: (binding, path) => this.recordBindingPath(binding, path),
-        recordScope: (scope) => {
-          this.currentScope = scope;
-          this.recordScope(scope);
-        },
-        setScopeUnsafe: () => {
-          let scope = this.currentScope;
-          if (scope) {
-            scope.unsafe = true;
-            while (scope.parent) {
-              scope = scope.parent;
-              scope.unsafe = true;
-            }
-          }
-        },
-        charset: this.charset,
-      });
-
+      this.collect();
       this.charset.sort();
       this.mangle();
     }
 
-    canUse(newName, binding) {
-      const { scopeToRefNames, scopeToChildren } = this;
+    collect() {
+      this.program.traverse(collectVisitor, this);
+    }
 
-      // Visit all scopes from the binding (definition) scope and all
-      // children scope downwards ignoring scopes with their own definition.
-      // And check if any of them references a `newName` variable.
-      const visited = new Set();
-      const toVisit = [binding.scope.getFunctionParent()];
+    mangle() {
+      for (const [binding, identifierPaths] of this.bindings.entries()) {
 
-      while (toVisit.length) {
-        const scope = toVisit.pop();
+        // Check if the scope is safe.
+        if (this.unsafeScopes.has(binding.scope)) {
+          continue;
+        }
 
-        if (scope.hasGlobal(newName)) {
+        // Don't mangle top level bindings. We can potentially do it just for block scoped though.
+        if (binding.scope.path.isProgram()) {
+          continue;
+        }
+
+        // Don't magnle if this exists in the blacklist
+        const oldName = binding.identifier.name;
+        if (hop.call(this.blacklist, oldName)) {
+          continue;
+        }
+
+        // Find a new name that doesn't collide with any.
+        let newName;
+        let i = 0;
+        do {
+          newName = this.charset.getIdentifier(i);
+          i++;
+        } while (!t.isValidIdentifier(newName) || !this.canUse(newName, binding, identifierPaths));
+
+        // Register binding names as used to prevent them new bindings from being mangled inside
+        // that could shadow.
+        for (let path of identifierPaths) {
+          const funcScope = path.scope.getFunctionParent();
+          let used = this.usedFunctionBindings.get(funcScope);
+          if (!used) {
+            used = new Set;
+            this.usedFunctionBindings.set(funcScope, used);
+          }
+          used.add(newName);
+        }
+
+        this.rename(newName, binding, identifierPaths);
+      }
+    }
+
+    rename(newName, binding, identifierPaths) {
+      const oldName = binding.identifier.name;
+
+      // Update scope tracking.
+      const scope = binding.scope;
+      const bindings = scope.bindings;
+      delete bindings[oldName];
+      bindings[newName] = binding;
+
+      // Update identifiers to reference the new name.
+      for (const path of identifierPaths) {
+        path.node.name = newName;
+      }
+    }
+
+    canUseInFunction(name, scope) {
+      const used = this.usedFunctionBindings.get(scope);
+      return !used || !used.has(name);
+    }
+
+    canUse(name, binding, identifierPaths) {
+      let scope = binding.scope;
+      if (scope.hasGlobal(name)) {
+        return false;
+      }
+
+      // Check name against names of references that appear in this function
+      const funcScope = scope.getFunctionParent();
+      if (!this.canUseInFunction(name, funcScope)) return false;
+
+      // Check that references to this variable aren't inside a function that has it used.
+      for (let path of identifierPaths) {
+        let funcParent = path.scope.getFunctionParent();
+        if (!this.canUseInFunction(name, funcParent)) return false;
+      }
+
+      // Collect scopes that we'll check for collisions in.
+      const scopes = [scope];
+      for (let path of identifierPaths) {
+        scopes.push(path.scope);
+      }
+
+      // Build a list of scope ancestors.
+      const parentScopes = [];
+      do {
+        parentScopes.push(scope);
+      } while ((scope = scope.parent) && scope !== funcScope);
+
+      for (const scope of scopes) {
+        const existing = scope.getBinding(name);
+
+        if (!existing || existing === binding) continue;
+
+        // Don't shadow any bindings in this scope.
+        if (existing.scope === binding.scope) {
           return false;
         }
 
-        const scopeReferences = scopeToRefNames.get(scope);
-        if (scopeReferences && scopeReferences[newName]) {
+        // Don't collide params with id.
+        // TODO only do this if the param is in the same function head
+        if (existing.kind === "hoisted" && binding.kind === "param") {
           return false;
         }
 
-        visited.add(scope);
+        // Check if the scope of any of the references is above us.
+        for (const path of this.bindings.get(existing)) {
+          let scope = path.scope;
+          if (scope.path.isFunction()) scope = scope.parent;
+          scope = scope.getFunctionParent();
 
-        const children = scopeToChildren.get(scope);
-        if (children) {
-          for (let scopeToVisit of children) {
-            if (!visited.has(scopeToVisit) &&
-                !scopeToVisit.hasOwnBinding(newName)) {
-              toVisit.push(scopeToVisit);
-            }
+          // Check if the function for this reference is a parent scope.
+          if (parentScopes.indexOf(scope) >= 0) {
+            return false;
           }
         }
       }
 
-      // Visit all binding reference paths and make sure there is no name
-      // collisions in their respective scopes and their parent scopes (to
-      // protect against shadowing)
-      const paths = this.bindingToRefPaths.get(binding);
-      const defScope = binding.scope.getFunctionParent();
-      for (let path of paths) {
-        let scope = path.scope.getFunctionParent();
-        while (scope && scope !== defScope) {
-          const scopeReferences = scopeToRefNames.get(scope);
-          if (scopeReferences && scopeReferences[newName]) {
+      for (const referencePath of binding.referencePaths) {
+        let scope = referencePath.scope;
+
+        do {
+          if (scope.getBinding(name)) {
             return false;
           }
-          scope = scope.parent;
-        }
+        } while ((scope = scope.parent) && scope !== binding.scope);
       }
 
       return true;
     }
-
-    updateScopeInfo(binding, newName) {
-      const scope = binding.scope.getFunctionParent();
-      const scopeReferences = this.scopeToRefNames.get(scope);
-      if (!scopeReferences) {
-        throw new Error("Encountered a scope with no information about");
-      }
-
-      const oldName = binding.identifier.name;
-      delete scopeReferences[oldName];
-      scopeReferences[newName] = true;
-
-      const paths = this.bindingToRefPaths.get(binding);
-      for (let path of paths) {
-        const refNames = this.scopeToRefNames.get(path.scope.getFunctionParent());
-        delete refNames[oldName];
-        refNames[newName] = true;
-        path.node.name = newName;
-      }
-
-      delete binding.scope.bindings[oldName];
-      binding.identifier.name = newName;
-
-      // Although we don't support block scoping for now (we expect things to be
-      // run through es2015 preset), we may get a let binding by virtue of being
-      // inside a catch clause. If that's the case then we want to maintain bindings
-      // on the the actual scope.
-      if (binding.kind === "let") {
-        binding.scope.bindings[newName] = binding;
-      } else {
-        scope.bindings[newName] = binding;
-      }
-    }
-
-    mangle() {
-      const { bindingToRefPaths, charset } = this;
-      const entries = Array.from(bindingToRefPaths.entries());
-      entries.forEach(([binding, paths]) => {
-        if (hop.call(this.blacklist, binding.identifier.name)) {
-          return;
-        }
-
-        if (binding.scope.unsafe) {
-          return;
-        }
-        if (binding.scope.getFunctionParent().path.isProgram()) {
-          return;
-        }
-        if (binding.path.isLabeledStatement()) {
-          return;
-        }
-
-        let newName;
-        let i = 0;
-
-        do {
-          newName = charset.getIdentifier(i);
-          i += 1;
-        } while (!t.isValidIdentifier(newName) || !this.canUse(newName, binding));
-
-        this.updateScopeInfo(binding, newName);
-      });
-    }
   }
 
   const collectVisitor = {
-    Scope({ scope }) {
-      this.recordScope(scope);
-    },
-
     "ReferencedIdentifier|BindingIdentifier"(path) {
       const { scope, node } = path;
 
-      if (path.parentPath.isLabeledStatement()) {
+      // Node is a label.
+      if (path.parentPath.isLabeledStatement({ label: node })) {
         return;
       }
 
       // Ignore break and continue statements.
-      if (path.parentPath.isContinueStatement() || path.parentPath.isBreakStatement()) {
-        if (path.parent.label === node) {
-          return;
-        }
+      if (path.parentPath.isContinueStatement({ label: node }) || path.parentPath.isBreakStatement({ label: node })) {
+        return;
       }
 
       // Doesn't take care of local eval bindings yet
-      if (node.name === 'eval' &&
-          path.parent.type === "CallExpression" &&
-          !path.scope.getBinding("eval")) {
-        this.setScopeUnsafe();
+      if (node.name === "eval" && path.parent.type === "CallExpression" && !path.scope.getBinding("eval")) {
+        // Mark all scopes from this one up as unsafe.
+        let evalScope = scope;
+        do {
+          this.unsafeScopes.add(evalScope);
+        } while (evalScope = evalScope.parent);
       }
 
-      // A function declaration name maybe shadowed by a variable
-      // in the scope. So we get it from the upper scope.
+      // Retrieve the binding.
       let binding;
       if (t.isFunctionDeclaration(path.parent, { id: node })) {
+        // A function declaration name maybe shadowed by a variable
+        // in the scope. So we get it from the upper scope.
         binding = scope.parent.getBinding(node.name);
       } else {
         binding = scope.getBinding(node.name);
       }
+      if (!binding) return;
 
-      if (!binding) {
-        return;
+      // Add the node path to our bindings map.
+      let paths = this.bindings.get(binding);
+      if (!paths) {
+        paths = [];
+        this.bindings.set(binding, paths);
       }
-
-      this.recordBindingPath(binding, path);
+      paths.push(path);
     },
 
     Literal({ node }) {
@@ -249,10 +209,12 @@ module.exports = ({ Plugin, types: t }) => {
     },
 
     Identifier(path) {
-      if ((path.parentPath.isMemberExpression() && path.key === "property") ||
-          (path.parentPath.isObjectProperty() && path.key === "key")
+      const { node } = path;
+
+      if ((path.parentPath.isMemberExpression({ property: node })) ||
+          (path.parentPath.isObjectProperty({ key: node }))
       ) {
-        this.charset.consider(path.node.name);
+        this.charset.consider(node.name);
       }
     },
   };

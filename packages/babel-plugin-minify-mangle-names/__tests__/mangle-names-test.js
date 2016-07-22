@@ -1,7 +1,8 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const unpad = require("../../../utils/unpad");
+const traverse = require("babel-traverse").default;
+const babel    = require("babel-core");
+const unpad    = require("../../../utils/unpad");
 
 function transform(code, options = {}) {
   return babel.transform(code,  {
@@ -81,9 +82,9 @@ describe("mangle-names", () => {
     const expected = unpad(`
       var a = 1;
       function foo() {
-        var a = 1;
-        if (a) {
-          console.log(a);
+        var b = 1;
+        if (b) {
+          console.log(b);
         }
       }
     `);
@@ -220,8 +221,8 @@ describe("mangle-names", () => {
           e(b, c, d);
         }
         function e() {
-          var a = who();
-          a.bam();
+          var b = who();
+          b.bam();
         }
         a();
       }
@@ -230,7 +231,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should be order independent", () => {
+  it("should be order independent 2", () => {
     const source = unpad(`
       function foo() {
         (function bar() {
@@ -248,8 +249,8 @@ describe("mangle-names", () => {
         (function a() {
           a();
           return function () {
-            var a = wow();
-            a.woo();
+            var b = wow();
+            b.woo();
           };
         })();
       }
@@ -297,8 +298,8 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function foo() {
         function a(b, c) {
-          return function (a, c) {
-            b(a, c);
+          return function (d, e) {
+            b(d, e);
           };
         }
         function b() {}
@@ -435,11 +436,11 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function xoo() {
         function a(b, c, d) {
-          function e(a, b, c) {
-            return function (c) {
-              b();
+          function e(f, g, h) {
+            return function (i) {
+              g();
               return function () {
-                a();
+                f();
               };
             };
           }
@@ -510,6 +511,149 @@ describe("mangle-names", () => {
         eval('...');
       }
     `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should integrate with block scoping plugin", () => {
+    const srcTxt = unpad(`
+      function f(x) {
+        for (let i = 0; i; i++) {
+          let n;
+          if (n) return;
+          g(() => n);
+        }
+      }
+    `);
+
+    const first = babel.transform(srcTxt, {
+      plugins: ["transform-es2015-block-scoping"],
+    });
+
+    traverse.clearCache();
+
+    const source = babel.transformFromAst(first.ast, null, {
+      plugins: [require("../src/index")],
+    }).code;
+
+    const expected = unpad(`
+      function f(a) {
+        var e = function (b) {
+          var h = void 0;
+          if (h) return {
+            v: void 0
+          };
+          g(() => h);
+        };
+
+        for (var b = 0; b; b++) {
+          var c = e(b);
+          if (typeof c === "object") return c.v;
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should integrate with block scoping plugin 2", () => {
+    const srcTxt = unpad(`
+      (function () {
+        function bar() {
+          if (smth) {
+            let entries = blah();
+            entries();
+          }
+          foo();
+        }
+        function foo() { }
+        module.exports = { bar };
+      })();
+    `);
+
+    const first = babel.transform(srcTxt, {
+      plugins: ["transform-es2015-block-scoping"],
+    });
+
+    traverse.clearCache();
+
+    const source = babel.transformFromAst(first.ast, null, {
+      plugins: [require("../src/index")],
+    }).code;
+
+    const expected = unpad(`
+      (function () {
+        function b() {
+          if (smth) {
+            var a = blah();
+            a();
+          }
+          d();
+        }
+        function d() {}
+        module.exports = { bar: b };
+      })();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should keep mangled named consistent across scopes when defined later on", () => {
+    const source = unpad(`
+      (function() {
+        function foo() {
+          {
+            var baz = true;
+
+            {
+              bar();
+            }
+          }
+        }
+
+        function bar() {}
+      }());
+    `);
+
+    const expected = unpad(`
+      (function () {
+        function a() {
+          {
+            var b = true;
+
+            {
+              c();
+            }
+          }
+        }
+
+        function c() {}
+      })();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should correctly mangle in nested loops", () => {
+    const source = unpad(`
+      (function () {
+        for (let x in foo) {
+          for (let y in foo[x]) {
+            alert(foo[x][y]);
+          }
+        }
+      })();
+    `);
+
+    const expected = unpad(`
+      (function () {
+        for (let a in foo) {
+          for (let b in foo[a]) {
+            alert(foo[a][b]);
+          }
+        }
+      })();
+    `);
+
     expect(transform(source)).toBe(expected);
   });
 });
