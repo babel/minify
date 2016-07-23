@@ -348,10 +348,11 @@ module.exports = ({ types: t, traverse }) => {
 
     IfStatement: {
       exit(path) {
-        const { node } = path;
-        let { consequent, alternate, test } = node;
+        const consequent = path.get("consequent");
+        const alternate = path.get("alternate");
+        const test = path.get("test");
 
-        const evaluateTest = path.get("test").evaluateTruthy();
+        const evaluateTest = test.evaluateTruthy();
 
         // we can check if a test will be truthy 100% and if so then we can inline
         // the consequent and completely ignore the alternate
@@ -360,7 +361,9 @@ module.exports = ({ types: t, traverse }) => {
         //   if ("foo") { foo; } -> { foo; }
         //
         if (evaluateTest === true) {
-          path.replaceWithMultiple(toStatements(consequent));
+          path.replaceWithMultiple(
+            [...toStatements(consequent), ...extractVars(alternate)]
+          );
           return;
         }
 
@@ -371,11 +374,13 @@ module.exports = ({ types: t, traverse }) => {
         //   if ("") { bar; } ->
         //
         if (evaluateTest === false) {
-          if (alternate) {
-            path.replaceWithMultiple(toStatements(alternate));
+          if (alternate.node) {
+            path.replaceWithMultiple(
+              [...toStatements(alternate), ...extractVars(consequent)]
+            );
             return;
           } else {
-            removeOrVoid(path);
+            path.replaceWithMultiple(extractVars(consequent));
           }
         }
 
@@ -383,8 +388,9 @@ module.exports = ({ types: t, traverse }) => {
         //
         //   if (foo) { foo; } else {} -> if (foo) { foo; }
         //
-        if (t.isBlockStatement(alternate) && !alternate.body.length) {
-          alternate = node.alternate = null;
+        if (alternate.isBlockStatement() && !alternate.node.body.length) {
+          alternate.skip();
+          alternate.remove();
         }
 
         // if the consequent block is empty turn alternate blocks into a consequent
@@ -392,13 +398,13 @@ module.exports = ({ types: t, traverse }) => {
         //
         //   if (foo) {} else { bar; } -> if (!foo) { bar; }
         //
-
-        if (t.isBlockStatement(consequent) && !consequent.body.length &&
-            t.isBlockStatement(alternate) && alternate.body.length
+        if (consequent.isBlockStatement() && !consequent.node.body.length &&
+            alternate.isBlockStatement() && alternate.node.body.length
         ) {
-          node.consequent = node.alternate;
-          node.alternate = null;
-          node.test = t.unaryExpression("!", test, true);
+          consequent.replaceWith(alternate.node);
+          alternate.skip();
+          alternate.remove();
+          test.replaceWith(t.unaryExpression("!", test.node, true));
         }
       },
     },
@@ -494,8 +500,9 @@ module.exports = ({ types: t, traverse }) => {
     },
   };
 
-  function toStatements(node) {
-    if (t.isBlockStatement(node)) {
+  function toStatements(path) {
+    const {node} = path;
+    if (path.isBlockStatement()) {
       let hasBlockScoped = false;
 
       for (let i = 0; i < node.body.length; i++) {
@@ -509,7 +516,39 @@ module.exports = ({ types: t, traverse }) => {
         return node.body;
       }
     }
-    return node;
+    return [node];
+  }
+
+  // recevies a consequent or alternate path
+  // and a scope that needs to be matched for extraction
+  function extractVars(path) {
+    let declarators = [];
+
+    if (path.isBlockStatement()) {
+      path.traverse({
+        VariableDeclaration(varPath) {
+          if (!varPath.isVariableDeclaration({ kind: "var" })) return;
+
+          if (varPath.scope.getFunctionParent() !== path.scope.getFunctionParent()) return;
+
+          for (let decl of varPath.node.declarations) {
+            declarators.push(t.variableDeclarator(decl.id));
+          }
+        }
+      });
+    }
+
+    // only kind=var VariableDeclaration is valid syntax
+    // kind var is unnecessary, keeping it for readablity
+    if (path.isVariableDeclaration({ kind: "var" })) {
+      for (let decl of path.node.declarations) {
+        declarators.push(t.variableDeclarator(decl.id));
+      }
+    }
+
+    if (declarators.length <= 0) return [];
+
+    return [t.variableDeclaration("var", declarators)];
   }
 
   function replace(path, options) {

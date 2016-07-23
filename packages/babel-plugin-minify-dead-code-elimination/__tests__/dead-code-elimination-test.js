@@ -1395,4 +1395,38 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should preserve vars from the removed block", () => {
+    const source = unpad(`
+      if (0) {var a = foo()}
+      if (0) var b = foo();
+      if (1) { } else { var c = foo() }
+      if (0) var d = bar(); else { }
+    `);
+    const expected = unpad(`
+      var a;
+      var b;
+      var c;
+      var d;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should optimize alternate when empty consequent is replaced with alternate", () => {
+    const source = unpad(`
+      if (baz) {
+      } else {
+        let foo = 'bar';
+        function foobar() {}
+        console.log('foo' + foo);
+      }
+    `);
+    const expected = unpad(`
+      if (!baz) {
+        console.log('foo' + 'bar');
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
