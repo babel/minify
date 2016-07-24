@@ -409,6 +409,126 @@ module.exports = ({ types: t, traverse }) => {
       },
     },
 
+    SwitchStatement(path) {
+      const evaluated = path.get('discriminant').evaluate();
+
+      if (!evaluated.confident) return;
+
+      const discriminant = evaluated.value;
+      const cases = path.get('cases');
+
+      let matchingCaseIndex = -1;
+      let defaultCaseIndex = -1;
+
+      for (let i = 0; i < cases.length; i++) {
+        const test = cases[i].get('test');
+        if (test === null) {
+          defaultCaseIndex = i;
+          continue;
+        }
+
+        // TODO - side effecty function
+        // switch (a) {
+        //   case sideEffetctyFunction(): break;
+        // }
+        // does evaluate automatically handle this?
+
+        const testResult = test.evaluate();
+
+        // if we are not able to deternine a test during
+        // compile time, we terminate immediately
+        if (!testResult.confident) return;
+
+        if (testResult.value !== discriminant) continue;
+
+        // we have a match now
+        matchingCaseIndex = i;
+        break;
+      }
+
+      if (matchingCaseIndex === -1) {
+        if (defaultCaseIndex === -1) {
+          path.skip();
+          path.remove();
+        } else {
+          replaceSwitch(getStatementsUntilBreak(defaultCaseIndex));
+        }
+      } else {
+        replaceSwitch(getStatementsUntilBreak(matchingCaseIndex));
+      }
+
+      function getStatementsUntilBreak(start) {
+        let statements = [];
+
+        for (let i = start; i < cases.length; i++) {
+          const consequent = cases[i].get('consequent');
+
+          for (let j = 0; j < consequent.length; j++) {
+            if (isBreaking(consequent[j])) {
+              // compute no more
+              // exit out of the loop
+              return statements;
+            } else {
+              statements.push(consequent[j].node);
+            }
+          }
+        }
+
+        return statements;
+      }
+
+      function isBreaking(stmt) {
+        if (stmt.isBreakStatement() && stmt.get('label').node === null) return true;
+
+        let _isBreaking = false;
+        stmt.traverse({
+          BreakStatement(breakPath) {
+            if (breakPath.get('label').node !== null) return;
+
+            // set the flag that it is indeed breaking
+            _isBreaking = true;
+
+            // and compute if it's breaking the correct thing
+            let parent = breakPath.parentPath;
+            while (!parent.isSwitchCase()) {
+              if (parent.isLoop()) {
+                _isBreaking = false;
+              }
+              parent = parent.parentPath;
+            }
+
+            // TODO - handle labelled switch statements ?
+            // x: switch(a) {
+            //   case 1: break x;
+            // }
+          }
+        });
+
+        return _isBreaking;
+      }
+
+      function replaceSwitch(statements) {
+        let isBlockRequired = false;
+
+        for (let i = 0; i < statements.length; i++) {
+          if (t.isVariableDeclaration(statements[i], { kind: 'let' })) {
+            isBlockRequired = true;
+            break;
+          }
+          if (t.isVariableDeclaration(statements[i], { kind: 'const' })) {
+            isBlockRequired = true;
+            break;
+          }
+        }
+
+        if (isBlockRequired) {
+          path.replaceWith(t.BlockStatement(statements));
+        } else {
+          path.replaceWithMultiple(statements);
+        }
+      }
+    },
+
     // Join assignment and definition when in sequence.
     // var x; x = 1; -> var x = 1;
     AssignmentExpression(path) {

@@ -1429,4 +1429,17 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should transform switch statement", () => {
+    const source = unpad(`
+      switch (0) {
+        case 0: foo(); break;
+        case 1: bar(); break;
+      }
+    `);
+    const expected = unpad(`
+      foo();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
