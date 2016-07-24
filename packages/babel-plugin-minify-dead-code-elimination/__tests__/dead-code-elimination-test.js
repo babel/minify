@@ -1430,7 +1430,7 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should transform switch statement", () => {
+  it("should transform simple switch statement", () => {
     const source = unpad(`
       switch (0) {
         case 0: foo(); break;
@@ -1440,6 +1440,104 @@ describe("dce-plugin", () => {
     const expected = unpad(`
       foo();
     `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT optimize when one of the cases is not evaluate-able", () => {
+    const source = unpad(`
+      switch (a) {
+        case 1:
+          break;
+      }
+      switch (100) {
+        default:
+          foo();
+        case a:
+          foo();
+          break;
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle cases where there is no break", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1: foo();
+        case 2: bar();
+        case 3: baz(); break;
+        case 4: foobarbaz();
+      }
+    `);
+    const expected = unpad(`
+      foo();
+      bar();
+      baz();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle defaults", () => {
+    const source = unpad(`
+      switch (10) {
+        default:
+          foo();
+          break;
+        case 1:
+          bar();
+          break;
+        case 2:
+          baz();
+      }
+      switch (5) {
+        case 1:
+          baz();
+          break;
+        case 2:
+          bar();
+          break;
+        default:
+          foo();
+      }
+    `);
+    const expected = unpad(`
+      foo();
+      foo();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should predict break statement within blocks", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1:
+          foo();
+          if (true) break;
+        case 2:
+          bar();
+      }
+      switch (1) {
+        case 1:
+          for(var i in x) { break }
+        case 2:
+          while(true) { break }
+        case 3:
+          foo();
+      }
+    `);
+
+    const expected = unpad(`
+      foo();
+      for (var i in x) {
+        break
+      }
+      while (true) {
+        break
+      }
+      foo();
+    `);
+
     expect(transform(source)).toBe(expected);
   });
 });
