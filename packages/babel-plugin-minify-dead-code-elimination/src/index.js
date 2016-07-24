@@ -410,18 +410,18 @@ module.exports = ({ types: t, traverse }) => {
     },
 
     SwitchStatement(path) {
-      const evaluated = path.get('discriminant').evaluate();
+      const evaluated = path.get("discriminant").evaluate();
 
       if (!evaluated.confident) return;
 
       const discriminant = evaluated.value;
-      const cases = path.get('cases');
+      const cases = path.get("cases");
 
       let matchingCaseIndex = -1;
       let defaultCaseIndex = -1;
 
       for (let i = 0; i < cases.length; i++) {
-        const test = cases[i].get('test');
+        const test = cases[i].get("test");
 
         // handle default case
         if (test.node === null) {
@@ -468,7 +468,7 @@ module.exports = ({ types: t, traverse }) => {
         let statements = [];
 
         for (let i = start; i < cases.length; i++) {
-          const consequent = cases[i].get('consequent');
+          const consequent = cases[i].get("consequent");
 
           for (let j = 0; j < consequent.length; j++) {
             if (isBreaking(consequent[j])) {
@@ -486,7 +486,7 @@ module.exports = ({ types: t, traverse }) => {
 
       function isBreaking(stmt) {
         if (stmt.isBreakStatement()) {
-          if (stmt.get('label').node === null) return true;
+          if (stmt.get("label").node === null) return true;
           // bailout otherwise
           shouldBailOut = false;
           return true;
@@ -515,7 +515,7 @@ module.exports = ({ types: t, traverse }) => {
             // once we confirmed that it breaks our switch
             if (_isBreaking) {
               // we find if we should bail out
-              if (breakPath.get('label').node !== null) {
+              if (breakPath.get("label").node !== null) {
                 shouldBailOut = true;
               }
             }
@@ -532,11 +532,11 @@ module.exports = ({ types: t, traverse }) => {
         let isBlockRequired = false;
 
         for (let i = 0; i < statements.length; i++) {
-          if (t.isVariableDeclaration(statements[i], { kind: 'let' })) {
+          if (t.isVariableDeclaration(statements[i], { kind: "let" })) {
             isBlockRequired = true;
             break;
           }
-          if (t.isVariableDeclaration(statements[i], { kind: 'const' })) {
+          if (t.isVariableDeclaration(statements[i], { kind: "const" })) {
             isBlockRequired = true;
             break;
           }
