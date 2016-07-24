@@ -6,7 +6,7 @@ const unpad = require("../../../utils/unpad");
 function transform(code, options) {
   return babel.transform(code,  {
     plugins: [[require("../src/index"), options]],
-  }).code;
+  }).code.trim();
 }
 
 describe("dce-plugin", () => {
@@ -1503,6 +1503,7 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       foo();
+
       foo();
     `);
     expect(transform(source)).toBe(expected);
@@ -1529,15 +1530,58 @@ describe("dce-plugin", () => {
 
     const expected = unpad(`
       foo();
+
       for (var i in x) {
-        break
+        break;
       }
+
       while (true) {
-        break
+        break;
       }
+
       foo();
     `);
 
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should bail out when break label is above switch's scope", () => {
+    const source = unpad(`
+      x: switch (1) {
+        case 1:
+          break x;
+      }
+      y: switch (0) {
+        case 0:
+          while (true) {
+            break y;
+          }
+      }
+      z: switch (2) {
+        case 2:
+          {
+            break z;
+          }
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT bail out when break label is under switch's scope", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1:
+          x: while (true) {
+            break x;
+          }
+      }
+    `);
+    const expected = unpad(`
+      x: while (true) {
+        break x;
+      }
+    `);
     expect(transform(source)).toBe(expected);
   });
 });

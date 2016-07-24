@@ -448,9 +448,6 @@ module.exports = ({ types: t, traverse }) => {
         break;
       }
 
-      // a flag to capture complex behavior - maybe
-      // for now, we bail out if we have this -
-      // x: switch(a) { case 1: break x; }
       let shouldBailOut = false;
 
       if (matchingCaseIndex === -1) {
@@ -488,13 +485,53 @@ module.exports = ({ types: t, traverse }) => {
         if (stmt.isBreakStatement()) {
           if (stmt.get("label").node === null) return true;
           // bailout otherwise
-          shouldBailOut = false;
+          shouldBailOut = true;
           return true;
         }
 
         let _isBreaking = false;
         stmt.traverse({
           BreakStatement(breakPath) {
+            const label = breakPath.get("label");
+
+            // immediately check if the nested break statements
+            // break this switch
+            if (label.node !== null) {
+              // labels are fn scoped and not accessible by inner functions
+              // path is the switch statement
+              let fnScope = path.scope.getFunctionParent();
+              let breakScope = breakPath.scope.getFunctionParent();
+              if (fnScope !== breakScope) {
+                // we don't have to worry about this break statement
+                return;
+              }
+
+              // we need to check for only one case here
+              // and bail out of it
+              // x: switch(someConst) {
+              //   case 1:
+              //     break x;
+              //   case 2:
+              //     while (true) { break x }
+              // }
+              const binding = path.scope.getBinding(label.node.name);
+              const labelDefn = binding.path;
+
+              let parent = path.parentPath;
+              while (!parent.isProgram()) {
+                if (parent === labelDefn) {
+                  _isBreaking = true;
+                  shouldBailOut = true;
+                  return;
+                }
+                parent = parent.parentPath;
+              }
+
+              // just ensuring
+              _isBreaking = false;
+              return;
+            }
+
             // set the flag that it is indeed breaking
             _isBreaking = true;
 
@@ -517,6 +554,7 @@ module.exports = ({ types: t, traverse }) => {
               // we find if we should bail out
               if (breakPath.get("label").node !== null) {
                 shouldBailOut = true;
+                return;
               }
             }
           }
