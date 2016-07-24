@@ -446,6 +446,11 @@ module.exports = ({ types: t, traverse }) => {
         break;
       }
 
+      // a flag to capture complex behavior - maybe
+      // for now, we bail out if we have this -
+      // x: switch(a) { case 1: break x; }
+      let shouldBailOut = false;
+
       if (matchingCaseIndex === -1) {
         if (defaultCaseIndex === -1) {
           path.skip();
@@ -478,29 +483,40 @@ module.exports = ({ types: t, traverse }) => {
       }
 
       function isBreaking(stmt) {
-        if (stmt.isBreakStatement() && stmt.get('label').node === null) return true;
+        if (stmt.isBreakStatement()) {
+          if (stmt.get('label').node === null) return true;
+          // bailout otherwise
+          shouldBailOut = false;
+          return true;
+        }
 
         let _isBreaking = false;
         stmt.traverse({
           BreakStatement(breakPath) {
-            if (breakPath.get('label').node !== null) return;
-
             // set the flag that it is indeed breaking
             _isBreaking = true;
 
             // and compute if it's breaking the correct thing
             let parent = breakPath.parentPath;
-            while (!parent.isSwitchCase()) {
+
+            while (parent !== stmt.parentPath) {
               if (parent.isLoop()) {
+                _isBreaking = false;
+              }
+              // nested switch statements
+              if (parent.isSwitchCase()) {
                 _isBreaking = false;
               }
               parent = parent.parentPath;
             }
 
-            // TODO - handle labelled switch statements ?
-            // x: switch(a) {
-            //   case 1: break x;
-            // }
+            // once we confirmed that it breaks our switch
+            if (_isBreaking) {
+              // we find if we should bail out
+              if (breakPath.get('label').node !== null) {
+                shouldBailOut = true;
+              }
+            }
           }
         });
 
@@ -508,6 +524,9 @@ module.exports = ({ types: t, traverse }) => {
       }
 
       function replaceSwitch(statements) {
+        // exit without doing anything
+        if (shouldBailOut) return;
+
         let isBlockRequired = false;
 
         for (let i = 0; i < statements.length; i++) {
