@@ -422,7 +422,9 @@ module.exports = ({ types: t, traverse }) => {
 
       for (let i = 0; i < cases.length; i++) {
         const test = cases[i].get('test');
-        if (test === null) {
+
+        // handle default case
+        if (test.node === null) {
           defaultCaseIndex = i;
           continue;
         }
