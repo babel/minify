@@ -134,15 +134,18 @@ module.exports = ({ types: t }) => {
           return false;
         }
 
-        // Check if the scope of any of the references is above us.
-        for (const path of this.bindings.get(existing)) {
-          let scope = path.scope;
-          if (scope.path.isFunction()) scope = scope.parent;
-          scope = scope.getFunctionParent();
+        let existingBinding = this.bindings.get(existing);
+        if (existingBinding) {
+          // Check if the scope of any of the references is above us.
+          for (const path of existingBinding) {
+            let scope = path.scope;
+            if (scope.path.isFunction()) scope = scope.parent;
+            scope = scope.getFunctionParent();
 
-          // Check if the function for this reference is a parent scope.
-          if (parentScopes.indexOf(scope) >= 0) {
-            return false;
+            // Check if the function for this reference is a parent scope.
+            if (parentScopes.indexOf(scope) >= 0) {
+              return false;
+            }
           }
         }
       }
