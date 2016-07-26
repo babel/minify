@@ -1635,9 +1635,11 @@ describe("dce-plugin", () => {
     const expected = unpad(`
       foo();
       while (1) {
-        if (x)
-          break;
+        if (x) break;
       }
+
+      bar();
     `);
+    expect(transform(source)).toBe(expected);
   });
 });
