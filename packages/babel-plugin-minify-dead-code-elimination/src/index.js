@@ -533,13 +533,20 @@ module.exports = ({ types: t, traverse }) => {
               // and compute if it's breaking the correct thing
               let parent = breakPath.parentPath;
 
+              // this flag is to capture
+              // switch(0) { case 0: while(1) if (x) break; }
+              let possibleRunTimeBreak = false;
+
               while (parent !== stmt.parentPath) {
-                if (parent.isLoop()) {
+                // loops and nested switch cases
+                if (parent.isLoop() || parent.isSwitchCase()) {
+                  // invalidate all the possible runtime breaks captured
+                  // while (1) { if (x) break; }
+                  possibleRunTimeBreak = false;
+
+                  // and set that it's not breaking our switch statement
                   _isBreaking = false;
-                }
-                // nested switch statements
-                if (parent.isSwitchCase()) {
-                  _isBreaking = false;
+                  break;
                 }
                 //
                 // this is a special case and depends on
@@ -557,11 +564,14 @@ module.exports = ({ types: t, traverse }) => {
                 // IfStatement if it was a compile time determined
                 //
                 if (parent.isIfStatement()) {
-                  _isBreaking = true;
-                  shouldBailOut = true;
-                  return;
+                  possibleRunTimeBreak = true;
                 }
                 parent = parent.parentPath;
+              }
+
+              if (possibleRunTimeBreak) {
+                shouldBailOut = true;
+                return;
               }
 
               // once we confirmed that it breaks our switch

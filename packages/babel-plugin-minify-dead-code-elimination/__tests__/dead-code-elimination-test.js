@@ -1618,15 +1618,26 @@ describe("dce-plugin", () => {
           bar();
       }
     `);
-    const expected = unpad(`
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT bail out for runtime evaluated if(x) break inside loop", () => {
+    const source = unpad(`
       switch (0) {
         case 0:
           foo();
-          if (a) break;
+          while (1) { if (x) break; }
         case 1:
           bar();
       }
     `);
-    expect(transform(source)).toBe(expected);
+    const expected = unpad(`
+      foo();
+      while (1) {
+        if (x)
+          break;
+      }
+    `);
   });
 });
