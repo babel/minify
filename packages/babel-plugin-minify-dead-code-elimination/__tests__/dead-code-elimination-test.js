@@ -6,7 +6,7 @@ const unpad = require("../../../utils/unpad");
 function transform(code, options) {
   return babel.transform(code,  {
     plugins: [[require("../src/index"), options]],
-  }).code;
+  }).code.trim();
 }
 
 describe("dce-plugin", () => {
@@ -1426,6 +1426,219 @@ describe("dce-plugin", () => {
       if (!baz) {
           console.log('foo' + 'bar');
         }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should transform simple switch statement", () => {
+    const source = unpad(`
+      switch (0) {
+        case 0: foo(); break;
+        case 1: bar(); break;
+      }
+    `);
+    const expected = unpad(`
+      foo();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT optimize when one of the cases is not evaluate-able", () => {
+    const source = unpad(`
+      switch (a) {
+        case 1:
+          break;
+      }
+      switch (100) {
+        default:
+          foo();
+        case a:
+          foo();
+          break;
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle cases where there is no break", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1: foo();
+        case 2: bar();
+        case 3: baz(); break;
+        case 4: foobarbaz();
+      }
+    `);
+    const expected = unpad(`
+      foo();
+      bar();
+      baz();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle defaults", () => {
+    const source = unpad(`
+      switch (10) {
+        default:
+          foo();
+          break;
+        case 1:
+          bar();
+          break;
+        case 2:
+          baz();
+      }
+      switch (5) {
+        case 1:
+          baz();
+          break;
+        case 2:
+          bar();
+          break;
+        default:
+          foo();
+      }
+    `);
+    const expected = unpad(`
+      foo();
+
+      foo();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should predict break statement within blocks", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1:
+          foo();
+          if (true) break;
+        case 2:
+          bar();
+      }
+      switch (1) {
+        case 1:
+          for(var i in x) { break }
+        case 2:
+          while(true) { break }
+        case 3:
+          foo();
+      }
+    `);
+
+    const expected = unpad(`
+      foo();
+
+      for (var i in x) {
+        break;
+      }
+
+      while (true) {
+        break;
+      }
+
+      foo();
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should bail out when break label is above switch's scope", () => {
+    const source = unpad(`
+      x: switch (1) {
+        case 1:
+          break x;
+      }
+      y: switch (0) {
+        case 0:
+          while (true) {
+            break y;
+          }
+      }
+      z: switch (2) {
+        case 2:
+          {
+            break z;
+          }
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT bail out when break label is under switch's scope", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1:
+          x: while (true) {
+            break x;
+          }
+      }
+    `);
+    const expected = unpad(`
+      x: while (true) {
+        break x;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle nested switch statements", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1:
+          foo();
+          switch (2) {
+            case 2:
+              bar();
+              break;
+          }
+          break;
+        case 2:
+          baz();
+      }
+    `);
+    const expected = unpad(`
+      foo();
+
+      bar();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should bail out for runtime evaluated if(x) break", () => {
+    const source = unpad(`
+      switch (0) {
+        case 0:
+          foo();
+          if (a) break;
+        case 1:
+          bar();
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT bail out for runtime evaluated if(x) break inside loop", () => {
+    const source = unpad(`
+      switch (0) {
+        case 0:
+          foo();
+          while (1) { if (x) break; }
+        case 1:
+          bar();
+      }
+    `);
+    const expected = unpad(`
+      foo();
+      while (1) {
+        if (x) break;
+      }
+
+      bar();
     `);
     expect(transform(source)).toBe(expected);
   });

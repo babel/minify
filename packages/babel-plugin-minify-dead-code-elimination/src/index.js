@@ -409,6 +409,211 @@ module.exports = ({ types: t, traverse }) => {
       },
     },
 
+    SwitchStatement: {
+      exit(path) {
+        const evaluated = path.get("discriminant").evaluate();
+
+        if (!evaluated.confident) return;
+
+        const discriminant = evaluated.value;
+        const cases = path.get("cases");
+
+        let matchingCaseIndex = -1;
+        let defaultCaseIndex = -1;
+
+        for (let i = 0; i < cases.length; i++) {
+          const test = cases[i].get("test");
+
+          // handle default case
+          if (test.node === null) {
+            defaultCaseIndex = i;
+            continue;
+          }
+
+          // TODO - side effecty function
+          // switch (a) {
+          //   case sideEffetctyFunction(): break;
+          // }
+          // does evaluate automatically handle this?
+
+          const testResult = test.evaluate();
+
+          // if we are not able to deternine a test during
+          // compile time, we terminate immediately
+          if (!testResult.confident) return;
+
+          if (testResult.value !== discriminant) continue;
+
+          // we have a match now
+          matchingCaseIndex = i;
+          break;
+        }
+
+        let shouldBailOut = false;
+
+        if (matchingCaseIndex === -1) {
+          if (defaultCaseIndex === -1) {
+            path.skip();
+            path.remove();
+          } else {
+            replaceSwitch(getStatementsUntilBreak(defaultCaseIndex));
+          }
+        } else {
+          replaceSwitch(getStatementsUntilBreak(matchingCaseIndex));
+        }
+
+        function getStatementsUntilBreak(start) {
+          let statements = [];
+
+          for (let i = start; i < cases.length; i++) {
+            const consequent = cases[i].get("consequent");
+
+            for (let j = 0; j < consequent.length; j++) {
+              if (isBreaking(consequent[j])) {
+                // compute no more
+                // exit out of the loop
+                return statements;
+              } else {
+                statements.push(consequent[j].node);
+              }
+            }
+          }
+
+          return statements;
+        }
+
+        function isBreaking(stmt) {
+          if (stmt.isBreakStatement()) {
+            if (stmt.get("label").node === null) return true;
+            // bailout otherwise
+            shouldBailOut = true;
+            return true;
+          }
+
+          let _isBreaking = false;
+          stmt.traverse({
+            BreakStatement(breakPath) {
+              const label = breakPath.get("label");
+
+              if (label.node !== null) {
+                // labels are fn scoped and not accessible by inner functions
+                // path is the switch statement
+                let fnScope = path.scope.getFunctionParent();
+                let breakScope = breakPath.scope.getFunctionParent();
+                if (fnScope !== breakScope) {
+                  // we don't have to worry about this break statement
+                  _isBreaking = false;
+                  return;
+                }
+
+                // here we handle the break labels
+                // if they are outside switch, we bail out
+                // if they are within the case, we keep them
+                const binding = path.scope.getBinding(label.node.name);
+                const labelDefn = binding.path;
+
+                let parent = path.parentPath;
+                while (!parent.isProgram()) {
+                  if (parent === labelDefn) {
+                    _isBreaking = true;
+                    shouldBailOut = true;
+                    return;
+                  }
+                  parent = parent.parentPath;
+                }
+
+                // just ensuring
+                _isBreaking = false;
+                return;
+              }
+
+              // set the flag that it is indeed breaking
+              _isBreaking = true;
+
+              // and compute if it's breaking the correct thing
+              let parent = breakPath.parentPath;
+
+              // this flag is to capture
+              // switch(0) { case 0: while(1) if (x) break; }
+              let possibleRunTimeBreak = false;
+
+              while (parent !== stmt.parentPath) {
+                // loops and nested switch cases
+                if (parent.isLoop() || parent.isSwitchCase()) {
+                  // invalidate all the possible runtime breaks captured
+                  // while (1) { if (x) break; }
+                  possibleRunTimeBreak = false;
+
+                  // and set that it's not breaking our switch statement
+                  _isBreaking = false;
+                  break;
+                }
+                //
+                // this is a special case and depends on
+                // the fact that SwitchStatement is handled in the
+                // exit hook of the traverse
+                //
+                // switch (0) {
+                //   case 0: if (x) break;
+                // }
+                //
+                // here `x` is runtime only.
+                // in this case, we need to bail out. So we depend on exit hook
+                // of switch so that, it would have visited the IfStatement first
+                // before the SwitchStatement and would have removed the
+                // IfStatement if it was a compile time determined
+                //
+                if (parent.isIfStatement()) {
+                  possibleRunTimeBreak = true;
+                }
+                parent = parent.parentPath;
+              }
+
+              if (possibleRunTimeBreak) {
+                shouldBailOut = true;
+                return;
+              }
+
+              // once we confirmed that it breaks our switch
+              if (_isBreaking) {
+                // we find if we should bail out
+                if (breakPath.get("label").node !== null) {
+                  shouldBailOut = true;
+                  return;
+                }
+              }
+            }
+          });
+
+          return _isBreaking;
+        }
+
+        function replaceSwitch(statements) {
+          // exit without doing anything
+          if (shouldBailOut) return;
+
+          let isBlockRequired = false;
+
+          for (let i = 0; i < statements.length; i++) {
+            if (t.isVariableDeclaration(statements[i], { kind: "let" })) {
+              isBlockRequired = true;
+              break;
+            }
+            if (t.isVariableDeclaration(statements[i], { kind: "const" })) {
+              isBlockRequired = true;
+              break;
+            }
+          }
+
+          if (isBlockRequired) {
+            path.replaceWith(t.BlockStatement(statements));
+          } else {
+            path.replaceWithMultiple(statements);
+          }
+        }
+      }
+    },
+
     // Join assignment and definition when in sequence.
     // var x; x = 1; -> var x = 1;
     AssignmentExpression(path) {
