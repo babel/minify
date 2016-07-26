@@ -1584,4 +1584,49 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should handle nested switch statements", () => {
+    const source = unpad(`
+      switch (1) {
+        case 1:
+          foo();
+          switch (2) {
+            case 2:
+              bar();
+              break;
+          }
+          break;
+        case 2:
+          baz();
+      }
+    `);
+    const expected = unpad(`
+      foo();
+
+      bar();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should bail out for runtime evaluated if(x) break", () => {
+    const source = unpad(`
+      switch (0) {
+        case 0:
+          foo();
+          if (a) break;
+        case 1:
+          bar();
+      }
+    `);
+    const expected = unpad(`
+      switch (0) {
+        case 0:
+          foo();
+          if (a) break;
+        case 1:
+          bar();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
