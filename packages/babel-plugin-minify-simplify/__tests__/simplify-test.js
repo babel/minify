@@ -396,11 +396,16 @@ describe("simplify-plugin", () => {
         while(true) {
           bar();
         }
+        while (x) {
+          baz();
+        }
       }
     `);
     const expected = unpad(`
       function foo(a) {
-        for (; true;) bar();
+        for (;;) bar();
+
+        for (; x;) baz();
       }
     `);
 
@@ -414,11 +419,16 @@ describe("simplify-plugin", () => {
         while(true) {
           bar();
         }
+        while (a) {
+          foobar();
+        }
       }
     `);
     const expected = unpad(`
       function foo(a) {
-        for (var bar = baz; true;) bar();
+        for (var bar = baz;;) bar();
+
+        for (; a;) foobar();
       }
     `);
 
@@ -718,7 +728,7 @@ describe("simplify-plugin", () => {
 
     const expected = unpad(`
       function foo() {
-        for (; 1;) {
+        for (;;) {
           if (a === null) return void b();
           a(), b();
         }
