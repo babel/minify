@@ -1642,4 +1642,44 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should optimize While statements", () => {
+    const source = unpad(`
+      while (false) {
+        foo();
+      }
+      while (true) {
+        bar();
+      }
+    `);
+    const expected = unpad(`
+      while (true) {
+        bar();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should optimize For statements", () => {
+    const source = unpad(`
+      for (var i = 0; i < 8; i++) {
+        foo();
+      }
+      for (; true;) {
+        bar();
+      }
+      for (; false;) {
+        baz();
+      }
+    `);
+    const expected = unpad(`
+      for (var i = 0; i < 8; i++) {
+        foo();
+      }
+      for (;;) {
+        bar();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
