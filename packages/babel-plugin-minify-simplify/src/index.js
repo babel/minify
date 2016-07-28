@@ -864,16 +864,7 @@ module.exports = ({ types: t }) => {
 
       WhileStatement(path) {
         const { node } = path;
-        const result = path.get("test").evaluate();
-        if (result.confident) {
-          if (result.value) {
-            path.replaceWith(t.forStatement(null, null, null, node.body));
-          } else {
-            path.remove();
-          }
-        } else {
-          path.replaceWith(t.forStatement(null, node.test, null, node.body));
-        }
+        path.replaceWith(t.forStatement(null, node.test, null, node.body));
       },
 
       ForInStatement:createPrevExpressionEater("for-in"),
