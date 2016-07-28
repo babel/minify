@@ -634,6 +634,14 @@ module.exports = ({ types: t, traverse }) => {
       }
     },
 
+    DoWhileStatement(path) {
+      const test = path.get("test");
+      const result = test.evaluate();
+      if (result.confident && !result.value) {
+        path.replaceWith(path.get("body").node);
+      }
+    },
+
     // Join assignment and definition when in sequence.
     // var x; x = 1; -> var x = 1;
     AssignmentExpression(path) {

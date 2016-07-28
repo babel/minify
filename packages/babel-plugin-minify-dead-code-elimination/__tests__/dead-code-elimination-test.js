@@ -1651,10 +1651,16 @@ describe("dce-plugin", () => {
       while (true) {
         bar();
       }
+      while (x) {
+        baz();
+      }
     `);
     const expected = unpad(`
       while (true) {
         bar();
+      }
+      while (x) {
+        baz();
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -1679,6 +1685,32 @@ describe("dce-plugin", () => {
       for (;;) {
         bar();
       }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should optimize dowhile statements", () => {
+    const source = unpad(`
+      do {
+        foo();
+      } while (1);
+      do {
+        bar()
+      } while (0);
+      do {
+        baz();
+      } while (a);
+    `);
+    const expected = unpad(`
+      do {
+        foo();
+      } while (1);
+      {
+        bar();
+      }
+      do {
+        baz();
+      } while (a);
     `);
     expect(transform(source)).toBe(expected);
   });
