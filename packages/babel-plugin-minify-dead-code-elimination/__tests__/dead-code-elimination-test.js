@@ -1643,6 +1643,7 @@ describe("dce-plugin", () => {
 
     const expected = unpad(`
       foo();
+      var i;
 
       for (var i in x) {
         break;
@@ -1717,6 +1718,42 @@ describe("dce-plugin", () => {
       foo();
 
       bar();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should break correctly when there is a break statement after break", () => {
+    const source = unpad(`
+      switch (0) {
+        case 0:
+          foo();
+          break;
+          bar();
+          break;
+      }
+    `);
+    const expected = unpad(`
+      foo();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should break correctly for the correct break statement", () => {
+    const source = unpad(`
+      switch (0) {
+        case 0:
+          foo();
+          {
+            if (true) break;
+            bar();
+            if (a) break;
+          }
+        case 1:
+          baz();
+      }
+    `);
+    const expected = unpad(`
+      foo();
     `);
     expect(transform(source)).toBe(expected);
   });
@@ -1841,4 +1878,44 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should extract vars from the removed switch statement", () => {
+    const source = unpad(`
+      switch (0) {
+        case 1:
+          var a = 5;
+          var b = 6;
+      }
+      switch (0) {
+        default:
+          var a = 1;
+          var b = 2;
+      }
+    `);
+    const expected = unpad(`
+      var a, b;
+      var a, b;
+
+      var a = 1;
+      var b = 2;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle side-effecty things in cases", () => {
+    const source = unpad(`
+      let i = 0;
+      let bar = () => console.log('foo');
+      switch (1) {
+        case ++i:
+          foo();
+          break;
+        case bar():
+          baz();
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
 });

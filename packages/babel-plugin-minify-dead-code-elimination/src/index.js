@@ -432,168 +432,68 @@ module.exports = ({ types: t, traverse }) => {
             continue;
           }
 
-          // TODO - side effecty function
-          // switch (a) {
-          //   case sideEffetctyFunction(): break;
-          // }
-          // does evaluate automatically handle this?
-
           const testResult = test.evaluate();
 
           // if we are not able to deternine a test during
           // compile time, we terminate immediately
           if (!testResult.confident) return;
 
-          if (testResult.value !== discriminant) continue;
-
-          // we have a match now
-          matchingCaseIndex = i;
-          break;
+          if (testResult.value === discriminant) {
+            matchingCaseIndex = i;
+            break;
+          }
         }
 
-        let shouldBailOut = false;
+        let result;
 
         if (matchingCaseIndex === -1) {
           if (defaultCaseIndex === -1) {
             path.skip();
-            path.remove();
+            path.replaceWithMultiple(extractVars(path));
+            return;
           } else {
-            replaceSwitch(getStatementsUntilBreak(defaultCaseIndex));
+            result = getStatementsUntilBreak(defaultCaseIndex);
           }
         } else {
-          replaceSwitch(getStatementsUntilBreak(matchingCaseIndex));
+          result = getStatementsUntilBreak(matchingCaseIndex);
         }
 
+        if (result.bail) return;
+
+        // we extract vars from the entire switch statement
+        // and there will be duplicates which
+        // will be again removed by DCE
+        replaceSwitch([...extractVars(path), ...result.statements]);
+
         function getStatementsUntilBreak(start) {
-          let statements = [];
+          const result = {
+            bail: false,
+            statements: []
+          };
 
           for (let i = start; i < cases.length; i++) {
             const consequent = cases[i].get("consequent");
 
             for (let j = 0; j < consequent.length; j++) {
-              if (isBreaking(consequent[j])) {
+              let _isBreaking = isBreaking(consequent[j], path);
+              if (_isBreaking.bail) {
+                result.bail = true;
+                return result;
+              }
+              if (_isBreaking.break) {
                 // compute no more
                 // exit out of the loop
-                return statements;
+                return result;
               } else {
-                statements.push(consequent[j].node);
+                result.statements.push(consequent[j].node);
               }
             }
           }
 
-          return statements;
-        }
-
-        function isBreaking(stmt) {
-          if (stmt.isBreakStatement()) {
-            if (stmt.get("label").node === null) return true;
-            // bailout otherwise
-            shouldBailOut = true;
-            return true;
-          }
-
-          let _isBreaking = false;
-          stmt.traverse({
-            BreakStatement(breakPath) {
-              const label = breakPath.get("label");
-
-              if (label.node !== null) {
-                // labels are fn scoped and not accessible by inner functions
-                // path is the switch statement
-                let fnScope = path.scope.getFunctionParent();
-                let breakScope = breakPath.scope.getFunctionParent();
-                if (fnScope !== breakScope) {
-                  // we don't have to worry about this break statement
-                  _isBreaking = false;
-                  return;
-                }
-
-                // here we handle the break labels
-                // if they are outside switch, we bail out
-                // if they are within the case, we keep them
-                const binding = path.scope.getBinding(label.node.name);
-                const labelDefn = binding.path;
-
-                let parent = path.parentPath;
-                while (!parent.isProgram()) {
-                  if (parent === labelDefn) {
-                    _isBreaking = true;
-                    shouldBailOut = true;
-                    return;
-                  }
-                  parent = parent.parentPath;
-                }
-
-                // just ensuring
-                _isBreaking = false;
-                return;
-              }
-
-              // set the flag that it is indeed breaking
-              _isBreaking = true;
-
-              // and compute if it's breaking the correct thing
-              let parent = breakPath.parentPath;
-
-              // this flag is to capture
-              // switch(0) { case 0: while(1) if (x) break; }
-              let possibleRunTimeBreak = false;
-
-              while (parent !== stmt.parentPath) {
-                // loops and nested switch cases
-                if (parent.isLoop() || parent.isSwitchCase()) {
-                  // invalidate all the possible runtime breaks captured
-                  // while (1) { if (x) break; }
-                  possibleRunTimeBreak = false;
-
-                  // and set that it's not breaking our switch statement
-                  _isBreaking = false;
-                  break;
-                }
-                //
-                // this is a special case and depends on
-                // the fact that SwitchStatement is handled in the
-                // exit hook of the traverse
-                //
-                // switch (0) {
-                //   case 0: if (x) break;
-                // }
-                //
-                // here `x` is runtime only.
-                // in this case, we need to bail out. So we depend on exit hook
-                // of switch so that, it would have visited the IfStatement first
-                // before the SwitchStatement and would have removed the
-                // IfStatement if it was a compile time determined
-                //
-                if (parent.isIfStatement()) {
-                  possibleRunTimeBreak = true;
-                }
-                parent = parent.parentPath;
-              }
-
-              if (possibleRunTimeBreak) {
-                shouldBailOut = true;
-                return;
-              }
-
-              // once we confirmed that it breaks our switch
-              if (_isBreaking) {
-                // we find if we should bail out
-                if (breakPath.get("label").node !== null) {
-                  shouldBailOut = true;
-                  return;
-                }
-              }
-            }
-          });
-
-          return _isBreaking;
+          return result;
         }
 
         function replaceSwitch(statements) {
-          // exit without doing anything
-          if (shouldBailOut) return;
-
           let isBlockRequired = false;
 
           for (let i = 0; i < statements.length; i++) {
@@ -742,31 +642,30 @@ module.exports = ({ types: t, traverse }) => {
     return [node];
   }
 
-  // recevies a consequent or alternate path
-  // and a scope that needs to be matched for extraction
+  // Extracts vars from a path
+  // Useful for removing blocks or paths that can contain
+  // variable declarations inside them
+  // Note:
+  // drops are inits
+  // extractVars({ var x = 5, y = x }) => var x, y;
   function extractVars(path) {
     let declarators = [];
 
-    if (path.isBlockStatement()) {
+    if (path.isVariableDeclaration({ kind: "var" })) {
+      for (let decl of path.node.declarations) {
+        declarators.push(t.variableDeclarator(decl.id));
+      }
+    } else {
       path.traverse({
         VariableDeclaration(varPath) {
           if (!varPath.isVariableDeclaration({ kind: "var" })) return;
-
-          if (varPath.scope.getFunctionParent() !== path.scope.getFunctionParent()) return;
+          if (!isSameFunctionScope(varPath, path)) return;
 
           for (let decl of varPath.node.declarations) {
             declarators.push(t.variableDeclarator(decl.id));
           }
         }
       });
-    }
-
-    // only kind=var VariableDeclaration is valid syntax
-    // kind var is unnecessary, keeping it for readablity
-    if (path.isVariableDeclaration({ kind: "var" })) {
-      for (let decl of path.node.declarations) {
-        declarators.push(t.variableDeclarator(decl.id));
-      }
     }
 
     if (declarators.length <= 0) return [];
@@ -866,6 +765,117 @@ module.exports = ({ types: t, traverse }) => {
     // Check if shadowed or is not referenced.
     if (binding.path.node !== node || !binding.referenced) {
       node.id = null;
+    }
+  }
+
+  // path1 -> path2
+  // is path1 an ancestor of path2
+  function isAncestor(path1, path2) {
+    return !!path2.findParent((parent) => parent === path1);
+  }
+
+  function isSameFunctionScope(path1, path2) {
+    return path1.scope.getFunctionParent() === path2.scope.getFunctionParent();
+  }
+
+  // tells if a "stmt" is a break statement that would break the "path"
+  function isBreaking(stmt, path) {
+    if (stmt.isBreakStatement()) {
+      return _isBreaking(stmt, path);
+    }
+
+    let isBroken = false;
+    let result = {
+      break: false,
+      bail: false
+    };
+
+    stmt.traverse({
+      BreakStatement(breakPath) {
+        // if we already detected a break statement,
+        if (isBroken) return;
+
+        result = _isBreaking(breakPath, path);
+
+        if (result.bail || result.break) {
+          isBroken = true;
+        }
+      }
+    });
+
+    return result;
+
+    function _isBreaking(breakPath, path) {
+      const label = breakPath.get("label");
+
+      if (label.node !== null) {
+        // labels are fn scoped and not accessible by inner functions
+        // path is the switch statement
+        if (!isSameFunctionScope(path, breakPath)) {
+          // we don't have to worry about this break statement
+          return {
+            break: false,
+            bail: false
+          };
+        }
+
+        // here we handle the break labels
+        // if they are outside switch, we bail out
+        // if they are within the case, we keep them
+        const _isAncestor = isAncestor(path.scope.getBinding(label.node.name).path, path);
+
+        return {
+          bail: _isAncestor,
+          break: _isAncestor
+        };
+      }
+
+      // set the flag that it is indeed breaking
+      let isBreak = true;
+
+      // this flag is to capture
+      // switch(0) { case 0: while(1) if (x) break; }
+      let possibleRunTimeBreak = false;
+
+      // and compute if it's breaking the correct thing
+      let parent = breakPath.parentPath;
+
+      while (parent !== stmt.parentPath) {
+        // loops and nested switch cases
+        if (parent.isLoop() || parent.isSwitchCase()) {
+          // invalidate all the possible runtime breaks captured
+          // while (1) { if (x) break; }
+          possibleRunTimeBreak = false;
+
+          // and set that it's not breaking our switch statement
+          isBreak = false;
+          break;
+        }
+        //
+        // this is a special case and depends on
+        // the fact that SwitchStatement is handled in the
+        // exit hook of the traverse
+        //
+        // switch (0) {
+        //   case 0: if (x) break;
+        // }
+        //
+        // here `x` is runtime only.
+        // in this case, we need to bail out. So we depend on exit hook
+        // of switch so that, it would have visited the IfStatement first
+        // before the SwitchStatement and would have removed the
+        // IfStatement if it was a compile time determined
+        //
+        if (parent.isIfStatement()) {
+          possibleRunTimeBreak = true;
+        }
+        parent = parent.parentPath;
+      }
+
+      return {
+        break: possibleRunTimeBreak || isBreak,
+        bail: possibleRunTimeBreak
+      };
     }
   }
 };
