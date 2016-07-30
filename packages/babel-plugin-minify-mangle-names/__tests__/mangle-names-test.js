@@ -415,7 +415,7 @@ describe("mangle-names", () => {
         var a = 2;
       }
     `);
-    expect(transform(source, { mangleBlacklist: {foo: true, bar: true }})).toBe(expected);
+    expect(transform(source, { blacklist: {foo: true, bar: true }})).toBe(expected);
   });
 
   it("should handle deeply nested paths with no bindings", () => {
@@ -721,5 +721,39 @@ describe("mangle-names", () => {
     `);
 
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT mangle functions & classes when keep_fnames is true", () => {
+    const source = unpad(`
+      (function() {
+        class Foo {}
+        const Bar = class Bar extends Foo {}
+        var foo = function foo() {
+          foo();
+        }
+        function bar() {
+          foo();
+        }
+        bar();
+        var baz = foo;
+        baz();
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        class Foo {}
+        const a = class Bar extends Foo {};
+        var b = function foo() {
+          foo();
+        };
+        function bar() {
+          b();
+        }
+        bar();
+        var c = b;
+        c();
+      })();
+    `);
+    expect(transform(source, {keep_fnames: true})).toBe(expected);
   });
 });

@@ -2,10 +2,14 @@ module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
-    constructor(charset, program, blacklist) {
+    constructor(charset, program, {
+      blacklist = {},
+      keep_fnames = false
+    } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
+      this.keep_fnames = keep_fnames;
 
       // unsafe scopes that contain an `eval`
       this.unsafeScopes = new Set;
@@ -198,6 +202,10 @@ module.exports = ({ types: t }) => {
       }
       if (!binding) return;
 
+      if (this.keep_fnames && isFunction(binding.path)) {
+        return;
+      }
+
       // Add the node path to our bindings map.
       let paths = this.bindings.get(binding);
       if (!paths) {
@@ -232,7 +240,7 @@ module.exports = ({ types: t }) => {
         const shouldConsiderSource = path.getSource().length > 70000;
 
         const charset = new Charset(shouldConsiderSource);
-        const mangler = new Mangler(charset, path, this.opts.mangleBlacklist || {});
+        const mangler = new Mangler(charset, path, this.opts);
         mangler.run();
       },
     },
@@ -287,4 +295,12 @@ class Charset {
     } while (num > 0);
     return ret;
   }
+}
+
+// for keep_fnames
+function isFunction(path) {
+  return path.isFunctionExpression()
+    || path.isFunctionDeclaration()
+    || path.isClassExpression()
+    || path.isClassDeclaration();
 }
