@@ -1,6 +1,6 @@
 "use strict";
 
-const PatternMatch = require('./pattern-match');
+const PatternMatch = require("./pattern-match");
 
 module.exports = ({ types: t }) => {
   const isNodesEquiv = require("babel-helper-is-nodes-equiv")(t);
@@ -14,19 +14,19 @@ module.exports = ({ types: t }) => {
 
   // Types as symbols for comparisions
   const types = {};
-  t.TYPES.forEach(type => {
+  t.TYPES.forEach((type) => {
     types[type] = Symbol.for(type);
   });
   const isNodeOfType = (node, typeSymbol) => {
-    if (typeof typeSymbol !== 'symbol') return false;
+    if (typeof typeSymbol !== "symbol") return false;
     return t["is"+ Symbol.keyFor(typeSymbol)](node);
   };
 
   // small abstractions
-  const not = node => t.unaryExpression('!', node);
-  const notnot = node => not(not(node));
-  const or = (a, b) => t.logicalExpression('||', a, b);
-  const and = (a, b) => t.logicalExpression('&&', a, b);
+  const not = (node) => t.unaryExpression("!", node);
+  const notnot = (node) => not(not(node));
+  const or = (a, b) => t.logicalExpression("||", a, b);
+  const and = (a, b) => t.logicalExpression("&&", a, b);
 
   return {
     visitor: {
@@ -50,7 +50,7 @@ module.exports = ({ types: t }) => {
         ) {
           path.replaceWith(
             t.callExpression(
-              t.unaryExpression('!', node.callee, true),
+              t.unaryExpression("!", node.callee, true),
               node.arguments
             )
           );
@@ -141,9 +141,9 @@ module.exports = ({ types: t }) => {
           },
 
           function simplifyPatterns(path) {
-            const test = path.get('test');
-            const consequent = path.get('consequent');
-            const alternate = path.get('alternate');
+            const test = path.get("test");
+            const consequent = path.get("consequent");
+            const alternate = path.get("alternate");
 
             const {
               Expression: EX,
@@ -1343,7 +1343,7 @@ module.exports = ({ types: t }) => {
   function isPatternMatchesPath(patternValue, inputPath) {
     if (Array.isArray(patternValue)) {
       for (let i = 0; i < patternValue.length; i++) {
-        if (isMatch(patternValue[i], inputPath)) {
+        if (isPatternMatchesPath(patternValue[i], inputPath)) {
           return true;
         }
       }

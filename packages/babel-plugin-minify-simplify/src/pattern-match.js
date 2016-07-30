@@ -24,7 +24,7 @@ module.exports = class PatternMatch {
     };
 
     // to handle falsy keys
-    const NO_MATCH = Symbol('NO_MATCH');
+    const NO_MATCH = Symbol("NO_MATCH");
 
     for (let i = 0; i < input.length; i++) {
       let matchedKey = NO_MATCH;
@@ -62,7 +62,7 @@ module.exports = class PatternMatch {
 
     function make(parent, pattern) {
       if (pattern.length < 2) {
-        throw new Error('at least 2 elements required in a pattern');
+        throw new Error("at least 2 elements required in a pattern");
       }
 
       if (pattern.length === 2) {
@@ -85,4 +85,4 @@ module.exports = class PatternMatch {
       return parent;
     }
   }
-}
+};
