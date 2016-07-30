@@ -13,7 +13,7 @@ module.exports = class PatternMatch {
       throw new Error("Expecting a function. Instead got - " + result.value.toString());
     }
 
-    result.value.call(null, ...result.keys);
+    result.value.call(null, input, result.keys);
   }
   match(input, isMatch = (a, b) => a === b) {
     let current = this.decisionTree;
