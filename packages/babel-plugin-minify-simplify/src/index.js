@@ -10,6 +10,22 @@ module.exports = ({ types: t }) => {
   const seqExprSeen = Symbol("seqExprSeen");
   const shouldRevisit = Symbol("shouldRevisit");
 
+  // Types as symbols for comparisions
+  const types = {};
+  t.TYPES.forEach(type => {
+    types[type] = Symbol.for(type);
+  });
+  const isNodeOfType = (node, typeSymbol) => {
+    if (typeof typeSymbol !== 'symbol') return false;
+    return t["is"+ Symbol.keyFor(typeSymbol)](node);
+  };
+
+  // small abstractions
+  const not = node => t.unaryExpression('!', node);
+  const notnot = node => not(not(node));
+  const or = (a, b) => t.logicalExpression('||', a, b);
+  const and = (a, b) => t.logicalExpression('&&', a, b);
+
   return {
     visitor: {
       Statement: {
@@ -121,6 +137,96 @@ module.exports = ({ types: t }) => {
               [node.alternate, node.consequent] = [node.consequent, node.alternate];
             }
           },
+
+          function simplifyPatterns(path) {
+            const test = path.get('test');
+            const consequent = path.get('consequent');
+            const alternate = path.get('alternate');
+
+            const {
+              Expression: EX,
+              LogicalExpression: LE
+            } = types;
+
+            // Convention:
+            // ===============
+            // for each pattern [test, consequent, alternate, handler(expr, cons, alt)]
+            // typeSymbol -> exact match
+            // [] -> oneOf match
+            // value -> exact match using ===
+            const patterns = [
+              [LE, true, false, (e) => e],
+              [EX, true, false, (e) => notnot(e)],
+
+              [EX, false, true, (e) => not(e)],
+
+              [LE, true, EX, (e, c, a) => or(e, a)],
+              [EX, true, EX, (e, c, a) => or(notnot(e), a)],
+
+              [EX, false, EX, (e, c, a) => and(not(e), a)],
+
+              [EX, EX, true, (e, c) => or(not(e), c)],
+
+              [LE, EX, false, (e, c) => and(e, c)],
+              [EX, EX, false, (e, c) => and(notnot(e), c)]
+            ];
+
+            let result = match(test, consequent, alternate);
+            if (result.confident) {
+              path.replaceWith(result.value);
+            }
+
+            function getPatternMatchTree(patterns) {
+              function make(pattern, tree = new Map, level = 0) {
+                if (tree.has(pattern[0])) {
+                  return make(pattern, tree, level + 1);
+                }
+                if (level === pattern.length) {
+                  tree.set(pattern[level], make(pattern, level + 1));
+                } else {}
+                return tree;
+              }
+            }
+
+            function match(test, cons, alt) {
+              for (let i = 0; i < patterns.length; i++) {
+                let [
+                  testMatch,
+                  consMatch,
+                  altMatch,
+                  handler
+                ] = patterns[i];
+
+                if (!isMatch(testMatch, test)) continue;
+                if (!isMatch(consMatch, cons)) continue;
+                if (!isMatch(altMatch, alt)) continue;
+
+                return {
+                  confident: true,
+                  value: handler(test.node, cons.node, alt.node)
+                };
+              }
+              return {
+                confident: false,
+                value: void 0
+              };
+            }
+
+            function isMatch(patternValue, inputPath) {
+              if (Array.isArray(patternValue)) {
+                for (let i = 0; i < patternValue.length; i++) {
+                  if (isMatch(patternValue[i], inputPath)) {
+                    return true;
+                  }
+                }
+                return false;
+              }
+              if (isNodeOfType(inputPath.node, patternValue)) return true;
+              let evalResult = inputPath.evaluate();
+              if (!evalResult.confident) return false;
+              return evalResult.value === patternValue;
+            }
+          }
         ],
 
         exit: [
