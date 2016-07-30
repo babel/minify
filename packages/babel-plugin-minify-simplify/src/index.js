@@ -1,5 +1,7 @@
 "use strict";
 
+const PatternMatch = require('./pattern-match');
+
 module.exports = ({ types: t }) => {
   const isNodesEquiv = require("babel-helper-is-nodes-equiv")(t);
   const flipExpressions = require("babel-helper-flip-expressions")(t);
@@ -151,10 +153,7 @@ module.exports = ({ types: t }) => {
             // Convention:
             // ===============
             // for each pattern [test, consequent, alternate, handler(expr, cons, alt)]
-            // typeSymbol -> exact match
-            // [] -> oneOf match
-            // value -> exact match using ===
-            const patterns = [
+            const matcher = new PatternMatch([
               [LE, true, false, (e) => e],
               [EX, true, false, (e) => notnot(e)],
 
@@ -169,62 +168,15 @@ module.exports = ({ types: t }) => {
 
               [LE, EX, false, (e, c) => and(e, c)],
               [EX, EX, false, (e, c) => and(notnot(e), c)]
-            ];
+            ]);
 
-            let result = match(test, consequent, alternate);
-            if (result.confident) {
-              path.replaceWith(result.value);
-            }
+            let result = matcher.match(
+              [test, consequent, alternate],
+              isPatternMatchesPath
+            );
 
-            function getPatternMatchTree(patterns) {
-              function make(pattern, tree = new Map, level = 0) {
-                if (tree.has(pattern[0])) {
-                  return make(pattern, tree, level + 1);
-                }
-                if (level === pattern.length) {
-                  tree.set(pattern[level], make(pattern, level + 1));
-                } else {}
-                return tree;
-              }
-            }
-
-            function match(test, cons, alt) {
-              for (let i = 0; i < patterns.length; i++) {
-                let [
-                  testMatch,
-                  consMatch,
-                  altMatch,
-                  handler
-                ] = patterns[i];
-
-                if (!isMatch(testMatch, test)) continue;
-                if (!isMatch(consMatch, cons)) continue;
-                if (!isMatch(altMatch, alt)) continue;
-
-                return {
-                  confident: true,
-                  value: handler(test.node, cons.node, alt.node)
-                };
-              }
-              return {
-                confident: false,
-                value: void 0
-              };
-            }
-
-            function isMatch(patternValue, inputPath) {
-              if (Array.isArray(patternValue)) {
-                for (let i = 0; i < patternValue.length; i++) {
-                  if (isMatch(patternValue[i], inputPath)) {
-                    return true;
-                  }
-                }
-                return false;
-              }
-              if (isNodeOfType(inputPath.node, patternValue)) return true;
-              let evalResult = inputPath.evaluate();
-              if (!evalResult.confident) return false;
-              return evalResult.value === patternValue;
+            if (result.match) {
+              path.replaceWith(result.value(test.node, consequent.node, alternate.node));
             }
           }
         ],
@@ -1386,5 +1338,20 @@ module.exports = ({ types: t }) => {
         }
       }
     };
+  }
+
+  function isPatternMatchesPath(patternValue, inputPath) {
+    if (Array.isArray(patternValue)) {
+      for (let i = 0; i < patternValue.length; i++) {
+        if (isMatch(patternValue[i], inputPath)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (isNodeOfType(inputPath.node, patternValue)) return true;
+    let evalResult = inputPath.evaluate();
+    if (!evalResult.confident) return false;
+    return evalResult.value === patternValue;
   }
 };

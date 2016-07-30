@@ -23,21 +23,24 @@ module.exports = class PatternMatch {
       keys: []
     };
 
+    // to handle falsy keys
+    const NO_MATCH = Symbol('NO_MATCH');
+
     for (let i = 0; i < input.length; i++) {
       let keys = [...current.keys()];
-      let matchedKey;
+      let matchedKey = NO_MATCH;
 
       // because map doesn't support custom key equal function
       for (let j = 0; j < keys.length; j++) {
         if (isMatch(keys[j], input[i])) {
           matchedKey = keys[j];
+          result.keys.push(matchedKey);
           break;
         }
       }
 
-      if (matchedKey) {
+      if (matchedKey !== NO_MATCH) {
         current = current.get(matchedKey);
-        result.keys.push(matchedKey);
 
         if (i === input.length - 1) {
           result.match = true;
