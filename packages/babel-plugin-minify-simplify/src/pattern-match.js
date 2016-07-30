@@ -27,13 +27,12 @@ module.exports = class PatternMatch {
     const NO_MATCH = Symbol('NO_MATCH');
 
     for (let i = 0; i < input.length; i++) {
-      let keys = [...current.keys()];
       let matchedKey = NO_MATCH;
 
       // because map doesn't support custom key equal function
-      for (let j = 0; j < keys.length; j++) {
-        if (isMatch(keys[j], input[i])) {
-          matchedKey = keys[j];
+      for (let key of current.keys()) {
+        if (isMatch(key, input[i])) {
+          matchedKey = key;
           result.keys.push(matchedKey);
           break;
         }
