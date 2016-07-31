@@ -11,4 +11,8 @@ node_js:
 - '6'
 - '5'
 
-script: npm run bootstrap && npm run build && npm run test
+script:
+- npm run bootstrap
+- npm run build
+- npm run lint
+- npm run test

@@ -10,7 +10,7 @@
     "updated": "lerna updated",
     "lint": "eslint packages/*/src packages/*/__tests__",
     "fix": "eslint packages/*/src packages/*/__tests__ --fix",
-    "test": "npm run lint && jest",
+    "test": "jest",
     "build": "gulp build",
     "watch": "gulp watch",
     "ci": "npm run lint && npm run bootstrap && jest"
