@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://travis-ci.org/amasad/babel-minify"><img alt="Travis Status" src="https://img.shields.io/travis/amasad/babel-minify/master.svg?style=flat&label=travis"></a>
+  <a href="https://travis-ci.org/amasad/babel-minify"><img alt="Travis Status" src="https://travis-ci.com/amasad/babel-minify.svg?token=16y8xibh7RyJuKvxyWtX"></a>
   <a href="https://slack.babeljs.io/"><img alt="Slack Status" src="https://slack.babeljs.io/badge.svg"></a>
 </p>
 
