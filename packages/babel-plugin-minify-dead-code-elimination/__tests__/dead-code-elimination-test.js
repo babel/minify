@@ -689,8 +689,8 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       if (!a) {
-          foo();
-        }
+        foo();
+      }
       if (a) {
         foo();
       }

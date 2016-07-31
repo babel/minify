@@ -389,8 +389,9 @@ module.exports = ({ types: t, traverse }) => {
         //   if (foo) { foo; } else {} -> if (foo) { foo; }
         //
         if (alternate.isBlockStatement() && !alternate.node.body.length) {
-          alternate.skip();
           alternate.remove();
+          // For if-statements babel-traverse replaces with an empty block
+          path.node.alternate = null;
         }
 
         // if the consequent block is empty turn alternate blocks into a consequent
@@ -402,8 +403,9 @@ module.exports = ({ types: t, traverse }) => {
             alternate.isBlockStatement() && alternate.node.body.length
         ) {
           consequent.replaceWith(alternate.node);
-          alternate.skip();
           alternate.remove();
+          // For if-statements babel-traverse replaces with an empty block
+          path.node.alternate = null
           test.replaceWith(t.unaryExpression("!", test.node, true));
         }
       },
