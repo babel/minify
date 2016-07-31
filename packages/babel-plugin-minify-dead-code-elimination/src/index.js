@@ -405,7 +405,7 @@ module.exports = ({ types: t, traverse }) => {
           consequent.replaceWith(alternate.node);
           alternate.remove();
           // For if-statements babel-traverse replaces with an empty block
-          path.node.alternate = null
+          path.node.alternate = null;
           test.replaceWith(t.unaryExpression("!", test.node, true));
         }
       },
