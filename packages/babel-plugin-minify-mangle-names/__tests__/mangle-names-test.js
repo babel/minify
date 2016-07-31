@@ -754,6 +754,6 @@ describe("mangle-names", () => {
         c();
       })();
     `);
-    expect(transform(source, {keep_fnames: true})).toBe(expected);
+    expect(transform(source, {keepFnames: true})).toBe(expected);
   });
 });
