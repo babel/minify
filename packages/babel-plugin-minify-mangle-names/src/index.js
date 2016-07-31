@@ -4,12 +4,12 @@ module.exports = ({ types: t }) => {
   class Mangler {
     constructor(charset, program, {
       blacklist = {},
-      keep_fnames = false
+      keepFnames = false
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
-      this.keep_fnames = keep_fnames;
+      this.keepFnames = keepFnames;
 
       // unsafe scopes that contain an `eval`
       this.unsafeScopes = new Set;
@@ -202,7 +202,7 @@ module.exports = ({ types: t }) => {
       }
       if (!binding) return;
 
-      if (this.keep_fnames && isFunction(binding.path)) {
+      if (this.keepFnames && isFunction(binding.path)) {
         return;
       }
 
@@ -297,7 +297,7 @@ class Charset {
   }
 }
 
-// for keep_fnames
+// for keepFnames
 function isFunction(path) {
   return path.isFunctionExpression()
     || path.isFunctionDeclaration()
