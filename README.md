@@ -9,6 +9,8 @@
   <a href="https://slack.babeljs.io/"><img alt="Slack Status" src="https://slack.babeljs.io/badge.svg"></a>
 </p>
 
+- NOTE: We are in a [feature freeze](https://github.com/amasad/babel-minify/issues/71) as we're trying to hammer out all the bugs to get to beta release. The best way to contribute is to test, report bugs, and add test cases.
+
 - Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
 
 - babel-minify is consumable via API, CLI, or babel preset.
