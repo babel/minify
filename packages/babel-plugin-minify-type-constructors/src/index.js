@@ -17,11 +17,16 @@ function replaceArray(t, path) {
       } else if (node.type === "NewExpression") {
         path.replaceWith(t.callExpression(node.callee, node.arguments));
       }
-
-    // Array("Hello") -> ["Hello"]
-    } else {
+    } else if (node.arguments.length === 0) {
+      // Array() -> []
+      path.replaceWith(t.arrayExpression([]));
+    } else if (node.arguments.length > 1) {
+      // Array(1,2,3) -> [1,2,3]
       path.replaceWith(t.arrayExpression(node.arguments));
     }
+    // else
+    // Array("Hello") -> Array("Hello")
+    // Array(x) -> Array(x)
     return true;
   }
 }

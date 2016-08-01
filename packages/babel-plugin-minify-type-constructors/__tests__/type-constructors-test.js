@@ -48,14 +48,9 @@ describe("type-constructors-plugin", () => {
       Array(null);
       Array({});
       Array([]);
+      Array(t);
     `);
-    const expected = unpad(`
-      ["Rome"];
-      [false];
-      [null];
-      [{}];
-      [[]];
-    `);
+    const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
