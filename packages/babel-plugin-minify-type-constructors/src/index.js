@@ -27,12 +27,17 @@ function replaceArray(t, path) {
           path.replaceWith(t.arrayExpression([t.valueToNode(result.value)]));
         }
       } else {
-        if (arg.isArrayExpression()) {
-          // Array([a,b,c])
-          path.replaceWith(t.ArrayExpression([arg.node]));
-        } else if (arg.isObjectExpression()) {
-          // Array({})
-          path.replaceWith(t.ArrayExpression([arg.node]));
+        const transformables = [
+          "ArrayExpression",
+          "ObjectExpression",
+          "FunctionExpression",
+          "ArrowFunctionExpression",
+          "ClassExpression"
+        ];
+        if (transformables.includes(arg.node.type)) {
+          // Array([]), Array({})
+          // Array(()=>{}), Array(class{}), Array(function(){})
+          path.replaceWith(t.arrayExpression([arg.node]));
         } else {
           // Array(x); Array(a.b);
           dropNewIfPresent();
