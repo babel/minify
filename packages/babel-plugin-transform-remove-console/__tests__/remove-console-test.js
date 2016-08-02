@@ -68,4 +68,25 @@ describe("remove-console-plugin", () => {
     `);
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it("statement no block", () => {
+    const source = unpad(`
+      if (blah) console.log(blah);
+      for (;;) console.log(blah);
+      for (var blah in []) console.log(blah);
+      for (var blah of []) console.log(blah);
+      while (blah) console.log(blah);
+      do console.log(blah); while (blah);
+    `);
+
+    const expected = unpad(`
+      if (blah) {}
+      for (;;) {}
+      for (var blah in []) {}
+      for (var blah of []) {}
+      while (blah) {}
+      do {} while (blah);
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
 });
