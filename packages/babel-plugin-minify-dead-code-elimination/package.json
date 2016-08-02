@@ -12,7 +12,8 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-remove-or-void": "^0.0.0"
+    "babel-helper-remove-or-void": "^0.0.0",
+    "lodash": "^4.14.1"
   },
   "devDependencies": {}
 }

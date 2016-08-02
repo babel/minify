@@ -25,12 +25,8 @@
       "<rootDir>/node_modules/"
     ]
   },
-  "dependencies": {
-    "babel-core": "^6.4.5",
-    "babel-traverse": "^6.3.26",
-    "lodash": "^4.13.1"
-  },
   "devDependencies": {
+    "babel-core": "^6.4.5",
     "babel-cli": "^6.4.0",
     "babel-jest": "^14.1.0",
     "babel-plugin-transform-es2015-block-scoping": "^6.10.1",
