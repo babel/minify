@@ -2,27 +2,58 @@
 
 function replaceArray(t, path) {
   const { node } = path;
+  // arguments is taken :(
+  const constructorArgs = path.get("arguments");
   if (t.isIdentifier(node.callee, { name: "Array" }) &&
     !path.scope.getBinding("Array")) {
 
-    // Array(5) -> [,,,,,]
-    if (node.arguments.length === 1 &&
-      typeof node.arguments[0].value === "number") {
+    if (constructorArgs.length === 0) {
+      // Array() -> []
+      path.replaceWith(t.arrayExpression([]));
+    } else if (constructorArgs.length === 1) {
+      const arg = constructorArgs[0];
+      const result = arg.evaluate();
 
-      // "Array(7)" is shorter than "[,,,,,,,]"
-      if (node.arguments[0].value <= 6) {
-        path.replaceWith(t.arrayExpression(Array(node.arguments[0].value).fill(null)));
-
-      // new Array(7) -> Array(7)
-      } else if (node.type === "NewExpression") {
-        path.replaceWith(t.callExpression(node.callee, node.arguments));
+      if (result.confident) {
+        if (typeof result.value === "number") {
+          if (result.value <= 6) {
+            // "Array(7)" is shorter than "[,,,,,,,]"
+            path.replaceWith(t.arrayExpression(Array(result.value).fill(null)));
+          } else {
+            dropNewIfPresent();
+          }
+        } else {
+          // Array("Asdf"), Array(true), Array(false)
+          path.replaceWith(t.arrayExpression([t.valueToNode(result.value)]));
+        }
+      } else {
+        const transformables = [
+          "ArrayExpression",
+          "ObjectExpression",
+          "FunctionExpression",
+          "ArrowFunctionExpression",
+          "ClassExpression"
+        ];
+        if (transformables.includes(arg.node.type)) {
+          // Array([]), Array({})
+          // Array(()=>{}), Array(class{}), Array(function(){})
+          path.replaceWith(t.arrayExpression([arg.node]));
+        } else {
+          // Array(x); Array(a.b);
+          dropNewIfPresent();
+        }
       }
-
-    // Array("Hello") -> ["Hello"]
     } else {
+      // Array(2,3), Array(a,b) => [2,3], [a,b]
       path.replaceWith(t.arrayExpression(node.arguments));
     }
     return true;
+  }
+
+  function dropNewIfPresent() {
+    if (path.isNewExpression()) {
+      path.replaceWith(t.callExpression(node.callee, node.arguments));
+    }
   }
 }
 
