@@ -514,6 +514,34 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should mangle names with option eval = true", () => {
+    const source = unpad(`
+      function foo() {
+        var inScopeOuter = 1;
+        (function () {
+          var inScopeInner = 2;
+          eval("...");
+          (function () {
+            var outOfScope = 1;
+          })();
+        })();
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var a = 1;
+        (function () {
+          var b = 2;
+          eval("...");
+          (function () {
+            var c = 1;
+          })();
+        })();
+      }
+    `);
+    expect(transform(source, { eval: true })).toBe(expected);
+  });
+
   it("should integrate with block scoping plugin", () => {
     const srcTxt = unpad(`
       function f(x) {

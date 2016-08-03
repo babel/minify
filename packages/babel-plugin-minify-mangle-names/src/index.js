@@ -4,12 +4,14 @@ module.exports = ({ types: t }) => {
   class Mangler {
     constructor(charset, program, {
       blacklist = {},
-      keepFnames = false
+      keepFnames = false,
+      eval: _eval = false
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
       this.keepFnames = keepFnames;
+      this.eval = _eval;
 
       // unsafe scopes that contain an `eval`
       this.unsafeScopes = new Set;
@@ -183,7 +185,7 @@ module.exports = ({ types: t }) => {
       }
 
       // Doesn't take care of local eval bindings yet
-      if (node.name === "eval" && path.parent.type === "CallExpression" && !path.scope.getBinding("eval")) {
+      if (!this.eval && node.name === "eval" && path.parent.type === "CallExpression" && !path.scope.getBinding("eval")) {
         // Mark all scopes from this one up as unsafe.
         let evalScope = scope;
         do {
