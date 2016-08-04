@@ -1144,6 +1144,58 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // NCE = Named Class Expressions
+  it("should remove name from NCE", () => {
+    const source = unpad(`
+      var Foo = class Bar {};
+    `);
+    const expected = unpad(`
+      var Foo = class {};
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove referenced name from NCE", () => {
+    const source = unpad(`
+      var Foo = class Bar {
+        constructor() {
+          console.log(Bar);
+        }
+      };
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  // issue#78
+  it("should not replace NCE with void 0 - issue#78", () => {
+    const source = unpad(`
+      (function() {
+        var B = class A {
+          constructor(x) {
+            console.log(x);
+          }
+        }
+        self.addEventListener(function (event) {
+          new B(event);
+        });
+      })();
+    `);
+    const expected = unpad(`
+    (function () {
+      var B = class {
+        constructor(x) {
+          console.log(x);
+        }
+      };
+      self.addEventListener(function (event) {
+        new B(event);
+      });
+    })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should track purity", () => {
     const source = unpad(`
      function x(a) {

@@ -112,7 +112,7 @@ module.exports = ({ types: t, traverse }) => {
               }
             } else if (!scope.isPure(binding.path.node)) {
               continue;
-            } else if (binding.path.isFunctionExpression()) {
+            } else if (binding.path.isFunctionExpression() || binding.path.isClassExpression()) {
               // `bar(function foo() {})` foo is not referenced but it's used.
               continue;
             }
@@ -670,21 +670,9 @@ module.exports = ({ types: t, traverse }) => {
 
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
-    FunctionExpression(path) {
-      const id = path.get("id").node;
-      if (!id) {
-        return;
-      }
+    FunctionExpression: removeUnreferencedId,
 
-      const { node, scope } = path;
-
-      const binding = scope.getBinding(id.name);
-
-      // Check if shadowed or is not referenced.
-      if (binding.path.node !== node || !binding.referenced) {
-        node.id = null;
-      }
-    },
+    ClassExpression: removeUnreferencedId,
 
     // Put the `var` in the left if feasible.
     ForInStatement(path) {
@@ -864,5 +852,20 @@ module.exports = ({ types: t, traverse }) => {
         }
       },
     });
+  }
+
+  function removeUnreferencedId(path) {
+    const id = path.get("id").node;
+    if (!id) {
+      return;
+    }
+
+    const { node, scope } = path;
+    const binding = scope.getBinding(id.name);
+
+    // Check if shadowed or is not referenced.
+    if (binding.path.node !== node || !binding.referenced) {
+      node.id = null;
+    }
   }
 };
