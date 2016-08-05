@@ -301,7 +301,7 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       function baz() {
-        exports.foo = function (config) {
+        exports.foo = function foo(config) {
           return foo;
         };
       }
@@ -321,7 +321,7 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       function baz() {
-        exports.foo = function (config) {
+        exports.foo = function foo(config) {
           return foo;
         };
       }
@@ -1144,6 +1144,41 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // issue#81
+  it("should NOT remove name from NFE when referenced - issue#81", () => {
+    const source = unpad(`
+      (function (require, module, exports) {
+        var Hub = function Hub(file, options) {
+          (0, _classCallCheck3.default)(this, Hub);
+        };
+        module.exports = Hub;
+      })(require, module, exports);
+    `);
+    const expected = unpad(`
+      (function (require, module, exports) {
+        module.exports = function Hub(file, options) {
+          (0, _classCallCheck3.default)(this, Hub);
+        };
+      })(require, module, exports);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should remove name from NFE when replaced - issue#81", () => {
+    const source = unpad(`
+      (function () {
+        var x = function foo() {};
+        module.exports = x;
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        module.exports = function () {};
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   // NCE = Named Class Expressions
   it("should remove name from NCE", () => {
     const source = unpad(`
@@ -1192,6 +1227,32 @@ describe("dce-plugin", () => {
         new B(event);
       });
     })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle var decl with same name as class expr name", () => {
+    const source = unpad(`
+      (function () {
+        var A = class A {
+          constructor() {
+            this.class = A;
+          }
+        }
+        var B = class B {};
+        exports.A = A;
+        exports.B = B;
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        exports.A = class A {
+          constructor() {
+            this.class = A;
+          }
+        };
+        exports.B = class {};
+      })();
     `);
     expect(transform(source)).toBe(expected);
   });
