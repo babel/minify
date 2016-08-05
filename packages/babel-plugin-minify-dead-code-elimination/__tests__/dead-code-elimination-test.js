@@ -1164,6 +1164,21 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should remove name from NFE when replaced - issue#81", () => {
+    const source = unpad(`
+      (function () {
+        var x = function foo() {};
+        module.exports = x;
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        module.exports = function () {};
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   // NCE = Named Class Expressions
   it("should remove name from NCE", () => {
     const source = unpad(`
@@ -1224,16 +1239,19 @@ describe("dce-plugin", () => {
             this.class = A;
           }
         }
-        module.exports = A;
+        var B = class B {};
+        exports.A = A;
+        exports.B = B;
       })();
     `);
     const expected = unpad(`
       (function () {
-        module.exports = class A {
+        exports.A = class A {
           constructor() {
             this.class = A;
           }
         };
+        exports.B = class {};
       })();
     `);
     expect(transform(source)).toBe(expected);
