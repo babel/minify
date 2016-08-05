@@ -26,11 +26,11 @@
     ]
   },
   "devDependencies": {
-    "babel-core": "^6.4.5",
+    "babel-core": "^6.13.0",
     "babel-jest": "^14.1.0",
     "babel-plugin-transform-es2015-block-scoping": "^6.10.1",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-traverse": "^6.10.4",
+    "babel-preset-es2015": "^6.13.0",
+    "babel-traverse": "^6.13.0",
     "bytes": "^2.1.0",
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",

@@ -1827,4 +1827,18 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not evaluate to false and remove conditional", () => {
+    const source = unpad(`
+      function foo(obj) {
+        return obj && typeof obj === 'object' ? x() : obj;
+      }
+    `);
+    const expected = unpad(`
+      function foo(obj) {
+        return obj && typeof obj === 'object' ? x() : obj;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
