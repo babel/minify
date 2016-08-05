@@ -813,8 +813,8 @@ module.exports = ({ types: t, traverse }) => {
 
     t.toExpression(replacement);
 
-    // We don't remove fn name here, we let the FnExpr & ClassExpr
-    // check if its references and remove unreferenced ones
+    // We don't remove fn name here, we let the FnExpr & ClassExpr visitors
+    // check its references and remove unreferenced ones
     // if (t.isFunction(replacement)) {
     //   replacement.id = null;
     // }
