@@ -685,7 +685,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should correctly mangle function declarations in different order", () => {
+  xit("should correctly mangle function declarations in different order", () => {
     const source = unpad(`
       (function(){
         (function() {
