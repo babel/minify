@@ -685,66 +685,27 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit("should correctly mangle multiple presets with passPerPreset", () => {
-    const srcTxt = unpad(`
-      (function() {
-        for (let x in y) y[x];
-        f(() => { g() });
+  it("should correctly mangle function declarations in different order", () => {
+    const source = unpad(`
+      (function(){
+        (function() {
+          for (let x in y) y[x];
+          f(() => { g() });
+        })();
+        function g() {}
       })();
-      function g() {}
     `);
 
-    const t = require("babel-core").types;
-
-    const first = babel.transform(srcTxt, {
-      code: false,
-      passPerPreset: true,
-      presets: [
-        { plugins: [ "transform-es2015-block-scoping" ] },
-        { plugins: [ {
-          visitor: {
-            Program: {
-              exit(programPath) {
-                if (this._wrapped) return;
-                const wrappedProgram = t.program([t.expressionStatement(
-                  t.callExpression(
-                    t.identifier("__d"), [
-                      t.functionExpression(
-                        t.identifier(""),
-                        [],
-                        t.blockStatement(
-                          programPath.node.body,
-                          programPath.node.directives
-                        )
-                      ),
-                    ]
-                  )
-                )]);
-                programPath.replaceWith(wrappedProgram);
-                this._wrapped = true;
-              },
-            },
-          },
-        }] }
-      ],
-    });
-
-    traverse.clearCache();
-
-    const source = babel.transformFromAst(first.ast, null, {
-      plugins: [require("../src/index")],
-    }).code;
-
     const expected = unpad(`
-      __d(function a() {
+      (function() {
         (function () {
-          for (var c in y) {
-            y[c];
+          for (var b in y) {
+            y[b];
           }f(() => {
-            b();
+            a();
           });
         })();
-        function b() {}
+        function a() {}
       });
     `);
 
