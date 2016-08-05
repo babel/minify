@@ -813,11 +813,11 @@ module.exports = ({ types: t, traverse }) => {
 
     t.toExpression(replacement);
 
-    // This changes `function.name` but all the other minifier
-    // do it :/
-    if (t.isFunction(replacement)) {
-      replacement.id = null;
-    }
+    // We don't remove fn name here, we let the FnExpr & ClassExpr
+    // check if its references and remove unreferenced ones
+    // if (t.isFunction(replacement)) {
+    //   replacement.id = null;
+    // }
 
     path.replaceWith(replacement);
     return true;
