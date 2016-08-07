@@ -1179,6 +1179,27 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should preserve fn/class names when keepFnames is true", () => {
+    const source = unpad(`
+      (function () {
+        function A() {}
+        exports.A = A;
+        var B = class B {};
+        exports.B = B;
+        onClick(function C() {});
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        exports.A = function A() {};
+
+        exports.B = class B {};
+        onClick(function C() {});
+      })();
+    `);
+    expect(transform(source, { keepFnames: true })).toBe(expected);
+  });
+
   // NCE = Named Class Expressions
   it("should remove name from NCE", () => {
     const source = unpad(`
