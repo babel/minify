@@ -670,7 +670,7 @@ module.exports = ({ types: t, traverse }) => {
 
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
-    'FunctionExpression|ClassExpression'(path) {
+    "FunctionExpression|ClassExpression"(path) {
       if (!this.keepFnames) {
         removeUnreferencedId(path);
       }
