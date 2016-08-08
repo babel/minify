@@ -670,9 +670,11 @@ module.exports = ({ types: t, traverse }) => {
 
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
-    FunctionExpression: removeUnreferencedId,
-
-    ClassExpression: removeUnreferencedId,
+    "FunctionExpression|ClassExpression"(path) {
+      if (!this.keepFnames) {
+        removeUnreferencedId(path);
+      }
+    },
 
     // Put the `var` in the left if feasible.
     ForInStatement(path) {
@@ -716,9 +718,19 @@ module.exports = ({ types: t, traverse }) => {
 
   return {
     visitor: {
-      Program(path) {
+      Program(path, {
+        opts: {
+          // set defaults
+          optimizeRawSize = false,
+          keepFnames = false
+        } = {}
+      } = {}) {
         // We need to run this plugin in isolation.
-        path.traverse(main, { functionToBindings: new Map(), optimizeRawSize: this.opts.optimizeRawSize });
+        path.traverse(main, {
+          functionToBindings: new Map(),
+          optimizeRawSize,
+          keepFnames
+        });
       },
     },
   };
