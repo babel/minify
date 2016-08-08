@@ -1,5 +1,7 @@
 "use strict";
 
+const PatternMatch = require("./pattern-match");
+
 module.exports = ({ types: t }) => {
   const isNodesEquiv = require("babel-helper-is-nodes-equiv")(t);
   const flipExpressions = require("babel-helper-flip-expressions")(t);
@@ -9,6 +11,22 @@ module.exports = ({ types: t }) => {
   const condExprSeen = Symbol("condExprSeen");
   const seqExprSeen = Symbol("seqExprSeen");
   const shouldRevisit = Symbol("shouldRevisit");
+
+  // Types as symbols for comparisions
+  const types = {};
+  t.TYPES.forEach((type) => {
+    types[type] = Symbol.for(type);
+  });
+  const isNodeOfType = (node, typeSymbol) => {
+    if (typeof typeSymbol !== "symbol") return false;
+    return t["is"+ Symbol.keyFor(typeSymbol)](node);
+  };
+
+  // small abstractions
+  const not = (node) => t.unaryExpression("!", node);
+  const notnot = (node) => not(not(node));
+  const or = (a, b) => t.logicalExpression("||", a, b);
+  const and = (a, b) => t.logicalExpression("&&", a, b);
 
   return {
     visitor: {
@@ -32,7 +50,7 @@ module.exports = ({ types: t }) => {
         ) {
           path.replaceWith(
             t.callExpression(
-              t.unaryExpression('!', node.callee, true),
+              t.unaryExpression("!", node.callee, true),
               node.arguments
             )
           );
@@ -121,6 +139,46 @@ module.exports = ({ types: t }) => {
               [node.alternate, node.consequent] = [node.consequent, node.alternate];
             }
           },
+
+          function simplifyPatterns(path) {
+            const test = path.get("test");
+            const consequent = path.get("consequent");
+            const alternate = path.get("alternate");
+
+            const {
+              Expression: EX,
+              LogicalExpression: LE
+            } = types;
+
+            // Convention:
+            // ===============
+            // for each pattern [test, consequent, alternate, handler(expr, cons, alt)]
+            const matcher = new PatternMatch([
+              [LE, true, false, (e) => e],
+              [EX, true, false, (e) => notnot(e)],
+
+              [EX, false, true, (e) => not(e)],
+
+              [LE, true, EX, (e, c, a) => or(e, a)],
+              [EX, true, EX, (e, c, a) => or(notnot(e), a)],
+
+              [EX, false, EX, (e, c, a) => and(not(e), a)],
+
+              [EX, EX, true, (e, c) => or(not(e), c)],
+
+              [LE, EX, false, (e, c) => and(e, c)],
+              [EX, EX, false, (e, c) => and(notnot(e), c)]
+            ]);
+
+            let result = matcher.match(
+              [test, consequent, alternate],
+              isPatternMatchesPath
+            );
+
+            if (result.match) {
+              path.replaceWith(result.value(test.node, consequent.node, alternate.node));
+            }
+          }
         ],
 
         exit: [
@@ -1280,5 +1338,20 @@ module.exports = ({ types: t }) => {
         }
       }
     };
+  }
+
+  function isPatternMatchesPath(patternValue, inputPath) {
+    if (Array.isArray(patternValue)) {
+      for (let i = 0; i < patternValue.length; i++) {
+        if (isPatternMatchesPath(patternValue[i], inputPath)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (isNodeOfType(inputPath.node, patternValue)) return true;
+    let evalResult = inputPath.evaluate();
+    if (!evalResult.confident) return false;
+    return evalResult.value === patternValue;
   }
 };
