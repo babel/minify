@@ -102,6 +102,10 @@ module.exports = class ManglerBfs {
         function getNext() {
           return mangler.charset.getIdentifier(i++);
         }
+        // TODO:
+        // Not effective as references are not yet removed when a binding
+        // is removed. Find a work around
+
         // This is useful when we have vars of single character
         // => var a, ...z, A, ...Z, $, _;
         // to
@@ -127,8 +131,9 @@ module.exports = class ManglerBfs {
             let next;
             do {
               next = getNext();
-            } while (scope.hasBinding(next) || scope.hasGlobal(next));
-            resetNext();
+            } while (scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
+            // TODO: enable reset
+            //resetNext();
             scope.rename(b, next);
             scope.getBinding(next).renamed = true;
           });
