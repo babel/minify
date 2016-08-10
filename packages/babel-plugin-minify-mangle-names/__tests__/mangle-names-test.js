@@ -177,7 +177,7 @@ describe("mangle-names", () => {
   });
 
   // https://phabricator.babeljs.io/T6957
-  xit("labels should not shadow bindings", () => {
+  it("labels should not shadow bindings", () => {
     const source = unpad(`
       function foo() {
         var meh;
@@ -685,7 +685,8 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit("should correctly mangle function declarations in different order", () => {
+  // #issue55, #issue57
+  it("should correctly mangle function declarations in different order", () => {
     const source = unpad(`
       (function(){
         (function() {
@@ -696,20 +697,35 @@ describe("mangle-names", () => {
       })();
     `);
 
+    const ast = babel.transform(source, {
+      presets: ["es2015"],
+      sourceType: "script",
+      code: false
+    }).ast;
+
+    traverse.clearCache();
+
+    const actual = babel.transformFromAst(ast, null, {
+      sourceType: "script",
+      plugins: [require("../src/index")]
+    }).code;
+
     const expected = unpad(`
-      (function() {
+      "use strict";
+
+      (function () {
         (function () {
           for (var b in y) {
             y[b];
-          }f(() => {
+          }f(function () {
             a();
           });
         })();
         function a() {}
-      });
+      })();
     `);
 
-    expect(transform(source)).toBe(expected);
+    expect(actual).toBe(expected);
   });
 
   it("should NOT mangle functions & classes when keep_fnames is true", () => {
