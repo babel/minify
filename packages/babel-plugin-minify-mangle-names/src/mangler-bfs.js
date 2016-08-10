@@ -23,6 +23,13 @@ module.exports = class ManglerBfs {
     return Object.prototype.hasOwnProperty.call(this.blacklist, name);
   }
 
+  markUnsafeScopes(scope) {
+    let evalScope = scope;
+    do {
+      this.unsafeScopes.add(evalScope);
+    } while (evalScope = evalScope.parent);
+  }
+
   collect() {
     const mangler = this;
     const evalPaths = new Set;
@@ -31,10 +38,10 @@ module.exports = class ManglerBfs {
       // capture direct evals
       CallExpression(path) {
         const callee = path.get("callee");
+
         if (callee.isIdentifier()
           && callee.node.name === "eval"
-          && !callee.scope.hasBinding("eval")
-          && !callee.scope.hasGlobal("eval")
+          && !callee.scope.getBinding("eval")
         ) {
           // Direct eval
           evalPaths.add(path);
@@ -100,17 +107,13 @@ module.exports = class ManglerBfs {
           .keys(scope.getAllBindings())
           .filter((b) => scope.hasOwnBinding(b))
           .filter((b) => !scope.getBinding(b).path.isLabeledStatement())
+          .filter((b) => !scope.getBinding(b).renamed)
           .filter((b) => !mangler.isBlacklist(b, mangler.blacklist))
           .filter((b) => {
             // function names
             if (!mangler.keepFnames) return true;
-            const binding = scope.getBinding(b);
-            if (!binding) {
-              throw new Error("Unexpected Error. Binding not found - " + b);
-            }
-            return !isFunction(binding.path);
+            return !isFunction(scope.getBinding(b).path);
           })
-          .filter((b) => !scope.getBinding(b).renamed)
           .map((b) => {
             let next;
             do {
