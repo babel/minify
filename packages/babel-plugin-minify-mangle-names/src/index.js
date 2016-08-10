@@ -244,6 +244,11 @@ module.exports = ({ types: t }) => {
         const shouldConsiderSource = path.getSource().length > 70000;
 
         const charset = new Charset(shouldConsiderSource);
+        // TODO:
+        // REMOVE
+        // temporary flag
+        this.opts.bfs = true;
+
         const Mangler = this.opts.bfs ? ManglerBfs : ManglerDfs;
         const mangler = new Mangler(charset, path, this.opts);
         mangler.run();

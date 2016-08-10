@@ -104,11 +104,11 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(e, a, b) {
-          c(e, a, b);
+        function d(f, g, h) {
+          e(f, g, h);
         }
 
-        function c() {}
+        function e() {}
       }
     `);
 
@@ -217,12 +217,12 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function foo() {
-        function a(b, c, d) {
-          e(b, c, d);
+        function a(c, d, e) {
+          b(c, d, e);
         }
-        function e() {
-          var b = who();
-          b.bam();
+        function b() {
+          var c = who();
+          c.bam();
         }
         a();
       }
@@ -272,12 +272,12 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(b, c) {
+        function a(c, d) {
           if (1) {
-            d(b, c);
+            b(c, d);
           }
         }
-        function d() {}
+        function b() {}
       }
     `);
 
@@ -297,9 +297,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(b, c) {
-          return function (d, e) {
-            b(d, e);
+        function a(c, d) {
+          return function (e, f) {
+            c(e, f);
           };
         }
         function b() {}
@@ -324,12 +324,12 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function foo() {
         function a() {
-          var b;
-          if (b) {
-            c();
+          var c;
+          if (c) {
+            b();
           }
         }
-        function c() {}
+        function b() {}
       }
     `);
 
@@ -349,12 +349,12 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(b) {
+        function a(c) {
           return function () {
-            c();
+            b();
           };
         }
-        function c() {}
+        function b() {}
       }
     `);
 
@@ -371,8 +371,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(e, a, b) {
-          d(e, a, b);
+        function d(e, f, g) {
+          d(e, f, g);
         }
       }
     `);
@@ -564,18 +564,18 @@ describe("mangle-names", () => {
     }).code;
 
     const expected = unpad(`
-      function f(a) {
-        var e = function (b) {
-          var h = void 0;
-          if (h) return {
+      function f(h) {
+        var i = function (l) {
+          var m = void 0;
+          if (m) return {
             v: void 0
           };
-          g(() => h);
+          g(() => m);
         };
 
-        for (var b = 0; b; b++) {
-          var c = e(b);
-          if (typeof c === "object") return c.v;
+        for (var j = 0; j; j++) {
+          var k = i(j);
+          if (typeof k === "object") return k.v;
         }
       }
     `);
@@ -610,15 +610,15 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       (function () {
-        function b() {
+        function d() {
           if (smth) {
-            var a = blah();
-            a();
+            var f = blah();
+            f();
           }
-          d();
+          e();
         }
-        function d() {}
-        module.exports = { bar: b };
+        function e() {}
+        module.exports = { bar: d };
       })();
     `);
 
@@ -646,15 +646,15 @@ describe("mangle-names", () => {
       (function () {
         function a() {
           {
-            var b = true;
+            var c = true;
 
             {
-              c();
+              b();
             }
           }
         }
 
-        function c() {}
+        function b() {}
       })();
     `);
 
