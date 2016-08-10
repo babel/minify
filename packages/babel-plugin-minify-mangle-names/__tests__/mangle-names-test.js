@@ -610,15 +610,15 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       (function () {
-        function b() {
+        function c() {
           if (smth) {
-            var a = blah();
-            a();
+            var b = blah();
+            b();
           }
-          d();
+          a();
         }
-        function d() {}
-        module.exports = { bar: b };
+        function a() {}
+        module.exports = { bar: c };
       })();
     `);
 
