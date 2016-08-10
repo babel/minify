@@ -102,6 +102,9 @@ module.exports = class ManglerBfs {
         function getNext() {
           return mangler.charset.getIdentifier(i++);
         }
+        function resetNext() {
+          i = 0;
+        }
 
         Object
           .keys(scope.getAllBindings())
@@ -118,7 +121,8 @@ module.exports = class ManglerBfs {
             let next;
             do {
               next = getNext();
-            } while (scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
+            } while (scope.hasBinding(next) || scope.hasGlobal(next));
+            resetNext();
             scope.rename(b, next);
             scope.getBinding(next).renamed = true;
           });
