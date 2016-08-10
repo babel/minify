@@ -171,50 +171,56 @@ module.exports = ({ types: t }) => {
   }
 
   const collectVisitor = {
-    "ReferencedIdentifier|BindingIdentifier"(path) {
-      const { scope, node } = path;
+    Scopable(scopablePath) {
+      scopablePath.traverse({
+        "ReferencedIdentifier|BindingIdentifier"(path) {
+          const { scope, node } = path;
 
-      // Node is a label.
-      if (path.parentPath.isLabeledStatement({ label: node })) {
-        return;
-      }
+          if (scope !== scopablePath.scope) return;
 
-      // Ignore break and continue statements.
-      if (path.parentPath.isContinueStatement({ label: node }) || path.parentPath.isBreakStatement({ label: node })) {
-        return;
-      }
+          // Node is a label.
+          if (path.parentPath.isLabeledStatement({ label: node })) {
+            return;
+          }
 
-      // Doesn't take care of local eval bindings yet
-      if (!this.eval && node.name === "eval" && path.parent.type === "CallExpression" && !path.scope.getBinding("eval")) {
-        // Mark all scopes from this one up as unsafe.
-        let evalScope = scope;
-        do {
-          this.unsafeScopes.add(evalScope);
-        } while (evalScope = evalScope.parent);
-      }
+          // Ignore break and continue statements.
+          if (path.parentPath.isContinueStatement({ label: node }) || path.parentPath.isBreakStatement({ label: node })) {
+            return;
+          }
 
-      // Retrieve the binding.
-      let binding;
-      if (t.isFunctionDeclaration(path.parent, { id: node })) {
-        // A function declaration name maybe shadowed by a variable
-        // in the scope. So we get it from the upper scope.
-        binding = scope.parent.getBinding(node.name);
-      } else {
-        binding = scope.getBinding(node.name);
-      }
-      if (!binding) return;
+          // Doesn't take care of local eval bindings yet
+          if (!this.eval && node.name === "eval" && path.parent.type === "CallExpression" && !path.scope.getBinding("eval")) {
+            // Mark all scopes from this one up as unsafe.
+            let evalScope = scope;
+            do {
+              this.unsafeScopes.add(evalScope);
+            } while (evalScope = evalScope.parent);
+          }
 
-      if (this.keepFnames && isFunction(binding.path)) {
-        return;
-      }
+          // Retrieve the binding.
+          let binding;
+          if (t.isFunctionDeclaration(path.parent, { id: node })) {
+            // A function declaration name maybe shadowed by a variable
+            // in the scope. So we get it from the upper scope.
+            binding = scope.parent.getBinding(node.name);
+          } else {
+            binding = scope.getBinding(node.name);
+          }
+          if (!binding) return;
 
-      // Add the node path to our bindings map.
-      let paths = this.bindings.get(binding);
-      if (!paths) {
-        paths = [];
-        this.bindings.set(binding, paths);
-      }
-      paths.push(path);
+          if (this.keepFnames && isFunction(binding.path)) {
+            return;
+          }
+
+          // Add the node path to our bindings map.
+          let paths = this.bindings.get(binding);
+          if (!paths) {
+            paths = [];
+            this.bindings.set(binding, paths);
+          }
+          paths.push(path);
+        },
+      }, this);
     },
 
     Literal({ node }) {

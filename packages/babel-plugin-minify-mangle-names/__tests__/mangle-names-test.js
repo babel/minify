@@ -610,15 +610,15 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       (function () {
-        function b() {
+        function c() {
           if (smth) {
-            var a = blah();
-            a();
+            var b = blah();
+            b();
           }
-          d();
+          a();
         }
-        function d() {}
-        module.exports = { bar: b };
+        function a() {}
+        module.exports = { bar: c };
       })();
     `);
 
@@ -685,11 +685,11 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit("should correctly mangle function declarations in different order", () => {
+  it("should correctly mangle function declarations in different order", () => {
     const source = unpad(`
       (function(){
         (function() {
-          for (let x in y) y[x];
+          for (var x in y) y[x];
           f(() => { g() });
         })();
         function g() {}
@@ -697,16 +697,15 @@ describe("mangle-names", () => {
     `);
 
     const expected = unpad(`
-      (function() {
+      (function () {
         (function () {
-          for (var b in y) {
-            y[b];
-          }f(() => {
-            a();
+          for (var a in y) y[a];
+          f(() => {
+            b();
           });
         })();
-        function a() {}
-      });
+        function b() {}
+      })();
     `);
 
     expect(transform(source)).toBe(expected);
