@@ -1,7 +1,9 @@
+const ManglerBfs = require("./mangler-bfs");
+
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
-  class Mangler {
+  class ManglerDfs {
     constructor(charset, program, {
       blacklist = {},
       keepFnames = false,
@@ -242,6 +244,7 @@ module.exports = ({ types: t }) => {
         const shouldConsiderSource = path.getSource().length > 70000;
 
         const charset = new Charset(shouldConsiderSource);
+        const Mangler = this.opts.bfs ? ManglerBfs : ManglerDfs;
         const mangler = new Mangler(charset, path, this.opts);
         mangler.run();
       },
