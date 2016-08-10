@@ -102,6 +102,12 @@ module.exports = class ManglerBfs {
         function getNext() {
           return mangler.charset.getIdentifier(i++);
         }
+        // This is useful when we have vars of single character
+        // => var a, ...z, A, ...Z, $, _;
+        // to
+        // => var aa, a, b ,c;
+        // instead of
+        // => var aa, ab, ...;
         function resetNext() {
           i = 0;
         }
