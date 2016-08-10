@@ -689,8 +689,8 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       if (!a) {
-        foo();
-      }
+          foo();
+        }
       if (a) {
         foo();
       }
@@ -1558,8 +1558,8 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       if (!baz) {
-        console.log('foo' + 'bar');
-      }
+          console.log('foo' + 'bar');
+        }
     `);
     expect(transform(source)).toBe(expected);
   });
@@ -1936,6 +1936,27 @@ describe("dce-plugin", () => {
       }
     `);
     const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should preserve names in NFEs", () => {
+    const source = unpad(`
+      function method() {
+        var removeListeners = function removeListeners() {
+          log(removeListeners);
+        };
+        removeListeners();
+      }
+    `);
+
+    const expected = unpad(`
+      function method() {
+        (function removeListeners() {
+          log(removeListeners);
+        })();
+      }
+    `);
+
     expect(transform(source)).toBe(expected);
   });
 
