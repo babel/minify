@@ -131,14 +131,49 @@ module.exports = class ManglerBfs {
             let next;
             do {
               next = getNext();
-            } while (scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
-            // TODO: enable reset
-            //resetNext();
-            scope.rename(b, next);
+            } while (scope.hasBinding(next) || scope.hasGlobal(next));
+            // TODO: enable reset (DONE)
+            resetNext();
+            mangler.rename(scope, b, next);
             scope.getBinding(next).renamed = true;
           });
       }
     });
+  }
+
+  idPaths(scope, name) {
+    const binding = scope.getBinding(name);
+    return binding
+      .referencePaths
+      .filter((path) => {
+        const {node} = path;
+        if (!path.isIdentifier()) {
+          throw new Error("Unhandled Case - Reference will not be mangled");
+        }
+        return !(
+          path.parentPath.isLabeledStatement({ label: node }) ||
+          path.parentPath.isBreakStatement({ label: node }) ||
+          path.parentPath.isContinueStatement({ label: node })
+        );
+      });
+  }
+
+  rename(scope, oldName, newName) {
+    const idPaths = this.idPaths(scope, oldName);
+    const binding = scope.getBinding(oldName);
+
+    // rename the binding at declaration place
+    binding.identifier.name = newName;
+
+    // update scope tracking
+    const {bindings} = scope;
+    delete bindings[oldName];
+    bindings[newName] = binding;
+
+    // rename all its references
+    for (let i = 0; i < idPaths.length; i++) {
+      idPaths[i].node.name = newName;
+    }
   }
 };
 
