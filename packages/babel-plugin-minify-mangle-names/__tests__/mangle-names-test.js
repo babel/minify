@@ -761,4 +761,56 @@ describe("mangle-names", () => {
     `);
     expect(transform(source, {keepFnames: true})).toBe(expected);
   });
+
+  it("should mangle variable re-declaration / K violations", () => {
+    const source = unpad(`
+      !function () {
+        var foo = 1;
+        foo++;
+        var foo = 2;
+        foo++;
+      }
+    `);
+    const expected = unpad(`
+      !function () {
+        var a = 1;
+        a++;
+        var a = 2;
+        a++;
+      };
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle K violations - 2", () => {
+    const source = unpad(`
+      !function () {
+        var bar = 1;
+        bar--;
+        var bar = 10;
+        foo(bar)
+        function foo() {
+          var foo = 10;
+          foo++;
+          var foo = 20;
+          foo(foo);
+        }
+      }
+    `);
+    const expected = unpad(`
+      !function () {
+        var b = 1;
+        b--;
+        var b = 10;
+        a(b);
+        function a() {
+          var c = 10;
+          c++;
+          var c = 20;
+          c(c);
+        }
+      };
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
