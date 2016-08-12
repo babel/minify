@@ -121,7 +121,18 @@ module.exports = class ManglerBfs {
   }
 
   idPaths(binding) {
-    return binding
+    const idPaths = new Set;
+
+    binding
+      .constantViolations
+      .map((path) => {
+        const {node} = path;
+        if (path.isVariableDeclarator()) {
+          idPaths.add(path.get("id"));
+        }
+      })
+
+    const x = binding
       .referencePaths
       .filter((path) => {
         const {node} = path;
@@ -133,7 +144,11 @@ module.exports = class ManglerBfs {
           path.parentPath.isBreakStatement({ label: node }) ||
           path.parentPath.isContinueStatement({ label: node })
         );
-      });
+      })
+      .map((path) => {
+        idPaths.add(path);
+      })
+    return [...idPaths];
   }
 
   rename(scope, oldName, newName) {
