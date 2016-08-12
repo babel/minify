@@ -250,7 +250,7 @@ module.exports = ({ types: t }) => {
         this.opts.bfs = true;
 
         const Mangler = this.opts.bfs ? ManglerBfs : ManglerDfs;
-        const mangler = new Mangler(charset, path, this.opts);
+        const mangler = new Mangler(charset, path, this.opts, t);
         mangler.run();
       },
     },

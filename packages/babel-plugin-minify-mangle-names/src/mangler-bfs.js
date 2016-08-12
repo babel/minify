@@ -1,14 +1,18 @@
 module.exports = class ManglerBfs {
+  // TEMPORARY `t`
   constructor(charset, program, {
     blacklist = {},
     keepFnames = false,
     eval: _eval = false
-  } = {}) {
+  } = {}, t) {
     this.charset = charset;
     this.program = program;
     this.blacklist = blacklist;
     this.keepFnames = keepFnames;
     this.eval = _eval;
+    // TODO:
+    // babel-types
+    this.t = t;
 
     this.unsafeScopes = new Set;
   }
@@ -89,6 +93,7 @@ module.exports = class ManglerBfs {
 
   mangle() {
     const mangler = this;
+    const t = this.t;
 
     this.program.traverse({
       Scopable(path) {
@@ -102,9 +107,6 @@ module.exports = class ManglerBfs {
         function getNext() {
           return mangler.charset.getIdentifier(i++);
         }
-        // TODO:
-        // Not effective as references are not yet removed when a binding
-        // is removed. Find a work around
 
         // This is useful when we have vars of single character
         // => var a, ...z, A, ...Z, $, _;
@@ -118,21 +120,21 @@ module.exports = class ManglerBfs {
 
         Object
           .keys(scope.getAllBindings())
-          .filter((b) => scope.hasOwnBinding(b))
-          .filter((b) => !scope.getBinding(b).path.isLabeledStatement())
-          .filter((b) => !scope.getBinding(b).renamed)
-          .filter((b) => !mangler.isBlacklist(b, mangler.blacklist))
           .filter((b) => {
-            // function names
-            if (!mangler.keepFnames) return true;
-            return !isFunction(scope.getBinding(b).path);
+            const binding = scope.getBinding(b);
+
+            return scope.hasOwnBinding(b)
+              && !binding.path.isLabeledStatement()
+              && !binding.renamed
+              && !mangler.isBlacklist(b, mangler.blacklist)
+              && (mangler.keepFnames ? !isFunction(binding.path) : true);
           })
           .map((b) => {
             let next;
             do {
               next = getNext();
-            } while (scope.hasBinding(next) || scope.hasGlobal(next));
-            // TODO: enable reset (DONE)
+            } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next));
+            // TODO: hasReference in the above check
             resetNext();
             mangler.rename(scope, b, next);
             scope.getBinding(next).renamed = true;
@@ -141,8 +143,7 @@ module.exports = class ManglerBfs {
     });
   }
 
-  idPaths(scope, name) {
-    const binding = scope.getBinding(name);
+  idPaths(binding) {
     return binding
       .referencePaths
       .filter((path) => {
@@ -159,8 +160,8 @@ module.exports = class ManglerBfs {
   }
 
   rename(scope, oldName, newName) {
-    const idPaths = this.idPaths(scope, oldName);
     const binding = scope.getBinding(oldName);
+    const idPaths = this.idPaths(binding);
 
     // rename the binding at declaration place
     binding.identifier.name = newName;
