@@ -16,7 +16,7 @@ module.exports = function(t) {
       path = path.parentPath;
     }
 
-    if (!path.inList) {
+    if (!path.inList && path.scope.path.type !== "ForStatement") {
       path.replaceWith(t.emptyStatement());
     } else {
       path.remove();
