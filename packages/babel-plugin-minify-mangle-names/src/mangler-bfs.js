@@ -36,7 +36,6 @@ module.exports = class ManglerBfs {
 
   collect() {
     const mangler = this;
-    const evalPaths = new Set;
 
     this.program.traverse({
       // capture direct evals
@@ -47,24 +46,12 @@ module.exports = class ManglerBfs {
           && callee.node.name === "eval"
           && !callee.scope.getBinding("eval")
         ) {
-          // Direct eval
-          evalPaths.add(path);
           mangler.markUnsafeScopes(path.scope);
         }
       },
 
-      // capture indirect evals - (1, eval)("foo")
       // charset considerations
       Identifier(path) {
-        if (path.node.name === "eval"
-          && !path.scope.hasBinding("eval")
-          && !path.scope.hasGlobal("eval")
-          && !evalPaths.has(path)
-        ) {
-          // indirect eval
-          mangler.markUnsafeScopes(mangler.program);
-        }
-
         const { node } = path;
 
         if ((path.parentPath.isMemberExpression({ property: node })) ||
@@ -77,16 +64,6 @@ module.exports = class ManglerBfs {
       // charset considerations
       Literal({ node }) {
         mangler.charset.consider(String(node.value));
-      },
-
-      // capture new Function
-      // similar to indirect eval - access to global scope
-      NewExpression(path) {
-        const callee = path.get("callee");
-        if (callee.isIdentifier() && callee.node.name === "Function") {
-          // new Function() - global scope accessible
-          mangler.markUnsafeScopes(mangler.program);
-        }
       }
     });
   }
