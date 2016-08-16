@@ -116,6 +116,8 @@ module.exports = class ManglerBfs {
             mangler.rename(scope, b, next);
             scope.getBinding(next).renamed = true;
           });
+
+        scope.crawl();
       }
     });
   }
