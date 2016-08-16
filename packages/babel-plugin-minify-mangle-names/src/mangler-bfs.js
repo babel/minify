@@ -132,7 +132,7 @@ module.exports = class ManglerBfs {
         }
       })
 
-    const x = binding
+    binding
       .referencePaths
       .filter((path) => {
         const {node} = path;
@@ -177,4 +177,3 @@ function isFunction(path) {
     || path.isClassExpression()
     || path.isClassDeclaration();
 }
-
