@@ -99,8 +99,6 @@ module.exports = class ManglerBfs {
           return;
         }
 
-        scope.renamedBindings = new Set;
-
         Object
           .keys(scope.getAllBindings())
           .filter((b) => {
