@@ -5,6 +5,8 @@
  * check the parent of a ReferencedIdentifier and don't rename Labels
  *
  */
+const t = require("babel-types");
+
 let renameVisitor = {
   ReferencedIdentifier(path, state) {
     const {node} = path;
