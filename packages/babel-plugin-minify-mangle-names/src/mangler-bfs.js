@@ -114,8 +114,7 @@ module.exports = class ManglerBfs {
             let next;
             do {
               next = getNext();
-            } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next));
-            // TODO: hasReference in the above check
+            } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
             resetNext();
             mangler.rename(scope, b, next);
             scope.getBinding(next).renamed = true;
