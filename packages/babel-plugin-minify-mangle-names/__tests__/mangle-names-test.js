@@ -849,4 +849,22 @@ describe("mangle-names", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should mangle both referenced and binding identifiers", () => {
+    const source = unpad(`
+      (function () {
+        var foo = bar;
+        foo = baz;
+        foo;
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        var a = bar;
+        a = baz;
+        a;
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

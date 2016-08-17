@@ -8,7 +8,7 @@
 const t = require("babel-types");
 
 let renameVisitor = {
-  ReferencedIdentifier(path, state) {
+  "ReferencedIdentifier|BindingIdentifier"(path, state) {
     const {node} = path;
     if (path.parentPath.isLabeledStatement({ label: node })
       || path.parentPath.isBreakStatement({ label: node })
