@@ -1,4 +1,5 @@
 const Renamer = require("./renamer");
+const t = require("babel-types");
 
 module.exports = class ManglerBfs {
   // TEMPORARY `t`
@@ -12,9 +13,7 @@ module.exports = class ManglerBfs {
     this.blacklist = blacklist;
     this.keepFnames = keepFnames;
     this.eval = _eval;
-    // TODO:
-    // babel-types
-    this.t = t;
+    this.renamedScopes = new Set;
 
     this.unsafeScopes = new Set;
   }
@@ -72,7 +71,6 @@ module.exports = class ManglerBfs {
 
   mangle() {
     const mangler = this;
-    const t = this.t;
 
     this.program.traverse({
       Scopable(path) {
@@ -97,6 +95,12 @@ module.exports = class ManglerBfs {
           i = 0;
         }
 
+        if (mangler.renamedScopes.has(scope)) {
+          return;
+        }
+
+        scope.renamedBindings = new Set;
+
         Object
           .keys(scope.getAllBindings())
           .filter((b) => {
@@ -112,17 +116,15 @@ module.exports = class ManglerBfs {
             let next;
             do {
               next = getNext();
-            } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
+            } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next));
             // TODO: hasReference in the above check
             resetNext();
             mangler.rename(scope, b, next);
             scope.getBinding(next).renamed = true;
           });
 
-        // TODO:
-        // This renames foo -> a -> b
-        // so instead of stopping at a, it does one more rename
-        // and changes it to b
+        // set the current scope as renamed own bindings
+        mangler.renamedScopes.add(scope);
 
         // Recalculate scope tracking
         // Solves the issues when used with block scoping plugin
