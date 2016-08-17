@@ -119,6 +119,13 @@ module.exports = class ManglerBfs {
             scope.getBinding(next).renamed = true;
           });
 
+        // TODO:
+        // This renames foo -> a -> b
+        // so instead of stopping at a, it does one more rename
+        // and changes it to b
+
+        // Recalculate scope tracking
+        // Solves the issues when used with block scoping plugin
         scope.crawl();
       }
     });
