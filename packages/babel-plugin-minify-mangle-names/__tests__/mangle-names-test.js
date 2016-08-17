@@ -816,18 +816,18 @@ describe("mangle-names", () => {
 
   it("should work with redeclarations", () => {
     const source = unpad(`
-      (function() {
+      (function () {
         var x = y;
         x = z;
         x;
-      }());
+      })();
     `);
     const expected = unpad(`
-      (function() {
+      (function () {
         var a = y;
         a = z;
         a;
-      }());
+      })();
     `);
     expect(transform(source)).toBe(expected);
   });
