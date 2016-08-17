@@ -104,11 +104,11 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(d, e, f) {
-          b(d, e, f);
+        function d(f, a, b) {
+          e(f, a, b);
         }
 
-        function b() {}
+        function e() {}
       }
     `);
 
@@ -371,8 +371,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(d, e, b) {
-          a(d, e, b);
+        function d(e, a, b) {
+          d(e, a, b);
         }
       }
     `);
@@ -547,7 +547,9 @@ describe("mangle-names", () => {
       function f(x) {
         for (let i = 0; i; i++) {
           let n;
-          if (n) return;
+          if (n) {
+            return;
+          }
           g(() => n);
         }
       }
@@ -555,32 +557,35 @@ describe("mangle-names", () => {
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
+      code: false,
     });
 
     traverse.clearCache();
 
-    const source = babel.transformFromAst(first.ast, null, {
+    const actual = babel.transformFromAst(first.ast, null, {
       plugins: [require("../src/index")],
     }).code;
 
     const expected = unpad(`
-      function f(e) {
-        var a = function (c) {
-          var h = void 0;
-          if (h) return {
-            v: void 0
-          };
-          g(() => h);
+      function f(a) {
+        var b = function (d) {
+          var e = void 0;
+          if (e) {
+            return {
+              v: void 0
+            };
+          }
+          g(() => e);
         };
 
-        for (var b = 0; b; b++) {
-          var d = a(b);
-          if (typeof d === "object") return d.v;
+        for (var d = 0; d; d++) {
+          var c = b(d);
+          if (typeof c === "object") return c.v;
         }
       }
     `);
 
-    expect(transform(source)).toBe(expected);
+    expect(actual).toBe(expected);
   });
 
   it("should integrate with block scoping plugin 2", () => {
@@ -600,29 +605,30 @@ describe("mangle-names", () => {
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
+      code: false,
     });
 
     traverse.clearCache();
 
-    const source = babel.transformFromAst(first.ast, null, {
+    const actual = babel.transformFromAst(first.ast, null, {
       plugins: [require("../src/index")],
     }).code;
 
     const expected = unpad(`
       (function () {
-        function c() {
+        function a() {
           if (smth) {
-            var b = blah();
-            b();
+            var c = blah();
+            c();
           }
-          a();
+          b();
         }
-        function a() {}
-        module.exports = { bar: c };
+        function b() {}
+        module.exports = { bar: a };
       })();
     `);
 
-    expect(transform(source)).toBe(expected);
+    expect(actual).toBe(expected);
   });
 
   it("should keep mangled named consistent across scopes when defined later on", () => {
