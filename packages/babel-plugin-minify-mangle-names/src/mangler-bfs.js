@@ -13,7 +13,7 @@ module.exports = class ManglerBfs {
     this.blacklist = blacklist;
     this.keepFnames = keepFnames;
     this.eval = _eval;
-    this.renamedScopes = new Set;
+    // this.renamedScopes = new Set;
 
     this.unsafeScopes = new Set;
   }
@@ -95,9 +95,9 @@ module.exports = class ManglerBfs {
           i = 0;
         }
 
-        if (mangler.renamedScopes.has(scope)) {
-          return;
-        }
+        // if (mangler.renamedScopes.has(scope)) {
+        //   return;
+        // }
 
         Object
           .keys(scope.getAllBindings())
@@ -121,18 +121,46 @@ module.exports = class ManglerBfs {
           });
 
         // set the current scope as renamed own bindings
-        mangler.renamedScopes.add(scope);
+        // mangler.renamedScopes.add(scope);
 
         // Recalculate scope tracking
         // Solves the issues when used with block scoping plugin
-        scope.crawl();
+        // scope.crawl();
       }
     });
   }
 
   rename(scope, oldName, newName) {
     const binding = scope.getBinding(oldName);
-    return new Renamer(binding, oldName, newName).rename();
+    if (!binding) {
+      throw new Error("Binding not found - " + oldName);
+    }
+    new Renamer(binding, oldName, newName).rename();
+    this.updateReferences(scope, oldName, newName);
+  }
+
+  updateReferences(scope, oldName, newName) {
+    let referenced = false;
+
+    // probably really slow
+    this.program.traverse({
+      Identifier(path) {
+        const {node} = path;
+        if (!path.parentPath.isMemberExpression({ property: node })
+          && !path.parentPath.isObjectProperty({key: node})
+          && node.name === oldName
+        ) {
+          referenced = true;
+        }
+      }
+    });
+
+    if (!referenced) {
+      let current = scope;
+      do {
+        current.references[oldName] = false;
+      } while (current = current.parent);
+    }
   }
 };
 
