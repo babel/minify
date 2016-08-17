@@ -14,39 +14,39 @@ const compile = require('google-closure-compiler-js').compile;
 
 const filename = process.argv[2];
 if (!filename) {
-  console.error('Error: No filename specified');
+  console.error("Error: No filename specified");
   process.exit(1);
 }
 
 const table = new Table({
-  head: ['', 'raw', 'raw win', 'gzip', 'gzip win', 'parse time', 'run'],
+  head: ["", "raw", "raw win", "gzip", "gzip win", "parse time", "run"],
   chars: {
-    top: '',
-    'top-mid': '' ,
-    'top-left': '' ,
-    'top-right': '',
-    bottom: '' ,
-    'bottom-mid': '' ,
-    'bottom-left': '' ,
-    'bottom-right': '',
-    left: '',
-    'left-mid': '',
-    mid: '',
-    'mid-mid': '',
-    right: '' ,
-    'right-mid': '',
-    middle: ' ',
+    top: "",
+    "top-mid": "" ,
+    "top-left": "" ,
+    "top-right": "",
+    bottom: "" ,
+    "bottom-mid": "" ,
+    "bottom-left": "" ,
+    "bottom-right": "",
+    left: "",
+    "left-mid": "",
+    mid: "",
+    "mid-mid": "",
+    right: "" ,
+    "right-mid": "",
+    middle: " ",
   },
   style: {
-    'padding-left': 0,
-    'padding-right': 0,
-    head: ['bold'],
+    "padding-left": 0,
+    "padding-right": 0,
+    head: ["bold"],
   },
 });
 
 let results = [];
 
-const code = fs.readFileSync(filename, 'utf8');
+const code = fs.readFileSync(filename, "utf8");
 const gzippedCode = zlib.gzipSync(code);
 
 function test(name, callback) {
@@ -57,7 +57,7 @@ function test(name, callback) {
   const end = Date.now();
   const run = end - start;
 
-  fs.writeFileSync('.test_gen_' + name + '.js', result);
+  fs.writeFileSync(".test_gen_" + name + ".js", result);
 
   const gzipped = zlib.gzipSync(result);
 
@@ -78,8 +78,8 @@ function test(name, callback) {
 
 test('babili', function (code) {
   return babel.transform(code, {
-    sourceType: 'script',
-    presets: [require('../packages/babel-preset-minify')],
+    sourceType: "script",
+    presets: [require("../packages/babel-preset-babili")],
     comments: false,
   }).code;
 });
@@ -112,11 +112,11 @@ results.forEach(function (result, i) {
   let row = [
     chalk.bold(result.name),
     bytes(result.raw),
-    Math.round(((code.length / result.raw) * 100) - 100) + '%',
+    Math.round(((code.length / result.raw) * 100) - 100) + "%",
     bytes(result.gzip),
-    Math.round(((gzippedCode.length / result.gzip) * 100) - 100) + '%',
-    Math.round(result.parse) + 'ms',
-    Math.round(result.run) + 'ms',
+    Math.round(((gzippedCode.length / result.gzip) * 100) - 100) + "%",
+    Math.round(result.parse) + "ms",
+    Math.round(result.run) + "ms",
   ];
 
   let style = chalk.yellow;

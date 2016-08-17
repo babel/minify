@@ -2,8 +2,8 @@
 
 ### Setup
 ```sh
-$ git clone https://github.com/amasad/babel-minify
-$ cd babel-minify
+$ git clone https://github.com/babel/babili
+$ cd babili
 $ npm install
 $ npm run bootstrap
 ```

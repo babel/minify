@@ -1,11 +1,11 @@
-# babel-preset-minify
+# babel-preset-babili
 
 > Babel preset for all minify plugins.
 
 ## Install
 
 ```sh
-$ npm install --save-dev babel-preset-minify
+$ npm install --save-dev babel-preset-babili
 ```
 
 ## Usage
