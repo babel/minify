@@ -1,3 +1,5 @@
+const Renamer = require("./renamer");
+
 module.exports = class ManglerBfs {
   // TEMPORARY `t`
   constructor(charset, program, {
@@ -110,7 +112,7 @@ module.exports = class ManglerBfs {
             let next;
             do {
               next = getNext();
-            } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next));
+            } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
             // TODO: hasReference in the above check
             resetNext();
             mangler.rename(scope, b, next);
@@ -122,53 +124,9 @@ module.exports = class ManglerBfs {
     });
   }
 
-  idPaths(binding) {
-    const idPaths = new Set;
-
-    binding
-      .constantViolations
-      .map((path) => {
-        const {node} = path;
-        if (path.isVariableDeclarator()) {
-          idPaths.add(path.get("id"));
-        }
-      })
-
-    binding
-      .referencePaths
-      .filter((path) => {
-        const {node} = path;
-        if (!path.isIdentifier()) {
-          throw new Error("Unhandled Case - Reference will not be mangled");
-        }
-        return !(
-          path.parentPath.isLabeledStatement({ label: node }) ||
-          path.parentPath.isBreakStatement({ label: node }) ||
-          path.parentPath.isContinueStatement({ label: node })
-        );
-      })
-      .map((path) => {
-        idPaths.add(path);
-      })
-    return [...idPaths];
-  }
-
   rename(scope, oldName, newName) {
     const binding = scope.getBinding(oldName);
-    const idPaths = this.idPaths(binding);
-
-    // rename the binding at declaration place
-    binding.identifier.name = newName;
-
-    // update scope tracking
-    const {bindings} = scope;
-    delete bindings[oldName];
-    bindings[newName] = binding;
-
-    // rename all its references
-    for (let i = 0; i < idPaths.length; i++) {
-      idPaths[i].node.name = newName;
-    }
+    return new Renamer(binding, oldName, newName).rename();
   }
 };
 
