@@ -104,11 +104,11 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(e, a, b) {
-          c(e, a, b);
+        function d(f, a, b) {
+          e(f, a, b);
         }
 
-        function c() {}
+        function e() {}
       }
     `);
 
@@ -217,12 +217,12 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function foo() {
-        function a(b, c, d) {
-          e(b, c, d);
+        function a(c, d, e) {
+          b(c, d, e);
         }
-        function e() {
-          var b = who();
-          b.bam();
+        function b() {
+          var c = who();
+          c.bam();
         }
         a();
       }
@@ -272,12 +272,12 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(b, c) {
+        function a(c, d) {
           if (1) {
-            d(b, c);
+            b(c, d);
           }
         }
-        function d() {}
+        function b() {}
       }
     `);
 
@@ -297,9 +297,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(b, c) {
-          return function (d, e) {
-            b(d, e);
+        function a(c, d) {
+          return function (e, f) {
+            c(e, f);
           };
         }
         function b() {}
@@ -324,12 +324,12 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function foo() {
         function a() {
-          var b;
-          if (b) {
-            c();
+          var c;
+          if (c) {
+            b();
           }
         }
-        function c() {}
+        function b() {}
       }
     `);
 
@@ -349,12 +349,12 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(b) {
+        function a(c) {
           return function () {
-            c();
+            b();
           };
         }
-        function c() {}
+        function b() {}
       }
     `);
 
@@ -547,7 +547,9 @@ describe("mangle-names", () => {
       function f(x) {
         for (let i = 0; i; i++) {
           let n;
-          if (n) return;
+          if (n) {
+            return;
+          }
           g(() => n);
         }
       }
@@ -555,32 +557,35 @@ describe("mangle-names", () => {
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
+      code: false,
     });
 
     traverse.clearCache();
 
-    const source = babel.transformFromAst(first.ast, null, {
+    const actual = babel.transformFromAst(first.ast, null, {
       plugins: [require("../src/index")],
     }).code;
 
     const expected = unpad(`
       function f(a) {
-        var e = function (b) {
-          var h = void 0;
-          if (h) return {
-            v: void 0
-          };
-          g(() => h);
+        var b = function (d) {
+          var e = void 0;
+          if (e) {
+            return {
+              v: void 0
+            };
+          }
+          g(() => e);
         };
 
-        for (var b = 0; b; b++) {
-          var c = e(b);
+        for (var d = 0; d; d++) {
+          var c = b(d);
           if (typeof c === "object") return c.v;
         }
       }
     `);
 
-    expect(transform(source)).toBe(expected);
+    expect(actual).toBe(expected);
   });
 
   it("should integrate with block scoping plugin 2", () => {
@@ -600,29 +605,30 @@ describe("mangle-names", () => {
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
+      code: false,
     });
 
     traverse.clearCache();
 
-    const source = babel.transformFromAst(first.ast, null, {
+    const actual = babel.transformFromAst(first.ast, null, {
       plugins: [require("../src/index")],
     }).code;
 
     const expected = unpad(`
       (function () {
-        function b() {
+        function a() {
           if (smth) {
-            var a = blah();
-            a();
+            var c = blah();
+            c();
           }
-          d();
+          b();
         }
-        function d() {}
-        module.exports = { bar: b };
+        function b() {}
+        module.exports = { bar: a };
       })();
     `);
 
-    expect(transform(source)).toBe(expected);
+    expect(actual).toBe(expected);
   });
 
   it("should keep mangled named consistent across scopes when defined later on", () => {
@@ -646,15 +652,15 @@ describe("mangle-names", () => {
       (function () {
         function a() {
           {
-            var b = true;
+            var c = true;
 
             {
-              c();
+              b();
             }
           }
         }
 
-        function c() {}
+        function b() {}
       })();
     `);
 
@@ -685,7 +691,8 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  xit("should correctly mangle function declarations in different order", () => {
+  // #issue55, #issue57
+  it("should correctly mangle function declarations in different order", () => {
     const source = unpad(`
       (function(){
         (function() {
@@ -696,20 +703,35 @@ describe("mangle-names", () => {
       })();
     `);
 
+    const ast = babel.transform(source, {
+      presets: ["es2015"],
+      sourceType: "script",
+      code: false
+    }).ast;
+
+    traverse.clearCache();
+
+    const actual = babel.transformFromAst(ast, null, {
+      sourceType: "script",
+      plugins: [require("../src/index")]
+    }).code;
+
     const expected = unpad(`
-      (function() {
+      "use strict";
+
+      (function () {
         (function () {
           for (var b in y) {
             y[b];
-          }f(() => {
+          }f(function () {
             a();
           });
         })();
         function a() {}
-      });
+      })();
     `);
 
-    expect(transform(source)).toBe(expected);
+    expect(actual).toBe(expected);
   });
 
   it("should NOT mangle functions & classes when keep_fnames is true", () => {
@@ -744,5 +766,111 @@ describe("mangle-names", () => {
       })();
     `);
     expect(transform(source, {keepFnames: true})).toBe(expected);
+  });
+
+  it("should mangle variable re-declaration / K violations", () => {
+    const source = unpad(`
+      !function () {
+        var foo = 1;
+        foo++;
+        var foo = 2;
+        foo++;
+      }
+    `);
+    const expected = unpad(`
+      !function () {
+        var a = 1;
+        a++;
+        var a = 2;
+        a++;
+      };
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle K violations - 2", () => {
+    const source = unpad(`
+      !function () {
+        var bar = 1;
+        bar--;
+        var bar = 10;
+        foo(bar)
+        function foo() {
+          var foo = 10;
+          foo++;
+          var foo = 20;
+          foo(foo);
+        }
+      }
+    `);
+    const expected = unpad(`
+      !function () {
+        var b = 1;
+        b--;
+        var b = 10;
+        a(b);
+        function a() {
+          var c = 10;
+          c++;
+          var c = 20;
+          c(c);
+        }
+      };
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should work with redeclarations", () => {
+    const source = unpad(`
+      (function () {
+        var x = y;
+        x = z;
+        x;
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        var a = y;
+        a = z;
+        a;
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should reuse removed vars", () => {
+    const source = unpad(`
+      function Foo() {
+        var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+        var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+        var $, _;
+      }
+    `);
+    const expected = unpad(`
+      function Foo() {
+        var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+        var Z, $;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should mangle both referenced and binding identifiers with K violations", () => {
+    const source = unpad(`
+      (function () {
+        var foo = bar,
+            foo = baz;
+        foo;
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        var a = bar,
+            a = baz;
+        a;
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
   });
 });

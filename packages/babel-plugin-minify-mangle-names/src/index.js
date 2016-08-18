@@ -1,3 +1,5 @@
+const Renamer = require("./renamer");
+
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
@@ -13,14 +15,7 @@ module.exports = ({ types: t }) => {
       this.keepFnames = keepFnames;
       this.eval = _eval;
 
-      // unsafe scopes that contain an `eval`
       this.unsafeScopes = new Set;
-
-      // <Binding, NodePath[]>
-      this.bindings = new Map;
-
-      // <Scope, Set<string>>
-      this.usedFunctionBindings = new Map;
     }
 
     run() {
@@ -29,207 +24,133 @@ module.exports = ({ types: t }) => {
       this.mangle();
     }
 
+    isBlacklist(name) {
+      return hop.call(this.blacklist, name);
+    }
+
+    markUnsafeScopes(scope) {
+      let evalScope = scope;
+      do {
+        this.unsafeScopes.add(evalScope);
+      } while (evalScope = evalScope.parent);
+    }
+
     collect() {
-      this.program.traverse(collectVisitor, this);
+      const mangler = this;
+
+      this.program.traverse({
+        // capture direct evals
+        CallExpression(path) {
+          const callee = path.get("callee");
+
+          if (callee.isIdentifier()
+            && callee.node.name === "eval"
+            && !callee.scope.getBinding("eval")
+          ) {
+            mangler.markUnsafeScopes(path.scope);
+          }
+        },
+
+        // charset considerations
+        Identifier(path) {
+          const { node } = path;
+
+          if ((path.parentPath.isMemberExpression({ property: node })) ||
+              (path.parentPath.isObjectProperty({ key: node }))
+          ) {
+            mangler.charset.consider(node.name);
+          }
+        },
+
+        // charset considerations
+        Literal({ node }) {
+          mangler.charset.consider(String(node.value));
+        }
+      });
     }
 
     mangle() {
-      for (const [binding, identifierPaths] of this.bindings.entries()) {
+      const mangler = this;
 
-        // Check if the scope is safe.
-        if (this.unsafeScopes.has(binding.scope)) {
-          continue;
-        }
+      this.program.traverse({
+        Scopable(path) {
+          if (path.isProgram()) return;
 
-        // Don't mangle top level bindings. We can potentially do it just for block scoped though.
-        if (binding.scope.path.isProgram()) {
-          continue;
-        }
+          const {scope} = path;
 
-        // Don't magnle if this exists in the blacklist
-        const oldName = binding.identifier.name;
-        if (hop.call(this.blacklist, oldName)) {
-          continue;
-        }
+          if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
 
-        // Find a new name that doesn't collide with any.
-        let newName;
-        let i = 0;
-        do {
-          newName = this.charset.getIdentifier(i);
-          i++;
-        } while (!t.isValidIdentifier(newName) || !this.canUse(newName, binding, identifierPaths));
-
-        // Register binding names as used to prevent them new bindings from being mangled inside
-        // that could shadow.
-        for (let path of identifierPaths) {
-          const funcScope = path.scope.getFunctionParent();
-          let used = this.usedFunctionBindings.get(funcScope);
-          if (!used) {
-            used = new Set;
-            this.usedFunctionBindings.set(funcScope, used);
+          let i = 0;
+          function getNext() {
+            return mangler.charset.getIdentifier(i++);
           }
-          used.add(newName);
-        }
 
-        this.rename(newName, binding, identifierPaths);
-      }
+          // This is useful when we have vars of single character
+          // => var a, ...z, A, ...Z, $, _;
+          // to
+          // => var aa, a, b ,c;
+          // instead of
+          // => var aa, ab, ...;
+          function resetNext() {
+            i = 0;
+          }
+
+          Object
+            .keys(scope.getAllBindings())
+            .filter((b) => {
+              const binding = scope.getBinding(b);
+
+              return scope.hasOwnBinding(b)
+                && !binding.path.isLabeledStatement()
+                && !binding.renamed
+                && !mangler.isBlacklist(b, mangler.blacklist)
+                && (mangler.keepFnames ? !isFunction(binding.path) : true);
+            })
+            .map((b) => {
+              let next;
+              do {
+                next = getNext();
+              } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
+              resetNext();
+              mangler.rename(scope, b, next);
+              scope.getBinding(next).renamed = true;
+            });
+        }
+      });
     }
 
-    rename(newName, binding, identifierPaths) {
-      const oldName = binding.identifier.name;
-
-      // Update scope tracking.
-      const scope = binding.scope;
-      const bindings = scope.bindings;
-      delete bindings[oldName];
-      bindings[newName] = binding;
-
-      // Update identifiers to reference the new name.
-      for (const path of identifierPaths) {
-        path.node.name = newName;
+    rename(scope, oldName, newName) {
+      const binding = scope.getBinding(oldName);
+      if (!binding) {
+        throw new Error("Binding not found - " + oldName);
       }
+      new Renamer(binding, oldName, newName).rename();
+      this.updateReferences(scope, oldName, newName);
     }
 
-    canUseInFunction(name, scope) {
-      const used = this.usedFunctionBindings.get(scope);
-      return !used || !used.has(name);
-    }
+    updateReferences(scope, oldName, newName) {
+      let referenced = false;
 
-    canUse(name, binding, identifierPaths) {
-      let scope = binding.scope;
-      if (scope.hasGlobal(name)) {
-        return false;
-      }
-
-      // Check name against names of references that appear in this function
-      const funcScope = scope.getFunctionParent();
-      if (!this.canUseInFunction(name, funcScope)) return false;
-
-      // Check that references to this variable aren't inside a function that has it used.
-      for (let path of identifierPaths) {
-        let funcParent = path.scope.getFunctionParent();
-        if (!this.canUseInFunction(name, funcParent)) return false;
-      }
-
-      // Collect scopes that we'll check for collisions in.
-      const scopes = [scope];
-      for (let path of identifierPaths) {
-        scopes.push(path.scope);
-      }
-
-      // Build a list of scope ancestors.
-      const parentScopes = [];
-      do {
-        parentScopes.push(scope);
-      } while ((scope = scope.parent) && scope !== funcScope);
-
-      for (const scope of scopes) {
-        const existing = scope.getBinding(name);
-
-        if (!existing || existing === binding) continue;
-
-        // Don't shadow any bindings in this scope.
-        if (existing.scope === binding.scope) {
-          return false;
-        }
-
-        // Don't collide params with id.
-        // TODO only do this if the param is in the same function head
-        if (existing.kind === "hoisted" && binding.kind === "param") {
-          return false;
-        }
-
-        let existingBinding = this.bindings.get(existing);
-        if (existingBinding) {
-          // Check if the scope of any of the references is above us.
-          for (const path of existingBinding) {
-            let scope = path.scope;
-            if (scope.path.isFunction()) scope = scope.parent;
-            scope = scope.getFunctionParent();
-
-            // Check if the function for this reference is a parent scope.
-            if (parentScopes.indexOf(scope) >= 0) {
-              return false;
-            }
+      // probably really slow
+      this.program.traverse({
+        Identifier(path) {
+          const {node} = path;
+          if (!path.parentPath.isMemberExpression({ property: node })
+            && !path.parentPath.isObjectProperty({key: node})
+            && node.name === oldName
+          ) {
+            referenced = true;
           }
         }
-      }
+      });
 
-      for (const referencePath of binding.referencePaths) {
-        let scope = referencePath.scope;
-
+      if (!referenced) {
+        let current = scope;
         do {
-          if (scope.getBinding(name)) {
-            return false;
-          }
-        } while ((scope = scope.parent) && scope !== binding.scope);
+          current.references[oldName] = false;
+        } while (current = current.parent);
       }
-
-      return true;
     }
-  }
-
-  const collectVisitor = {
-    "ReferencedIdentifier|BindingIdentifier"(path) {
-      const { scope, node } = path;
-
-      // Node is a label.
-      if (path.parentPath.isLabeledStatement({ label: node })) {
-        return;
-      }
-
-      // Ignore break and continue statements.
-      if (path.parentPath.isContinueStatement({ label: node }) || path.parentPath.isBreakStatement({ label: node })) {
-        return;
-      }
-
-      // Doesn't take care of local eval bindings yet
-      if (!this.eval && node.name === "eval" && path.parent.type === "CallExpression" && !path.scope.getBinding("eval")) {
-        // Mark all scopes from this one up as unsafe.
-        let evalScope = scope;
-        do {
-          this.unsafeScopes.add(evalScope);
-        } while (evalScope = evalScope.parent);
-      }
-
-      // Retrieve the binding.
-      let binding;
-      if (t.isFunctionDeclaration(path.parent, { id: node })) {
-        // A function declaration name maybe shadowed by a variable
-        // in the scope. So we get it from the upper scope.
-        binding = scope.parent.getBinding(node.name);
-      } else {
-        binding = scope.getBinding(node.name);
-      }
-      if (!binding) return;
-
-      if (this.keepFnames && isFunction(binding.path)) {
-        return;
-      }
-
-      // Add the node path to our bindings map.
-      let paths = this.bindings.get(binding);
-      if (!paths) {
-        paths = [];
-        this.bindings.set(binding, paths);
-      }
-      paths.push(path);
-    },
-
-    Literal({ node }) {
-      this.charset.consider(String(node.value));
-    },
-
-    Identifier(path) {
-      const { node } = path;
-
-      if ((path.parentPath.isMemberExpression({ property: node })) ||
-          (path.parentPath.isObjectProperty({ key: node }))
-      ) {
-        this.charset.consider(node.name);
-      }
-    },
   };
 
   return {
@@ -242,6 +163,7 @@ module.exports = ({ types: t }) => {
         const shouldConsiderSource = path.getSource().length > 70000;
 
         const charset = new Charset(shouldConsiderSource);
+
         const mangler = new Mangler(charset, path, this.opts);
         mangler.run();
       },
