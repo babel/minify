@@ -76,7 +76,7 @@ function test(name, callback) {
   });
 }
 
-test('minify-preset', function (code, callback) {
+test('babili', function (code) {
   return babel.transform(code, {
     sourceType: 'script',
     presets: [require('../packages/babel-preset-minify')],
@@ -84,39 +84,13 @@ test('minify-preset', function (code, callback) {
   }).code;
 });
 
-test('babel', function (code, callback) {
-  return babel.transform(code, {
-    sourceType: 'script',
-    plugins: [
-      [
-        require('../packages/babel-plugin-minify-replace'),
-        {
-          replacements: [{
-            identifierName: '__DEV__',
-            replacement: {
-              type: 'booleanLiteral',
-              value: true,
-            },
-          }],
-        },
-      ],
-      require('../packages/babel-plugin-minify-constant-folding'),
-      require('../packages/babel-plugin-minify-mangle-names'),
-      require('../packages/babel-plugin-minify-dead-code-elimination'),
-      require('../packages/babel-plugin-minify-simplify'),
-    ],
-    minified: true,
-    comments: false,
-  }).code;
-});
-
-test('closure', function (code, callback) {
+test('closure', function (code) {
   return child.execSync(
     'java -jar ' + path.join(__dirname, 'gcc.jar') + ' --jscomp_off=uselessCode --js ' + filename
-  );
+  ).toString();
 });
 
-test('closure js', function (code, callback) {
+test('closure js', function (code) {
   const flags = {
     jsCode: [{ source: code }],
   };
@@ -124,7 +98,7 @@ test('closure js', function (code, callback) {
   return out.compiledCode;
 });
 
-test('uglify', function (code, callback) {
+test('uglify', function (code) {
   return uglify.minify(code, {
     fromString: true,
   }).code;
