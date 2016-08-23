@@ -137,7 +137,7 @@ module.exports = ({ types: t }) => {
     }
 
     updateReferences() {
-      var _this = this;
+      var mangler = this;
 
       this.program.traverse({
         Identifier(path) {
@@ -147,9 +147,9 @@ module.exports = ({ types: t }) => {
             path.parentPath.isObjectProperty({key: node})
           ) return;
 
-          _this.referencesToUpdate.forEach((ref, oldName) => {
+          mangler.referencesToUpdate.forEach((ref, oldName) => {
             if (node.name === oldName) {
-              _this.referencesToUpdate.get(oldName).referenced = true;
+              mangler.referencesToUpdate.get(oldName).referenced = true;
             }
           });
         }
