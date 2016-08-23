@@ -104,8 +104,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(f, a, b) {
-          e(f, a, b);
+        function d(f, g, h) {
+          e(f, g, h);
         }
 
         function e() {}
@@ -371,8 +371,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(e, a, b) {
-          d(e, a, b);
+        function d(e, f, g) {
+          d(e, f, g);
         }
       }
     `);
@@ -848,9 +848,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function Foo() {
-        var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
-        var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
-        var Z, $;
+        var aa, ba, ca, da, ea, fa, ga, ha, ia, ja, ka, la, ma, na, oa, pa, qa, ra, sa, ta, ua, va, wa, xa, ya, za;
+        var Aa, Ba, Ca, Da, Ea, Fa, Ga, Ha, Ia, Ja, Ka, La, Ma, Na, Oa, Pa, Qa, Ra, Sa, Ta, Ua, Va, Wa, Xa, Ya, Za;
+        var $a, _a;
       }
     `);
     expect(transform(source)).toBe(expected);

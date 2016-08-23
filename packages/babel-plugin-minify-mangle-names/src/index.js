@@ -16,6 +16,8 @@ module.exports = ({ types: t }) => {
       this.eval = _eval;
 
       this.unsafeScopes = new Set;
+
+      this.referencesToUpdate = new Map;
     }
 
     run() {
@@ -117,6 +119,8 @@ module.exports = ({ types: t }) => {
             });
         }
       });
+
+      this.updateReferences();
     }
 
     rename(scope, oldName, newName) {
@@ -125,31 +129,41 @@ module.exports = ({ types: t }) => {
         throw new Error("Binding not found - " + oldName);
       }
       new Renamer(binding, oldName, newName).rename();
-      this.updateReferences(scope, oldName, newName);
+
+      this.referencesToUpdate.set(oldName, {
+        scope,
+        referenced: false
+      });
     }
 
-    updateReferences(scope, oldName, newName) {
-      let referenced = false;
+    updateReferences() {
+      var mangler = this;
 
-      // probably really slow
       this.program.traverse({
         Identifier(path) {
-          const {node} = path;
-          if (!path.parentPath.isMemberExpression({ property: node })
-            && !path.parentPath.isObjectProperty({key: node})
-            && node.name === oldName
-          ) {
-            referenced = true;
-          }
+          const { node } = path;
+          if (
+            path.parentPath.isMemberExpression({ property: node }) ||
+            path.parentPath.isObjectProperty({key: node})
+          ) return;
+
+          mangler.referencesToUpdate.forEach((ref, oldName) => {
+            if (node.name === oldName) {
+              mangler.referencesToUpdate.get(oldName).referenced = true;
+            }
+          });
         }
       });
 
-      if (!referenced) {
-        let current = scope;
+      this.referencesToUpdate.forEach((ref, oldName) => {
+        if (ref.referenced) return;
+
+        let current = ref.scope;
         do {
           current.references[oldName] = false;
-        } while (current = current.parent);
-      }
+        }
+        while (current = current.parent);
+      });
     }
   };
 
