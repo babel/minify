@@ -44,6 +44,7 @@
     "jest-cli": "^14.1.0",
     "lerna": "2.0.0-beta.24",
     "through2": "^2.0.1",
-    "uglify-js": "^2.6.2"
+    "uglify-js": "^2.6.2",
+    "google-closure-compiler-js": "^20160713.0.3"
   }
 }

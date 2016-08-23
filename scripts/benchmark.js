@@ -10,6 +10,7 @@ const babel  = require('babel-core');
 const zlib   = require('zlib');
 const fs     = require('fs');
 const path   = require('path');
+const compile = require('google-closure-compiler-js').compile;
 
 const filename = process.argv[2];
 if (!filename) {
@@ -49,6 +50,8 @@ const code = fs.readFileSync(filename, 'utf8');
 const gzippedCode = zlib.gzipSync(code);
 
 function test(name, callback) {
+  console.log('testing', name);
+
   const start = Date.now();
   const result = callback(code);
   const end = Date.now();
@@ -111,6 +114,14 @@ test('closure', function (code, callback) {
   return child.execSync(
     'java -jar ' + path.join(__dirname, 'gcc.jar') + ' --jscomp_off=uselessCode --js ' + filename
   );
+});
+
+test('closure js', function (code, callback) {
+  const flags = {
+    jsCode: [{ source: code }],
+  };
+  const out = compile(flags);
+  return out.compiledCode;
 });
 
 test('uglify', function (code, callback) {
