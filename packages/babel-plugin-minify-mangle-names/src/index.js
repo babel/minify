@@ -93,9 +93,13 @@ module.exports = ({ types: t }) => {
           // => var aa, a, b ,c;
           // instead of
           // => var aa, ab, ...;
-          function resetNext() {
-            i = 0;
-          }
+          // TODO:
+          // Re-enable after enabling this feature
+          // This doesn't work right now as we are concentrating
+          // on performance improvements
+          // function resetNext() {
+          //   i = 0;
+          // }
 
           Object
             .keys(scope.getAllBindings())
@@ -113,14 +117,19 @@ module.exports = ({ types: t }) => {
               do {
                 next = getNext();
               } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
-              resetNext();
+              // TODO:
+              // re-enable this
+              // resetNext();
               mangler.rename(scope, b, next);
               scope.getBinding(next).renamed = true;
             });
         }
       });
 
-      this.updateReferences();
+      // TODO:
+      // re-enable
+      // check above
+      // this.updateReferences();
     }
 
     rename(scope, oldName, newName) {
