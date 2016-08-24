@@ -16,6 +16,7 @@ module.exports = ({ types: t }) => {
       this.eval = _eval;
 
       this.unsafeScopes = new Set;
+      this.visitedScopes = new Set;
 
       this.referencesToUpdate = new Map;
     }
@@ -82,6 +83,9 @@ module.exports = ({ types: t }) => {
 
           if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
 
+          if (mangler.visitedScopes.has(scope)) return;
+          mangler.visitedScopes.add(scope);
+
           let i = 0;
           function getNext() {
             return mangler.charset.getIdentifier(i++);
@@ -108,7 +112,6 @@ module.exports = ({ types: t }) => {
 
               return scope.hasOwnBinding(b)
                 && !binding.path.isLabeledStatement()
-                && !binding.renamed
                 && !mangler.isBlacklist(b, mangler.blacklist)
                 && (mangler.keepFnames ? !isFunction(binding.path) : true);
             })
@@ -120,8 +123,7 @@ module.exports = ({ types: t }) => {
               // TODO:
               // re-enable this
               // resetNext();
-              mangler.rename(scope, b, next);
-              scope.getBinding(next).renamed = true;
+              mangler.renameNew(scope, b, next);
             });
         }
       });
@@ -130,6 +132,48 @@ module.exports = ({ types: t }) => {
       // re-enable
       // check above
       // this.updateReferences();
+    }
+
+    renameNew(scope, oldName, newName) {
+      const binding = scope.getBinding(oldName);
+
+      // rename at the declaration level
+      binding.identifier.name = newName;
+
+      const {bindings} = scope;
+      bindings[newName] = binding;
+      delete bindings[oldName];
+
+      // update all constant violations & redeclarations
+      const violations = binding.constantViolations;
+      for (let i = 0; i < violations.length; i++) {
+        if (violations[i].isLabeledStatement()) continue;
+
+        const bindings = violations[i].getBindingIdentifiers();
+        Object
+          .keys(bindings)
+          .map((b) => {
+            bindings[b].name = newName;
+          });
+      }
+
+      // update all referenced places
+      const refs = binding.referencePaths;
+      for (let i = 0; i < refs.length; i++) {
+        const path = refs[i];
+        const {node} = path;
+        if (!path.isIdentifier()) {
+          // if this occurs, then it is
+          // probably an upstream bug (in babel)
+          throw new Error("Unexpected " + path.node.name + ". Expected an Identifier");
+        }
+        if (!isLabelIdentifier(path)) {
+          node.name = newName;
+        }
+      }
+
+      // update references
+      // TODO
     }
 
     rename(scope, oldName, newName) {
@@ -250,4 +294,11 @@ function isFunction(path) {
     || path.isFunctionDeclaration()
     || path.isClassExpression()
     || path.isClassDeclaration();
+}
+
+function isLabelIdentifier(path) {
+  const {node} = path;
+  return path.parentPath.isLabeledStatement({ label: node })
+    || path.parentPath.isBreakStatement({ label: node })
+    || path.parentPath.isContinueStatement({ label: node });
 }
