@@ -28,7 +28,7 @@ This is simple wrapper around the regular `babel-cli` and thus takes in the same
 `babili src -d lib`
 
 Equivalent to:
-`babel src -d lib --presets=minify`
+`babel src -d lib --presets=babili`
 
 ## [Babel preset](http://babeljs.io/docs/plugins/#presets)
 
