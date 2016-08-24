@@ -165,7 +165,7 @@ module.exports = ({ types: t }) => {
         if (!path.isIdentifier()) {
           // if this occurs, then it is
           // probably an upstream bug (in babel)
-          throw new Error("Unexpected " + path.node.name + ". Expected an Identifier");
+          throw new Error("Unexpected " + path.node.type + ". Expected an Identifier");
         }
         if (!isLabelIdentifier(path)) {
           node.name = newName;
