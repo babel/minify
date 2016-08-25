@@ -4,6 +4,7 @@ module.exports = function({ types: t }) {
   const flipExpressions = require("babel-helper-flip-expressions")(t);
 
   return {
+    name: "minify-guarded-expressions",
     visitor: {
       // Convert guarded expressions
       // !a && b() --> a || b();

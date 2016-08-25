@@ -100,6 +100,7 @@ function replaceObject(t, path) {
 
 module.exports = function({ types: t }) {
   return {
+    name: "minify-type-constructors",
     visitor: {
       CallExpression(path) {
         const { node } = path;

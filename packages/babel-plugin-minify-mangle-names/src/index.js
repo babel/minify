@@ -177,6 +177,7 @@ module.exports = ({ types: t }) => {
   };
 
   return {
+    name: "minify-mangle-names",
     visitor: {
       Program(path) {
         // If the source code is small then we're going to assume that the user

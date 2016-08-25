@@ -617,6 +617,7 @@ module.exports = ({ types: t, traverse }) => {
   };
 
   return {
+    name: "minify-dead-code-elimination",
     visitor: {
       Program(path, {
         opts: {

@@ -2,6 +2,7 @@
 
 module.exports = function() {
   return {
+    name: "transform-merge-sibling-variables",
     visitor: {
       VariableDeclaration: {
         enter: [

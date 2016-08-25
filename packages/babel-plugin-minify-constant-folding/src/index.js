@@ -4,6 +4,7 @@ module.exports = ({ types: t, traverse }) => {
   const seen = Symbol("seen");
 
   return {
+    name: "minify-constant-folding",
     visitor: {
 
       // Evaluate string expressions that are next to each other
