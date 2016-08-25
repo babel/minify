@@ -3,6 +3,7 @@
 module.exports = function({ types: t }) {
   const INFINITY = t.binaryExpression("/", t.numericLiteral(1), t.numericLiteral(0));
   return {
+    name: "minify-infinity",
     visitor: {
       // Infinity -> 1 / 0
       Identifier(path) {

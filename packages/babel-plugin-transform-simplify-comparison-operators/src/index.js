@@ -2,6 +2,7 @@
 
 module.exports = function() {
   return {
+    name: "transform-simplify-comparison-operators",
     visitor: {
       // simplify comparison operations if we're 100% certain
       // that each value will always be of the same type

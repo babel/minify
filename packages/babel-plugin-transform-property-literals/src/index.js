@@ -2,6 +2,7 @@
 
 module.exports = function({ types: t }) {
   return {
+    name: "transform-property-literals",
     visitor: {
       // { 'foo': 'bar' } -> { foo: 'bar' }
       ObjectProperty: {

@@ -2,6 +2,7 @@
 
 module.exports = function({ types: t }) {
   return {
+    name: "transform-node-env-inline",
     visitor: {
       MemberExpression(path) {
         if (path.matchesPattern("process.env.NODE_ENV")) {

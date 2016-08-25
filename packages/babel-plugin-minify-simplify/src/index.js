@@ -29,6 +29,7 @@ module.exports = ({ types: t }) => {
   const and = (a, b) => t.logicalExpression("&&", a, b);
 
   return {
+    name: "minify-simplify",
     visitor: {
       Statement: {
         exit(path) {

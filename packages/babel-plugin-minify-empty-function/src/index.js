@@ -23,6 +23,7 @@ module.exports = ({ types: t }) => {
   };
 
   return {
+    name: "minify-empty-function",
     visitor: {
       // Unfortunately we have to do it in a seperate pass to ensure that
       // the expression statements are removed otherwise the calls may

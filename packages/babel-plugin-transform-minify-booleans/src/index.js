@@ -5,6 +5,7 @@ module.exports = function({ types: t }) {
   const FALSE = t.unaryExpression("!", t.numericLiteral(1), true);
 
   return {
+    name: "transform-minify-booleans",
     visitor: {
       // shorten booleans to a negation
       // true -> !0

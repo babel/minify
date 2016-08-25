@@ -34,6 +34,7 @@ module.exports = ({ types: t }) => {
   };
 
   return {
+    name: "minify-replace",
     visitor: {
       Program(path) {
         /**

@@ -4,6 +4,7 @@ module.exports = function({ types: t }) {
   const isVoid0 = require("babel-helper-is-void-0")(t);
 
   return {
+    name: "minify-flip-comparisons",
     visitor: {
       // flip comparisons with a pure right hand value, this ensures
       // consistency with comparisons and increases the length of
