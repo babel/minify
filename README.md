@@ -117,7 +117,7 @@ uglify  21.82kB 220%    7.32kB 169%     1ms        359ms
 closure 21.67kB 223%    7.37kB 167%     2ms        3455ms
 ```
 
-Run with: ``./scripts/benchmark.js ./scripts/fixtures/backbone.js`
+Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
 
 React:
 ```
@@ -127,7 +127,7 @@ closure 171.46kB 265%    52.97kB 168%     12ms       9785ms
 uglify  176.41kB 255%    53.18kB 167%     12ms       2187ms
 ```
 
-Run with: ``./scripts/benchmark.js ./scripts/fixtures/react.js`
+Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
 
 jQuery:
 ```
@@ -137,4 +137,4 @@ babel   93.63kB 220%    32.95kB 156%     8ms        3623ms
 closure 94.23kB 218%    33.38kB 153%     10ms       9001ms
 ```
 
-Run with: ``./scripts/benchmark.js ./scripts/fixtures/jquery.js`
+Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`

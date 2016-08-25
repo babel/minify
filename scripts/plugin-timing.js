@@ -15,6 +15,7 @@ class Benchmark {
     }
   } = {}) {
     this.events = {};
+    this.visits = {};
     this.results = {};
     this.now = now;
     this.diff = diff;
@@ -22,8 +23,10 @@ class Benchmark {
   push(name) {
     if (!hop(this.events, name)) {
       this.events[name] = [];
+      this.visits[name] = 0;
     }
     this.events[name].push(this.now());
+    this.visits[name]++;
   }
   pop(name) {
     if (hop(this.events, name) && (this.events[name].length > 0)) {
@@ -59,7 +62,7 @@ function run (file) {
   });
 
   const table = new Table({
-    head: ["pluginAlias", "time(ms)"],
+    head: ["pluginAlias", "time(ms)", "# visits", "time/visit(ms)"],
     chars: {
       top: "",
       "top-mid": "" ,
@@ -86,13 +89,13 @@ function run (file) {
 
   const results = Object
     .keys(b.results)
-    .map((name) => [name, b.results[name].aggregate])
+    .map((name) => [name, b.results[name].aggregate, b.visits[name]])
     .sort((a, b) => {
       if (a[1] < b[1]) return 1;
       if (a[1] > b[1]) return -1;
       return 0;
     })
-    .map((arr) => [arr[0], arr[1].toFixed(3)]);
+    .map((arr) => [arr[0], arr[1].toFixed(3), arr[2], (arr[1]/arr[2]).toFixed(3)]);
 
   table.push(...results);
   console.log(table.toString());
