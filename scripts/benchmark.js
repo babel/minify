@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 Error.stackTraceLimit = Infinity;
 
-const uglify = require('uglify-js');
-const Table  = require('cli-table');
-const child  = require('child_process');
-const bytes  = require('bytes');
-const chalk  = require('chalk');
-const babel  = require('babel-core');
-const zlib   = require('zlib');
-const fs     = require('fs');
-const path   = require('path');
-const compile = require('google-closure-compiler-js').compile;
+const uglify = require("uglify-js");
+const Table  = require("cli-table");
+const child  = require("child_process");
+const bytes  = require("bytes");
+const chalk  = require("chalk");
+const babel  = require("babel-core");
+const zlib   = require("zlib");
+const fs     = require("fs");
+const path   = require("path");
+const compile = require("google-closure-compiler-js").compile;
 
 const filename = process.argv[2];
 if (!filename) {
@@ -50,7 +50,7 @@ const code = fs.readFileSync(filename, "utf8");
 const gzippedCode = zlib.gzipSync(code);
 
 function test(name, callback) {
-  console.log('testing', name);
+  console.log("testing", name);
 
   const start = Date.now();
   const result = callback(code);
@@ -76,7 +76,7 @@ function test(name, callback) {
   });
 }
 
-test('babili', function (code) {
+test("babili", function (code) {
   return babel.transform(code, {
     sourceType: "script",
     presets: [require("../packages/babel-preset-babili")],
@@ -84,13 +84,13 @@ test('babili', function (code) {
   }).code;
 });
 
-test('closure', function (code) {
+test("closure", function (/*code*/) {
   return child.execSync(
-    'java -jar ' + path.join(__dirname, 'gcc.jar') + ' --jscomp_off=uselessCode --js ' + filename
+    "java -jar " + path.join(__dirname, "gcc.jar") + " --jscomp_off=uselessCode --js " + filename
   ).toString();
 });
 
-test('closure js', function (code) {
+test("closure js", function (code) {
   const flags = {
     jsCode: [{ source: code }],
   };
@@ -98,7 +98,7 @@ test('closure js', function (code) {
   return out.compiledCode;
 });
 
-test('uglify', function (code) {
+test("uglify", function (code) {
   return uglify.minify(code, {
     fromString: true,
   }).code;

@@ -137,4 +137,4 @@ module.exports = class Renamer {
       this.maybeConvertFromClassFunctionExpression(parentDeclar);
     }
   }
-}
+};
