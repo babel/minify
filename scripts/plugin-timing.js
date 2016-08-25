@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const babel = require("babel-core");
 const preset = require("../packages/babel-preset-babili");
 const fs = require("fs");
