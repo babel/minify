@@ -9,7 +9,6 @@
   "license": "MIT",
   "main": "lib/index.js",
   "bin": {
-    "babel-minify": "./bin/babili.js",
     "babili": "./bin/babili.js"
   },
   "keywords": [
