@@ -110,7 +110,7 @@ module.exports = class Renamer {
     path.replaceWith(t.assignmentExpression("=", t.identifier(this.newName), path.node));
   }
 
-  rename(block ) {
+  rename(block) {
     let { binding, oldName, newName } = this;
     let { scope, path } = binding;
 
