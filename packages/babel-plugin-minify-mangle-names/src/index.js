@@ -146,7 +146,7 @@ module.exports = ({ types: t }) => {
     }
 
     updateReferences() {
-      var mangler = this;
+      const mangler = this;
 
       this.program.traverse({
         Identifier(path) {
@@ -174,7 +174,7 @@ module.exports = ({ types: t }) => {
         while (current = current.parent);
       });
     }
-  };
+  }
 
   return {
     visitor: {
