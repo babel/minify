@@ -88,13 +88,14 @@ test("babili", function (code) {
 
 test("closure", function (/*code*/) {
   return child.execSync(
-    "java -jar " + path.join(__dirname, "gcc.jar") + " --jscomp_off=uselessCode --js " + filename
+    "java -jar " + path.join(__dirname, "gcc.jar") + " --env=CUSTOM --jscomp_off=* --js " + filename
   ).toString();
 });
 
 test("closure js", function (code) {
   const flags = {
-    jsCode: [{ source: code }],
+    jsCode: [{ src: code }],
+    env: "CUSTOM",
   };
   const out = compile(flags);
   return out.compiledCode;
