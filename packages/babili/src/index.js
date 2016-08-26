@@ -1,6 +1,6 @@
 import child from "child_process";
 
-const args = process.argv.slice(2).concat(["--presets=minify"]);
+const args = process.argv.slice(2).concat(["--presets=babili"]);
 
 const opts = {
   stdio: "inherit",
