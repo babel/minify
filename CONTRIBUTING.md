@@ -23,6 +23,31 @@ $ npm run watch
 to have Babel build itself then incrementally build files on change.
 
 To run tests:
+
 ```sh
 $ npm test
+```
+
+To run lint:
+
+```sh
+$ npm run lint
+```
+
+To run lint autofixes:
+
+```sh
+$ npm run fix
+```
+
+To run current benchmarks on a file:
+
+```sh
+$ ./scripts/benchmark.js file.js
+```
+
+To run current plugin timing on a file:
+
+```sh
+$ ./scripts/plugin-timing.js file.js
 ```
