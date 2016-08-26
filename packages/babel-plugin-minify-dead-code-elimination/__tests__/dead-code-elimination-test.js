@@ -689,8 +689,8 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       if (!a) {
-          foo();
-        }
+        foo();
+      }
       if (a) {
         foo();
       }
@@ -1558,8 +1558,8 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       if (!baz) {
-          console.log('foo' + 'bar');
-        }
+        console.log('foo' + 'bar');
+      }
     `);
     expect(transform(source)).toBe(expected);
   });
