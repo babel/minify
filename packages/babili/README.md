@@ -17,9 +17,6 @@ $ npm install babili --save-dev
 babili src -d lib
 # local
 ./node_modules/.bin/babili src -d lib
-# alias
-./node_modules/.bin/babel-minify src -d lib
-
 ```
 
 Equivalent to:
