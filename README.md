@@ -134,6 +134,7 @@ Add to your `.babelrc`'s plugins array.
 | [`babel-plugin-transform-remove-debugger`](/packages/babel-plugin-transform-remove-debugger) | [![npm](https://img.shields.io/npm/v/babel-plugin-transform-remove-debugger.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-plugin-transform-remove-debugger) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-plugin-transform-remove-debugger)](https://david-dm.org/babel/babili?path=packages/babel-plugin-transform-remove-debugger) |
 
 ## Benchmarks
+> Bootstrap: `npm run bootstrap`
 
 > Running the benchmarks: `./scripts/benchmark.js file.js`
 
