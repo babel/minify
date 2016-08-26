@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-empty-function",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-empty-function",
@@ -12,7 +12,7 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-remove-or-void": "^0.0.0"
+    "babel-helper-remove-or-void": "^0.0.1"
   },
   "devDependencies": {}
 }

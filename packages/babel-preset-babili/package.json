@@ -1,6 +1,6 @@
 {
   "name": "babel-preset-babili",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-preset-babili",
@@ -12,21 +12,21 @@
     "babel-preset"
   ],
   "dependencies": {
-    "babel-plugin-minify-constant-folding": "^0.0.0",
-    "babel-plugin-minify-dead-code-elimination": "^0.0.0",
-    "babel-plugin-minify-flip-comparisons": "^0.0.0",
-    "babel-plugin-minify-guarded-expressions": "^0.0.0",
-    "babel-plugin-minify-infinity": "^0.0.0",
-    "babel-plugin-minify-mangle-names": "^0.0.0",
-    "babel-plugin-minify-replace": "^0.0.0",
-    "babel-plugin-minify-simplify": "^0.0.0",
-    "babel-plugin-minify-type-constructors": "^0.0.0",
-    "babel-plugin-transform-member-expression-literals": "^6.8.0",
-    "babel-plugin-transform-merge-sibling-variables": "^6.8.0",
-    "babel-plugin-transform-minify-booleans": "^6.8.0",
-    "babel-plugin-transform-property-literals": "^6.8.0",
-    "babel-plugin-transform-simplify-comparison-operators": "^6.8.0",
-    "babel-plugin-transform-undefined-to-void": "^6.8.0"
+    "babel-plugin-minify-constant-folding": "^0.0.1",
+    "babel-plugin-minify-dead-code-elimination": "^0.0.1",
+    "babel-plugin-minify-flip-comparisons": "^0.0.1",
+    "babel-plugin-minify-guarded-expressions": "^0.0.1",
+    "babel-plugin-minify-infinity": "^0.0.1",
+    "babel-plugin-minify-mangle-names": "^0.0.1",
+    "babel-plugin-minify-replace": "^0.0.1",
+    "babel-plugin-minify-simplify": "^0.0.1",
+    "babel-plugin-minify-type-constructors": "^0.0.1",
+    "babel-plugin-transform-member-expression-literals": "^0.0.1",
+    "babel-plugin-transform-merge-sibling-variables": "^0.0.1",
+    "babel-plugin-transform-minify-booleans": "^0.0.1",
+    "babel-plugin-transform-property-literals": "^0.0.1",
+    "babel-plugin-transform-simplify-comparison-operators": "^0.0.1",
+    "babel-plugin-transform-undefined-to-void": "^0.0.1"
   },
   "devDependencies": {}
 }

@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-remove-debugger",
-  "version": "6.8.0",
+  "version": "0.0.1",
   "description": "Remove debugger statements",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-remove-debugger",
