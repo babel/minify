@@ -15,6 +15,34 @@
 
 - babili is consumable via API, CLI, or babel preset.
 
+## Why
+Current tools don't support targeting the latest version of ecmascript. (yet)
+- Babili can because it is just a set of babel plugins and babel already understands new syntax with our parser [babylon](https://github.com/babel/babylon).
+- When it's possible to only target browsers that support newer ES features, code sizes can be smaller because you don't have to transpile and then minify.
+
+```js
+// Example ES2015 Code
+class Mangler {
+  constructor(program) {
+    this.program = program;
+  }
+}
+new Mangler(); // without this it would just output nothing since Mangler isn't used
+```
+
+Before
+```js
+// ES2015+ code -> Babel -> Uglify -> Minified ES5 Code
+var Mangler=function a(b){_classCallCheck(this,a),this.program=b};Mangler();
+```
+
+After
+
+```js
+// ES2015+ code -> Babili -> Minified ES2015+ Code
+class a{constructor(b){this.program=b}}new a;
+```
+
 ## [CLI](http://babeljs.io/docs/usage/cli/)
 
 | Package | Version | Dependencies |
