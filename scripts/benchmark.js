@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+'use strict';
+
 Error.stackTraceLimit = Infinity;
 
 const uglify = require("uglify-js");
