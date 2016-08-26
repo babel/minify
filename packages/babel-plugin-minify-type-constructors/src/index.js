@@ -34,7 +34,7 @@ function replaceArray(t, path) {
           "ArrowFunctionExpression",
           "ClassExpression"
         ];
-        if (transformables.includes(arg.node.type)) {
+        if (transformables.indexOf(arg.node.type) !== -1) {
           // Array([]), Array({})
           // Array(()=>{}), Array(class{}), Array(function(){})
           path.replaceWith(t.arrayExpression([arg.node]));
