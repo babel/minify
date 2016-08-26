@@ -111,30 +111,33 @@ Add to your `.babelrc`'s plugins array.
 
 Backbone.js:
 ```
-        raw     raw win gzip   gzip win parse time run
-babel   21.74kB 222%    7.28kB 170%     2ms        831ms
-uglify  21.82kB 220%    7.32kB 169%     1ms        359ms
-closure 21.67kB 223%    7.37kB 167%     2ms        3455ms
+           raw     raw win gzip   gzip win parse time run
+uglify     21.79kB 221%    7.29kB 169%     2ms        379ms
+closure    21.67kB 223%    7.37kB 167%     3ms        4083ms
+babili     21.62kB 223%    7.4kB  165%     2ms        1072ms
+closure js 29.45kB 137%    8.07kB 144%     1ms        5822ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
 
 React:
 ```
-        raw      raw win gzip    gzip win parse time run
-babel   176.09kB 256%    52.88kB 168%     12ms       3506ms
-closure 171.46kB 265%    52.97kB 168%     12ms       9785ms
-uglify  176.41kB 255%    53.18kB 167%     12ms       2187ms
+          raw      raw win gzip    gzip win parse time run
+closure    171.46kB 265%    52.97kB 168%     16ms       9481ms
+uglify     176.36kB 255%    53.13kB 167%     13ms       1552ms
+babili     177.28kB 253%    55.18kB 157%     14ms       4403ms
+closure js 229.62kB 173%    58.57kB 142%     14ms       16834ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
 
 jQuery:
 ```
-        raw     raw win gzip    gzip win parse time run
-uglify  94.4kB  217%    32.82kB 157%     8ms        1449ms
-babel   93.63kB 220%    32.95kB 156%     8ms        3623ms
-closure 94.23kB 218%    33.38kB 153%     10ms       9001ms
+           raw      raw win gzip    gzip win parse time run
+uglify     94.27kB  218%    32.78kB 158%     9ms        1388ms
+closure    94.23kB  218%    33.38kB 153%     20ms       10805ms
+babili     101.52kB 195%    35kB    141%     10ms       6045ms
+closure js 135.64kB 121%    37.91kB 123%     10ms       16360ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
