@@ -51,7 +51,7 @@ You'll most likely want to use it only in the production environment. Check out 
   "presets": ["es2015"],
   "env": {
     "production": {
-      "presets": ["minify"]
+      "presets": ["babili"]
     }
   }
 }
