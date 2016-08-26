@@ -43,7 +43,7 @@
     "gulp-newer": "^1.1.0",
     "gulp-util": "^3.0.7",
     "jest-cli": "^14.1.0",
-    "lerna": "2.0.0-beta.24",
+    "lerna": "2.0.0-beta.26",
     "through2": "^2.0.1",
     "uglify-js": "^2.7.3"
   }
