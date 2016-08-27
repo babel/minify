@@ -1,5 +1,3 @@
-// const Renamer = require("./renamer");
-
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
@@ -175,24 +173,6 @@ module.exports = ({ types: t }) => {
       // update references
       // TODO
     }
-
-    // Old rename
-    // Suspect some bugs in new rename
-    //
-    // Will be removed once it is tested well
-    //
-    // renameOld(scope, oldName, newName) {
-    //   const binding = scope.getBinding(oldName);
-    //   if (!binding) {
-    //     throw new Error("Binding not found - " + oldName);
-    //   }
-    //   new Renamer(binding, oldName, newName).rename();
-
-    //   this.referencesToUpdate.set(oldName, {
-    //     scope,
-    //     referenced: false
-    //   });
-    // }
 
     // updateReferences() {
     //   const mangler = this;
