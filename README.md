@@ -16,8 +16,8 @@
 - babili is consumable via API, CLI, or babel preset.
 
 ## Why
-Current tools don't support targeting the latest version of ecmascript. (yet)
-- Babili can because it is just a set of babel plugins and babel already understands new syntax with our parser [babylon](https://github.com/babel/babylon).
+Current tools don't support targeting the latest version of ECMAScript. (yet)
+- Babili can because it is just a set of Babel plugins, and Babel already understands new syntax with our parser [Babylon](https://github.com/babel/babylon).
 - When it's possible to only target browsers that support newer ES features, code sizes can be smaller because you don't have to transpile and then minify.
 
 ```js
@@ -64,7 +64,7 @@ Equivalent to:
 |--------|-------|------------|
 | [`babel-preset-babili`](/packages/babel-preset-babili) | [![npm](https://img.shields.io/npm/v/babel-preset-babili.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-preset-babili) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-preset-babili)](https://david-dm.org/babel/babili?path=packages/babel-preset-babili) |
 
-It's a babel preset (like `babel-preset-es2015`).
+It's a Babel preset (like `babel-preset-es2015`).
 
 ### Usage
 
