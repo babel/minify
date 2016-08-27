@@ -4,7 +4,12 @@
  * This one modifies it for one scenario -
  * check the parent of a ReferencedIdentifier and don't rename Labels
  *
+ * This file is no longer used
+ * Will be removed once the new renamer is tested in the wild
+ *
  */
+
+// TODO: Babel-types should be installed
 const t = require("babel-types");
 
 let renameVisitor = {
