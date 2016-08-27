@@ -1,4 +1,4 @@
-const err = new Error("Babili is supported only for babel version >=6.14.0");
+const err = new Error("Babili requires babel-core>=6.14.0. Upgrade babel-core or tools dependent on babel-core to recent versions");
 
 function isVersion(versionStr) {
   const version = versionStr.split(".").map((p) => parseInt(p));
