@@ -64,3 +64,7 @@ require("babel-core").transform("code", {
   plugins: ["minify-dead-code-elimination"]
 });
 ```
+
+## Options
+
++ `keepFnames` - prevent plugin from removing function names. Useful for code depending on `fn.name`
