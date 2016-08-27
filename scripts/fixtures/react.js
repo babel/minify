@@ -4542,7 +4542,6 @@ var ReactClassInterface = {
    *   }
    *
    * @return {ReactComponent}
-   * @nosideeffects
    * @required
    */
   render: SpecPolicy.DEFINE_ONCE,

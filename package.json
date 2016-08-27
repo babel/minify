@@ -37,7 +37,7 @@
     "closure-compiler": "^0.2.12",
     "eslint": "~3.0.0",
     "eslint-config-babel": "^1.0.0",
-    "google-closure-compiler-js": "^20160713.0.3",
+    "google-closure-compiler-js": "^20160822.0.0",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-babel": "^6.1.2",
     "gulp-newer": "^1.1.0",
