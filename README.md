@@ -15,6 +15,8 @@
 
 - babili is consumable via API, CLI, or babel preset.
 
+- Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false)
+
 ## Why
 Current tools don't support targeting the latest version of ECMAScript. (yet)
 - Babili can because it is just a set of Babel plugins, and Babel already understands new syntax with our parser [Babylon](https://github.com/babel/babylon).
