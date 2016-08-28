@@ -2043,4 +2043,20 @@ describe("simplify-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  // https://github.com/babel/babili/issues/115
+  it("should transform impure conditional statements correctly - issue#115", () => {
+    const source = unpad(`
+      (function () {
+        a = x ? true : false;
+        c = 1 ? (this.get(x), a = b, true) : (foo.bar, false);
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        a = !!x, c = 1 ? (this.get(x), a = b, true) : (foo.bar, false);
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
