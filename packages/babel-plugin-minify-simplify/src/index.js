@@ -1352,7 +1352,7 @@ module.exports = ({ types: t }) => {
     }
     if (isNodeOfType(inputPath.node, patternValue)) return true;
     let evalResult = inputPath.evaluate();
-    if (!evalResult.confident) return false;
+    if (!evalResult.confident || !inputPath.isPure()) return false;
     return evalResult.value === patternValue;
   }
 };
