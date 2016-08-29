@@ -34,8 +34,8 @@ new Mangler(); // without this it would just output nothing since Mangler isn't 
 
 Before
 ```js
-// ES2015+ code -> Babel -> Uglify -> Minified ES5 Code
-var Mangler=function a(b){_classCallCheck(this,a),this.program=b};Mangler();
+// ES2015+ code -> Babel -> Babili/Uglify -> Minified ES5 Code
+var a=function a(b){_classCallCheck(this,a),this.program=b};new a;
 ```
 
 After
