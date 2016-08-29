@@ -18,31 +18,25 @@
 - Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false)
 
 ## Why
-Current tools don't support targeting the latest version of ECMAScript. (yet)
+Current tools such as Uglify don't support targeting the latest version of ECMAScript.
 - Babili can because it is just a set of Babel plugins, and Babel already understands new syntax with our parser [Babylon](https://github.com/babel/babylon).
-- When it's possible to only target browsers that support newer ES features, code sizes can be smaller because you don't have to transpile and then minify.
+- Say we're targeting the latest versions of Chrome, Firefox and Safari -- all of which support ES2015 classes. Then, compiling ES2015 classes to a constructor function and prototype methods (ES5) results in more code (and potentially lose any optimizations browsers might have for classes).
 
 ```js
 // Example ES2015 Code
-class Mangler {
-  constructor(program) {
-    this.program = program;
-  }
-}
-new Mangler(); // without this it would just output nothing since Mangler isn't used
+const { op: a, lhs: { op: b }, rhs: c } = getASTNode();
 ```
 
 Before
 ```js
-// ES2015+ code -> Babel -> Uglify -> Minified ES5 Code
-var Mangler=function a(b){_classCallCheck(this,a),this.program=b};Mangler();
+// ES2015+ code -> Babel -> Babili/Uglify -> Minified ES5 Code
+;var _getASTNode=getASTNode(),a=_getASTNode.op,b=_getASTNode.lhs.op,c=_getASTNode.rhs;
 ```
 
 After
-
 ```js
 // ES2015+ code -> Babili -> Minified ES2015+ Code
-class a{constructor(b){this.program=b}}new a;
+const{op:a,lhs:{op:b},rhs:c}=getASTNode();
 ```
 
 ## [CLI](http://babeljs.io/docs/usage/cli/)
