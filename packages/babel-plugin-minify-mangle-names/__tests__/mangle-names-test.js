@@ -4,9 +4,9 @@ const traverse = require("babel-traverse").default;
 const babel    = require("babel-core");
 const unpad    = require("../../../utils/unpad");
 
-function transform(code, options = {}) {
+function transform(code, options = {}, sourceType = "script") {
   return babel.transform(code,  {
-    sourceType: "script",
+    sourceType,
     plugins: [
       [require("../src/index"), options],
     ],
@@ -872,5 +872,35 @@ describe("mangle-names", () => {
       })();
     `);
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle export declarations", () => {
+    const source = unpad(`
+      const foo = 1;
+      export { foo };
+      export const bar = 2;
+      export function baz(bar, foo) {
+        bar();
+        foo();
+      };
+      export default function (bar, baz) {
+        bar();
+        baz();
+      }
+    `);
+    const expected = unpad(`
+      const foo = 1;
+      export { foo };
+      export const bar = 2;
+      export function baz(a, b) {
+        a();
+        b();
+      };
+      export default function (a, b) {
+        a();
+        b();
+      }
+    `);
+    expect(transform(source, {}, "module")).toBe(expected);
   });
 });
