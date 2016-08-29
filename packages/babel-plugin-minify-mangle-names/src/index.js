@@ -163,9 +163,21 @@ module.exports = ({ types: t }) => {
         const path = refs[i];
         const {node} = path;
         if (!path.isIdentifier()) {
-          // if this occurs, then it is
-          // probably an upstream bug (in babel)
-          throw new Error("Unexpected " + path.node.type + ". Expected an Identifier");
+          // Ideally, this should not happen
+          // it happens in these places now -
+          // case 1: Export Statements
+          // This is a bug in babel
+          // https://github.com/babel/babel/pull/3629
+          // case 2: Replacements in other plugins
+          // eg: https://github.com/babel/babili/issues/122
+          // replacement in dce from `x` to `!x` gives referencePath as `!x`
+          path.traverse({
+            ReferencedIdentifier(refPath) {
+              if (refPath.node.name === oldName && refPath.scope === scope) {
+                refPath.node.name = newName;
+              }
+            }
+          });
         }
         if (!isLabelIdentifier(path)) {
           node.name = newName;
