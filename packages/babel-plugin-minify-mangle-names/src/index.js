@@ -169,40 +169,7 @@ module.exports = ({ types: t }) => {
           node.name = newName;
         }
       }
-
-      // update references
-      // TODO
     }
-
-    // updateReferences() {
-    //   const mangler = this;
-
-    //   this.program.traverse({
-    //     Identifier(path) {
-    //       const { node } = path;
-    //       if (
-    //         path.parentPath.isMemberExpression({ property: node }) ||
-    //         path.parentPath.isObjectProperty({key: node})
-    //       ) return;
-
-    //       mangler.referencesToUpdate.forEach((ref, oldName) => {
-    //         if (node.name === oldName) {
-    //           mangler.referencesToUpdate.get(oldName).referenced = true;
-    //         }
-    //       });
-    //     }
-    //   });
-
-    //   this.referencesToUpdate.forEach((ref, oldName) => {
-    //     if (ref.referenced) return;
-
-    //     let current = ref.scope;
-    //     do {
-    //       current.references[oldName] = false;
-    //     }
-    //     while (current = current.parent);
-    //   });
-    // }
   }
 
   return {
