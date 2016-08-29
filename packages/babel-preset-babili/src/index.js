@@ -2,10 +2,7 @@ const err = new Error("Babili requires babel-core>=6.14.0. Upgrade babel-core or
 
 function isVersion(versionStr) {
   const version = versionStr.split(".").map((p) => parseInt(p));
-  if (version[0] >= 6 && version[1] >= 14) {
-    return true;
-  }
-  return false;
+  return version[0] >= 6 && version[1] >= 14;
 }
 
 module.exports = {
