@@ -1,5 +1,3 @@
-const Renamer = require("./renamer");
-
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
@@ -123,7 +121,7 @@ module.exports = ({ types: t }) => {
               // TODO:
               // re-enable this
               // resetNext();
-              mangler.renameNew(scope, b, next);
+              mangler.rename(scope, b, next);
             });
         }
       });
@@ -134,7 +132,7 @@ module.exports = ({ types: t }) => {
       // this.updateReferences();
     }
 
-    renameNew(scope, oldName, newName) {
+    rename(scope, oldName, newName) {
       const binding = scope.getBinding(oldName);
 
       // rename at the declaration level
@@ -171,52 +169,6 @@ module.exports = ({ types: t }) => {
           node.name = newName;
         }
       }
-
-      // update references
-      // TODO
-    }
-
-    rename(scope, oldName, newName) {
-      const binding = scope.getBinding(oldName);
-      if (!binding) {
-        throw new Error("Binding not found - " + oldName);
-      }
-      new Renamer(binding, oldName, newName).rename();
-
-      this.referencesToUpdate.set(oldName, {
-        scope,
-        referenced: false
-      });
-    }
-
-    updateReferences() {
-      const mangler = this;
-
-      this.program.traverse({
-        Identifier(path) {
-          const { node } = path;
-          if (
-            path.parentPath.isMemberExpression({ property: node }) ||
-            path.parentPath.isObjectProperty({key: node})
-          ) return;
-
-          mangler.referencesToUpdate.forEach((ref, oldName) => {
-            if (node.name === oldName) {
-              mangler.referencesToUpdate.get(oldName).referenced = true;
-            }
-          });
-        }
-      });
-
-      this.referencesToUpdate.forEach((ref, oldName) => {
-        if (ref.referenced) return;
-
-        let current = ref.scope;
-        do {
-          current.references[oldName] = false;
-        }
-        while (current = current.parent);
-      });
     }
   }
 
