@@ -178,6 +178,7 @@ module.exports = ({ types: t }) => {
               }
             }
           });
+          return;
         }
         if (!isLabelIdentifier(path)) {
           node.name = newName;
