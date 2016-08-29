@@ -1,6 +1,6 @@
 import child from "child_process";
 
-const args = process.argv.slice(2).concat(["--presets=babili"]);
+const args = process.argv.slice(2).concat(["--presets=babili", "--no-babelrc"]);
 
 const opts = {
   stdio: "inherit",
