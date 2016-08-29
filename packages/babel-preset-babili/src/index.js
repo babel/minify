@@ -29,7 +29,7 @@ module.exports = {
 
 function validateVersion(versionStr) {
   const version = versionStr.split(".");
-  if (!(version[0] === '6' && parseInt(version[1]) >= 14)) {
+  if (!(version[0] === "6" && parseInt(version[1]) >= 14)) {
     throw new Error(
       "Babili requires babel-core>=6.14.0. " +
       "Upgrade babel-core or tools dependent on babel-core to recent versions"
