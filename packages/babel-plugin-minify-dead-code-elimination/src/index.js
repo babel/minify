@@ -723,7 +723,10 @@ module.exports = ({ types: t, traverse }) => {
       return;
     }
 
-    t.toExpression(replacement);
+    // https://github.com/babel/babili/issues/130
+    if (!t.isExpression(replacement)) {
+      t.toExpression(replacement);
+    }
 
     // We don't remove fn name here, we let the FnExpr & ClassExpr visitors
     // check its references and remove unreferenced ones

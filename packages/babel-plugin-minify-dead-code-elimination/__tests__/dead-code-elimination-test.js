@@ -1960,4 +1960,19 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // https://github.com/babel/babili/issues/130
+  if("should not convert expression to expression during replace issue#130", () => {
+    const source = unpad(`
+      function outer() {
+        const inner = (d) => d.x;
+        return inner;
+      }
+    `);
+    const expected = unpad(`
+      function outer() {
+        return d => d.x;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
