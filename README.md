@@ -58,7 +58,7 @@ This is simple wrapper around the regular `babel-cli` and thus takes in the same
 `babili src -d lib`
 
 Equivalent to:
-`babel src -d lib --presets=babili`
+`babel src -d lib --presets=babili --no-babelrc`
 
 ## [Babel preset](http://babeljs.io/docs/plugins/#presets)
 
