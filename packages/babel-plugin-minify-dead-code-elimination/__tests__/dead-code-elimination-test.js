@@ -1961,7 +1961,7 @@ describe("dce-plugin", () => {
   });
 
   // https://github.com/babel/babili/issues/130
-  if("should not convert expression to expression during replace issue#130", () => {
+  it("should not convert expression to expression during replace issue#130", () => {
     const source = unpad(`
       function outer() {
         const inner = (d) => d.x;
