@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const plugin = require("../src");
+const plugin = require("../src/index");
 const testUtils = require("../../../utils/test");
 
 const transform = testUtils.transformer(plugin);
@@ -8,6 +8,7 @@ const transformModule = testUtils.transformer(plugin, {
   sourceType: "module"
 });
 const transformWithBlockScoping = testUtils.transformerWithBlockScoping(plugin);
+const transformWithES2015 = testUtils.transformerWithES2015(plugin);
 
 describe("mangle-names", () => {
   it("should not mangle names in the global namespace", () => {
@@ -18,28 +19,20 @@ describe("mangle-names", () => {
   });
 
   it("should mangle names", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         var xxx = 1;
         if (xxx) {
           console.log(xxx);
         }
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var a = 1;
-        if (a) {
-          console.log(a);
-        }
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle name collisions", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         var x = 2;
         var xxx = 1;
@@ -47,22 +40,13 @@ describe("mangle-names", () => {
           console.log(xxx + x);
         }
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var a = 2;
-        var b = 1;
-        if (b) {
-          console.log(b + a);
-        }
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should be fine with shadowing", () => {
-    const source = unpad(`
+    const source = `
       var a = 1;
       function foo() {
         var xxx = 1;
@@ -70,22 +54,13 @@ describe("mangle-names", () => {
           console.log(xxx);
         }
       }
-    `);
-    const expected = unpad(`
-      var a = 1;
-      function foo() {
-        var b = 1;
-        if (b) {
-          console.log(b);
-        }
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should not shadow outer references", () => {
-    const source = unpad(`
+    const source = `
       function bar() {
         function foo(a, b, c) {
           lol(a,b,c);
@@ -93,84 +68,51 @@ describe("mangle-names", () => {
 
         function lol() {}
       }
-    `);
-    const expected = unpad(`
-      function bar() {
-        function d(f, g, h) {
-          e(f, g, h);
-        }
+    `;
 
-        function e() {}
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should mangle args", () => {
-    const source = unpad(`
+    const source = `
       function foo(xxx) {
         if (xxx) {
           console.log(xxx);
         }
       }
-    `);
-    const expected = unpad(`
-      function foo(a) {
-        if (a) {
-          console.log(a);
-        }
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should ignore labels", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         meh: for (;;) {
           continue meh;
         }
       }
-    `);
+    `;
 
-    const expected = unpad(`
-      function foo() {
-        meh: for (;;) {
-          continue meh;
-        }
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should not have labels conflicting with bindings", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         meh: for (;;) {
           var meh;
           break meh;
         }
       }
-    `);
+    `;
 
-    const expected = unpad(`
-      function foo() {
-        meh: for (;;) {
-          var a;
-          break meh;
-        }
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   // https://phabricator.babeljs.io/T6957
   xit("labels should not shadow bindings", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         var meh;
         meh: for (;;) {
@@ -178,23 +120,13 @@ describe("mangle-names", () => {
         }
         return meh;
       }
-    `);
+    `;
 
-    const expected = unpad(`
-      function foo() {
-        var a;
-        meh: for (;;) {
-          break meh;
-        }
-        return a;
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should be order independent", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         function bar(aaa, bbb, ccc) {
           baz(aaa, bbb, ccc);
@@ -205,26 +137,13 @@ describe("mangle-names", () => {
         }
         bar();
       }
-    `);
+    `;
 
-    const expected = unpad(`
-      function foo() {
-        function a(c, d, e) {
-          b(c, d, e);
-        }
-        function b() {
-          var c = who();
-          c.bam();
-        }
-        a();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should be order independent 2", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         (function bar() {
           bar();
@@ -234,25 +153,13 @@ describe("mangle-names", () => {
           };
         })();
       }
-    `);
+    `;
 
-    const expected = unpad(`
-      function foo() {
-        (function a() {
-          a();
-          return function () {
-            var b = wow();
-            b.woo();
-          };
-        })();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle only think in function scopes", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         function xx(bar, baz) {
           if (1) {
@@ -261,23 +168,13 @@ describe("mangle-names", () => {
         }
         function yy(){}
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a(c, d) {
-          if (1) {
-            b(c, d);
-          }
-        }
-        function b() {}
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should be fine with shadowing 2", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         function xx(bar, baz) {
           return function(boo, foo) {
@@ -286,23 +183,13 @@ describe("mangle-names", () => {
         }
         function yy(){}
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a(c, d) {
-          return function (e, f) {
-            c(e, f);
-          };
-        }
-        function b() {}
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should not be confused by scopes", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         function bar() {
           var baz;
@@ -312,24 +199,13 @@ describe("mangle-names", () => {
         }
         function bam() {}
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a() {
-          var c;
-          if (c) {
-            b();
-          }
-        }
-        function b() {}
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should not be confused by scopes (closures)", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         function bar(baz) {
           return function() {
@@ -338,80 +214,49 @@ describe("mangle-names", () => {
         }
         function bam() {}
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a(c) {
-          return function () {
-            b();
-          };
-        }
-        function b() {}
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle recursion", () => {
-    const source = unpad(`
+    const source = `
       function bar() {
         function foo(a, b, c) {
           foo(a,b,c);
         }
       }
-    `);
-    const expected = unpad(`
-      function bar() {
-        function d(e, f, g) {
-          d(e, f, g);
-        }
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle global name conflict", () => {
-    const source = unpad(`
+    const source = `
       function e() {
         function foo() {
           b = bar();
         }
         function bar() {}
       }
-    `);
-    const expected = unpad(`
-      function e() {
-        function a() {
-          b = c();
-        }
-        function c() {}
-      }
-    `);
+    `;
 
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle global name", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         var bar = 1;
         var baz = 2;
       }
-    `);
+    `;
 
-    const expected = unpad(`
-      function foo() {
-        var bar = 1;
-        var a = 2;
-      }
-    `);
-    expect(transform(source, { blacklist: {foo: true, bar: true }})).toBe(expected);
+    expect(transform(source, { blacklist: {foo: true, bar: true }})).toMatchSnapshot();
   });
 
   it("should handle deeply nested paths with no bindings", () => {
-    const source = unpad(`
+    const source = `
       function xoo() {
         function foo(zz, xx, yy) {
           function bar(zip, zap, zop) {
@@ -424,44 +269,24 @@ describe("mangle-names", () => {
           }
         }
       }
-    `);
-    const expected = unpad(`
-      function xoo() {
-        function a(b, c, d) {
-          function e(f, g, h) {
-            return function (i) {
-              g();
-              return function () {
-                f();
-              };
-            };
-          }
-        }
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle try/catch", () => {
-    const source = unpad(`
+    const source = `
       function xoo() {
         var e;
         try {} catch (e) {
 
         }
       }
-    `);
-    const expected = unpad(`
-      function xoo() {
-        var a;
-        try {} catch (b) {}
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should not mangle vars in scope with eval" , () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         var inScopeOuter = 1;
         (function () {
@@ -472,42 +297,23 @@ describe("mangle-names", () => {
           })();
         })();
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var inScopeOuter = 1;
-        (function () {
-          var inScopeInner = 2;
-          eval("inScopeInner + inScopeOuter");
-          (function () {
-            var a = 1;
-          })();
-        })();
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should mangle names with local eval bindings", () => {
-    const source = unpad(`
+    const source = `
       function eval() {}
       function foo() {
         var bar = 1;
         eval('...');
       }
-    `);
-    const expected = unpad(`
-      function eval() {}
-      function foo() {
-        var a = 1;
-        eval('...');
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should mangle names with option eval = true", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         var inScopeOuter = 1;
         (function () {
@@ -518,24 +324,12 @@ describe("mangle-names", () => {
           })();
         })();
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var a = 1;
-        (function () {
-          var b = 2;
-          eval("...");
-          (function () {
-            var c = 1;
-          })();
-        })();
-      }
-    `);
-    expect(transform(source, { eval: true })).toBe(expected);
+    `;
+    expect(transform(source, { eval: true })).toMatchSnapshot();
   });
 
   it("should integrate with block scoping plugin", () => {
-    const srcTxt = unpad(`
+    const source = `
       function f(x) {
         for (let i = 0; i; i++) {
           let n;
@@ -545,43 +339,13 @@ describe("mangle-names", () => {
           g(() => n);
         }
       }
-    `);
+    `;
 
-    const first = babel.transform(srcTxt, {
-      plugins: ["transform-es2015-block-scoping"],
-      code: false,
-    });
-
-    traverse.clearCache();
-
-    const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [require("../src/index")],
-    }).code;
-
-    const expected = unpad(`
-      function f(a) {
-        var b = function (d) {
-          var e = void 0;
-          if (e) {
-            return {
-              v: void 0
-            };
-          }
-          g(() => e);
-        };
-
-        for (var d = 0; d; d++) {
-          var c = b(d);
-          if (typeof c === "object") return c.v;
-        }
-      }
-    `);
-
-    expect(actual).toBe(expected);
+    expect(transformWithBlockScoping(source)).toMatchSnapshot();
   });
 
   it("should integrate with block scoping plugin 2", () => {
-    const srcTxt = unpad(`
+    const source = `
       (function () {
         function bar() {
           if (smth) {
@@ -593,38 +357,13 @@ describe("mangle-names", () => {
         function foo() { }
         module.exports = { bar };
       })();
-    `);
+    `;
 
-    const first = babel.transform(srcTxt, {
-      plugins: ["transform-es2015-block-scoping"],
-      code: false,
-    });
-
-    traverse.clearCache();
-
-    const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [require("../src/index")],
-    }).code;
-
-    const expected = unpad(`
-      (function () {
-        function a() {
-          if (smth) {
-            var c = blah();
-            c();
-          }
-          b();
-        }
-        function b() {}
-        module.exports = { bar: a };
-      })();
-    `);
-
-    expect(actual).toBe(expected);
+    expect(transformWithBlockScoping(source)).toMatchSnapshot();
   });
 
   it("should keep mangled named consistent across scopes when defined later on", () => {
-    const source = unpad(`
+    const source = `
       (function() {
         function foo() {
           {
@@ -638,29 +377,13 @@ describe("mangle-names", () => {
 
         function bar() {}
       }());
-    `);
+    `;
 
-    const expected = unpad(`
-      (function () {
-        function a() {
-          {
-            var c = true;
-
-            {
-              b();
-            }
-          }
-        }
-
-        function b() {}
-      })();
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should correctly mangle in nested loops", () => {
-    const source = unpad(`
+    const source = `
       (function () {
         for (let x in foo) {
           for (let y in foo[x]) {
@@ -668,24 +391,14 @@ describe("mangle-names", () => {
           }
         }
       })();
-    `);
+    `;
 
-    const expected = unpad(`
-      (function () {
-        for (let a in foo) {
-          for (let b in foo[a]) {
-            alert(foo[a][b]);
-          }
-        }
-      })();
-    `);
-
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toMatchSnapshot();
   });
 
   // #issue55, #issue57
   it("should correctly mangle function declarations in different order", () => {
-    const source = unpad(`
+    const source = `
       (function(){
         (function() {
           for (let x in y) y[x];
@@ -693,41 +406,13 @@ describe("mangle-names", () => {
         })();
         function g() {}
       })();
-    `);
+    `;
 
-    const ast = babel.transform(source, {
-      presets: ["es2015"],
-      sourceType: "script",
-      code: false
-    }).ast;
-
-    traverse.clearCache();
-
-    const actual = babel.transformFromAst(ast, null, {
-      sourceType: "script",
-      plugins: [require("../src/index")]
-    }).code;
-
-    const expected = unpad(`
-      "use strict";
-
-      (function () {
-        (function () {
-          for (var b in y) {
-            y[b];
-          }f(function () {
-            a();
-          });
-        })();
-        function a() {}
-      })();
-    `);
-
-    expect(actual).toBe(expected);
+    expect(transformWithES2015(source)).toMatchSnapshot();
   });
 
   it("should NOT mangle functions & classes when keep_fnames is true", () => {
-    const source = unpad(`
+    const source = `
       (function() {
         class Foo {}
         const Bar = class Bar extends Foo {}
@@ -741,47 +426,24 @@ describe("mangle-names", () => {
         var baz = foo;
         baz();
       })();
-    `);
-    const expected = unpad(`
-      (function () {
-        class Foo {}
-        const a = class Bar extends Foo {};
-        var b = function foo() {
-          foo();
-        };
-        function bar() {
-          b();
-        }
-        bar();
-        var c = b;
-        c();
-      })();
-    `);
-    expect(transform(source, {keepFnames: true})).toBe(expected);
+    `;
+    expect(transform(source, {keepFnames: true})).toMatchSnapshot();
   });
 
   it("should mangle variable re-declaration / K violations", () => {
-    const source = unpad(`
+    const source = `
       !function () {
         var foo = 1;
         foo++;
         var foo = 2;
         foo++;
       }
-    `);
-    const expected = unpad(`
-      !function () {
-        var a = 1;
-        a++;
-        var a = 2;
-        a++;
-      };
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle K violations - 2", () => {
-    const source = unpad(`
+    const source = `
       !function () {
         var bar = 1;
         bar--;
@@ -794,80 +456,45 @@ describe("mangle-names", () => {
           foo(foo);
         }
       }
-    `);
-    const expected = unpad(`
-      !function () {
-        var b = 1;
-        b--;
-        var b = 10;
-        a(b);
-        function a() {
-          var c = 10;
-          c++;
-          var c = 20;
-          c(c);
-        }
-      };
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should work with redeclarations", () => {
-    const source = unpad(`
+    const source = `
       (function () {
         var x = y;
         x = z;
         x;
       })();
-    `);
-    const expected = unpad(`
-      (function () {
-        var a = y;
-        a = z;
-        a;
-      })();
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should reuse removed vars", () => {
-    const source = unpad(`
+    const source = `
       function Foo() {
         var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
         var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
         var $, _;
       }
-    `);
-    const expected = unpad(`
-      function Foo() {
-        var aa, ba, ca, da, ea, fa, ga, ha, ia, ja, ka, la, ma, na, oa, pa, qa, ra, sa, ta, ua, va, wa, xa, ya, za;
-        var Aa, Ba, Ca, Da, Ea, Fa, Ga, Ha, Ia, Ja, Ka, La, Ma, Na, Oa, Pa, Qa, Ra, Sa, Ta, Ua, Va, Wa, Xa, Ya, Za;
-        var $a, _a;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should mangle both referenced and binding identifiers with K violations", () => {
-    const source = unpad(`
+    const source = `
       (function () {
         var foo = bar,
             foo = baz;
         foo;
       })();
-    `);
-    const expected = unpad(`
-      (function () {
-        var a = bar,
-            a = baz;
-        a;
-      })();
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should handle export declarations", () => {
-    const source = unpad(`
+    const source = `
       const foo = 1;
       export { foo };
       export const bar = 2;
@@ -879,20 +506,7 @@ describe("mangle-names", () => {
         bar();
         baz();
       }
-    `);
-    const expected = unpad(`
-      const foo = 1;
-      export { foo };
-      export const bar = 2;
-      export function baz(a, b) {
-        a();
-        b();
-      };
-      export default function (a, b) {
-        a();
-        b();
-      }
-    `);
-    expect(transform(source, {}, "module")).toBe(expected);
+    `;
+    expect(transformModule(source)).toMatchSnapshot();
   });
 });

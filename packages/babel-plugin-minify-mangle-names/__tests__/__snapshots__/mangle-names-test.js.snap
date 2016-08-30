@@ -1,0 +1,402 @@
+exports[`mangle-names should NOT mangle functions & classes when keep_fnames is true 1`] = `
+"
+(function () {
+  class Foo {}
+  const a = class Bar extends Foo {};
+  var b = function foo() {
+    foo();
+  };
+  function bar() {
+    b();
+  }
+  bar();
+  var c = b;
+  c();
+})();"
+`;
+
+exports[`mangle-names should be fine with shadowing 1`] = `
+"
+var a = 1;
+function foo() {
+  var b = 1;
+  if (b) {
+    console.log(b);
+  }
+}"
+`;
+
+exports[`mangle-names should be fine with shadowing 2 1`] = `
+"
+function foo() {
+  function a(c, d) {
+    return function (e, f) {
+      c(e, f);
+    };
+  }
+  function b() {}
+}"
+`;
+
+exports[`mangle-names should be order independent 1`] = `
+"
+function foo() {
+  function a(c, d, e) {
+    b(c, d, e);
+  }
+  function b() {
+    var c = who();
+    c.bam();
+  }
+  a();
+}"
+`;
+
+exports[`mangle-names should be order independent 2 1`] = `
+"
+function foo() {
+  (function a() {
+    a();
+    return function () {
+      var b = wow();
+      b.woo();
+    };
+  })();
+}"
+`;
+
+exports[`mangle-names should correctly mangle function declarations in different order 1`] = `
+"\"use strict\";
+
+(function () {
+  (function () {
+    for (var b in y) {
+      y[b];
+    }f(function () {
+      a();
+    });
+  })();
+  function a() {}
+})();"
+`;
+
+exports[`mangle-names should correctly mangle in nested loops 1`] = `
+"
+(function () {
+  for (let a in foo) {
+    for (let b in foo[a]) {
+      alert(foo[a][b]);
+    }
+  }
+})();"
+`;
+
+exports[`mangle-names should handle K violations - 2 1`] = `
+"
+!function () {
+  var b = 1;
+  b--;
+  var b = 10;
+  a(b);
+  function a() {
+    var c = 10;
+    c++;
+    var c = 20;
+    c(c);
+  }
+};"
+`;
+
+exports[`mangle-names should handle deeply nested paths with no bindings 1`] = `
+"
+function xoo() {
+  function a(b, c, d) {
+    function e(f, g, h) {
+      return function (i) {
+        g();
+        return function () {
+          f();
+        };
+      };
+    }
+  }
+}"
+`;
+
+exports[`mangle-names should handle export declarations 1`] = `
+"
+const foo = 1;
+export { foo };
+export const bar = 2;
+export function baz(a, b) {
+  a();
+  b();
+};
+export default function (a, b) {
+  a();
+  b();
+}"
+`;
+
+exports[`mangle-names should handle global name 1`] = `
+"
+function foo() {
+  var bar = 1;
+  var a = 2;
+}"
+`;
+
+exports[`mangle-names should handle global name conflict 1`] = `
+"
+function e() {
+  function a() {
+    b = c();
+  }
+  function c() {}
+}"
+`;
+
+exports[`mangle-names should handle name collisions 1`] = `
+"
+function foo() {
+  var a = 2;
+  var b = 1;
+  if (b) {
+    console.log(b + a);
+  }
+}"
+`;
+
+exports[`mangle-names should handle only think in function scopes 1`] = `
+"
+function foo() {
+  function a(c, d) {
+    if (1) {
+      b(c, d);
+    }
+  }
+  function b() {}
+}"
+`;
+
+exports[`mangle-names should handle recursion 1`] = `
+"
+function bar() {
+  function d(e, f, g) {
+    d(e, f, g);
+  }
+}"
+`;
+
+exports[`mangle-names should handle try/catch 1`] = `
+"
+function xoo() {
+  var a;
+  try {} catch (b) {}
+}"
+`;
+
+exports[`mangle-names should ignore labels 1`] = `
+"
+function foo() {
+  meh: for (;;) {
+    continue meh;
+  }
+}"
+`;
+
+exports[`mangle-names should integrate with block scoping plugin 1`] = `
+"
+function f(a) {
+  var b = function (d) {
+    var e = void 0;
+    if (e) {
+      return {
+        v: void 0
+      };
+    }
+    g(() => e);
+  };
+
+  for (var d = 0; d; d++) {
+    var c = b(d);
+    if (typeof c === \"object\") return c.v;
+  }
+}"
+`;
+
+exports[`mangle-names should integrate with block scoping plugin 2 1`] = `
+"
+(function () {
+  function a() {
+    if (smth) {
+      var c = blah();
+      c();
+    }
+    b();
+  }
+  function b() {}
+  module.exports = { bar: a };
+})();"
+`;
+
+exports[`mangle-names should keep mangled named consistent across scopes when defined later on 1`] = `
+"
+(function () {
+  function a() {
+    {
+      var c = true;
+
+      {
+        b();
+      }
+    }
+  }
+
+  function b() {}
+})();"
+`;
+
+exports[`mangle-names should mangle args 1`] = `
+"
+function foo(a) {
+  if (a) {
+    console.log(a);
+  }
+}"
+`;
+
+exports[`mangle-names should mangle both referenced and binding identifiers with K violations 1`] = `
+"
+(function () {
+  var a = bar,
+      a = baz;
+  a;
+})();"
+`;
+
+exports[`mangle-names should mangle names 1`] = `
+"
+function foo() {
+  var a = 1;
+  if (a) {
+    console.log(a);
+  }
+}"
+`;
+
+exports[`mangle-names should mangle names with local eval bindings 1`] = `
+"
+function eval() {}
+function foo() {
+  var a = 1;
+  eval(\'...\');
+}"
+`;
+
+exports[`mangle-names should mangle names with option eval = true 1`] = `
+"
+function foo() {
+  var a = 1;
+  (function () {
+    var b = 2;
+    eval(\"...\");
+    (function () {
+      var c = 1;
+    })();
+  })();
+}"
+`;
+
+exports[`mangle-names should mangle variable re-declaration / K violations 1`] = `
+"
+!function () {
+  var a = 1;
+  a++;
+  var a = 2;
+  a++;
+};"
+`;
+
+exports[`mangle-names should not be confused by scopes (closures) 1`] = `
+"
+function foo() {
+  function a(c) {
+    return function () {
+      b();
+    };
+  }
+  function b() {}
+}"
+`;
+
+exports[`mangle-names should not be confused by scopes 1`] = `
+"
+function foo() {
+  function a() {
+    var c;
+    if (c) {
+      b();
+    }
+  }
+  function b() {}
+}"
+`;
+
+exports[`mangle-names should not have labels conflicting with bindings 1`] = `
+"
+function foo() {
+  meh: for (;;) {
+    var a;
+    break meh;
+  }
+}"
+`;
+
+exports[`mangle-names should not mangle names in the global namespace 1`] = `
+"
+var Foo = 1;"
+`;
+
+exports[`mangle-names should not mangle vars in scope with eval 1`] = `
+"
+function foo() {
+  var inScopeOuter = 1;
+  (function () {
+    var inScopeInner = 2;
+    eval(\"inScopeInner + inScopeOuter\");
+    (function () {
+      var a = 1;
+    })();
+  })();
+}"
+`;
+
+exports[`mangle-names should not shadow outer references 1`] = `
+"
+function bar() {
+  function d(f, g, h) {
+    e(f, g, h);
+  }
+
+  function e() {}
+}"
+`;
+
+exports[`mangle-names should reuse removed vars 1`] = `
+"
+function Foo() {
+  var aa, ba, ca, da, ea, fa, ga, ha, ia, ja, ka, la, ma, na, oa, pa, qa, ra, sa, ta, ua, va, wa, xa, ya, za;
+  var Aa, Ba, Ca, Da, Ea, Fa, Ga, Ha, Ia, Ja, Ka, La, Ma, Na, Oa, Pa, Qa, Ra, Sa, Ta, Ua, Va, Wa, Xa, Ya, Za;
+  var $a, _a;
+}"
+`;
+
+exports[`mangle-names should work with redeclarations 1`] = `
+"
+(function () {
+  var a = y;
+  a = z;
+  a;
+})();"
+`;
