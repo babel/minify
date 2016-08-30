@@ -1,28 +1,20 @@
 jest.autoMockOff();
 
-const traverse = require("babel-traverse").default;
-const babel    = require("babel-core");
-const unpad    = require("../../../utils/unpad");
+const plugin = require("../src");
+const testUtils = require("../../../utils/test");
 
-function transform(code, options = {}, sourceType = "script") {
-  return babel.transform(code,  {
-    sourceType,
-    plugins: [
-      [require("../src/index"), options],
-    ],
-  }).code;
-}
+const transform = testUtils.transformer(plugin);
+const transformModule = testUtils.transformer(plugin, {
+  sourceType: "module"
+});
+const transformWithBlockScoping = testUtils.transformerWithBlockScoping(plugin);
 
 describe("mangle-names", () => {
   it("should not mangle names in the global namespace", () => {
-    const source = unpad(`
+    const source = `
       var Foo = 1;
-    `);
-    const expected = unpad(`
-      var Foo = 1;
-    `);
-
-    expect(transform(source)).toBe(expected);
+    `;
+    expect(transform(source)).toMatchSnapshot();
   });
 
   it("should mangle names", () => {

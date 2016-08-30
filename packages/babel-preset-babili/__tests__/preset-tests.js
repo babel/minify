@@ -1,22 +1,14 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const unpad = require("../../../utils/unpad");
-
-function transform(code, options = {}, sourceType = "script") {
-  return babel.transform(code,  {
-    sourceType,
-    minified: false,
-    presets: [
-      require("../src/index")
-    ],
-  }).code;
-}
+const transformer = require("../../../utils/test").transformer;
+const transform = transformer(void 0, {
+  presets: [require("../src")]
+});
 
 describe("preset", () => {
   // https://github.com/babel/babili/issues/122
   it ("should fix issue#122", () => {
-    const source = unpad(`
+    const source = `
       function foo() {
         var a, b, c;
         if (a) {
@@ -30,13 +22,8 @@ describe("preset", () => {
           }
         }
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var d, e, f;
-        d ? e && f : !b && f;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    `;
+
+    expect(transform(source)).toMatchSnapshot();
   });
 });
