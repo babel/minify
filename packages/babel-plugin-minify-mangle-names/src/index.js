@@ -39,7 +39,7 @@ module.exports = ({ types: t }) => {
     collect() {
       const mangler = this;
 
-      this.program.traverse({
+      const collectVisitor = {
         // capture direct evals
         CallExpression(path) {
           const callee = path.get("callee");
@@ -50,10 +50,12 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.markUnsafeScopes(path.scope);
           }
-        },
+        }
+      };
 
+      if (this.charset.shouldConsider) {
         // charset considerations
-        Identifier(path) {
+        collectVisitor.Identifier = function Identifier(path) {
           const { node } = path;
 
           if ((path.parentPath.isMemberExpression({ property: node })) ||
@@ -61,13 +63,15 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.charset.consider(node.name);
           }
-        },
+        };
 
         // charset considerations
-        Literal({ node }) {
+        collectVisitor.Literal = function Literal({ node }) {
           mangler.charset.consider(String(node.value));
-        }
-      });
+        };
+      }
+
+      this.program.traverse(collectVisitor);
     }
 
     mangle() {
@@ -124,7 +128,7 @@ module.exports = ({ types: t }) => {
               next = getNext();
             } while (
               !t.isValidIdentifier(next)
-              || scope.hasBinding(next)
+              || hop.call(bindings, next)
               || scope.hasGlobal(next)
               || scope.hasReference(next)
             );
