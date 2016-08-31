@@ -98,15 +98,30 @@ function replaceObject(t, path) {
   }
 }
 
+function defaults({
+  boolean = true,
+  number = true,
+  string = true,
+  array = true,
+  object = true
+} = {}) {
+  return {
+    boolean, number, string, array, object
+  };
+}
+
 module.exports = function({ types: t }) {
   return {
     name: "minify-type-constructors",
     visitor: {
       CallExpression(path) {
         const { node } = path;
+        const opts = defaults(this.opts);
 
         // Boolean(foo) -> !!foo
-        if (t.isIdentifier(node.callee, { name: "Boolean" }) &&
+        if (
+          opts.boolean &&
+          t.isIdentifier(node.callee, { name: "Boolean" }) &&
           node.arguments.length === 1 &&
           !path.scope.getBinding("Boolean")) {
           path.replaceWith(t.unaryExpression("!", t.unaryExpression("!", node.arguments[0], true), true));
@@ -114,7 +129,9 @@ module.exports = function({ types: t }) {
         }
 
         // Number(foo) -> +foo
-        if (t.isIdentifier(node.callee, { name: "Number" }) &&
+        if (
+          opts.number &&
+          t.isIdentifier(node.callee, { name: "Number" }) &&
           node.arguments.length === 1 &&
           !path.scope.getBinding("Number")) {
           path.replaceWith(t.unaryExpression("+", node.arguments[0], true));
@@ -122,7 +139,9 @@ module.exports = function({ types: t }) {
         }
 
         // String(foo) -> foo + ''
-        if (t.isIdentifier(node.callee, { name: "String" }) &&
+        if (
+          opts.string &&
+          t.isIdentifier(node.callee, { name: "String" }) &&
           node.arguments.length === 1 &&
           !path.scope.getBinding("String")) {
           path.replaceWith(t.binaryExpression("+", node.arguments[0], t.stringLiteral("")));
@@ -130,23 +149,25 @@ module.exports = function({ types: t }) {
         }
 
         // Array() -> []
-        if (replaceArray(t, path)) {
+        if (opts.array && replaceArray(t, path)) {
           return;
         }
 
         // Object() -> {}
-        if (replaceObject(t, path)) {
+        if (opts.object && replaceObject(t, path)) {
           return;
         }
       },
       NewExpression(path) {
+        const opts = defaults(this.opts);
+
         // new Array() -> []
-        if (replaceArray(t, path)) {
+        if (opts.array && replaceArray(t, path)) {
           return;
         }
 
         // new Object() -> {}
-        if (replaceObject(t, path)) {
+        if (opts.object && replaceObject(t, path)) {
           return;
         }
       },
