@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-mangle-names",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-mangle-names",
