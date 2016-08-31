@@ -39,7 +39,7 @@ module.exports = ({ types: t }) => {
     collect() {
       const mangler = this;
 
-      this.program.traverse({
+      const collectVisitor = {
         // capture direct evals
         CallExpression(path) {
           const callee = path.get("callee");
@@ -50,10 +50,12 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.markUnsafeScopes(path.scope);
           }
-        },
+        }
+      };
 
+      if (this.charset.shouldConsider) {
         // charset considerations
-        Identifier(path) {
+        collectVisitor.Identifier = function Identifier(path) {
           const { node } = path;
 
           if ((path.parentPath.isMemberExpression({ property: node })) ||
@@ -61,13 +63,15 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.charset.consider(node.name);
           }
-        },
+        };
 
         // charset considerations
-        Literal({ node }) {
+        collectVisitor.Literal = function Literal({ node }) {
           mangler.charset.consider(String(node.value));
-        }
-      });
+        };
+      }
+
+      this.program.traverse(collectVisitor);
     }
 
     mangle() {
@@ -103,26 +107,37 @@ module.exports = ({ types: t }) => {
           //   i = 0;
           // }
 
-          Object
-            .keys(scope.getAllBindings())
-            .filter((b) => {
-              const binding = scope.getBinding(b);
+          const bindings = scope.getAllBindings();
+          const names = Object.keys(bindings);
 
-              return scope.hasOwnBinding(b)
-                && !binding.path.isLabeledStatement()
-                && !mangler.isBlacklist(b, mangler.blacklist)
-                && (mangler.keepFnames ? !isFunction(binding.path) : true);
-            })
-            .map((b) => {
-              let next;
-              do {
-                next = getNext();
-              } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
-              // TODO:
-              // re-enable this
-              // resetNext();
-              mangler.rename(scope, b, next);
-            });
+          for (let i = 0; i < names.length; i++) {
+            const oldName = names[i];
+            const binding = bindings[oldName];
+
+            if (
+              !scope.hasOwnBinding(oldName)
+              || binding.path.isLabeledStatement()
+              || mangler.isBlacklist(oldName)
+              || (mangler.keepFnames ? isFunction(binding.path) : false)
+            ) {
+              continue;
+            }
+
+            let next;
+            do {
+              next = getNext();
+            } while (
+              !t.isValidIdentifier(next)
+              || hop.call(bindings, next)
+              || scope.hasGlobal(next)
+              || scope.hasReference(next)
+            );
+
+            // TODO:
+            // re-enable this - check above
+            // resetNext();
+            mangler.rename(scope, oldName, next);
+          }
         }
       });
 
