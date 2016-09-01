@@ -903,4 +903,34 @@ describe("mangle-names", () => {
     `);
     expect(transform(source, {}, "module")).toBe(expected);
   });
+
+  it("should find global scope properly", () => {
+    const source = unpad(`
+      class A {}
+      class B extends A {}
+      (function () {
+        class C {
+          constructor() {
+            new A();
+            new B();
+            C;
+          }
+        }
+      })();
+    `);
+    const expected = unpad(`
+      class A {}
+      class B extends A {}
+      (function () {
+        class b {
+          constructor() {
+            new A();
+            new B();
+            b;
+          }
+        }
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
