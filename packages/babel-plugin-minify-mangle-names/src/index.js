@@ -79,7 +79,11 @@ module.exports = ({ types: t }) => {
 
       this.program.traverse({
         Scopable(path) {
-          if (path.isProgram()) return;
+          const programParent = path.scope.getProgramParent().path
+
+          if (programParent === path.parentPath) {
+            return;
+          }
 
           const {scope} = path;
 
