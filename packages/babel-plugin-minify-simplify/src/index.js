@@ -19,7 +19,7 @@ module.exports = ({ types: t }) => {
   });
   const isNodeOfType = (node, typeSymbol) => {
     if (typeof typeSymbol !== "symbol") return false;
-    return t["is"+ Symbol.keyFor(typeSymbol)](node);
+    return t["is" + Symbol.keyFor(typeSymbol)](node);
   };
 
   // small abstractions
