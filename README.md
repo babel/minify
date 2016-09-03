@@ -18,9 +18,12 @@
 - Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false)
 
 ## Why
+
 Current tools don't support targeting the latest version of ECMAScript. (yet)
 - Babili can because it is just a set of Babel plugins, and Babel already understands new syntax with our parser [Babylon](https://github.com/babel/babylon).
 - When it's possible to only target browsers that support newer ES features, code sizes can be smaller because you don't have to transpile and then minify.
+
+Check out our [blog post](http://babeljs.io/blog/2016/08/30/babili) for more info!
 
 ```js
 // Example ES2015 Code
