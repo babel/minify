@@ -16,20 +16,20 @@ $ npm install --save-dev babel-preset-babili
 
 ```json
 {
-  "presets": ["minify"]
+  "presets": ["babili"]
 }
 ```
 
 ### Via CLI
 
 ```sh
-$ babel script.js --presets minify
+$ babel script.js --presets babili
 ```
 
 ### Via Node API
 
 ```javascript
 require("babel-core").transform("code", {
-  presets: ["minify"]
+  presets: ["babili"]
 });
 ```
