@@ -6,9 +6,7 @@ const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
-    plugins: [
-      [plugin, { multiPass: true }],
-    ],
+    plugins: [plugin],
   }).code;
 }
 
