@@ -14,6 +14,8 @@ const fs     = require("fs");
 const path   = require("path");
 const compile = require("google-closure-compiler-js").compile;
 
+const NUM_TEST_RUNS = 10;
+
 const filename = process.argv[2];
 if (!filename) {
   console.error("Error: No filename specified");
@@ -21,7 +23,7 @@ if (!filename) {
 }
 
 const table = new Table({
-  head: ["", "raw", "raw win", "gzip", "gzip win", "parse time", "run"],
+  head: ["", "raw", "raw win", "gzip", "gzip win", "parse time", "run time (average)"],
   chars: {
     top: "",
     "top-mid": "" ,
@@ -52,7 +54,8 @@ const code = fs.readFileSync(filename, "utf8");
 const gzippedCode = zlib.gzipSync(code);
 
 function test(name, callback) {
-  console.log("testing", name);
+
+  console.log('testing', name);
 
   const start = Date.now();
   const result = callback(code);
@@ -64,24 +67,82 @@ function test(name, callback) {
   const gzipped = zlib.gzipSync(result);
 
   const parseStart = Date.now();
-  // disable for now we have a failing test in dce
   new Function(result);
   const parseEnd = Date.now();
   const parseNow = parseEnd - parseStart;
+
+  const runTimes = [run];
+
+  for (var i = 1; i < NUM_TEST_RUNS; i++) {
+    const start = Date.now();
+    const result = callback(code);
+    runTimes.push(Date.now() - start);
+  }
+
+  const totalTime = runTimes.reduce((a, b) => a + b, 0);
+  const average = parseInt(totalTime / runTimes.length, 10);
 
   results.push({
     name: name,
     raw: result.length,
     gzip: gzipped.length,
     parse: parseNow,
-    run: run,
+    run: average,
   });
 }
 
-test("babili", function (code) {
+test("babili (best size)", function (code) {
   return babel.transform(code, {
     sourceType: "script",
-    presets: [require("../packages/babel-preset-babili")],
+    minified: true,
+    plugins: [
+      require("babel-plugin-minify-constant-folding"),
+      require("babel-plugin-minify-dead-code-elimination"),
+      require("babel-plugin-minify-flip-comparisons"),
+      require("babel-plugin-minify-guarded-expressions"),
+      require("babel-plugin-minify-infinity"),
+      require("babel-plugin-minify-mangle-names"),
+      require("babel-plugin-minify-replace"),
+      [
+        require("../packages/babel-plugin-minify-simplify/lib/index.js"),
+        { multiPass: true }
+      ],
+      require("babel-plugin-minify-type-constructors"),
+      require("babel-plugin-transform-member-expression-literals"),
+      require("babel-plugin-transform-merge-sibling-variables"),
+      require("babel-plugin-transform-minify-booleans"),
+      require("babel-plugin-transform-property-literals"),
+      require("babel-plugin-transform-simplify-comparison-operators"),
+      require("babel-plugin-transform-undefined-to-void"),
+    ],
+    comments: false,
+  }).code;
+});
+
+test("babili (best speed)", function (code) {
+  return babel.transform(code, {
+    sourceType: "script",
+    minified: true,
+    plugins: [
+      require("babel-plugin-minify-constant-folding"),
+      require("babel-plugin-minify-dead-code-elimination"),
+      require("babel-plugin-minify-flip-comparisons"),
+      require("babel-plugin-minify-guarded-expressions"),
+      require("babel-plugin-minify-infinity"),
+      require("babel-plugin-minify-mangle-names"),
+      require("babel-plugin-minify-replace"),
+      [
+        require("../packages/babel-plugin-minify-simplify/lib/index.js"),
+        { multiPass: false }
+      ],
+      require("babel-plugin-minify-type-constructors"),
+      require("babel-plugin-transform-member-expression-literals"),
+      require("babel-plugin-transform-merge-sibling-variables"),
+      require("babel-plugin-transform-minify-booleans"),
+      require("babel-plugin-transform-property-literals"),
+      require("babel-plugin-transform-simplify-comparison-operators"),
+      require("babel-plugin-transform-undefined-to-void"),
+    ],
     comments: false,
   }).code;
 });
@@ -107,9 +168,7 @@ test("uglify", function (code) {
   }).code;
 });
 
-results = results.sort(function (a, b) {
-  return a.gzip > b.gzip;
-});
+results = results.sort((a, b) => a.gzip > b.gzip);
 
 results.forEach(function (result, i) {
   let row = [

@@ -333,7 +333,12 @@ module.exports = ({ types: t }) => {
       Function: {
         enter: earlyReturnTransform,
 
-        exit(path) {
+        exit(path, state) {
+          const multiPass = state.opts.multiPass === false ? false : true;
+          if (!multiPass) {
+            return;
+          }
+
           // Useful to do on enter and exit because more oppurtinties can open.
           earlyReturnTransform(path);
 
