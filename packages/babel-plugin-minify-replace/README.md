@@ -58,15 +58,19 @@ $ npm install babel-plugin-minify-replace
   "plugins": ["minify-replace"]
 }
 
-// with plugins
+// with options
 {
-  "plugins": ["minify-replace", {
-    "identifierName": "__DEV__",
-    "replacement": {
-      "type": "booleanLiteral",
-      "value": true
-    }
-  }]
+  "plugins": [
+    ["minify-replace", {
+      "replacements": [{
+        "identifierName": "__DEV__",
+        "replacement": {
+          "type": "booleanLiteral",
+          "value": true
+        }
+      }]
+    }]
+  ]
 }
 ```
 
