@@ -961,4 +961,13 @@ describe("mangle-names", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  // https://github.com/babel/babili/issues/138
+  it("should handle class exports in modules - issue#138", () => {
+    const source = unpad(`
+      export class App extends Object {};
+    `);
+    const expected = source;
+    expect(transform(source, {}, "module")).toBe(expected);
+  });
 });
