@@ -79,13 +79,6 @@ module.exports = ({ types: t }) => {
 
       this.program.traverse({
         Scopable(path) {
-          const programParent = path.scope.getProgramParent().path;
-          const blockParent = path.scope.getBlockParent().path;
-
-          if (programParent === blockParent) {
-            return;
-          }
-
           const {scope} = path;
 
           if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
@@ -120,9 +113,17 @@ module.exports = ({ types: t }) => {
             const binding = bindings[oldName];
 
             if (
-              !scope.hasOwnBinding(oldName)
+              // already renamed bindings
+              binding.renamed
+              // globals
+              || mangler.program.scope.bindings[oldName] === binding
+              // other scope bindings
+              || !scope.hasOwnBinding(oldName)
+              // labels
               || binding.path.isLabeledStatement()
+              // blacklisted
               || mangler.isBlacklist(oldName)
+              // function names
               || (mangler.keepFnames ? isFunction(binding.path) : false)
             ) {
               continue;
@@ -142,6 +143,8 @@ module.exports = ({ types: t }) => {
             // re-enable this - check above
             // resetNext();
             mangler.rename(scope, oldName, next);
+            // mark the binding as renamed
+            binding.renamed = true;
           }
         }
       });

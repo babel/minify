@@ -922,14 +922,42 @@ describe("mangle-names", () => {
       class A {}
       class B extends A {}
       (function () {
-        class b {
+        class a {
           constructor() {
             new A();
             new B();
-            b;
+            a;
           }
         }
       })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should mangle classes properly", () => {
+    const source = unpad(`
+      class A {}
+      class B {}
+      new A();
+      new B();
+      function a() {
+        class A {}
+        class B {}
+        new A();
+        new B();
+      }
+    `);
+    const expected = unpad(`
+      class A {}
+      class B {}
+      new A();
+      new B();
+      function a() {
+        class b {}
+        class c {}
+        new b();
+        new c();
+      }
     `);
     expect(transform(source)).toBe(expected);
   });
