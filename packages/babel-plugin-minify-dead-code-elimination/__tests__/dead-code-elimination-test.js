@@ -1975,4 +1975,28 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  // https://github.com/babel/babili/issues/151
+  it("should fix issue#151 - array patterns and object patterns", () => {
+    const source = unpad(`
+      const me = lyfe => {
+        const [swag] = lyfe;
+        return swag;
+      };
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://github.com/babel/babili/issues/151
+  it("should fix issue#151 - array patterns and object patterns 2", () => {
+    const source = unpad(`
+      const me = lyfe => {
+        const [swag, yolo] = lyfe;
+        return swag && yolo;
+      };
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
 });
