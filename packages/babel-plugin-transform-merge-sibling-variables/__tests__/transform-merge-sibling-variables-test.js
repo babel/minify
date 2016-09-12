@@ -36,4 +36,38 @@ describe("transform-merge-sibling-variables-plugin", () => {
 
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it("don't concat block-scoped variables in for loops", () => {
+    const source = unpad(`
+      let i = 0;
+      for (let x = 0; x < 10; x++) console.log(i + x);
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  it("don't concat constants in for loops", () => {
+    const source = unpad(`
+      const j = 0;
+      for (const x = 0;;) console.log(j + x);
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  it("concat block-scoped vars next to, but not into for loops", () => {
+    const source = unpad(`
+      let i = 0;
+      let y = 0;
+      for (let x = 0; x < 10; x++) console.log(i + x);
+    `);
+    const expected = unpad(`
+      let i = 0,
+          y = 0;
+
+      for (let x = 0; x < 10; x++) console.log(i + x);
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

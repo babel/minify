@@ -25,14 +25,19 @@ module.exports = function() {
             }
           },
 
-          // concat variable declarations next to for loops with it's
-          // initialisers if they're of the same variable kind
+          // concat `var` declarations next to for loops with it's initialisers.
+          // block-scoped `let` and `const` are not moved because the for loop
+          // is a different block scope.
           function (path) {
             if (!path.inList) {
               return;
             }
 
             const { node } = path;
+            if (node.kind !== "var") {
+              return;
+            }
+
             let next = path.getSibling(path.key + 1);
             if (!next.isForStatement()) {
               return;
