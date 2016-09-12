@@ -903,4 +903,71 @@ describe("mangle-names", () => {
     `);
     expect(transform(source, {}, "module")).toBe(expected);
   });
+
+  it("should find global scope properly", () => {
+    const source = unpad(`
+      class A {}
+      class B extends A {}
+      (function () {
+        class C {
+          constructor() {
+            new A();
+            new B();
+            C;
+          }
+        }
+      })();
+    `);
+    const expected = unpad(`
+      class A {}
+      class B extends A {}
+      (function () {
+        class a {
+          constructor() {
+            new A();
+            new B();
+            a;
+          }
+        }
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should mangle classes properly", () => {
+    const source = unpad(`
+      class A {}
+      class B {}
+      new A();
+      new B();
+      function a() {
+        class A {}
+        class B {}
+        new A();
+        new B();
+      }
+    `);
+    const expected = unpad(`
+      class A {}
+      class B {}
+      new A();
+      new B();
+      function a() {
+        class b {}
+        class c {}
+        new b();
+        new c();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://github.com/babel/babili/issues/138
+  it("should handle class exports in modules - issue#138", () => {
+    const source = unpad(`
+      export class App extends Object {};
+    `);
+    const expected = source;
+    expect(transform(source, {}, "module")).toBe(expected);
+  });
 });
