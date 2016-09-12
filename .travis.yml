@@ -1,6 +1,6 @@
 ---
 git:
-  depth: 1
+  depth: 3
 sudo: false
 language: node_js
 cache:
