@@ -13,7 +13,8 @@
       "bug": "Bug Fix",
       "docs": "Docs",
       "chore": "Chore",
-      "feature": "New Feature"
+      "feature": "New Feature",
+      "internal": "Internal"
     }
   }
 }
