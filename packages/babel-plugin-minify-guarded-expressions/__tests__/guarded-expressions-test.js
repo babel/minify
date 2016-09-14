@@ -72,4 +72,11 @@ describe("guarded-expressions-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not remove unpure statements that always evaluate to false", () => {
+    const source = unpad(`
+      a && void alert('Side effect');
+    `);
+    expect(transform(source)).toBe(source);
+  });
 });

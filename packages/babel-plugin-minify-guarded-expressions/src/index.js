@@ -15,8 +15,17 @@ module.exports = function({ types: t }) {
           function(path) {
             const { node } = path;
 
-            if (path.evaluateTruthy(node) === false) {
-              path.replaceWith(node.left);
+            const left = path.get("left");
+            const right = path.get("right");
+            if (node.operator === "&&") {
+              if ((right.evaluateTruthy() === false && right.isPure()) ||
+                  (left.evaluateTruthy() === false && left.isPure())) {
+                path.replaceWith(node.left);
+              }
+            } else if (node.operator === "||") {
+              if (left.evaluateTruthy() === false && left.isPure()) {
+                path.replaceWith(node.left);
+              }
             }
           },
 
