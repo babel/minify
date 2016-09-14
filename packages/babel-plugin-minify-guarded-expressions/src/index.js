@@ -20,6 +20,7 @@ module.exports = function({ types: t }) {
             if (node.operator === "&&") {
               const leftTruthy = left.evaluateTruthy();
               if (leftTruthy === false) {
+                // Short-circuit
                 path.replaceWith(node.left);
               } else if (leftTruthy === true && left.isPure()) {
                 path.replaceWith(node.right);
@@ -27,9 +28,13 @@ module.exports = function({ types: t }) {
                 path.replaceWith(node.left);
               }
             } else if (node.operator === "||") {
-              if (left.evaluateTruthy() === false && left.isPure()) {
+              const leftTruthy = left.evaluateTruthy();
+              if (leftTruthy === false && left.isPure()) {
                 path.replaceWith(node.right);
-              } else if (left.evaluateTruthy() === true) {
+              } else if (leftTruthy === true) {
+                // Short-circuit
+                path.replaceWith(node.left);
+              } else if (right.evaluateTruthy() === false && right.isPure()) {
                 path.replaceWith(node.left);
               }
             }
