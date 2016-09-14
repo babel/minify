@@ -18,12 +18,18 @@ module.exports = function({ types: t }) {
             const left = path.get("left");
             const right = path.get("right");
             if (node.operator === "&&") {
-              if ((right.evaluateTruthy() === false && right.isPure()) ||
-                  (left.evaluateTruthy() === false && left.isPure())) {
+              const leftTruthy = left.evaluateTruthy();
+              if (leftTruthy === false) {
+                path.replaceWith(node.left);
+              } else if (leftTruthy === true && left.isPure()) {
+                path.replaceWith(node.right);
+              } else if (right.evaluateTruthy() === false && right.isPure()) {
                 path.replaceWith(node.left);
               }
             } else if (node.operator === "||") {
               if (left.evaluateTruthy() === false && left.isPure()) {
+                path.replaceWith(node.right);
+              } else if (left.evaluateTruthy() === true) {
                 path.replaceWith(node.left);
               }
             }

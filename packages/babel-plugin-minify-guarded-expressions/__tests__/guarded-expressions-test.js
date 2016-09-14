@@ -71,11 +71,58 @@ describe("guarded-expressions-plugin", () => {
       alert("");
     `);
     expect(transform(source)).toBe(expected);
+
+    source = unpad(`
+      alert(new Foo() || false);
+    `);
+    expected = unpad(`
+      alert(new Foo());
+    `);
+    expect(transform(source)).toBe(expected);
   });
 
-  it("should not remove unpure statements that always evaluate to false", () => {
-    const source = unpad(`
+  it("should simplify truthy expressions", () => {
+    let source = unpad(`
+      alert(1 && new Bar());
+    `);
+    let expected = unpad(`
+      alert(new Bar());
+    `);
+    expect(transform(source)).toBe(expected);
+
+    source = unpad(`
+      alert(true && new Bar());
+    `);
+    expected = unpad(`
+      alert(new Bar());
+    `);
+    expect(transform(source)).toBe(expected);
+
+    source = unpad(`
+      alert("hello" && new Bar());
+    `);
+    expected = unpad(`
+      alert(new Bar());
+    `);
+    expect(transform(source)).toBe(expected);
+
+    source = unpad(`
+      alert(!false && new Bar());
+    `);
+    expected = unpad(`
+      alert(new Bar());
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove reachable impure statements", () => {
+    let source = unpad(`
       a && void alert('Side effect');
+    `);
+    expect(transform(source)).toBe(source);
+
+    source = unpad(`
+      alert(func() || true);
     `);
     expect(transform(source)).toBe(source);
   });
