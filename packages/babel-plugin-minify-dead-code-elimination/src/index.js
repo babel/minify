@@ -141,7 +141,8 @@ module.exports = ({ types: t, traverse }) => {
             }
 
             if (binding.path.isVariableDeclarator() && binding.path.node.init &&
-              !scope.isPure(binding.path.node.init)
+              !scope.isPure(binding.path.node.init) &&
+              binding.path.parentPath.node.declarations
             ) {
               if (binding.path.parentPath.node.declarations.length !== 1) {
                 continue;
