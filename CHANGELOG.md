@@ -1,3 +1,32 @@
+## Changelog for 2016-09-20
+
+- babel-plugin-minify-dead-code-elimination@0.0.2
+- babel-plugin-minify-guarded-expressions@0.0.2
+- babel-plugin-minify-mangle-names@0.0.3
+- babel-plugin-minify-simplify@0.0.3
+- babel-plugin-transform-merge-sibling-variables@0.0.2
+- babel-preset-babili@0.0.3
+- babili@0.0.5
+
+#### Bug Fix
+* `babel-plugin-minify-guarded-expressions`
+  * [#160](https://github.com/babel/babili/pull/160) don't remove impure reachable parts of logical expressions. ([@goto-bus-stop](https://github.com/goto-bus-stop))
+* `babel-plugin-transform-merge-sibling-variables`
+  * [#157](https://github.com/babel/babili/pull/157) don't merge block-scoped sibling vars across scopes, Fixes [#153](https://github.com/babel/babili/issues/153). ([@goto-bus-stop](https://github.com/goto-bus-stop))
+* `babel-plugin-minify-mangle-names`
+  * [#140](https://github.com/babel/babili/pull/140) Mangle - Fix for classes and program scope. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`
+  * [ba50db](https://github.com/babel/babili/commit/ba50db58d8c366302e1f23ad1f30f5a5fe182f45) - Ensure parent node has declarations
+
+#### Docs
+* Other
+  * [#136](https://github.com/babel/babili/pull/136) add changelog [skip ci]. ([@hzoo](https://github.com/hzoo))
+
+#### Internal
+* `babel-plugin-minify-simplify`
+  * [#143](https://github.com/babel/babili/pull/143) Satisfy the "space-infix-ops" eslint rule. ([@gigabo](https://github.com/gigabo))
+* `babel-plugin-minify-mangle-names`
+  * [#134](https://github.com/babel/babili/pull/134) Mangler performance - some improvement. ([@boopathi](https://github.com/boopathi))
 
 ## Changelog for 2016-08-31
 
