@@ -36,6 +36,7 @@
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",
     "closure-compiler": "^0.2.12",
+    "commander": "^2.9.0",
     "eslint": "~3.0.0",
     "eslint-config-babel": "^1.0.0",
     "google-closure-compiler-js": "^20160822.0.0",
