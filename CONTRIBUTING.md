@@ -43,7 +43,7 @@ $ npm run fix
 To run current benchmarks on a file:
 
 ```sh
-$ ./scripts/benchmark.js file.js
+$ ./scripts/benchmark.js package [file.js]
 ```
 
 To run current plugin timing on a file:
