@@ -283,7 +283,7 @@ module.exports = ({ types: t, traverse }) => {
           continue;
         }
 
-        if (purge && !p.isFunctionDeclaration()) {
+        if (purge && !canExistAfterCompletion(p)) {
           removeOrVoid(p);
         }
       }
@@ -299,7 +299,7 @@ module.exports = ({ types: t, traverse }) => {
 
       // Not last in it's block? (See BlockStatement visitor)
       if (path.container.length - 1 !== path.key &&
-          !path.getSibling(path.key + 1).isFunctionDeclaration() &&
+          !canExistAfterCompletion(path.getSibling(path.key + 1)) &&
           path.parentPath.isBlockStatement()
       ) {
         // This is probably a new oppurtinity by some other transform
@@ -899,5 +899,11 @@ module.exports = ({ types: t, traverse }) => {
         bail: possibleRunTimeBreak
       };
     }
+  }
+
+  // things that are hoisted
+  function canExistAfterCompletion(path) {
+    return path.isFunctionDeclaration()
+      || path.isVariableDeclaration({ kind: "var" });
   }
 };

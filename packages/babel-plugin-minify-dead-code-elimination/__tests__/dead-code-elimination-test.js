@@ -1999,4 +1999,39 @@ describe("dce-plugin", () => {
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
+
+  it("should preserve variabledeclarations(var) after completion statements", () => {
+    const source = unpad(`
+      function foo() {
+        a = 1;
+        return a;
+        var a;
+      }
+    `);
+
+    const expected = source;
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT preserve variabledeclarations(let) after completion statements", () => {
+    const source = unpad(`
+      function foo() {
+        a = 1;
+        b = 2;
+        return a + b;
+        let a, b;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        a = 1;
+        b = 2;
+        return a + b;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
