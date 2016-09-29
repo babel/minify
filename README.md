@@ -141,6 +141,8 @@ Add to your `.babelrc`'s plugins array.
 ## Benchmarks
 > Bootstrap: `npm run bootstrap`
 
+> Build:  `npm run build`
+
 > Running the benchmarks: `./scripts/benchmark.js file.js`
 
 Backbone.js:
