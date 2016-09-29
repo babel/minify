@@ -181,6 +181,11 @@ module.exports = ({ types: t, traverse }) => {
               let replacementPath = binding.path;
               if (t.isVariableDeclarator(replacement)) {
                 replacement = replacement.init;
+                // Bail out for ArrayPattern and ObjectPattern
+                // TODO: maybe a more intelligent approach instead of simply bailing out
+                if (!replacementPath.get("id").isIdentifier()) {
+                  continue;
+                }
                 replacementPath = replacementPath.get("init");
               }
               if (!replacement) {
