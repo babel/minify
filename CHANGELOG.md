@@ -1,3 +1,38 @@
+## Changelog for 2016-09-30
+
+ - babel-plugin-minify-dead-code-elimination@0.0.3
+ - babel-preset-babili@0.0.4
+ - babili@0.0.6
+ 
+#### Bug Fix
+
+* `babili`
+  * [#166](https://github.com/babel/babili/pull/166) use process.execPath when spawing cli. Fixes #108 ([@rossipedia](https://github.com/rossipedia))
+ 
+Should fix windows support for the cli.
+
+* `babel-plugin-minify-dead-code-elimination`
+  * [#155](https://github.com/babel/babili/pull/155) Fix DCE for ArrayPatterns and ObjectPatterns (#155) ([@boopathi](https://github.com/boopathi))
+  
+```js
+// bail out when destructuring with a variable
+const me = lyfe => {
+  const [swag] = lyfe;
+  return swag;
+};
+ ```
+
+* [#169](https://github.com/babel/babili/pull/169) Fix var hoisting bug in DCE (#169) ([@boopathi](https://github.com/boopathi))
+
+```
+// var hoisting but not let/const
+function foo() {
+  a = 1;
+  return a;
+  var a;
+}
+ ```
+
 ## Changelog for 2016-09-20
 
 - babel-plugin-minify-dead-code-elimination@0.0.2
