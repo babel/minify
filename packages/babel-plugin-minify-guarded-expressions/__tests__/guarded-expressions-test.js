@@ -76,7 +76,7 @@ describe("guarded-expressions-plugin", () => {
       alert(new Foo() || false);
     `);
     expected = unpad(`
-      alert(new Foo());
+      alert(new Foo() || false);
     `);
     expect(transform(source)).toBe(expected);
   });
