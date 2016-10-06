@@ -1,6 +1,6 @@
 "use strict";
 
-const { some } = require("lodash");
+const some = require("lodash.some");
 
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);

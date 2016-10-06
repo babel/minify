@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "babel-helper-remove-or-void": "^0.0.1",
-    "lodash": "^4.14.1"
+    "lodash.some": "^4.6.0"
   },
   "devDependencies": {}
 }
