@@ -1,4 +1,21 @@
-## Changelog for 2016-09-30
+ ## Changelog for 2016-10-07
+ 
+ - babel-plugin-minify-dead-code-elimination@0.0.4
+ - babel-plugin-minify-guarded-expressions@0.0.3
+ - babel-preset-babili@0.0.5
+ - babili@0.0.7
+ 
+ #### Bug Fix
+ 
+ * `babel-plugin-minify-guarded-expressions`
+  * [#179](https://github.com/babel/babili/pull/179) Fix guarded expressions being utilized elsewhere. Fixes #171,#174,#176 ([@boopathi](https://github.com/boopathi))
+ 
+ #### Deps
+ 
+ * `babel-plugin-dead-code-elimination`
+  * [#180](https://github.com/babel/babili/pull/180) Use modularized lodash. ([@boopathi](https://github.com/boopathi))
+ 
+ ## Changelog for 2016-09-30
 
  - babel-plugin-minify-dead-code-elimination@0.0.3
  - babel-preset-babili@0.0.4
