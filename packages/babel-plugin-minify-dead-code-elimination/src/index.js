@@ -6,6 +6,11 @@ module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
   const shouldRevisit = Symbol("shouldRevisit");
 
+  // this is used for tracking fn params that can be removed
+  // as traversal takes place from left and
+  // unused params can be removed only on the right
+  const markForRemoval = Symbol("markForRemoval");
+
   const main = {
     // remove side effectless statement
     ExpressionStatement(path) {
@@ -100,15 +105,63 @@ module.exports = ({ types: t, traverse }) => {
         }
 
         const { scope } = path;
+
+        // if the scope is created by a function, we obtain its
+        // parameter list
+        const paramsList = path.isFunction() ? path.get("params") : [];
+
+        for (let i = paramsList.length - 1; i >= 0; i--) {
+          const param = paramsList[i];
+
+          if (param.isIdentifier()) {
+            const binding = scope.bindings[param.node.name];
+            if (binding.referenced) {
+              // when the first binding is referenced (right to left)
+              // exit without marking anything after this
+              break;
+            }
+
+            Object.defineProperty(binding, markForRemoval, {
+              enumerable: false,
+              value: true,
+              writable: false,
+              configurable: true
+            });
+            continue;
+          } else if (param.isAssignmentPattern()) {
+            const left = param.get("left");
+            const right = param.get("right");
+
+            if (left.isIdentifier() && right.isPure()) {
+              const binding = scope.bindings[left.node.name];
+              if (binding.referenced) {
+                // when the first binding is referenced (right to left)
+                // exit without marking anything after this
+                break;
+              }
+
+              Object.defineProperty(binding, markForRemoval, {
+                enumerable: false,
+                value: true,
+                writable: false,
+                configurable: true
+              });
+              continue;
+            }
+          }
+
+          // other patterns - assignment, object have side-effects
+          // and cannot be safely removed
+          break;
+        }
+
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
 
           if (!binding.referenced && binding.kind !== "module") {
-            if (binding.kind === "param" && this.keepFargs) {
+            if (binding.kind === "param" && (this.keepFnArgs || !binding[markForRemoval])) {
               continue;
-            }
-
-            if (binding.path.isVariableDeclarator()) {
+            } else if (binding.path.isVariableDeclarator()) {
               if (binding.path.parentPath.parentPath &&
                 binding.path.parentPath.parentPath.isForInStatement()
               ) {
@@ -116,6 +169,7 @@ module.exports = ({ types: t, traverse }) => {
                 continue;
               }
             } else if (!scope.isPure(binding.path.node)) {
+              // TODO: AssignmentPattern are marked as impure and unused ids aren't removed yet
               continue;
             } else if (binding.path.isFunctionExpression() || binding.path.isClassExpression()) {
               // `bar(function foo() {})` foo is not referenced but it's used.
@@ -582,7 +636,7 @@ module.exports = ({ types: t, traverse }) => {
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
     "FunctionExpression|ClassExpression"(path) {
-      if (!this.keepFnames) {
+      if (!this.keepFnName) {
         removeUnreferencedId(path);
       }
     },
@@ -634,16 +688,16 @@ module.exports = ({ types: t, traverse }) => {
         opts: {
           // set defaults
           optimizeRawSize = false,
-          keepFnames = false,
-          keepFargs = false,
+          keepFnName = false,
+          keepFnArgs = false,
         } = {}
       } = {}) {
         // We need to run this plugin in isolation.
         path.traverse(main, {
           functionToBindings: new Map(),
           optimizeRawSize,
-          keepFnames,
-          keepFargs,
+          keepFnName,
+          keepFnArgs,
         });
       },
     },

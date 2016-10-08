@@ -32,7 +32,7 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should not remove params (preserve fn.length)", () => {
+  it("should remove unused params", () => {
     const source = unpad(`
       _(function bar(p) {
         return 1;
@@ -47,6 +47,12 @@ describe("dce-plugin", () => {
       };
       bar();
       bar();
+
+      class A {
+        foo(p) {
+        }
+      }
+      new A();
     `);
 
     const expected = unpad(`
@@ -63,6 +69,81 @@ describe("dce-plugin", () => {
       };
       bar();
       bar();
+
+      class A {
+        foo() {}
+      }
+      new A();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT remove params when keepFnArgs is true (preserve fn.length)", () => {
+    const source = unpad(`
+      function foo(p) {
+        return 1;
+      };
+      function bar(q) {
+        return q + 1;
+      }
+      class A {
+        foo(p) {
+          return p;
+        }
+        bar(q) {
+          return 1;
+        }
+      }
+      foo();
+      bar();
+      new A();
+    `);
+
+    const expected = source;
+
+    expect(transform(source, { keepFnArgs: true })).toBe(expected);
+  });
+
+  it("should handle all cases of parameter list - and remove unused ones", () => {
+    const source = unpad(`
+      function a(foo, bar, baz) {
+        return foo;
+      }
+      function b(foo, bar, baz) {
+        return baz;
+      }
+      function c(foo, {bar}, baz) {
+        return bar;
+      }
+      function d({foo}, {bar}, baz) {
+        return foo;
+      }
+      function e({foo}, bar = sideEffect(), baz) {
+        return foo;
+      }
+      function e({foo}, bar = {}, baz) {
+        return foo;
+      }
+    `);
+    const expected = unpad(`
+      function a(foo) {
+        return foo;
+      }
+      function b(foo, bar, baz) {
+        return baz;
+      }
+      function c(foo, { bar }) {
+        return bar;
+      }
+      function d({ foo }, { bar }) {
+        return foo;
+      }
+      function e({ foo }, bar = sideEffect()) {
+        return foo;
+      }
+      function e({ foo }, bar = {}) {
+        return foo;
+      }
     `);
     expect(transform(source)).toBe(expected);
   });
@@ -301,7 +382,7 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       function baz() {
-        exports.foo = function foo(config) {
+        exports.foo = function foo() {
           return foo;
         };
       }
@@ -321,7 +402,7 @@ describe("dce-plugin", () => {
     `);
     const expected = unpad(`
       function baz() {
-        exports.foo = function foo(config) {
+        exports.foo = function foo() {
           return foo;
         };
       }
@@ -1155,8 +1236,8 @@ describe("dce-plugin", () => {
       })(require, module, exports);
     `);
     const expected = unpad(`
-      (function (require, module, exports) {
-        module.exports = function Hub(file, options) {
+      (function (require, module) {
+        module.exports = function Hub() {
           (0, _classCallCheck3.default)(this, Hub);
         };
       })(require, module, exports);
@@ -1179,7 +1260,7 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should preserve fn/class names when keepFnames is true", () => {
+  it("should preserve fn/class names when keepFnName is true", () => {
     const source = unpad(`
       (function () {
         function A() {}
@@ -1197,7 +1278,7 @@ describe("dce-plugin", () => {
         onClick(function C() {});
       })();
     `);
-    expect(transform(source, { keepFnames: true })).toBe(expected);
+    expect(transform(source, { keepFnName: true })).toBe(expected);
   });
 
   // NCE = Named Class Expressions
@@ -1399,7 +1480,7 @@ describe("dce-plugin", () => {
      function foo() {
        var a = c + d;
        function x(c, d) {
-         return a;
+         return a + c + d;
        }
        x();
        x();
@@ -1410,7 +1491,7 @@ describe("dce-plugin", () => {
       function foo() {
         var a = c + d;
         function x(c, d) {
-          return a;
+          return a + c + d;
         }
         x();
         x();
