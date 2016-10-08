@@ -50,10 +50,10 @@ describe("dce-plugin", () => {
     `);
 
     const expected = unpad(`
-      _(function (p) {
+      _(function () {
         return 1;
       });
-      function foo(w) {
+      function foo() {
         return 1;
       }
       foo();

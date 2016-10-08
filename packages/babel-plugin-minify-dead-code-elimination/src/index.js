@@ -102,7 +102,12 @@ module.exports = ({ types: t, traverse }) => {
         const { scope } = path;
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
-          if (!binding.referenced && binding.kind !== "param" && binding.kind !== "module") {
+
+          if (!binding.referenced && binding.kind !== "module") {
+            if (binding.kind === "param" && this.keepFargs) {
+              continue;
+            }
+
             if (binding.path.isVariableDeclarator()) {
               if (binding.path.parentPath.parentPath &&
                 binding.path.parentPath.parentPath.isForInStatement()
@@ -629,14 +634,16 @@ module.exports = ({ types: t, traverse }) => {
         opts: {
           // set defaults
           optimizeRawSize = false,
-          keepFnames = false
+          keepFnames = false,
+          keepFargs = false,
         } = {}
       } = {}) {
         // We need to run this plugin in isolation.
         path.traverse(main, {
           functionToBindings: new Map(),
           optimizeRawSize,
-          keepFnames
+          keepFnames,
+          keepFargs,
         });
       },
     },
