@@ -1,0 +1,7 @@
+exports[`preset should fix issue#122 1`] = `
+"
+function foo() {
+  var d, e, f;
+  d ? e && f : !b && f;
+}"
+`;
