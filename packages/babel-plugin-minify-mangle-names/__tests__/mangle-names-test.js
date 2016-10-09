@@ -734,7 +734,7 @@ describe("mangle-names", () => {
     expect(actual).toBe(expected);
   });
 
-  it("should NOT mangle functions & classes when keep_fnames is true", () => {
+  it("should NOT mangle functions & classes when keepFnName is true", () => {
     const source = unpad(`
       (function() {
         class Foo {}
@@ -765,7 +765,7 @@ describe("mangle-names", () => {
         c();
       })();
     `);
-    expect(transform(source, {keepFnames: true})).toBe(expected);
+    expect(transform(source, {keepFnName: true})).toBe(expected);
   });
 
   it("should mangle variable re-declaration / K violations", () => {
