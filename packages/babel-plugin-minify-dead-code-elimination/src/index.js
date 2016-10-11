@@ -623,24 +623,16 @@ module.exports = ({ types: t, traverse }) => {
 
     LogicalExpression: {
       exit(path) {
-        const evaluated = path.evaluate();
-        if (evaluated.confident) {
-          path.replaceWith(t.valueToNode(evaluated.value));
-          return;
-        }
-
         const node = path.node;
-        if (node.operator !== "&&") return;
-
-        const leftTruthy = path.get("left").evaluateTruthy();
-        if (leftTruthy === true) {
-          path.replaceWith(node.right);
-          return;
-        }
-
-        const rightTruthy = path.get("right").evaluateTruthy();
-        if (rightTruthy === true) {
-          path.replaceWith(node.left);
+        if (node.operator === "&&" || node.operator === "||") {
+          const leftEvaluated = path.get("left").evaluate();
+          if (leftEvaluated.confident) {
+            if (node.operator === "&&") {
+              path.replaceWith(leftEvaluated.value ? node.right : t.valueToNode(leftEvaluated.value));
+            } else {
+              path.replaceWith(leftEvaluated.value ? t.valueToNode(leftEvaluated.value) : node.right);
+            }
+          }
         }
       },
     },

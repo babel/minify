@@ -2035,16 +2035,93 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should remove dead logical expressions", () => {
+  it("should remove dead logical expressions with && operator", () => {
     const source = unpad(`
-      false && foo();
-      true && bar();
-      x && true && foo();  
+      false && a();
+      true && b();
+      x() && true && c();  
+      1 + 2 && 2 + d();
+      e() && false; 
+    `);
+    const expected = unpad(`
+      false;
+      b();
+      x() && true && c();
+      2 + d();
+      e() && false;
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should remove left in logical expressions with || operator", () => {
+    const source = unpad(`
+      false || a();
+      !"string" || b();
+      null || c();
+    `);
+    const expected = unpad(`
+      a();
+      b();
+      c();
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should remove right in logical expressions with || operator", () => {
+    const source = unpad(`
+      true || a();
+      1 || b();
+      1 == 1 || c();
+      "string" || d() || d2();
+    `);
+    const expected = unpad(`
+      true;
+      1;
+      true;
+      "string";
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+
+  it("should preserve logical expressions", () => {
+    const source = unpad(`
+      a() || b();
+      c() || false;
+      a() && b();
+      c() && false;
+      c() && true;
+    `);
+    const expected = unpad(`
+      a() || b();
+      c() || false;
+      a() && b();
+      c() && false;
+      c() && true;
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should remove dead logical expressions with functions", () => {
+    const source = unpad(`
+      fn(true && bar());
+      function a() {
+        1 && foo();
+      }
+      a();
+      
+      console.log(undefined && condition || null);
+      console.log(undefined || condition && null);
     `);
     const expected = unpad(` 
-      false;
-      bar();
-      x && foo();
+      fn(bar());
+      function a() {
+        foo();
+      }
+      a();
+      
+      console.log(null);
+      console.log(condition && null);
     `);
     expect(transform(source).trim()).toBe(expected);
   });
