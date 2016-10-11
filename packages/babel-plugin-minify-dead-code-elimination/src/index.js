@@ -620,6 +620,30 @@ module.exports = ({ types: t, traverse }) => {
       path.node.left = t.variableDeclaration("var", [t.variableDeclarator(left.node)]);
       binding.path = path.get("left").get("declarations")[0];
     },
+
+    LogicalExpression: {
+      exit(path) {
+        const evaluated = path.evaluate();
+        if (evaluated.confident) {
+          path.replaceWith(t.valueToNode(evaluated.value));
+          return;
+        }
+
+        const node = path.node;
+        if (node.operator !== "&&") return;
+
+        const leftTruthy = path.get("left").evaluateTruthy();
+        if (leftTruthy === true) {
+          path.replaceWith(node.right);
+          return;
+        }
+
+        const rightTruthy = path.get("right").evaluateTruthy();
+        if (rightTruthy === true) {
+          path.replaceWith(node.left);
+        }
+      },
+    },
   };
 
   return {

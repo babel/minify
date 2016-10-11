@@ -2034,4 +2034,18 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should remove dead logical expressions", () => {
+    const source = unpad(`
+      false && foo();
+      true && bar();
+      x && true && foo();  
+    `);
+    const expected = unpad(` 
+      false;
+      bar();
+      x && foo();
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
 });
