@@ -4,13 +4,13 @@ module.exports = ({ types: t }) => {
   class Mangler {
     constructor(charset, program, {
       blacklist = {},
-      keepFnames = false,
+      keepFnName = false,
       eval: _eval = false
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
-      this.keepFnames = keepFnames;
+      this.keepFnName = keepFnName;
       this.eval = _eval;
 
       this.unsafeScopes = new Set;
@@ -124,7 +124,7 @@ module.exports = ({ types: t }) => {
               // blacklisted
               || mangler.isBlacklist(oldName)
               // function names
-              || (mangler.keepFnames ? isFunction(binding.path) : false)
+              || (mangler.keepFnName ? isFunction(binding.path) : false)
             ) {
               continue;
             }
@@ -275,7 +275,7 @@ class Charset {
   }
 }
 
-// for keepFnames
+// for keepFnName
 function isFunction(path) {
   return path.isFunctionExpression()
     || path.isFunctionDeclaration()
