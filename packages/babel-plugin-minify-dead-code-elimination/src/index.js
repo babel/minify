@@ -121,12 +121,7 @@ module.exports = ({ types: t, traverse }) => {
               break;
             }
 
-            Object.defineProperty(binding, markForRemoval, {
-              enumerable: false,
-              value: true,
-              writable: false,
-              configurable: true
-            });
+            binding[markForRemoval] = true;
             continue;
           } else if (param.isAssignmentPattern()) {
             const left = param.get("left");
@@ -140,12 +135,7 @@ module.exports = ({ types: t, traverse }) => {
                 break;
               }
 
-              Object.defineProperty(binding, markForRemoval, {
-                enumerable: false,
-                value: true,
-                writable: false,
-                configurable: true
-              });
+              binding[markForRemoval] = true;
               continue;
             }
           }
