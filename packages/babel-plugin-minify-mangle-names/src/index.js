@@ -81,6 +81,42 @@ module.exports = ({ types: t }) => {
         Scopable(path) {
           const {scope} = path;
 
+          const bindings = scope.getAllBindings();
+          const names = Object.keys(bindings);
+
+          for (let i = 0; i < names.length; i++) {
+            const oldName = names[i];
+            const binding = bindings[oldName];
+
+            if (binding.path.isLabeledStatement()) {
+              const faulty = binding.referencePaths.filter(ref => {
+                return !(ref.parentPath.isBreakStatement() || ref.parentPath.isContinueStatement());
+              });
+              faulty.forEach(f => {
+                const index = binding.referencePaths.indexOf(f);
+                if (index > -1) {
+                  binding.referencePaths.splice(index, 1);
+                  binding.references--;
+                  if (binding.references === 0) {
+                    binding.referenced = false;
+                  }
+                }
+              });
+
+              scope.removeBinding(oldName);
+              const newBinding = scope.getBinding(oldName);
+              faulty.forEach(f => newBinding.reference(f));
+
+              continue;
+            }
+          }
+        }
+      })
+
+      this.program.traverse({
+        Scopable(path) {
+          const {scope} = path;
+
           if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
 
           if (mangler.visitedScopes.has(scope)) return;
