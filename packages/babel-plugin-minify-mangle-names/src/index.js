@@ -89,10 +89,10 @@ module.exports = ({ types: t }) => {
             const binding = bindings[oldName];
 
             if (binding.path.isLabeledStatement()) {
-              const faulty = binding.referencePaths.filter(ref => {
+              const faulty = binding.referencePaths.filter((ref) => {
                 return !(ref.parentPath.isBreakStatement() || ref.parentPath.isContinueStatement());
               });
-              faulty.forEach(f => {
+              faulty.forEach((f) => {
                 const index = binding.referencePaths.indexOf(f);
                 if (index > -1) {
                   binding.referencePaths.splice(index, 1);
@@ -105,13 +105,13 @@ module.exports = ({ types: t }) => {
 
               scope.removeBinding(oldName);
               const newBinding = scope.getBinding(oldName);
-              faulty.forEach(f => newBinding.reference(f));
+              faulty.forEach((f) => newBinding.reference(f));
 
               continue;
             }
           }
         }
-      })
+      });
 
       this.program.traverse({
         Scopable(path) {
