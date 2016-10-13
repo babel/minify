@@ -103,11 +103,37 @@ module.exports = ({ types: t }) => {
                 }
               });
 
+              // probably really bad for labels
               scope.removeBinding(oldName);
-              const newBinding = scope.getBinding(oldName);
-              faulty.forEach((f) => newBinding.reference(f));
 
-              continue;
+              const newBinding = scope.getBinding(oldName);
+              if (newBinding) {
+                // we found a binding in outer scopes
+                faulty.forEach((f) => newBinding.reference(f));
+              } else {
+                // we might have a binding in the same scope
+                // slow
+
+                // register binding
+                path.traverse({
+                  BindingIdentifier(bindingIdPath) {
+                    if (bindingIdPath.parentPath.isLabeledStatement({ label: bindingIdPath.node })) {
+                      return;
+                    }
+                    if (bindingIdPath.node.name === oldName) {
+                      scope.registerDeclaration(bindingIdPath);
+                    }
+                  }
+                });
+
+                // update references
+                const registeredBinding = scope.getBinding(oldName);
+                if (!registeredBinding) {
+                  // I'm not sure what this is - a global?
+                  return;
+                }
+                faulty.forEach((f) => registeredBinding.reference(f));
+              }
             }
           }
         }
