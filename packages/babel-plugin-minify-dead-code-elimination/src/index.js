@@ -669,6 +669,22 @@ module.exports = ({ types: t, traverse }) => {
       path.node.left = t.variableDeclaration("var", [t.variableDeclarator(left.node)]);
       binding.path = path.get("left").get("declarations")[0];
     },
+
+    LogicalExpression: {
+      exit(path) {
+        const node = path.node;
+        if (node.operator === "&&" || node.operator === "||") {
+          const leftEvaluated = path.get("left").evaluate();
+          if (leftEvaluated.confident) {
+            if (node.operator === "&&") {
+              path.replaceWith(leftEvaluated.value ? node.right : t.valueToNode(leftEvaluated.value));
+            } else {
+              path.replaceWith(leftEvaluated.value ? t.valueToNode(leftEvaluated.value) : node.right);
+            }
+          }
+        }
+      },
+    },
   };
 
   return {
