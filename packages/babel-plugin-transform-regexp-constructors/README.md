@@ -1,7 +1,6 @@
 # babel-plugin-transform-regexp-constructors
 
-This changes RegExp constructors into literals if and only if the RegExp
-arguments are string literals.
+This changes RegExp constructors into literals if the RegExp arguments are strings.
 
 ## Example
 
