@@ -21,19 +21,14 @@ function removeRvalIfUndefined(declaratorPath) {
 }
 
 function isAnyLvalReferencedBefore(declaratorPath, seenIds, t) {
-  const id = declaratorPath.get("id");
-  if (t.isIdentifier(id)) {
-    return seenIds.has(id.node.name);
-  }
-  let hasReference = false;
-  id.traverse({
-    Identifier(path) {
-      if (seenIds.has(path.node.name)) {
-        hasReference = true;
-      }
+  const id = declaratorPath.node.id;
+  const ids = t.getBindingIdentifiers(id);
+  for (const name in ids) {
+    if (seenIds.has(name)) {
+      return true;
     }
-  });
-  return hasReference;
+  }
+  return false;
 }
 
 function removeUndefinedAssignments(functionPath, t) {
@@ -51,24 +46,19 @@ function removeUndefinedAssignments(functionPath, t) {
       case "const":
         break;
       case "let":
-        path.node.declarations.forEach((declarator, index) => {
-          const declaratorPath = path.get("declarations")[index];
-          removeRvalIfUndefined(declaratorPath);
-        });
+        for (const declarator of path.get("declarations")) {
+          removeRvalIfUndefined(declarator);
+        }
         break;
       case "var":
-        if (!t.isFunction(functionPath)) {
+        if (!t.isFunction(functionPath) || isInLocalLoop(path.parentPath, t)) {
           break;
         }
-        if (isInLocalLoop(path.parentPath, t)) {
-          break;
-        }
-        path.node.declarations.forEach((declarator, index) => {
-          const declaratorPath = path.get("declarations")[index];
-          if (!isAnyLvalReferencedBefore(declaratorPath, seenIds, t)) {
-            removeRvalIfUndefined(declaratorPath);
+        for (const declarator of path.get("declarations")) {
+          if (!isAnyLvalReferencedBefore(declarator, seenIds, t)) {
+            removeRvalIfUndefined(declarator);
           }
-        });
+        }
         break;
       }
     },

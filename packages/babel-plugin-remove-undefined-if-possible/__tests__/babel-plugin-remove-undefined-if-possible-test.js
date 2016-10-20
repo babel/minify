@@ -2,6 +2,7 @@ jest.autoMockOff();
 
 const babel = require("babel-core");
 const plugin = require("../src/index");
+const unpad = require("../../../utils/unpad");
 
 function transform(code) {
   return babel.transform(code,  {
@@ -29,28 +30,56 @@ describe("remove-undefined-if-possible-plugin", () => {
   });
 
   it("should remove undefined return value", () => {
-    const source = `
-function foo() {
-  const a = undefined;
-  return undefined;
-}`;
-    const expected = `
-function foo() {
-  const a = undefined;
-  return;
-}`;
+    const source = unpad(`
+      function foo() {
+        const a = undefined;
+        return undefined;
+      }`);
+    const expected = unpad(`
+      function foo() {
+        const a = undefined;
+        return;
+      }`);
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove var declarations in functions", () => {
-    const source = `
-function foo() {
-  var a = undefined;
-}`;
-    const expected = `
-function foo() {
-  var a;
-}`;
+    const source = unpad(`
+      function foo() {
+        var a = undefined;
+      }`);
+    const expected = unpad(`
+      function foo() {
+        var a;
+      }`);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should remove nested var-assignments if not referenced before", () => {
+    const source = unpad(`
+      function foo() {
+        a = 3;
+        var { a: aa, b: bb } = undefined;
+      }`);
+    const expected = unpad(`
+      function foo() {
+        a = 3;
+        var { a: aa, b: bb };
+      }`);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should remove let-assignments in inner blocks", () => {
+    const source = unpad(`
+      let a = 1;
+      {
+        let a = undefined;
+      }`);
+    const expected = unpad(`
+      let a = 1;
+      {
+        let a;
+      }`);
     expect(transform(source)).toBe(expected);
   });
 
@@ -60,19 +89,28 @@ function foo() {
   });
 
   it("should not remove var-assignments in loops", () => {
-    const source = `
-for (var a = undefined;;) {
-  var b = undefined;
-}`;
+    const source = unpad(`
+      for (var a = undefined;;) {
+        var b = undefined;
+      }`);
     expect(transform(source)).toBe(source);
   });
 
   it("should not remove var-assignments if referenced before", () => {
-    const source = `
-function foo() {
-  a = 3;
-  var a = undefined;
-}`;
+    const source = unpad(`
+      function foo() {
+        a = 3;
+        var a = undefined;
+      }`);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not remove nested var-assignments if referenced before", () => {
+    const source = unpad(`
+      function foo() {
+        aa = 3;
+        var { a: aa, b: bb } = undefined;
+      }`);
     expect(transform(source)).toBe(source);
   });
 });
