@@ -363,7 +363,24 @@ module.exports = ({ types: t }) => {
           const prev = path.getSibling(path.key - 1);
           let consumed = false;
           if (prev.isVariableDeclaration()) {
-            if (!node.init) {
+            let referencedOutsideLoop = false;
+
+            // we don't care if vars are referenced outside the loop as they are fn scope
+            if (prev.node.kind === "let" || prev.node.kind === "const") {
+              const ids = Object.keys(prev.getBindingIdentifiers());
+
+              idloop: for (let i = 0; i < ids.length; i++) {
+                const refs = prev.scope.bindings[ids[i]].referencePaths;
+                for (let j = 0; j < refs.length; j++) {
+                  if (!isAncestor(path, refs[j])) {
+                    referencedOutsideLoop = true;
+                    break idloop;
+                  }
+                }
+              }
+            }
+
+            if (!node.init && !referencedOutsideLoop) {
               node.init = prev.node;
               consumed = true;
             }
@@ -1354,5 +1371,11 @@ module.exports = ({ types: t }) => {
     let evalResult = inputPath.evaluate();
     if (!evalResult.confident || !inputPath.isPure()) return false;
     return evalResult.value === patternValue;
+  }
+
+  // path1 -> path2
+  // is path1 an ancestor of path2
+  function isAncestor(path1, path2) {
+    return !!path2.findParent((parent) => parent === path1);
   }
 };
