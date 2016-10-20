@@ -5,13 +5,15 @@ module.exports = ({ types: t }) => {
     constructor(charset, program, {
       blacklist = {},
       keepFnName = false,
-      eval: _eval = false
+      eval: _eval = false,
+      topLevel = false,
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
       this.keepFnName = keepFnName;
       this.eval = _eval;
+      this.topLevel = topLevel;
 
       this.unsafeScopes = new Set;
       this.visitedScopes = new Set;
@@ -86,6 +88,13 @@ module.exports = ({ types: t }) => {
           if (mangler.visitedScopes.has(scope)) return;
           mangler.visitedScopes.add(scope);
 
+          function hasOwnBinding(name) {
+            if (scope.parent !== mangler.program.scope) {
+              return scope.hasOwnBinding(name);
+            }
+            return mangler.program.scope.hasOwnBinding(name) || scope.hasOwnBinding(name);
+          }
+
           let i = 0;
           function getNext() {
             return mangler.charset.getIdentifier(i++);
@@ -118,9 +127,9 @@ module.exports = ({ types: t }) => {
               // arguments
               || oldName === "arguments"
               // globals
-              || mangler.program.scope.bindings[oldName] === binding
+              || (mangler.topLevel ? false : mangler.program.scope.bindings[oldName] === binding)
               // other scope bindings
-              || !scope.hasOwnBinding(oldName)
+              || !hasOwnBinding(oldName)
               // labels
               || binding.path.isLabeledStatement()
               // blacklisted

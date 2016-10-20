@@ -983,4 +983,38 @@ describe("mangle-names", () => {
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
+
+  it("should mangle topLevel when topLevel option is true", () => {
+    const source = unpad(`
+      function foo() {
+        const bar = 1;
+      }
+      const FOO_ENV = "production";
+      var HELLO_WORLD = function bar() {
+        const x = 1;
+      };
+      class AbstractClass {}
+      new AbstractClass({
+        [FOO_ENV]: "foo",
+        a: foo(HELLO_WORLD)
+      });
+    `);
+
+    const expected = unpad(`
+      function b() {
+        const a = 1;
+      }
+      const c = "production";
+      var d = function a() {
+        const b = 1;
+      };
+      class e {}
+      new e({
+        [c]: "foo",
+        a: b(d)
+      });
+    `);
+
+    expect(transform(source, { topLevel: true })).toBe(expected);
+  });
 });
