@@ -987,32 +987,36 @@ describe("mangle-names", () => {
   it("should mangle topLevel when topLevel option is true", () => {
     const source = unpad(`
       function foo() {
-        const bar = 1;
+        if (FOO_ENV === "production") {
+          HELLO_WORLD.call();
+        }
       }
       const FOO_ENV = "production";
       var HELLO_WORLD = function bar() {
-        const x = 1;
+        new AbstractClass({
+          [FOO_ENV]: "foo",
+          a: foo(HELLO_WORLD)
+        });
       };
       class AbstractClass {}
-      new AbstractClass({
-        [FOO_ENV]: "foo",
-        a: foo(HELLO_WORLD)
-      });
+      foo();
     `);
 
     const expected = unpad(`
-      function b() {
-        const a = 1;
+      function a() {
+        if (b === "production") {
+          c.call();
+        }
       }
-      const c = "production";
-      var d = function a() {
-        const b = 1;
+      const b = "production";
+      var c = function a() {
+        new d({
+          [b]: "foo",
+          a: a(c)
+        });
       };
-      class e {}
-      new e({
-        [c]: "foo",
-        a: b(d)
-      });
+      class d {}
+      a();
     `);
 
     expect(transform(source, { topLevel: true })).toBe(expected);
