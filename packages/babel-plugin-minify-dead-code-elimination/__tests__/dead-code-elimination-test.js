@@ -2115,4 +2115,26 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not remove var from for..in/for..of statements", () => {
+    const source = unpad(`
+      function foo() {
+        for (var i in x) console.log("foo");
+        for (var j of y) console.log("foo");
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  // TODO: enable. (still a non standard feature)
+  xit("should not remove var from for..await statements", () => {
+    const source = unpad(`
+      async function foo() {
+        for await(var x of y) console.log("bar");
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
 });
