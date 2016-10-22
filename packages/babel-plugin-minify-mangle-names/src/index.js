@@ -120,6 +120,7 @@ module.exports = ({ types: t }) => {
           for (let i = 0; i < names.length; i++) {
             const oldName = names[i];
             const binding = bindings[oldName];
+            const isTopLevel = mangler.program.scope.bindings[oldName] === binding;
 
             if (
               // already renamed bindings
@@ -127,7 +128,7 @@ module.exports = ({ types: t }) => {
               // arguments
               || oldName === "arguments"
               // globals
-              || (mangler.topLevel ? false : mangler.program.scope.bindings[oldName] === binding)
+              || (mangler.topLevel ? false : isTopLevel)
               // other scope bindings
               || !hasOwnBinding(oldName)
               // labels
@@ -154,6 +155,9 @@ module.exports = ({ types: t }) => {
             // re-enable this - check above
             // resetNext();
             mangler.rename(scope, oldName, next);
+            if (isTopLevel) {
+              mangler.rename(mangler.program.scope, oldName, next);
+            }
             // mark the binding as renamed
             binding.renamed = true;
           }

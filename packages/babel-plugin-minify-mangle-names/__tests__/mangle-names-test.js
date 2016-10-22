@@ -1009,7 +1009,7 @@ describe("mangle-names", () => {
         }
       }
       const b = "production";
-      var c = function a() {
+      var c = function e() {
         new d({
           [b]: "foo",
           a: a(c)
