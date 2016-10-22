@@ -3,10 +3,10 @@ jest.autoMockOff();
 const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
 
-function transform(code, options) {
-  return babel.transform(code,  {
+function transform(code, options, babelOpts) {
+  return babel.transform(code,  Object.assign({}, {
     plugins: [[require("../src/index"), options]],
-  }).code.trim();
+  }, babelOpts)).code.trim();
 }
 
 describe("dce-plugin", () => {
@@ -2114,5 +2114,30 @@ describe("dce-plugin", () => {
     `);
 
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove var from for..in/for..of statements", () => {
+    const source = unpad(`
+      function foo() {
+        for (var i in x) console.log("foo");
+        for (var j of y) console.log("foo");
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove var from for..await statements", () => {
+    const source = unpad(`
+      async function foo() {
+        for await (var x of y) console.log("bar");
+      }
+    `);
+    const expected = source;
+    expect(transform(source, {}, {
+      parserOpts: {
+        plugins: ["asyncGenerators"]
+      }
+    })).toBe(expected);
   });
 });
