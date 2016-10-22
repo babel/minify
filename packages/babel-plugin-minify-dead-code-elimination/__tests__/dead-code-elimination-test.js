@@ -2127,7 +2127,6 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  // TODO: enable. (still a non standard feature)
   it("should not remove var from for..await statements", () => {
     const source = unpad(`
       async function foo() {
