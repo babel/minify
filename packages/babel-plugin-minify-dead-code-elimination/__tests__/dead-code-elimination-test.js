@@ -791,6 +791,30 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  it("should evaluate conditional expressions 3", () => {
+    const source = "'foo' ? a() : b();";
+    const expected = "a();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should evaluate conditional expressions 4", () => {
+    const source = "null ? a() : b();";
+    const expected = "b();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should evaluate conditional expressions 5", () => {
+    const source = "'foo' === 'foo' ? a() : b();";
+    const expected = "a();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should evaluate conditional expressions 6", () => {
+    const source = "'foo' !== 'bar' ? a() : b();";
+    const expected = "a();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it("should not remove needed expressions", () => {
     const source = unpad(`
       var n = 1;
