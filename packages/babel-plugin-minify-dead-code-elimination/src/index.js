@@ -153,9 +153,9 @@ module.exports = ({ types: t, traverse }) => {
               continue;
             } else if (binding.path.isVariableDeclarator()) {
               if (binding.path.parentPath.parentPath &&
-                binding.path.parentPath.parentPath.isForInStatement()
+                binding.path.parentPath.parentPath.isForXStatement()
               ) {
-                // Can't remove if in a for in statement `for (var x in wat)`.
+                // Can't remove if in a for-in/for-of/for-await statement `for (var x in wat)`.
                 continue;
               }
             } else if (!scope.isPure(binding.path.node)) {

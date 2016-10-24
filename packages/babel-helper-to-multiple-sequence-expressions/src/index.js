@@ -80,7 +80,9 @@ module.exports = function(t) {
           if (res.bailed) {
             return bail();
           }
-          exprs.push(res.seq);
+          if (res.seq) {
+            exprs.push(res.seq);
+          }
         } else {
           return bail();
         }
