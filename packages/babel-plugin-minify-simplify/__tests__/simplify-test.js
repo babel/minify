@@ -2122,4 +2122,16 @@ describe("simplify-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should require block for single block scoped declaration in if/else", () => {
+    const source = unpad(`
+      if (false) {
+        let { a } = foo();
+      } else {
+        const x = bar();
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
 });
