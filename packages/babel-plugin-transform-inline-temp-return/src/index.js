@@ -28,7 +28,7 @@ function isSafeToInline(i, statements, scope, t) {
   return true;
 }
 
-function inline(i, block, statements, t) {
+function inline(i, block, statements) {
   const varDeclaration = statements[i - 1];
   const exp = varDeclaration.declarations[0].init;
   const statementsPath = block.get("body");
