@@ -246,6 +246,24 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // https://github.com/babel/babili/issues/208
+  it("should handle empty blocks when merging to sequences", () => {
+    const source = unpad(`
+      !function () {
+        var x;
+        { }
+        alert(x);
+      }()
+    `);
+    const expected = unpad(`
+      !function () {
+        var x;
+        alert(x);
+      }();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should merge expressions into the init part of for", () => {
     const source = unpad(`
       function foo() {
