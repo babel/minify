@@ -1,17 +1,5 @@
 "use strict";
 
-function isInLocalLoop(path, t) {
-  if (path === null) {
-    return false;
-  } else if (t.isLoop(path)) {
-    return true;
-  } else if (t.isFunction(path)) {
-    return false;
-  } else {
-    return isInLocalLoop(path.parentPath, t);
-  }
-}
-
 function removeRvalIfUndefined(declaratorPath) {
   const rval = declaratorPath.get("init")
                               .evaluate();
@@ -20,57 +8,55 @@ function removeRvalIfUndefined(declaratorPath) {
   }
 }
 
-function isAnyLvalReferencedBefore(declaratorPath, seenIds, t) {
+function isAnyLvalReferencedBefore(declaratorPath, seenNames, t) {
   const id = declaratorPath.node.id;
-  const ids = t.getBindingIdentifiers(id);
-  for (const name in ids) {
-    if (seenIds.has(name)) {
+  const names = t.getBindingIdentifiers(id);
+  for (const name in names) {
+    if (seenNames.has(name)) {
       return true;
     }
   }
   return false;
 }
 
-function removeUndefinedAssignments(functionPath, t) {
-  const seenIds = new Set();
-  functionPath.traverse({
-    Function(path) {
-      path.skip();
-    },
-    Identifier(path) {
-      // potential optimization: only store ids that are lvals of assignments.
-      seenIds.add(path.node.name);
-    },
-    VariableDeclaration(path) {
-      switch (path.node.kind) {
-      case "const":
-        break;
-      case "let":
-        for (const declarator of path.get("declarations")) {
-          removeRvalIfUndefined(declarator);
-        }
-        break;
-      case "var":
-        if (!t.isFunction(functionPath) || isInLocalLoop(path.parentPath, t)) {
-          break;
-        }
-        for (const declarator of path.get("declarations")) {
-          if (!isAnyLvalReferencedBefore(declarator, seenIds, t)) {
-            removeRvalIfUndefined(declarator);
-          }
-        }
-        break;
-      }
-    },
-  });
-}
-
 module.exports = function({ types: t }) {
+  let functionStack = null;
+  let functionLoopStack = null;
+  let functionToNamesMap = null;
   return {
     name: "remove-undefined-if-possible",
     visitor: {
-      FunctionParent(path) {
-        removeUndefinedAssignments(path, t);
+      Program: {
+        enter(path) {
+          functionStack = [];
+          functionLoopStack = [];
+          functionToNamesMap = new Map();
+        },
+        exit(path) {
+          functionStack = null;
+          functionLoopStack = null;
+          functionToNamesMap = null;
+        },
+      },
+      Function: {
+        enter(path) {
+          functionStack.push(path);
+          functionLoopStack.push(path);
+          functionToNamesMap.set(path, new Set());
+        },
+        exit(path) {
+          functionStack.pop();
+          functionLoopStack.pop();
+          functionToNamesMap.delete(path);
+        },
+      },
+      Loop: {
+        enter(path) {
+          functionLoopStack.push(path);
+        },
+        exit(path) {
+          functionLoopStack.pop();
+        },
       },
       ReturnStatement(path) {
         if (path.node.argument !== null) {
@@ -79,6 +65,41 @@ module.exports = function({ types: t }) {
           if (rval.confident === true && rval.value === undefined) {
             path.node.argument = null;
           }
+        }
+      },
+      Identifier(path) {
+        // potential optimization: only store ids that are lvals, instead of all
+        // ids
+        if (functionStack.length > 0) {
+          functionToNamesMap.get(functionStack[functionStack.length - 1])
+                            .add(path.node.name);
+        }
+      },
+      VariableDeclaration(path) {
+        switch (path.node.kind) {
+        case "const":
+          break;
+        case "let":
+          for (const declarator of path.get("declarations")) {
+            removeRvalIfUndefined(declarator);
+          }
+          break;
+        case "var":
+          if (functionLoopStack.length === 0) {
+            // ignore global variables
+            break;
+          }
+          const fnOrLoop = functionLoopStack[functionLoopStack.length - 1];
+          if (t.isLoop(fnOrLoop)) {
+            break;
+          }
+          for (const declarator of path.get("declarations")) {
+            if (!isAnyLvalReferencedBefore(declarator,
+                functionToNamesMap.get(fnOrLoop), t)) {
+              removeRvalIfUndefined(declarator);
+            }
+          }
+          break;
         }
       },
     },
