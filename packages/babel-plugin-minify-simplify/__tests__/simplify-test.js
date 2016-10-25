@@ -246,6 +246,24 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // https://github.com/babel/babili/issues/208
+  it("should handle empty blocks when merging to sequences", () => {
+    const source = unpad(`
+      !function () {
+        var x;
+        { }
+        alert(x);
+      }()
+    `);
+    const expected = unpad(`
+      !function () {
+        var x;
+        alert(x);
+      }();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should merge expressions into the init part of for", () => {
     const source = unpad(`
       function foo() {
@@ -409,19 +427,64 @@ describe("simplify-plugin", () => {
 
   it("should convert whiles to fors and merge vars", () => {
     const source = unpad(`
-      function foo(a) {
-        var bar = baz;
+      function foo() {
+        let bar = baz;
         while(true) {
           bar();
         }
       }
     `);
     const expected = unpad(`
-      function foo(a) {
-        for (var bar = baz; true;) bar();
+      function foo() {
+        for (let bar = baz; true;) bar();
       }
     `);
 
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://github.com/babel/babili/issues/198
+  it("should convert while->for and NOT merge let/const if any is refereced outside the loop", () => {
+    const source = unpad(`
+      function foo() {
+        let a,
+            { b } = x;
+        while (true) {
+          bar(a, b);
+        }
+        return [a, b];
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        let a,
+            { b } = x;
+
+        for (; true;) bar(a, b);
+
+        return [a, b];
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should convert while->for and merge var even if any is refereced outside the loop", () => {
+    const source = unpad(`
+      function foo() {
+        var a = 1;
+        while (true) {
+          bar(a);
+        }
+        return a;
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        for (var a = 1; true;) bar(a);
+
+        return a;
+      }
+    `);
     expect(transform(source)).toBe(expected);
   });
 

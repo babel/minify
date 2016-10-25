@@ -115,6 +115,8 @@ module.exports = ({ types: t }) => {
             if (
               // already renamed bindings
               binding.renamed
+              // arguments
+              || oldName === "arguments"
               // globals
               || mangler.program.scope.bindings[oldName] === binding
               // other scope bindings

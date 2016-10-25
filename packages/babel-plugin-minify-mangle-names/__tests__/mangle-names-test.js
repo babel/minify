@@ -970,4 +970,17 @@ describe("mangle-names", () => {
     const expected = source;
     expect(transform(source, {}, "module")).toBe(expected);
   });
+
+  it("should not mangle the name arguments", () => {
+    const source = unpad(`
+      (function () {
+        var arguments = void 0;
+        (function () {
+          console.log(arguments);
+        })("argument");
+      })();
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
 });
