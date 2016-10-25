@@ -8,55 +8,43 @@ function removeRvalIfUndefined(declaratorPath) {
   }
 }
 
-function isAnyLvalReferencedBefore(declaratorPath, seenNames, t) {
+function areAllBindingsNotSeen(declaratorPath, seenNames, t) {
   const id = declaratorPath.node.id;
   const names = t.getBindingIdentifiers(id);
   for (const name in names) {
     if (seenNames.has(name)) {
-      return true;
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 module.exports = function({ types: t }) {
-  let functionStack = null;
-  let functionLoopStack = null;
-  let functionToNamesMap = null;
+  let names = null;
+  let functionNesting = 0;
   return {
     name: "remove-undefined-if-possible",
     visitor: {
       Program: {
         enter() {
-          functionStack = [];
-          functionLoopStack = [];
-          functionToNamesMap = new Map();
+          names = new Set();
+          functionNesting = 0;
         },
         exit() {
-          functionStack = null;
-          functionLoopStack = null;
-          functionToNamesMap = null;
+          names = null;
+          functionNesting = 0;
         },
       },
       Function: {
-        enter(path) {
-          functionStack.push(path);
-          functionLoopStack.push(path);
-          functionToNamesMap.set(path, new Set());
-        },
-        exit(path) {
-          functionStack.pop();
-          functionLoopStack.pop();
-          functionToNamesMap.delete(path);
-        },
-      },
-      Loop: {
-        enter(path) {
-          functionLoopStack.push(path);
+        enter() {
+          functionNesting++;
         },
         exit() {
-          functionLoopStack.pop();
+          functionNesting--;
         },
+      },
+      Identifier(path) {
+        names.add(path.node.name);
       },
       ReturnStatement(path) {
         if (path.node.argument !== null) {
@@ -65,14 +53,6 @@ module.exports = function({ types: t }) {
           if (rval.confident === true && rval.value === undefined) {
             path.node.argument = null;
           }
-        }
-      },
-      Identifier(path) {
-        // potential optimization: only store ids that are lvals, instead of all
-        // ids
-        if (functionStack.length > 0) {
-          functionToNamesMap.get(functionStack[functionStack.length - 1])
-                            .add(path.node.name);
         }
       },
       VariableDeclaration(path) {
@@ -85,17 +65,12 @@ module.exports = function({ types: t }) {
           }
           break;
         case "var":
-          if (functionLoopStack.length === 0) {
-            // ignore global variables
-            break;
-          }
-          const fnOrLoop = functionLoopStack[functionLoopStack.length - 1];
-          if (t.isLoop(fnOrLoop)) {
+          if (functionNesting === 0) {
+            // ignore global vars
             break;
           }
           for (const declarator of path.get("declarations")) {
-            if (!isAnyLvalReferencedBefore(declarator,
-                functionToNamesMap.get(fnOrLoop), t)) {
+            if (areAllBindingsNotSeen(declarator, names, t)) {
               removeRvalIfUndefined(declarator);
             }
           }
