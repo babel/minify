@@ -27,12 +27,12 @@ module.exports = function({ types: t }) {
     name: "remove-undefined-if-possible",
     visitor: {
       Program: {
-        enter(path) {
+        enter() {
           functionStack = [];
           functionLoopStack = [];
           functionToNamesMap = new Map();
         },
-        exit(path) {
+        exit() {
           functionStack = null;
           functionLoopStack = null;
           functionToNamesMap = null;
@@ -54,7 +54,7 @@ module.exports = function({ types: t }) {
         enter(path) {
           functionLoopStack.push(path);
         },
-        exit(path) {
+        exit() {
           functionLoopStack.pop();
         },
       },

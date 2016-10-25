@@ -10,6 +10,7 @@ module.exports = {
     require("babel-plugin-minify-replace"),
     require("babel-plugin-minify-simplify"),
     require("babel-plugin-minify-type-constructors"),
+    require("babel-plugin-remove-undefined-if-possible"),
     require("babel-plugin-transform-member-expression-literals"),
     require("babel-plugin-transform-merge-sibling-variables"),
     require("babel-plugin-transform-minify-booleans"),
