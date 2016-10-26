@@ -21,12 +21,12 @@
     "babel-plugin-minify-replace": "^0.0.1",
     "babel-plugin-minify-simplify": "^0.0.3",
     "babel-plugin-minify-type-constructors": "^0.0.1",
-    "babel-plugin-remove-undefined-if-possible": "^0.0.1",
     "babel-plugin-transform-member-expression-literals": "^6.8.0",
     "babel-plugin-transform-merge-sibling-variables": "^6.8.0",
     "babel-plugin-transform-minify-booleans": "^6.8.0",
     "babel-plugin-transform-property-literals": "^6.8.0",
     "babel-plugin-transform-regexp-constructors": "^0.0.1",
+    "babel-plugin-transform-remove-undefined": "^0.0.1",
     "babel-plugin-transform-simplify-comparison-operators": "^6.8.0",
     "babel-plugin-transform-undefined-to-void": "^6.8.0"
   },
