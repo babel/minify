@@ -7,6 +7,7 @@ module.exports = {
     require("babel-plugin-minify-guarded-expressions"),
     require("babel-plugin-minify-infinity"),
     require("babel-plugin-minify-mangle-names"),
+    require("babel-plugin-minify-numeric-literals"),
     require("babel-plugin-minify-replace"),
     require("babel-plugin-minify-simplify"),
     require("babel-plugin-minify-type-constructors"),
