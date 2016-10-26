@@ -1232,7 +1232,8 @@ module.exports = ({ types: t }) => {
       block.body.length === 1 &&
       (
         t.isVariableDeclaration(block.body[0], { kind: "let" }) ||
-        t.isVariableDeclaration(block.body[0], { kind: "const" })
+        t.isVariableDeclaration(block.body[0], { kind: "const" }) ||
+        t.isFunctionDeclaration(block.body[0])
       );
   }
 

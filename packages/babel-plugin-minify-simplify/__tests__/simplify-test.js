@@ -2127,8 +2127,10 @@ describe("simplify-plugin", () => {
     const source = unpad(`
       if (false) {
         let { a } = foo();
-      } else {
+      } else if (true) {
         const x = bar();
+      } else {
+        function baz() {}
       }
     `);
     const expected = source;
