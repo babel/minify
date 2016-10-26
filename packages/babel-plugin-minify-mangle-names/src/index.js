@@ -81,6 +81,68 @@ module.exports = ({ types: t }) => {
         Scopable(path) {
           const {scope} = path;
 
+          const bindings = scope.getAllBindings();
+          const names = Object.keys(bindings);
+
+          for (let i = 0; i < names.length; i++) {
+            const oldName = names[i];
+            const binding = bindings[oldName];
+
+            if (binding.path.isLabeledStatement()) {
+              const faulty = binding.referencePaths.filter((ref) => {
+                return !(ref.parentPath.isBreakStatement() || ref.parentPath.isContinueStatement());
+              });
+              faulty.forEach((f) => {
+                const index = binding.referencePaths.indexOf(f);
+                if (index > -1) {
+                  binding.referencePaths.splice(index, 1);
+                  binding.references--;
+                  if (binding.references === 0) {
+                    binding.referenced = false;
+                  }
+                }
+              });
+
+              // probably really bad for labels
+              scope.removeBinding(oldName);
+
+              const newBinding = scope.getBinding(oldName);
+              if (newBinding) {
+                // we found a binding in outer scopes
+                faulty.forEach((f) => newBinding.reference(f));
+              } else {
+                // we might have a binding in the same scope
+                // slow
+
+                // register binding
+                path.traverse({
+                  BindingIdentifier(bindingIdPath) {
+                    if (bindingIdPath.parentPath.isLabeledStatement({ label: bindingIdPath.node })) {
+                      return;
+                    }
+                    if (bindingIdPath.node.name === oldName) {
+                      scope.registerDeclaration(bindingIdPath);
+                    }
+                  }
+                });
+
+                // update references
+                const registeredBinding = scope.getBinding(oldName);
+                if (!registeredBinding) {
+                  // I'm not sure what this is - a global?
+                  return;
+                }
+                faulty.forEach((f) => registeredBinding.reference(f));
+              }
+            }
+          }
+        }
+      });
+
+      this.program.traverse({
+        Scopable(path) {
+          const {scope} = path;
+
           if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
 
           if (mangler.visitedScopes.has(scope)) return;
