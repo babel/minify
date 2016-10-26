@@ -966,13 +966,12 @@ module.exports = ({ types: t, traverse }) => {
 
   function getLabel(name, _path) {
     let label, path = _path;
-    while (!path.isProgram()) {
+    do {
       label = path.scope.getLabel(name);
       if (label) {
         return label;
       }
-      path = path.parentPath;
-    }
+    } while (path = path.parentPath);
     return null;
   }
 };
