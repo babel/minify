@@ -124,6 +124,54 @@ module.exports = ({ types: t }) => {
         ],
       },
 
+      LogicalExpression(path) {
+        const left = path.get("left");
+        const right = path.get("right");
+        const operator = path.node.operator;
+
+        const AND = (input) => input === "&&";
+        const OR = (input) => input === "||";
+
+        const TRUTHY = (input) => {
+          const evalResult = input.evaluate();
+          return evalResult.confident && input.isPure() && evalResult.value;
+        };
+        const FALSY = (input) => {
+          // NaN and undefined are falsy
+          if (input.isIdentifier()) {
+            if (input.node.name === "NaN" || input.node.name === "undefined") {
+              return true;
+            }
+          }
+          const evalResult = input.evaluate();
+          return evalResult.confident && input.isPure() && !evalResult.value;
+        };
+
+        const {
+          Expression: EX
+        } = types;
+
+        // Convention:
+        // [left, operator, right, handler(leftNode, rightNode)]
+        const matcher = new PatternMatch([
+          [TRUTHY, AND, EX, (l, r) => r],
+          [FALSY, AND, EX, (l) => l],
+          [TRUTHY, OR, EX, (l) => l],
+          [FALSY, OR, EX, (l, r) => r]
+        ]);
+
+        const result = matcher.match(
+          [left, operator, right],
+          isPatternMatchesPath
+        );
+
+        if (result.match) {
+          // here we are sure that left.evaluate is always confident becuase
+          // it satisfied one of TRUTHY/FALSY paths
+          path.replaceWith(result.value(t.valueToNode(left.evaluate().value), right.node));
+        }
+      },
+
       ConditionalExpression: {
         enter: [
           // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
@@ -1377,6 +1425,9 @@ module.exports = ({ types: t }) => {
         }
       }
       return false;
+    }
+    if (typeof patternValue === "function") {
+      return patternValue(inputPath);
     }
     if (isNodeOfType(inputPath.node, patternValue)) return true;
     let evalResult = inputPath.evaluate();

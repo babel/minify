@@ -2107,6 +2107,146 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // From UglifyJS
+  it("should simplify logical expression of the following forms of &&", () => {
+    // compress to right
+    let sources = unpad(`
+      a = true && foo
+      a = 1 && console.log("asdf")
+      a = 4 * 2 && foo()
+      a = 10 == 10 && foo() + bar()
+      a = "foo" && foo()
+      a = 1 + "a" && foo / 10
+      a = -1 && 5 << foo
+      a = 6 && 10
+    `).split("\n");
+
+    let expected = unpad(`
+      a = foo;
+      a = console.log("asdf");
+      a = foo();
+      a = foo() + bar();
+      a = foo();
+      a = foo / 10;
+      a = 5 << foo;
+      a = 10;
+    `).split("\n");
+
+    for (let i = 0; i < sources.length; i++) {
+      expect(transform(sources[i])).toBe(expected[i]);
+    }
+
+    // compress to left
+    sources = unpad(`
+      a = false && bar
+      a = NaN && console.log("a")
+      a = 0 && bar()
+      a = undefined && foo(bar)
+      a = 3 * 3 - 9 && bar(foo)
+      a = 9 == 10 && foo()
+      a = !"string" && foo % bar
+      a = 0 && 7
+    `).split("\n");
+    expected = unpad(`
+      a = false;
+      a = NaN;
+      a = 0;
+      a = undefined;
+      a = 0;
+      a = false;
+      a = false;
+      a = 0;
+    `).split("\n");
+    for (let i = 0; i < sources.length; i++) {
+      expect(transform(sources[i])).toBe(expected[i]);
+    }
+
+    // don't compress
+    sources = unpad(`
+      a = foo() && true;
+      a = console.log && 3 + 8;
+      a = foo + bar + 5 && "a";
+      a = 4 << foo && -1.5;
+      a = bar() && false;
+      a = foo() && 0;
+      a = bar() && NaN;
+      a = foo() && null;
+    `).split("\n");
+    for (let i = 0; i < sources.length; i++) {
+      expect(transform(sources[i])).toBe(sources[i]);
+    }
+  });
+
+  it("should simplify logical expression of the following forms of ||", () => {
+    // compress to left
+    let sources = unpad(`
+      a = true     || condition;
+      a = 1        || console.log("a");
+      a = 2 * 3    || 2 * condition;
+      a = 5 == 5   || condition + 3;
+      a = "string" || 4 - condition;
+      a = 5 + ""   || condition / 5;
+      a = -4.5     || 6 << condition;
+      a = 6        || 7;
+    `).split("\n");
+    let expected = unpad(`
+      a = true;
+      a = 1;
+      a = 6;
+      a = true;
+      a = "string";
+      a = "5";
+      a = -4.5;
+      a = 6;
+    `).split("\n");
+    for (let i = 0; i < sources.length; i++) {
+      expect(transform(sources[i])).toBe(expected[i]);
+    }
+
+    sources = unpad(`
+      a = false     || condition;
+      a = 0         || console.log("b");
+      a = NaN       || console.log("c");
+      a = undefined || 2 * condition;
+      a = null      || condition + 3;
+      a = 2 * 3 - 6 || 4 - condition;
+      a = 10 == 7   || condition / 5;
+      a = !"string" || 6 % condition;
+      a = null      || 7;
+    `).split("\n");
+    expected = unpad(`
+      a = condition;
+      a = console.log("b");
+      a = console.log("c");
+      a = 2 * condition;
+      a = condition + 3;
+      a = 4 - condition;
+      a = condition / 5;
+      a = 6 % condition;
+      a = 7;
+    `).split("\n");
+    for (let i = 0; i < sources.length; i++) {
+      expect(transform(sources[i])).toBe(expected[i]);
+    }
+
+    // don't compress
+    sources = unpad(`
+      a = condition || true;
+      a = console.log("a") || 2;
+      a = 4 - condition || "string";
+      a = 6 << condition || -4.5;
+
+      a = condition || false;
+      a = console.log("b") || NaN;
+      a = console.log("c") || 0;
+      a = 2 * condition || undefined;
+      a = condition + 3 || null;
+    `).split("\n");
+    for (let i = 0; i < sources.length; i++) {
+      expect(transform(sources[i])).toBe(sources[i]);
+    }
+  });
+
   // https://github.com/babel/babili/issues/115
   it("should transform impure conditional statements correctly - issue#115", () => {
     const source = unpad(`

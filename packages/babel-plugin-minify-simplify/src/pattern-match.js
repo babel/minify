@@ -46,6 +46,8 @@ module.exports = class PatternMatch {
           result.value = current;
           break;
         }
+      } else {
+        break;
       }
     }
     return result;
