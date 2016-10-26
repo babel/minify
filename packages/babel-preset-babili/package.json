@@ -18,6 +18,7 @@
     "babel-plugin-minify-guarded-expressions": "^0.0.3",
     "babel-plugin-minify-infinity": "^0.0.1",
     "babel-plugin-minify-mangle-names": "^0.0.3",
+    "babel-plugin-minify-numeric-literals": "^0.0.1",
     "babel-plugin-minify-replace": "^0.0.1",
     "babel-plugin-minify-simplify": "^0.0.3",
     "babel-plugin-minify-type-constructors": "^0.0.1",
