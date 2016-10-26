@@ -6,7 +6,7 @@ module.exports = function({ types: t }) {
     visitor: {
       NumericLiteral(path) {
         if (!path.node.extra) return;
-        const exponential = path.node.value.toExponential().replace('+', '');
+        const exponential = path.node.value.toExponential().replace("+", "");
         if (path.node.extra.raw.length > exponential.length) {
           const literal = t.numericLiteral(path.node.value);
           literal.extra = {
