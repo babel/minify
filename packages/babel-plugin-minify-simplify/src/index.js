@@ -28,6 +28,9 @@ module.exports = ({ types: t }) => {
   const or = (a, b) => t.logicalExpression("||", a, b);
   const and = (a, b) => t.logicalExpression("&&", a, b);
 
+  const OP_AND = (input) => input === "&&";
+  const OP_OR = (input) => input === "||";
+
   return {
     name: "minify-simplify",
     visitor: {
@@ -124,51 +127,70 @@ module.exports = ({ types: t }) => {
         ],
       },
 
-      LogicalExpression(path) {
-        const left = path.get("left");
-        const right = path.get("right");
-        const operator = path.node.operator;
+      LogicalExpression: {
+        exit(path) {
+          // cache of path.evaluate()
+          const evaluateMemo = new Map;
 
-        const AND = (input) => input === "&&";
-        const OR = (input) => input === "||";
-
-        const TRUTHY = (input) => {
-          const evalResult = input.evaluate();
-          return evalResult.confident && input.isPure() && evalResult.value;
-        };
-        const FALSY = (input) => {
-          // NaN and undefined are falsy
-          if (input.isIdentifier()) {
-            if (input.node.name === "NaN" || input.node.name === "undefined") {
-              return true;
+          const TRUTHY = (input) => {
+            // !NaN and !undefined are truthy
+            // separate check here as they are considered impure by babel
+            if (input.isUnaryExpression() && input.get("argument").isIdentifier()) {
+              if (input.node.argument.name === "NaN" || input.node.argument.name === "undefined") {
+                return true;
+              }
             }
+            const evalResult = input.evaluate();
+            evaluateMemo.set(input, evalResult);
+            return evalResult.confident && input.isPure() && evalResult.value;
+          };
+
+          const FALSY = (input) => {
+            // NaN and undefined are falsy
+            // separate check here as they are considered impure by babel
+            if (input.isIdentifier()) {
+              if (input.node.name === "NaN" || input.node.name === "undefined") {
+                return true;
+              }
+            }
+            const evalResult = input.evaluate();
+            evaluateMemo.set(input, evalResult);
+            return evalResult.confident && input.isPure() && !evalResult.value;
+          };
+
+          const {
+            Expression: EX
+          } = types;
+
+          // Convention:
+          // [left, operator, right, handler(leftNode, rightNode)]
+          const matcher = new PatternMatch([
+            [TRUTHY, OP_AND, EX, (l, r) => r],
+            [FALSY, OP_AND, EX, (l) => l],
+            [TRUTHY, OP_OR, EX, (l) => l],
+            [FALSY, OP_OR, EX, (l, r) => r]
+          ]);
+
+          const left = path.get("left");
+          const right = path.get("right");
+          const operator = path.node.operator;
+
+          const result = matcher.match(
+            [left, operator, right],
+            isPatternMatchesPath
+          );
+
+          if (result.match) {
+            // here we are sure that left.evaluate is always confident becuase
+            // it satisfied one of TRUTHY/FALSY paths
+            let value;
+            if (evaluateMemo.has(left)) {
+              value = evaluateMemo.get(left).value;
+            } else {
+              value = left.evaluate().value;
+            }
+            path.replaceWith(result.value(t.valueToNode(value), right.node));
           }
-          const evalResult = input.evaluate();
-          return evalResult.confident && input.isPure() && !evalResult.value;
-        };
-
-        const {
-          Expression: EX
-        } = types;
-
-        // Convention:
-        // [left, operator, right, handler(leftNode, rightNode)]
-        const matcher = new PatternMatch([
-          [TRUTHY, AND, EX, (l, r) => r],
-          [FALSY, AND, EX, (l) => l],
-          [TRUTHY, OR, EX, (l) => l],
-          [FALSY, OR, EX, (l, r) => r]
-        ]);
-
-        const result = matcher.match(
-          [left, operator, right],
-          isPatternMatchesPath
-        );
-
-        if (result.match) {
-          // here we are sure that left.evaluate is always confident becuase
-          // it satisfied one of TRUTHY/FALSY paths
-          path.replaceWith(result.value(t.valueToNode(left.evaluate().value), right.node));
         }
       },
 

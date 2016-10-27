@@ -2119,6 +2119,7 @@ describe("simplify-plugin", () => {
       a = 1 + "a" && foo / 10
       a = -1 && 5 << foo
       a = 6 && 10
+      a = !NaN && foo()
     `).split("\n");
 
     let expected = unpad(`
@@ -2130,11 +2131,10 @@ describe("simplify-plugin", () => {
       a = foo / 10;
       a = 5 << foo;
       a = 10;
+      a = foo();
     `).split("\n");
 
-    for (let i = 0; i < sources.length; i++) {
-      expect(transform(sources[i])).toBe(expected[i]);
-    }
+    expect(sources.map((s) => transform(s))).toEqual(expected);
 
     // compress to left
     sources = unpad(`
@@ -2147,6 +2147,7 @@ describe("simplify-plugin", () => {
       a = !"string" && foo % bar
       a = 0 && 7
     `).split("\n");
+
     expected = unpad(`
       a = false;
       a = NaN;
@@ -2157,9 +2158,8 @@ describe("simplify-plugin", () => {
       a = false;
       a = 0;
     `).split("\n");
-    for (let i = 0; i < sources.length; i++) {
-      expect(transform(sources[i])).toBe(expected[i]);
-    }
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
 
     // don't compress
     sources = unpad(`
@@ -2172,9 +2172,8 @@ describe("simplify-plugin", () => {
       a = bar() && NaN;
       a = foo() && null;
     `).split("\n");
-    for (let i = 0; i < sources.length; i++) {
-      expect(transform(sources[i])).toBe(sources[i]);
-    }
+
+    expect(sources.map((s) => transform(s))).toEqual(sources);
   });
 
   it("should simplify logical expression of the following forms of ||", () => {
@@ -2189,6 +2188,7 @@ describe("simplify-plugin", () => {
       a = -4.5     || 6 << condition;
       a = 6        || 7;
     `).split("\n");
+
     let expected = unpad(`
       a = true;
       a = 1;
@@ -2199,9 +2199,8 @@ describe("simplify-plugin", () => {
       a = -4.5;
       a = 6;
     `).split("\n");
-    for (let i = 0; i < sources.length; i++) {
-      expect(transform(sources[i])).toBe(expected[i]);
-    }
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
 
     sources = unpad(`
       a = false     || condition;
@@ -2214,6 +2213,7 @@ describe("simplify-plugin", () => {
       a = !"string" || 6 % condition;
       a = null      || 7;
     `).split("\n");
+
     expected = unpad(`
       a = condition;
       a = console.log("b");
@@ -2225,9 +2225,8 @@ describe("simplify-plugin", () => {
       a = 6 % condition;
       a = 7;
     `).split("\n");
-    for (let i = 0; i < sources.length; i++) {
-      expect(transform(sources[i])).toBe(expected[i]);
-    }
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
 
     // don't compress
     sources = unpad(`
@@ -2235,16 +2234,34 @@ describe("simplify-plugin", () => {
       a = console.log("a") || 2;
       a = 4 - condition || "string";
       a = 6 << condition || -4.5;
-
       a = condition || false;
       a = console.log("b") || NaN;
       a = console.log("c") || 0;
       a = 2 * condition || undefined;
       a = condition + 3 || null;
     `).split("\n");
-    for (let i = 0; i < sources.length; i++) {
-      expect(transform(sources[i])).toBe(sources[i]);
-    }
+
+    expect(sources.map((s) => transform(s))).toEqual(sources);
+  });
+
+  it("should transform complex logical expressions", () => {
+    let sources = unpad(`
+      a = true && 1 && foo
+      a = 1 && 4 * 2 && console.log("asdf")
+      a = 4 * 2 && NaN && foo()
+      a = 10 == 11 || undefined && foo() + bar() && bar()
+      a = -1 && undefined || 5 << foo
+    `).split("\n");
+
+    let expected = unpad(`
+      a = foo;
+      a = console.log("asdf");
+      a = NaN;
+      a = undefined;
+      a = 5 << foo;
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
   });
 
   // https://github.com/babel/babili/issues/115
