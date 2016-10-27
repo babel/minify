@@ -154,7 +154,8 @@ module.exports = ({ types: t }) => {
           updateOperators.has(right.node.operator));
 
         if (left.node.name === undefined) {
-          // not an identifier, probably MemberExpression which we don't transform yet
+          // TODO: transform MemberExpressions as well
+          // e.g. foo.bar = foo.bar + 123;
           return;
         }
 
