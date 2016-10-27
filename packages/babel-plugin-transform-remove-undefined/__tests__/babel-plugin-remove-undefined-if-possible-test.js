@@ -55,18 +55,13 @@ describe("remove-undefined-if-possible-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should remove nested var-assignments if not referenced before", () => {
+  it("idk what this is", () => {
     const source = unpad(`
       function foo() {
         a = 3;
         var { a: aa, b: bb } = undefined;
       }`);
-    const expected = unpad(`
-      function foo() {
-        a = 3;
-        var { a: aa, b: bb };
-      }`);
-    expect(transform(source)).toBe(expected);
+    expect(transform(source)).toBe(source);
   });
 
   it("should remove let-assignments in inner blocks", () => {
@@ -88,10 +83,24 @@ describe("remove-undefined-if-possible-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
-  it("should not remove var-assignments in loops", () => {
+  it("should remove var-assignments in loops", () => {
     const source = unpad(`
       for (var a = undefined;;) {
         var b = undefined;
+      }`);
+    const expected = unpad(`
+      for (var a;;) {
+        var b;
+      }`);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove var-assignments in loops 2", () => {
+    const source = unpad(`
+      for (var a;;) {
+        var b = undefined;
+        console.log(b);
+        b = 3;
       }`);
     expect(transform(source)).toBe(source);
   });
@@ -112,5 +121,64 @@ describe("remove-undefined-if-possible-plugin", () => {
         var { a: aa, b: bb } = undefined;
       }`);
     expect(transform(source)).toBe(source);
+  });
+
+  it("should not remove ...", () => {
+    const source = unpad(`
+      function foo() {
+        bar();
+        var x = undefined;
+        console.log(x);
+        function bar() {
+          x = 3;
+        }
+      }`);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should remove ...", () => {
+    const source = unpad(`
+      function foo() {
+        var x = undefined;
+        bar();
+        console.log(x);
+        function bar() {
+          x = 3;
+        }
+      }`);
+    const expected = unpad(`
+      function foo() {
+        var x;
+        bar();
+        console.log(x);
+        function bar() {
+          x = 3;
+        }
+      }`);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should remove ...", () => {
+    const source = unpad(`
+      foo();
+      function foo() {
+        var x = undefined;
+        bar();
+        console.log(x);
+        function bar() {
+          x = 3;
+        }
+      }`);
+    const expected = unpad(`
+      foo();
+      function foo() {
+        var x;
+        bar();
+        console.log(x);
+        function bar() {
+          x = 3;
+        }
+      }`);
+    expect(transform(source)).toBe(expected);
   });
 });
