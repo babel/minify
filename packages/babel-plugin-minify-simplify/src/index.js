@@ -28,6 +28,17 @@ module.exports = ({ types: t }) => {
   const or = (a, b) => t.logicalExpression("||", a, b);
   const and = (a, b) => t.logicalExpression("&&", a, b);
 
+  const operators = new Set([
+    '+', '-', '*', '%',
+    '<<', '>>', '>>>',
+    '&', '|', '^', '/',
+    '**'
+  ]);
+
+  const updateOperators = new Set([
+    '+', '-'
+  ]);
+
   return {
     name: "minify-simplify",
     visitor: {
@@ -122,6 +133,48 @@ module.exports = ({ types: t }) => {
             path.replaceWith(node.argument);
           },
         ],
+      },
+
+      AssignmentExpression(path) {
+
+        const right = path.get('right');
+        const left = path.get('left');
+
+        const canShorten = (
+          right.type === 'BinaryExpression' &&
+          operators.has(right.node.operator) &&
+          left.node.name === right.node.left.name
+        );
+
+		    if (!canShorten) return;
+
+        const canBeUpdateExpression = (
+          right.node.right.type === 'NumericLiteral' &&
+          right.node.right.value === 1 &&
+          updateOperators.has(right.node.operator));
+
+        if (left.node.name === undefined) {
+          // not an identifier, probably MemberExpression which we don't transform yet
+          return;
+        }
+
+        if (canBeUpdateExpression) {
+
+          const newExpression = t.updateExpression(
+            right.node.operator + right.node.operator,
+            t.identifier(left.node.name));
+
+          path.replaceWith(newExpression);
+        }
+        else {
+
+          const newExpression = t.assignmentExpression(
+            right.node.operator + '=',
+            t.identifier(left.node.name),
+            t.clone(right.node.right));
+
+          path.replaceWith(newExpression);
+        }
       },
 
       ConditionalExpression: {

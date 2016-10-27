@@ -2136,4 +2136,52 @@ describe("simplify-plugin", () => {
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
+
+  it("should transform assignments to the same identifier", () => {
+    const source = unpad(`
+      x = x + 1;
+      x = x - 1;
+      x = x * 1;
+      x = x % 1;
+      x = x << 1;
+      x = x >> 1;
+      x = x >>> 1;
+      x = x & 1;
+      x = x | 1;
+      x = x ^ 1;
+      x = x / 1;
+      x = x ** 1;
+      foo = foo + bar;
+      foo = foo * function(){};
+      foo += 123;
+      foo = 1 + foo;
+      x = x = x + 1;
+      foo = foo + bar + baz;
+      window.foo = window.foo + 1;
+      window.foo.bar = window.foo.baz + 1;
+    `);
+    const expected = unpad(`
+      x++,
+      x--,
+      x *= 1,
+      x %= 1,
+      x <<= 1,
+      x >>= 1,
+      x >>>= 1,
+      x &= 1,
+      x |= 1,
+      x ^= 1,
+      x /= 1,
+      x **= 1,
+      foo += bar,
+      foo *= function () {},
+      foo += 123,
+      foo = 1 + foo,
+      x = x++,
+      foo = foo + bar + baz,
+      window.foo = window.foo + 1,
+      window.foo.bar = window.foo.baz + 1;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
