@@ -20,6 +20,25 @@ function getFunctionParent(path, scopeParent) {
   return parent === scopeParent ? null : parent;
 }
 
+function getFunctionReferences(path, scopeParent, references = []) {
+  for (let func = getFunctionParent(path, scopeParent); func; func = getFunctionParent(func, scopeParent)) {
+    const id = func.node.id;
+    const binding = id && func.scope.getBinding(id.name);
+
+    if (!binding) {
+      continue;
+    }
+
+    binding.referencePaths.forEach((path) => {
+      if (references.indexOf(path) == -1) {
+        references.push(path);
+        getFunctionReferences(path, scopeParent, references);
+      }
+    });
+  }
+  return references;
+}
+
 module.exports = function({ types: t }) {
   let names = null;
   let functionNesting = 0;
@@ -62,18 +81,9 @@ module.exports = function({ types: t }) {
                 return true;
               }
 
-              for (let func = getFunctionParent(v, scopeParent); func; func = getFunctionParent(func, scopeParent)) {
-                const id = func.node.id;
-                const binding = id && scope.getBinding(id.name);
-
-                if (!binding) {
-                  continue;
-                }
-
-                const funcViolation = binding.referencePaths.some((p) => {
-                  return p.node.start < start;
-                });
-                if (funcViolation) {
+              var references = getFunctionReferences(v, scopeParent);
+              for (let ref of references) {
+                if (ref.node.start < start) {
                   return true;
                 }
               }
