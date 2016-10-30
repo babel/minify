@@ -196,6 +196,10 @@ module.exports = ({ types: t, traverse }) => {
               if (binding.path.parentPath.node.declarations.length !== 1) {
                 continue;
               }
+              // Bail out for ArrayPattern and ObjectPattern
+              if (!binding.path.get("id").isIdentifier()) {
+                continue;
+              }
 
               binding.path.parentPath.replaceWith(binding.path.node.init);
             } else {
