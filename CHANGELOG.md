@@ -29,10 +29,25 @@
 #### New Feature
 * `babel-plugin-minify-numeric-literals`, `babel-preset-babili`
   * [#222](https://github.com/babel/babili/pull/222) Add numeric literals minification. ([@kangax](https://github.com/kangax))
+  ```js
+  [10000, 0x000001, 0o23420, 0b10011100010000]
+  // =>
+  [1e4, 1, 1e4, 1e4]
+  ```
 * `babel-plugin-transform-regexp-constructors`
   * [#196](https://github.com/babel/babili/pull/196) Implemented transform-regexp-constructors plugin. ([@shinew](https://github.com/shinew))
+  ```js
+  var x = new RegExp('\\w+\\s')
+  // =>
+  var x = /\w+\s/
+  ```
 * `babel-plugin-minify-dead-code-elimination`
   * [#182](https://github.com/babel/babili/pull/182) Remove unused fn params. ([@boopathi](https://github.com/boopathi))
+  ```js
+  function foo(unused) { return 1 }
+  // =>
+  function foo() { return 1 }
+  ```
 
 #### Internal
 * Other
@@ -55,38 +70,38 @@
 - Shine Wang ([shinew](https://github.com/shinew))
 
 ## Changelog for 2016-10-07
- 
+
 - babel-plugin-minify-dead-code-elimination@0.0.4
 - babel-plugin-minify-guarded-expressions@0.0.3
 - babel-preset-babili@0.0.5
 - babili@0.0.7
- 
+
 #### Bug Fix
- 
+
 * `babel-plugin-minify-guarded-expressions`
  * [#179](https://github.com/babel/babili/pull/179) Fix guarded expressions being utilized elsewhere. Fixes #171,#174,#176 ([@boopathi](https://github.com/boopathi))
- 
+
 #### Deps
- 
+
 * `babel-plugin-dead-code-elimination`
  * [#180](https://github.com/babel/babili/pull/180) Use modularized lodash. ([@boopathi](https://github.com/boopathi))
- 
+
 ## Changelog for 2016-09-30
 
  - babel-plugin-minify-dead-code-elimination@0.0.3
  - babel-preset-babili@0.0.4
  - babili@0.0.6
- 
+
 #### Bug Fix
 
 * `babili`
   * [#166](https://github.com/babel/babili/pull/166) use process.execPath when spawing cli. Fixes #108 ([@rossipedia](https://github.com/rossipedia))
- 
+
 Should fix windows support for the cli.
 
 * `babel-plugin-minify-dead-code-elimination`
   * [#155](https://github.com/babel/babili/pull/155) Fix DCE for ArrayPatterns and ObjectPatterns (#155) ([@boopathi](https://github.com/boopathi))
-  
+
 ```js
 // bail out when destructuring with a variable
 const me = lyfe => {
