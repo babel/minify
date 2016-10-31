@@ -10,7 +10,7 @@ function transform(code) {
   }).code;
 }
 
-describe("remove-undefined-if-possible-plugin", () => {
+describe("transform-remove-undefined-plugin", () => {
   it("should remove multiple undefined assignments", () => {
     const source = "let a = undefined, b = 3, c = undefined, d;";
     const expected = "let a,\n    b = 3,\n    c,\n    d;";
@@ -53,15 +53,6 @@ describe("remove-undefined-if-possible-plugin", () => {
         var a;
       }`);
     expect(transform(source)).toBe(expected);
-  });
-
-  it("idk what this is", () => {
-    const source = unpad(`
-      function foo() {
-        a = 3;
-        var { a: aa, b: bb } = undefined;
-      }`);
-    expect(transform(source)).toBe(source);
   });
 
   it("should remove let-assignments in inner blocks", () => {
@@ -123,7 +114,7 @@ describe("remove-undefined-if-possible-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
-  it("should not remove ...", () => {
+  it("should not remove if call to constant violation function", () => {
     const source = unpad(`
       function foo() {
         bar();
@@ -136,7 +127,7 @@ describe("remove-undefined-if-possible-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
-  it("should remove ...", () => {
+  it("should remove if not referenced in any way before", () => {
     const source = unpad(`
       function foo() {
         var x = undefined;
@@ -180,5 +171,30 @@ describe("remove-undefined-if-possible-plugin", () => {
         }
       }`);
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove nor break on mutually recursive function", () => {
+    const source = unpad(`
+      function foo() {
+        a();
+        var c = undefined;
+        function a() {
+          b();
+        }
+        function b() {
+          a();
+          c = 3;
+        }
+      }`);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not remove if rval has side effects", () => {
+    const source = unpad(`
+      function foo() {
+        var a = void b();
+        return void bar();
+      }`);
+    expect(transform(source)).toBe(source);
   });
 });

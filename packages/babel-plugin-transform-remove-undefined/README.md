@@ -1,4 +1,4 @@
-# babel-plugin-remove-undefined-if-possible
+# babel-plugin-transform-remove-undefined
 
 For variable assignments, this removes rvals that evaluate to `undefined`
 (`var`s in functions only).
@@ -29,7 +29,7 @@ function foo() {
 ## Installation
 
 ```sh
-$ npm install babel-plugin-remove-undefined-if-possible
+$ npm install babel-plugin-transform-remove-undefined
 ```
 
 ## Usage
@@ -40,20 +40,20 @@ $ npm install babel-plugin-remove-undefined-if-possible
 
 ```json
 {
-  "plugins": ["babel-plugin-remove-undefined-if-possible"]
+  "plugins": ["babel-plugin-transform-remove-undefined"]
 }
 ```
 
 ### Via CLI
 
 ```sh
-$ babel --plugins babel-plugin-remove-undefined-if-possible script.js
+$ babel --plugins babel-plugin-transform-remove-undefined script.js
 ```
 
 ### Via Node API
 
 ```javascript
 require("babel-core").transform("code", {
-  plugins: ["babel-plugin-remove-undefined-if-possible"]
+  plugins: ["babel-plugin-transform-remove-undefined"]
 });
 ```

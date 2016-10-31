@@ -1,11 +1,15 @@
 "use strict";
 
-function removeRvalIfUndefined(declaratorPath) {
-  const rval = declaratorPath.get("init")
-                              .evaluate();
-  if (rval.confident === true && rval.value === undefined) {
-    declaratorPath.node.init = null;
+function isPureAndUndefined(rval) {
+  if (rval.isIdentifier() &&
+    rval.node.name === "undefined") {
+    return true;
   }
+  if (!rval.isPure()) {
+    return false;
+  }
+  const evaluation = rval.evaluate();
+  return evaluation.confident === true && evaluation.value === undefined;
 }
 
 function getLoopParent(path, scopeParent) {
@@ -20,7 +24,7 @@ function getFunctionParent(path, scopeParent) {
   return parent === scopeParent ? null : parent;
 }
 
-function getFunctionReferences(path, scopeParent, references = []) {
+function getFunctionReferences(path, scopeParent, references = new Set()) {
   for (let func = getFunctionParent(path, scopeParent); func; func = getFunctionParent(func, scopeParent)) {
     const id = func.node.id;
     const binding = id && func.scope.getBinding(id.name);
@@ -30,8 +34,8 @@ function getFunctionReferences(path, scopeParent, references = []) {
     }
 
     binding.referencePaths.forEach((path) => {
-      if (references.indexOf(path) == -1) {
-        references.push(path);
+      if (!references.has(path)) {
+        references.add(path);
         getFunctionReferences(path, scopeParent, references);
       }
     });
@@ -39,17 +43,46 @@ function getFunctionReferences(path, scopeParent, references = []) {
   return references;
 }
 
-module.exports = function({ types: t }) {
-  let names = null;
-  let functionNesting = 0;
+function hasViolation(declarator, scope, start) {
+  const binding = scope.getBinding(declarator.node.id.name);
+  if (!binding) {
+    return true;
+  }
+
+  const scopeParent = declarator.getFunctionParent();
+
+  const violation = binding.constantViolations.some((v) => {
+    // return 'true' if we cannot guarantee the violation references
+    // the initialized identifier after
+    const violationStart = v.node.start;
+    if (violationStart === undefined || violationStart < start) {
+      return true;
+    }
+
+    const references = getFunctionReferences(v, scopeParent);
+    for (const ref of references) {
+      if (ref.node.start === undefined || ref.node.start < start) {
+        return true;
+      }
+    }
+
+    for (let loop = getLoopParent(declarator, scopeParent); loop; loop = getLoopParent(loop, scopeParent)) {
+      if (loop.node.end === undefined || loop.node.end > violationStart) {
+        return true;
+      }
+    }
+  });
+
+  return violation;
+}
+
+module.exports = function() {
   return {
-    name: "remove-undefined-if-possible",
+    name: "transform-remove-undefined",
     visitor: {
       ReturnStatement(path) {
         if (path.node.argument !== null) {
-          const rval = path.get("argument")
-                           .evaluate();
-          if (rval.confident === true && rval.value === undefined) {
+          if (isPureAndUndefined(path.get("argument"))) {
             path.node.argument = null;
           }
         }
@@ -61,42 +94,22 @@ module.exports = function({ types: t }) {
           break;
         case "let":
           for (const declarator of path.get("declarations")) {
-            removeRvalIfUndefined(declarator);
+            if (isPureAndUndefined(declarator.get("init"))) {
+              declarator.node.init = null;
+            }
           }
           break;
         case "var":
-          const { node, scope } = path;
+          const start = path.node.start;
+          if (start === undefined) {
+            // This is common for plugin-generated nodes
+            break;
+          }
+          const scope = path.scope;
           for (const declarator of path.get("declarations")) {
-            const binding = scope.getBinding(declarator.node.id.name);
-            if (!binding) {
-              continue;
-            }
-
-            const { start } = node;
-            const scopeParent = declarator.getFunctionParent();
-
-            const violation = binding.constantViolations.some(v => {
-              const violationStart = v.node.start;
-              if (violationStart < start) {
-                return true;
-              }
-
-              var references = getFunctionReferences(v, scopeParent);
-              for (let ref of references) {
-                if (ref.node.start < start) {
-                  return true;
-                }
-              }
-
-              for (let loop = getLoopParent(declarator, scopeParent); loop; loop = getLoopParent(loop, scopeParent)) {
-                if (loop.node.end > violationStart) {
-                  return true;
-                }
-              }
-            });
-
-            if (!violation) {
-              removeRvalIfUndefined(declarator);
+            if (isPureAndUndefined(declarator.get("init")) &&
+                !hasViolation(declarator, scope, start)) {
+              declarator.node.init = null;
             }
           }
           break;
