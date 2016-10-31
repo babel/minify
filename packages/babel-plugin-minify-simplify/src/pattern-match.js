@@ -50,8 +50,6 @@ module.exports = class PatternMatch {
           }
           break;
         }
-      } else {
-        break;
       }
     }
     return result;

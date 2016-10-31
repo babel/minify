@@ -105,4 +105,61 @@ describe("simplify-plugin - pattern-match", () => {
       return pattern === input;
     }
   });
+
+  it("should match in order - first match should win", () => {
+    const matcher = new PatternMatch([
+      [1, true, "foo"],
+      [1, true, "bar"]
+    ]);
+    const result = matcher.match([1, true]);
+    expect(result.match).toBe(true);
+    expect(result.value).toBe("foo");
+  });
+
+  it("should handle case no match found", () => {
+    const matcher = new PatternMatch([
+      [1, 2, 3],
+      [2, 2, 4, 5],
+      [3, 2, 1, 6],
+      [1, 2, 4, 3],
+      [4, 3, 2, 1]
+    ]);
+    const result = matcher.match([1, 2, 5]);
+    expect(result.match).toBe(false);
+    expect(result.value).toBe(void 0);
+  });
+
+  it("should match the first found pattern even if it's less specific", () => {
+    const matcher = new PatternMatch([
+      ["foo", "bar", "baz"],
+      ["foo", "bar", "baz", true]
+    ]);
+    const result = matcher.match(["foo", "bar"]);
+    expect(result.match).toBe(true);
+    expect(result.value).toBe("baz");
+  });
+
+  it("should match the first found pattern even if it's less specific 2", () => {
+    const matcher = new PatternMatch([
+      [1, 2, 3],
+      [1, 2, 3, 4],
+      [1, 3],
+      [1, 3, 5]
+    ]);
+
+    expect(matcher.match([1])).toEqual({
+      match: true,
+      value: 3
+    });
+
+    expect(matcher.match([1, 2])).toEqual({
+      match: true,
+      value: 3
+    });
+
+    expect(matcher.match([1, 3])).toEqual({
+      match: true,
+      value: 5
+    });
+  });
 });
