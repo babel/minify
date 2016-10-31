@@ -1,5 +1,7 @@
-## Changelog for 2016-10-31
+## Babili v0.0.8: Changelog for 2016-10-31
 
+- babili: 0.0.7 => 0.0.8
+- babel-preset-babili: 0.0.5 => 0.0.8
 - babel-helper-to-multiple-sequence-expressions: 0.0.1 => 0.0.2
 - babel-plugin-minify-dead-code-elimination: 0.0.4 => 0.1.0
 - babel-plugin-minify-mangle-names: 0.0.3 => 0.0.4
@@ -7,8 +9,6 @@
 - babel-plugin-minify-simplify: 0.0.3 => 0.0.4
 - babel-plugin-minify-type-constructors: 0.0.1 => 0.0.2
 - babel-plugin-transform-regexp-constructors: 0.0.1 => 0.0.1
-- babel-preset-babili: 0.0.5 => 0.0.8
-- babili: 0.0.7 => 0.0.8
 
 #### New Feature
 * `babel-plugin-minify-numeric-literals`, `babel-preset-babili`
