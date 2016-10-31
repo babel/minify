@@ -5,10 +5,10 @@
 - babel-helper-to-multiple-sequence-expressions: 0.0.1 => 0.0.2
 - babel-plugin-minify-dead-code-elimination: 0.0.4 => 0.1.0
 - babel-plugin-minify-mangle-names: 0.0.3 => 0.0.4
-- babel-plugin-minify-numeric-literals: 0.0.1 => 0.0.2
+- babel-plugin-minify-numeric-literals: 0.0.1 (new)
 - babel-plugin-minify-simplify: 0.0.3 => 0.0.4
 - babel-plugin-minify-type-constructors: 0.0.1 => 0.0.2
-- babel-plugin-transform-regexp-constructors: 0.0.1 => 0.0.1
+- babel-plugin-transform-regexp-constructors: 0.0.1 (new)
 
 #### :rocket: New Feature
 * `babel-plugin-minify-numeric-literals`, `babel-preset-babili`
