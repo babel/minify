@@ -70,9 +70,14 @@ module.exports = class PatternMatch {
       }
 
       if (pattern.length === 2) {
-        // here we don't handle duplicates
-        // this pattern would have already been matched
-        if (!parent.has(pattern[0])) {
+        if (parent.has(pattern[0])) {
+          const pattern0 = parent.get(pattern[0]);
+          if (!pattern0.has(LEAF_NODE)) {
+            pattern0.set(LEAF_NODE, pattern[1]);
+          }
+          // here we don't handle duplicates
+          // this pattern would have already been matched
+        } else {
           parent.set(pattern[0], new Map([
             [LEAF_NODE, pattern[1]]
           ]));

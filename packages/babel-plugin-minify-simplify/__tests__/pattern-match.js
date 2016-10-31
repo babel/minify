@@ -149,17 +149,20 @@ describe("simplify-plugin - pattern-match", () => {
 
     expect(matcher.match([1])).toEqual({
       match: true,
-      value: 3
+      value: 3,
+      keys: [1]
     });
 
     expect(matcher.match([1, 2])).toEqual({
       match: true,
-      value: 3
+      value: 3,
+      keys: [1, 2]
     });
 
     expect(matcher.match([1, 3])).toEqual({
       match: true,
-      value: 5
+      value: 5,
+      keys: [1, 3]
     });
   });
 });
