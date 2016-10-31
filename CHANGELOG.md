@@ -10,7 +10,7 @@
 - babel-plugin-minify-type-constructors: 0.0.1 => 0.0.2
 - babel-plugin-transform-regexp-constructors: 0.0.1 => 0.0.1
 
-#### New Feature
+#### :rocket: New Feature
 * `babel-plugin-minify-numeric-literals`, `babel-preset-babili`
   * [#222](https://github.com/babel/babili/pull/222) Add numeric literals minification. ([@kangax](https://github.com/kangax))
   ```js
@@ -37,7 +37,7 @@
   }
   ```
 
-#### Bug Fix
+#### :bug: Bug Fix
 * `babel-plugin-minify-dead-code-elimination`
   * [#233](https://github.com/babel/babili/pull/233) Fix array and object patterns in DCE (close #232). ([@boopathi](https://github.com/boopathi))
   * [#225](https://github.com/babel/babili/pull/225) Fix DCE tests with labels in separate namespace. ([@boopathi](https://github.com/boopathi))
@@ -53,7 +53,7 @@
   * [#201](https://github.com/babel/babili/pull/201) Fix bug - mangling of name "arguments". ([@boopathi](https://github.com/boopathi))
   * [#183](https://github.com/babel/babili/pull/183) Mangler - rename keepFnames to keepFnName. ([@boopathi](https://github.com/boopathi))
 
-#### Internal
+#### :house: Internal
 * Other
   * [#229](https://github.com/babel/babili/pull/229) add node 4,7, drop 5. ([@hzoo](https://github.com/hzoo))
 * `babel-plugin-minify-dead-code-elimination`
