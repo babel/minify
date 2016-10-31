@@ -17,6 +17,15 @@
 
 - Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false&lineWrap=false&presets=react%2Cstage-2&code=%2F%2F%20Example%20ES2015%20Code%0Aclass%20Mangler%20%7B%0A%20%20constructor(program)%20%7B%0A%20%20%20%20this.program%20%3D%20program%3B%0A%20%20%7D%0A%7D%0Anew%20Mangler()%3B%20%2F%2F%20without%20this%20it%20would%20just%20output%20nothing%20since%20Mangler%20isn%27t%20used)
 
+## Table of Contents
+
+- [Why](#why)
+- [CLI](#cli)
+- [Babel Preset](#babel-preset)
+- [Individual Plugins](#individual-plugins)
+- [Benchmarks](#benchmarks)
+- [Team](#team)
+
 ## Why
 
 Current tools don't support targeting the latest version of ECMAScript. (yet)
@@ -92,7 +101,7 @@ You'll most likely want to use it only in the production environment. Check out 
 
 Then you'll need to set the env variable which could be something like `BABEL_ENV=production npm run build`
 
-## [Plugins](http://babeljs.io/docs/plugins/) (in `babel-preset-babili`)
+## Individual Plugins
 
 The `babili` repo is comprised of many npm packages. It is a [lerna](https://github.com/lerna/lerna) monorepo similar to [babel](https://github.com/babel/babel) itself.
 
@@ -177,3 +186,10 @@ babili     102.74kB 192%    35.3kB  139%     8ms        2912ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
+
+## Team
+
+[![Amjad Masad](https://avatars.githubusercontent.com/u/587518?s=96)](https://github.com/amasad) | [![Boopathi Rajaa](https://avatars.githubusercontent.com/u/294474?s=96)](https://github.com/boopathi) | [![Juriy Zaytsev](https://avatars.githubusercontent.com/u/383?s=96)](https://github.com/kangax) | [![Henry Zhu](https://avatars.githubusercontent.com/u/588473?s=96)](https://github.com/hzoo)
+---|---|---|---|---|
+Amjad Masad [@amasad](https://github.com/amasad) | Boopathi Rajaa [@boopathi](https://github.com/boopathi) | Juriy Zaytsev [@kangax](https://github.com/kangax) | Henry Zhu [@hzoo](https://github.com/hzoo)
+[@amasad](https://twitter.com/amasad) | [@heisenbugger](https://twitter.com/heisenbugger) | [@kangax](https://twitter.com/kangax) | [@left_pad](https://twitter.com/left_pad)
