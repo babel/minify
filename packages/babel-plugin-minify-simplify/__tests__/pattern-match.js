@@ -42,7 +42,7 @@ describe("simplify-plugin - pattern-match", () => {
     });
   });
 
-  it("should throw when there a pattern contains less than 2 entries", () => {
+  it("should throw when a pattern contains less than 2 entries", () => {
     expect(() => {
       new PatternMatch([
         ["foo", "bar"],
