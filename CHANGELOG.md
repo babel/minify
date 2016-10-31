@@ -47,6 +47,10 @@
   function foo(unused) { return 1 }
   // =>
   function foo() { return 1 }
+  // To prevent this for code depending on foo.length, use keepFnArgs: true
+  {
+    plugins: [ ["minify-dead-code-elimination", { keepFnArgs: true }] ]
+  }
   ```
 
 #### Internal
