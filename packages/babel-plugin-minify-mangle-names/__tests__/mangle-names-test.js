@@ -177,7 +177,7 @@ describe("mangle-names", () => {
   });
 
   // https://phabricator.babeljs.io/T6957
-  xit("labels should not shadow bindings", () => {
+  it("labels should not shadow bindings", () => {
     const source = unpad(`
       function foo() {
         var meh;
@@ -198,6 +198,28 @@ describe("mangle-names", () => {
       }
     `);
 
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("labels should not shadow bindings 2", () => {
+    const source = unpad(`
+      function f(a) {
+        try {
+          a: {
+            console.log(a);
+          }
+        } catch ($a) { }
+      }
+    `);
+    const expected = unpad(`
+      function f(b) {
+        try {
+          a: {
+            console.log(b);
+          }
+        } catch (c) {}
+      }
+    `);
     expect(transform(source)).toBe(expected);
   });
 

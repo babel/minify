@@ -1223,7 +1223,18 @@ module.exports = ({ types: t }) => {
   function needsBlock(node, parent) {
     return (t.isFunction(parent) && node === parent.body) ||
            t.isTryStatement(parent) || t.isCatchClause(parent) ||
-           t.isSwitchStatement(parent);
+           t.isSwitchStatement(parent) ||
+           (isSingleBlockScopeDeclaration(node) && t.isIfStatement(parent));
+  }
+
+  function isSingleBlockScopeDeclaration(block) {
+    return t.isBlockStatement(block) &&
+      block.body.length === 1 &&
+      (
+        t.isVariableDeclaration(block.body[0], { kind: "let" }) ||
+        t.isVariableDeclaration(block.body[0], { kind: "const" }) ||
+        t.isFunctionDeclaration(block.body[0])
+      );
   }
 
   function isVoid0(expr) {

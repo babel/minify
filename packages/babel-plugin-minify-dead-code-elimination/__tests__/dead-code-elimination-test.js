@@ -2105,6 +2105,35 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // https://github.com/babel/babili/issues/232
+  it("should fix issue#232 - array patterns and object patterns with non constant init", () => {
+    const source = unpad(`
+      const a = {
+        lol: input => {
+          const [hello, world] = input.split('|');
+          if (hello === 't' || hello === 'top') {
+            return 'top';
+          }
+          return 'bottom';
+        }
+      };
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://github.com/babel/babili/issues/232
+  it("should fix issue#232 - array & object patterns with non-constant init", () => {
+    const source = unpad(`
+      function foo() {
+        const { bar1, bar2 } = baz();
+        return bar1;
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should preserve variabledeclarations(var) after completion statements", () => {
     const source = unpad(`
       function foo() {
