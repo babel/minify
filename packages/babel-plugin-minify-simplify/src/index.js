@@ -214,11 +214,12 @@ module.exports = ({ types: t }) => {
 
         let newExpression;
 
-        // special case +=1 --> ++
+        // special case x=x+1 --> ++x
         if (canBeUpdateExpression) {
           newExpression = t.updateExpression(
             rightExpr.node.operator + rightExpr.node.operator,
-            t.clone(leftExpr.node));
+            t.clone(leftExpr.node),
+            true /* prefix */);
         }
         else {
           newExpression = t.assignmentExpression(

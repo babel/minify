@@ -2154,8 +2154,8 @@ describe("simplify-plugin", () => {
       x = x ** 1;
     `);
     const expected = unpad(`
-      x++,
-      x--,
+      ++x,
+      --x,
       x *= 1,
       x %= 1,
       x <<= 1,
@@ -2186,7 +2186,7 @@ describe("simplify-plugin", () => {
       foo *= function () {},
       foo += 123,
       foo = 1 + foo,
-      x = x++,
+      x = ++x,
       foo = foo + bar + baz;
     `).replace(/\s+/g, ' ');
 
@@ -2217,7 +2217,7 @@ describe("simplify-plugin", () => {
     `);
     // TODO: foo[void 0] = foo[void 0] + 1;
     const expected = unpad(`
-      foo.bar++,
+      ++foo.bar,
       foo.bar += 2,
       foo["x"] = foo[x] + 2,
       foo[x] += 2,
@@ -2230,11 +2230,11 @@ describe("simplify-plugin", () => {
       foo[2] += 2,
       foo[{}] = foo[{}] + 1,
       foo[function () {}] = foo[function () {}] + 1,
-      foo[false]++,
+      ++foo[false],
       foo.bar.baz += 321,
-      this.hello++,
-      foo[null]++,
-      foo[undefined]++;
+      ++this.hello,
+      ++foo[null],
+      ++foo[undefined];
     `).replace(/\s+/g, ' ');
 
     expect(transform(source)).toBe(expected);
@@ -2252,7 +2252,7 @@ describe("simplify-plugin", () => {
     const expected = unpad(`
       class Foo {
         foo() {
-          super.foo++;
+          ++super.foo;
         }
       };
     `);
