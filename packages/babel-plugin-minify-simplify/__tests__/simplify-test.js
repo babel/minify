@@ -2235,7 +2235,7 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should simplify assignments w. member expressions", () => {
+  it("should simplify assignments w. super", () => {
 
     const source = unpad(`
       class Foo {
