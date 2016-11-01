@@ -217,9 +217,7 @@ module.exports = ({ types: t }) => {
         if (canBeUpdateExpression) {
           newExpression = t.updateExpression(
             rightExpr.node.operator + rightExpr.node.operator,
-            leftExpr.isMemberExpression()
-              ? t.clone(leftExpr.node)
-              : t.identifier(leftExpr.node.name));
+            t.clone(leftExpr.node));
         }
         else {
           newExpression = t.assignmentExpression(
