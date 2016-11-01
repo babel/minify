@@ -202,8 +202,6 @@ module.exports = ({ types: t }) => {
              !isEqual(leftPropNames, rightPropNames)) {
             return;
           }
-
-          // TODO: implement replacement
         }
         else {
           if (!rightExpr.isBinaryExpression() ||
