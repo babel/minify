@@ -41,7 +41,7 @@ module.exports = ({ types: t }) => {
 
   function isEqual(arr1, arr2) {
     return arr1.every((value, index) => {
-      return value.toString() === arr2[index].toString();
+      return String(value) === String(arr2[index]);
     });
   }
 
@@ -51,6 +51,9 @@ module.exports = ({ types: t }) => {
     }
     if (node.type === 'Super') {
       return 'super';
+    }
+    if (node.type === 'NullLiteral') {
+      return 'null';
     }
     // augment identifiers so that they don't match
     // string/number literals
@@ -70,9 +73,7 @@ module.exports = ({ types: t }) => {
     const prop = path.get('property');
     const propNames = [getName(prop.node)];
 
-    while (obj.type !== 'Identifier' &&
-           obj.type !== 'ThisExpression' &&
-           obj.type !== 'Super') {
+    while (obj.type === 'MemberExpression') {
       const node = obj.get('property').node;
       if (node) {
         propNames.push(getName(node));

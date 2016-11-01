@@ -2211,8 +2211,11 @@ describe("simplify-plugin", () => {
       foo[function(){}] = foo[function(){}] + 1,
       foo[false] = foo[false] + 1,
       foo.bar.baz = foo.bar.baz + 321,
-      this.hello = this.hello + 1;
+      this.hello = this.hello + 1,
+      foo[null] = foo[null] + 1,
+      foo[undefined] = foo[undefined] + 1;
     `);
+    // TODO: foo[void 0] = foo[void 0] + 1;
     const expected = unpad(`
       foo.bar++,
       foo.bar += 2,
@@ -2229,7 +2232,9 @@ describe("simplify-plugin", () => {
       foo[function () {}] = foo[function () {}] + 1,
       foo[false]++,
       foo.bar.baz += 321,
-      this.hello++;
+      this.hello++,
+      foo[null]++,
+      foo[undefined]++;
     `).replace(/\s+/g, ' ');
 
     expect(transform(source)).toBe(expected);
@@ -2253,5 +2258,12 @@ describe("simplify-plugin", () => {
     `);
 
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not simplify assignments w. template literals", () => {
+
+    const source = unpad('foo[`x`] = foo[`x`] + 1;');
+
+    expect(transform(source)).toBe(source);
   });
 });
