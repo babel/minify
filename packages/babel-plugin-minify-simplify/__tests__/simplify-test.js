@@ -2137,56 +2137,121 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should transform assignments to the same identifier", () => {
+  it("should simplify assignments", () => {
 
-    const actual = [
-      'x = x + 1;',
-      'x = x - 1;',
-      'x = x * 1;',
-      'x = x % 1;',
-      'x = x << 1;',
-      'x = x >> 1;',
-      'x = x >>> 1;',
-      'x = x & 1;',
-      'x = x | 1;',
-      'x = x ^ 1;',
-      'x = x / 1;',
-      'x = x ** 1;',
-      'foo = foo + bar;',
-      'foo = foo * function(){};',
-      'foo += 123;',
-      'foo = 1 + foo;',
-      'x = x = x + 1;',
-      'foo = foo + bar + baz;',
-      'window.foo = window.foo + 1;',
-      'window.foo.bar = window.foo.baz + 1;',
-    ];
+    const source = unpad(`
+      x = x + 1,
+      x = x - 1,
+      x = x * 1,
+      x = x % 1,
+      x = x << 1,
+      x = x >> 1,
+      x = x >>> 1,
+      x = x & 1,
+      x = x | 1,
+      x = x ^ 1,
+      x = x / 1,
+      x = x ** 1;
+    `);
+    const expected = unpad(`
+      x++,
+      x--,
+      x *= 1,
+      x %= 1,
+      x <<= 1,
+      x >>= 1,
+      x >>>= 1,
+      x &= 1,
+      x |= 1,
+      x ^= 1,
+      x /= 1,
+      x **= 1;
+    `).replace(/\s+/g, ' ');
 
-    const expected = [
-      'x++;',
-      'x--;',
-      'x *= 1;',
-      'x %= 1;',
-      'x <<= 1;',
-      'x >>= 1;',
-      'x >>>= 1;',
-      'x &= 1;',
-      'x |= 1;',
-      'x ^= 1;',
-      'x /= 1;',
-      'x **= 1;',
-      'foo += bar;',
-      'foo *= function () {};',
-      'foo += 123;',
-      'foo = 1 + foo;',
-      'x = x++;',
-      'foo = foo + bar + baz;',
-      'window.foo = window.foo + 1;',
-      'window.foo.bar = window.foo.baz + 1;',
-    ];
+    expect(transform(source)).toBe(expected);
+  });
 
-    actual.forEach((test, index) => {
-      expect(transform(test)).toBe(expected[index]);
-    });
+  it("should simplify assignments 2", () => {
+
+    const source = unpad(`
+      foo = foo + bar,
+      foo = foo * function(){},
+      foo += 123,
+      foo = 1 + foo,
+      x = x = x + 1,
+      foo = foo + bar + baz
+    `);
+    const expected = unpad(`
+      foo += bar,
+      foo *= function () {},
+      foo += 123,
+      foo = 1 + foo,
+      x = x++,
+      foo = foo + bar + baz;
+    `).replace(/\s+/g, ' ');
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments w. member expressions", () => {
+
+    const source = unpad(`
+      foo.bar = foo.bar + 1,
+      foo.bar = foo.bar + 2,
+      foo["x"] = foo[x] + 2,
+      foo[x] = foo[x] + 2,
+      foo[x] = foo["x"] + 2,
+      foo["x"] = foo["x"] + 2,
+      foo[1] = foo["1"] + 2,
+      foo["bar"] = foo["bar"] + 2,
+      foo[bar()] = foo[bar()] + 2,
+      foo[""] = foo[""] + 2,
+      foo[2] = foo[2] + 2,
+      foo[{}] = foo[{}] + 1,
+      foo[function(){}] = foo[function(){}] + 1,
+      foo[false] = foo[false] + 1,
+      foo.bar.baz = foo.bar.baz + 321,
+      this.hello = this.hello + 1;
+    `);
+    const expected = unpad(`
+      foo.bar++,
+      foo.bar += 2,
+      foo["x"] = foo[x] + 2,
+      foo[x] += 2,
+      foo[x] = foo["x"] + 2,
+      foo["x"] += 2,
+      foo[1] += 2,
+      foo["bar"] += 2,
+      foo[bar()] = foo[bar()] + 2,
+      foo[""] += 2,
+      foo[2] += 2,
+      foo[{}] = foo[{}] + 1,
+      foo[function () {}] = foo[function () {}] + 1,
+      foo[false]++,
+      foo.bar.baz += 321,
+      this.hello++;
+    `).replace(/\s+/g, ' ');
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments w. member expressions", () => {
+
+    const source = unpad(`
+      class Foo {
+        foo() {
+          super.foo = super.foo + 1;
+        }
+      };
+    `);
+    const expected = unpad(`
+      class Foo {
+        foo() {
+          super.foo++;
+        }
+      };
+    `);
+
+    expect(transform(source)).toBe(expected);
   });
 });

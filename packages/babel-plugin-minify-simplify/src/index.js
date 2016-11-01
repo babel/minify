@@ -39,6 +39,51 @@ module.exports = ({ types: t }) => {
     '+', '-'
   ]);
 
+  function isEqual(arr1, arr2) {
+    return arr1.every((value, index) => {
+      return value.toString() === arr2[index].toString();
+    });
+  }
+
+  function getName(node) {
+    if (node.type === 'ThisExpression') {
+      return 'this';
+    }
+    if (node.type === 'Super') {
+      return 'super';
+    }
+    // augment identifiers so that they don't match
+    // string/number literals
+    // but still match against each other
+    return node.name
+      ? node.name + '_'
+    	: node.value /* Literal */;
+  }
+
+  function getPropNames(path) {
+    if (!path.isMemberExpression()) {
+      return;
+    }
+
+    let obj = path.get('object');
+
+    const prop = path.get('property');
+    const propNames = [getName(prop.node)];
+
+    while (obj.type !== 'Identifier' &&
+           obj.type !== 'ThisExpression' &&
+           obj.type !== 'Super') {
+      const node = obj.get('property').node;
+      if (node) {
+        propNames.push(getName(node));
+      }
+      obj = obj.get('object');
+    }
+    propNames.push(getName(obj.node));
+
+    return propNames;
+  }
+
   return {
     name: "minify-simplify",
     visitor: {
@@ -137,45 +182,55 @@ module.exports = ({ types: t }) => {
 
       AssignmentExpression(path) {
 
-        const right = path.get('right');
-        const left = path.get('left');
-
-        const canShorten = (
-          right.type === 'BinaryExpression' &&
-          operators.has(right.node.operator) &&
-          left.node.name === right.node.left.name
-        );
-
-		    if (!canShorten) return;
+        const rightExpr = path.get('right');
+        const leftExpr = path.get('left');
 
         const canBeUpdateExpression = (
-          right.node.right.type === 'NumericLiteral' &&
-          right.node.right.value === 1 &&
-          updateOperators.has(right.node.operator));
+          rightExpr.get('right').isNumericLiteral() &&
+          rightExpr.get('right').node.value === 1 &&
+          updateOperators.has(rightExpr.node.operator));
 
-        if (left.node.name === undefined) {
-          // TODO: transform MemberExpressions as well
-          // e.g. foo.bar = foo.bar + 123;
-          return;
-        }
+        if (leftExpr.isMemberExpression()) {
 
-        if (canBeUpdateExpression) {
+          const leftPropNames = getPropNames(leftExpr);
+          const rightPropNames = getPropNames(rightExpr.get('left'));
 
-          const newExpression = t.updateExpression(
-            right.node.operator + right.node.operator,
-            t.identifier(left.node.name));
+          if (!leftPropNames ||
+              leftPropNames.includes(undefined) ||
+              !rightPropNames ||
+              rightPropNames.includes(undefined) ||
+             !isEqual(leftPropNames, rightPropNames)) {
+            return;
+          }
 
-          path.replaceWith(newExpression);
+          // TODO: implement replacement
         }
         else {
-
-          const newExpression = t.assignmentExpression(
-            right.node.operator + '=',
-            t.identifier(left.node.name),
-            t.clone(right.node.right));
-
-          path.replaceWith(newExpression);
+          if (!rightExpr.isBinaryExpression() ||
+              !operators.has(rightExpr.node.operator) ||
+              leftExpr.node.name !== rightExpr.node.left.name) {
+          	return;
+          }
         }
+
+        let newExpression;
+
+        // special case +=1 --> ++
+        if (canBeUpdateExpression) {
+          newExpression = t.updateExpression(
+            rightExpr.node.operator + rightExpr.node.operator,
+            leftExpr.isMemberExpression()
+              ? t.clone(leftExpr.node)
+              : t.identifier(leftExpr.node.name));
+        }
+        else {
+          newExpression = t.assignmentExpression(
+            rightExpr.node.operator + '=',
+            t.clone(leftExpr.node),
+            t.clone(rightExpr.node.right));
+        }
+
+        path.replaceWith(newExpression);
       },
 
       ConditionalExpression: {
