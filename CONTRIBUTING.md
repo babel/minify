@@ -56,4 +56,4 @@ $ ./scripts/plugin-timing.js file.js
 
 Use `npm run publish`. It will run `lerna publish` (we use --independent) so it will prompt the version number for every package.
 
-If you are releasing a new package, you'll want to run `.scripts/npm-owner-update.sh` to add all owners to the new npm package. 
+If you are releasing a new package, you'll want to run `./scripts/npm-owner-update.sh` to add all owners to the new npm package. 
