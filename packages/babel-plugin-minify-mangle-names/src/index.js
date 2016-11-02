@@ -17,6 +17,32 @@ module.exports = ({ types: t }) => {
       this.visitedScopes = new Set;
 
       this.referencesToUpdate = new Map;
+
+      this.references = new Map;
+    }
+
+    addReference(scope, name) {
+      // console.log(scope.path.type, name);
+      if (this.references.has(scope)) {
+        this.references.get(scope).add(name);
+      } else {
+        const refs = new Set;
+        refs.add(name);
+        this.references.set(scope, refs);
+      }
+    }
+
+    hasReference(scope, name) {
+      return this.references.has(scope) && this.references.get(scope).has(name);
+    }
+
+    updateReference(scope, oldName, newName) {
+      if (!this.references.has(scope)) {
+        return;
+      }
+      const references = this.references.get(scope);
+      references.delete(oldName);
+      references.add(newName);
     }
 
     run() {
@@ -50,6 +76,9 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.markUnsafeScopes(path.scope);
           }
+        },
+        ReferencedIdentifier({scope, node: {name}}) {
+          mangler.addReference(scope, name);
         }
       };
 
@@ -101,9 +130,9 @@ module.exports = ({ types: t }) => {
           // Re-enable after enabling this feature
           // This doesn't work right now as we are concentrating
           // on performance improvements
-          // function resetNext() {
-          //   i = 0;
-          // }
+          function resetNext() {
+            i = 0;
+          }
 
           const bindings = scope.getAllBindings();
           const names = Object.keys(bindings);
@@ -136,15 +165,16 @@ module.exports = ({ types: t }) => {
               next = getNext();
             } while (
               !t.isValidIdentifier(next)
-              || hop.call(bindings, next)
+              || scope.hasBinding(next)
               || scope.hasGlobal(next)
-              || scope.hasReference(next)
+              || mangler.hasReference(scope, next)
             );
 
             // TODO:
             // re-enable this - check above
-            // resetNext();
+            resetNext();
             mangler.rename(scope, oldName, next);
+            mangler.updateReference(scope, oldName, next);
             // mark the binding as renamed
             binding.renamed = true;
           }
