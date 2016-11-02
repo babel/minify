@@ -38,7 +38,8 @@ module.exports = ({ types: t }) => {
     updateReference(scope, oldName, newName) {
       const references = this.references.get(scope);
       if (!references.has(oldName)) {
-        throw new Error("Reference not found - " + oldName + ". New reference - " + newName);
+        // already renamed
+        return;
       }
       references.delete(oldName);
       references.add(newName);
