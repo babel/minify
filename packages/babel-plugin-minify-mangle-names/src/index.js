@@ -229,11 +229,13 @@ module.exports = ({ types: t }) => {
 
 const CHARSET = ("abcdefghijklmnopqrstuvwxyz" +
                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
+const FIRST_CHARSET = ("abcdefghijklmnopqrstuvwxyz").split("");
 
 class Charset {
   constructor(shouldConsider) {
     this.shouldConsider = shouldConsider;
     this.chars = CHARSET.slice();
+	this.firstChars = FIRST_CHARSET.slice();
     this.frequency = {};
     this.chars.forEach((c) => { this.frequency[c] = 0; });
     this.finalized = false;
@@ -256,6 +258,9 @@ class Charset {
       this.chars = this.chars.sort(
         (a, b) => this.frequency[b] - this.frequency[a]
       );
+	  this.firstChars = this.firstChars.sort(
+		(a, b) => this.frequency[b] - this.frequency[a]
+	  );
     }
 
     this.finalized = true;
@@ -266,13 +271,14 @@ class Charset {
       throw new Error("Should sort first");
     }
 
-    let ret = "";
-    num++;
-    do {
-      num--;
+    let ret = this.firstChars[num % this.firstChars.length];
+    num = Math.floor(num / this.firstChars.length);
+    
+    while (num > 0) {
+	  num--;
       ret += this.chars[num % this.chars.length];
       num = Math.floor(num / this.chars.length);
-    } while (num > 0);
+    };
     return ret;
   }
 }
