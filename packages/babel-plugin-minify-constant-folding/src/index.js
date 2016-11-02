@@ -92,7 +92,7 @@ module.exports = ({ types: t, traverse }) => {
           return;
         }
 
-        const res = path.evaluate();
+        const res = evaluate(path);
         if (res.confident) {
           // Avoid fractions because they can be longer than the original expression.
           // There is also issues with number percision?
@@ -118,3 +118,14 @@ module.exports = ({ types: t, traverse }) => {
     },
   };
 };
+
+function evaluate(path) {
+  try {
+    return path.evaluate();
+  } catch (e) {
+    return {
+      confident: false,
+      error: e
+    };
+  }
+}
