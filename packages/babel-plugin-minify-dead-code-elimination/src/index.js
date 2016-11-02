@@ -840,7 +840,7 @@ module.exports = ({ types: t, traverse }) => {
     const binding = scope.getBinding(id.name);
 
     // Check if shadowed or is not referenced.
-    if (binding.path.node !== node || !binding.referenced) {
+    if (binding && (binding.path.node !== node || !binding.referenced)) {
       node.id = null;
     }
   }
