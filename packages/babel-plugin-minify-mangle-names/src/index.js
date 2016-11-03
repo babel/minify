@@ -27,22 +27,34 @@ module.exports = ({ types: t }) => {
       }
     }
 
-    addReference(scope, name) {
-      this.references.get(scope).add(name);
+    addReference(scope, binding, name) {
+      let parent = scope;
+      do {
+        // here binding is undefined for globals,
+        // so we just add to all scopes up
+        if (binding && binding.scope === parent) {
+          break;
+        }
+        this.references.get(parent).add(name);
+      } while (parent = parent.parent);
     }
 
     hasReference(scope, name) {
       return this.references.get(scope).has(name);
     }
 
-    updateReference(scope, oldName, newName) {
-      const references = this.references.get(scope);
-      if (!references.has(oldName)) {
-        // already renamed
-        return;
-      }
-      references.delete(oldName);
-      references.add(newName);
+    updateReference(scope, binding, oldName, newName) {
+      let parent = scope;
+      do {
+        if (binding.scope === parent) {
+          break;
+        }
+        const ref = this.references.get(parent);
+        if (ref.has(oldName)) {
+          ref.delete(oldName);
+          ref.add(newName);
+        }
+      } while (parent = parent.parent);
     }
 
     run() {
@@ -82,8 +94,10 @@ module.exports = ({ types: t }) => {
         Scopable({scope}) {
           mangler.addScope(scope);
         },
-        ReferencedIdentifier({scope, node: {name}}) {
-          mangler.addReference(scope, name);
+        ReferencedIdentifier(path) {
+          const {scope, node: {name}} = path;
+          const binding = scope.getBinding(name);
+          mangler.addReference(scope, binding, name);
         }
       };
 
@@ -173,7 +187,6 @@ module.exports = ({ types: t }) => {
 
             resetNext();
             mangler.rename(scope, binding, oldName, next);
-            mangler.updateReference(scope, oldName, next);
             // mark the binding as renamed
             binding.renamed = true;
           }
@@ -222,13 +235,13 @@ module.exports = ({ types: t }) => {
             ReferencedIdentifier(refPath) {
               if (refPath.node.name === oldName && refPath.scope === scope) {
                 refPath.node.name = newName;
-                mangler.updateReference(refPath.scope, oldName, newName);
+                mangler.updateReference(refPath.scope, binding, oldName, newName);
               }
             }
           });
         } else if (!isLabelIdentifier(path)) {
           node.name = newName;
-          mangler.updateReference(path.scope, oldName, newName);
+          mangler.updateReference(path.scope, binding, oldName, newName, path);
         }
       }
     }
