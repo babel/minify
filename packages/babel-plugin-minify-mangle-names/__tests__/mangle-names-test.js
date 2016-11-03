@@ -104,8 +104,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(d, e, f) {
-          b(d, e, f);
+        function a(d, a, e) {
+          b(d, a, e);
         }
 
         function b() {}
@@ -294,9 +294,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(c, d) {
+        function a(a, c) {
           if (1) {
-            b(c, d);
+            b(a, c);
           }
         }
         function b() {}
@@ -457,12 +457,12 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function xoo() {
-        function a(b, c, d) {
-          function e(f, g, h) {
-            return function (i) {
-              g();
+        function a(a, b, c) {
+          function d(a, b, c) {
+            return function (c) {
+              b();
               return function () {
-                f();
+                a();
               };
             };
           }
@@ -976,9 +976,9 @@ describe("mangle-names", () => {
       new B();
       function a() {
         class a {}
-        class c {}
+        class b {}
         new a();
-        new c();
+        new b();
       }
     `);
     expect(transform(source)).toBe(expected);
