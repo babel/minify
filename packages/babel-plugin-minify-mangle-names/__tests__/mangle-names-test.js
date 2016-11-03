@@ -82,9 +82,9 @@ describe("mangle-names", () => {
     const expected = unpad(`
       var a = 1;
       function foo() {
-        var b = 1;
-        if (b) {
-          console.log(b);
+        var a = 1;
+        if (a) {
+          console.log(a);
         }
       }
     `);
@@ -239,12 +239,12 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function foo() {
-        function a(c, d, e) {
-          b(c, d, e);
+        function a(a, c, d) {
+          b(a, c, d);
         }
         function b() {
-          var c = who();
-          c.bam();
+          var a = who();
+          a.bam();
         }
         a();
       }
@@ -271,8 +271,8 @@ describe("mangle-names", () => {
         (function a() {
           a();
           return function () {
-            var b = wow();
-            b.woo();
+            var a = wow();
+            a.woo();
           };
         })();
       }
@@ -319,9 +319,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(c, d) {
-          return function (e, f) {
-            c(e, f);
+        function a(a, b) {
+          return function (b, c) {
+            a(b, c);
           };
         }
         function b() {}
@@ -346,8 +346,8 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function foo() {
         function a() {
-          var c;
-          if (c) {
+          var a;
+          if (a) {
             b();
           }
         }
@@ -371,7 +371,7 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(c) {
+        function a(a) {
           return function () {
             b();
           };
@@ -484,7 +484,7 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function xoo() {
         var a;
-        try {} catch (b) {}
+        try {} catch (a) {}
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -553,10 +553,10 @@ describe("mangle-names", () => {
       function foo() {
         var a = 1;
         (function () {
-          var b = 2;
+          var a = 2;
           eval("...");
           (function () {
-            var c = 1;
+            var a = 1;
           })();
         })();
       }
@@ -590,18 +590,18 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function f(a) {
-        var b = function (d) {
-          var e = void 0;
-          if (e) {
+        var b = function (a) {
+          var b = void 0;
+          if (b) {
             return {
               v: void 0
             };
           }
-          g(() => e);
+          g(() => b);
         };
 
-        for (var d = 0; d; d++) {
-          var c = b(d);
+        for (var a = 0; a; a++) {
+          var c = b(a);
           if (typeof c === "object") return c.v;
         }
       }
@@ -640,8 +640,8 @@ describe("mangle-names", () => {
       (function () {
         function a() {
           if (smth) {
-            var c = blah();
-            c();
+            var a = blah();
+            a();
           }
           b();
         }
@@ -674,7 +674,7 @@ describe("mangle-names", () => {
       (function () {
         function a() {
           {
-            var c = true;
+            var a = true;
 
             {
               b();
@@ -743,8 +743,8 @@ describe("mangle-names", () => {
 
       (function () {
         (function () {
-          for (var b in y) {
-            y[b];
+          for (var a in y) {
+            y[a];
           }f(function () {
             a();
           });
@@ -832,10 +832,10 @@ describe("mangle-names", () => {
         var b = 10;
         a(b);
         function a() {
-          var c = 10;
-          c++;
-          var c = 20;
-          c(c);
+          var a = 10;
+          a++;
+          var a = 20;
+          a(a);
         }
       };
     `);
@@ -975,9 +975,9 @@ describe("mangle-names", () => {
       new A();
       new B();
       function a() {
-        class b {}
+        class a {}
         class c {}
-        new b();
+        new a();
         new c();
       }
     `);

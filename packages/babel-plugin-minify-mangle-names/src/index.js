@@ -45,10 +45,6 @@ module.exports = ({ types: t }) => {
       references.add(newName);
     }
 
-    hasBinding(scope, name) {
-      return scope.hasOwnBinding(name) || scope.hasUid(name);
-    }
-
     run() {
       this.collect();
       this.charset.sort();
@@ -135,10 +131,6 @@ module.exports = ({ types: t }) => {
           // => var aa, a, b ,c;
           // instead of
           // => var aa, ab, ...;
-          // TODO:
-          // Re-enable after enabling this feature
-          // This doesn't work right now as we are concentrating
-          // on performance improvements
           function resetNext() {
             i = 0;
           }
@@ -179,8 +171,6 @@ module.exports = ({ types: t }) => {
               || mangler.hasReference(scope, next)
             );
 
-            // TODO:
-            // re-enable this - check above
             resetNext();
             mangler.rename(scope, binding, oldName, next);
             mangler.updateReference(scope, oldName, next);
@@ -189,11 +179,6 @@ module.exports = ({ types: t }) => {
           }
         }
       });
-
-      // TODO:
-      // re-enable
-      // check above
-      // this.updateReferences();
     }
 
     rename(scope, binding, oldName, newName) {
