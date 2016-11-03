@@ -245,9 +245,7 @@ module.exports = ({ types: t, traverse }) => {
                 continue;
               }
 
-              if (!scope.isPure(replacement, true)) {
-                continue;
-              }
+              const isPure = scope.isPure(replacement, true);
 
               if (binding.referencePaths.length > 1) {
                 throw new Error("Expected only one reference");
@@ -255,6 +253,76 @@ module.exports = ({ types: t, traverse }) => {
 
               let bail = false;
               const refPath = binding.referencePaths[0];
+
+              if (!isPure) {
+                const isSimpleUse = (refPath) => {
+                  const refParent = refPath.parentPath;
+                  // [return] foo(id);
+                  if (t.isCallExpression(refParent) &&
+                      refParent.node.arguments.length === 1 &&
+                      t.isIdentifier(refParent.node.arguments[0]) &&
+                      refParent.node.arguments[0] === refPath.node &&
+                      (t.isExpressionStatement(refParent.parentPath) ||
+                        t.isReturnStatement(refParent.parentPath))) {
+                    return true;
+                  }
+                  // return id;
+                  if (t.isReturnStatement(refParent) &&
+                      t.isIdentifier(refParent.node.argument) &&
+                      refParent.node.argument === refPath.node) {
+                    return true;
+                  }
+                  // [var|let|const] new_id = id;
+                  if (t.isVariableDeclarator(refParent) &&
+                      refParent.node.init === refPath.node &&
+                      t.isVariableDeclaration(refParent.parentPath) &&
+                      refParent.parentPath.node.declarations.length === 1) {
+                    return true;
+                  }
+                  return false;
+                };
+                const isSimpleDeclaration = (repPath) => {
+                  // [let|const] foo = `exp`;
+                  if (t.isVariableDeclarator(repPath.parentPath) &&
+                      t.isVariableDeclaration(repPath.parentPath.parentPath)) {
+                    const varDecl = repPath.parentPath.parentPath;
+                    if (varDecl.node.declarations.length === 1 &&
+                        varDecl.node.kind !== "var") {
+                      return true;
+                    }
+                  }
+                  return false;
+                };
+                const isRefAfterDeclaration = (repPath, refPath) => {
+                  const getStatement = (p) => {
+                    if (p === null) {
+                      return null;
+                    }
+                    if (t.isStatement(p)) {
+                      return p;
+                    } else {
+                      return getStatement(p.parentPath);
+                    }
+                  }
+                  const repStatement = getStatement(repPath);
+                  const refStatement = getStatement(refPath);
+                  const block = refStatement.parentPath;
+                  if (!t.isBlockStatement(block)) {
+                    return false;
+                  }
+                  const body = block.get("body");
+                  const refIndex = body.indexOf(refStatement);
+                  if (refIndex > 0 && body[refIndex - 1] === repStatement) {
+                    return true;
+                  }
+                  return false;
+                };
+                if (!(isSimpleUse(refPath) &&
+                    isSimpleDeclaration(replacementPath) &&
+                    isRefAfterDeclaration(replacementPath, refPath))) {
+                  continue;
+                }
+              }
 
               if (replacementPath.isIdentifier()) {
                 bail = refPath.scope.getBinding(replacement.name) !== scope.getBinding(replacement.name);

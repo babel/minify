@@ -2193,4 +2193,82 @@ describe("dce-plugin", () => {
       }
     })).toBe(expected);
   });
+
+  it("should inline returns for temp variables", () => {
+    const source = unpad(`
+      function foo() {
+        let a = bar();
+        return a;
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        return bar();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should inline calls with temp variables", () => {
+    const source = unpad(`
+      function foo() {
+        let a = f();
+        bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        bar(f());
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should inline return calls with temp variables", () => {
+    const source = unpad(`
+      function foo() {
+        let a = f();
+        return bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        return bar(f());
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should inline transitive temp variables", () => {
+    const source = unpad(`
+      function foo() {
+        let a = f();
+        let b = a;
+        return b;
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        return f();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should inline assignments to temp variables", () => {
+    const source = unpad(`
+      function foo() {
+        let a = f();
+        const b = a;
+        return b + 2;
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        const b = f();
+        return b + 2;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
