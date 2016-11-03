@@ -1,3 +1,5 @@
+const LEAF_NODE = Symbol("LEAF_NODE");
+
 module.exports = class PatternMatch {
   constructor(patterns) {
     this.decisionTree = this.makeDecisionTree(patterns);
@@ -42,8 +44,10 @@ module.exports = class PatternMatch {
         current = current.get(matchedKey);
 
         if (i === input.length - 1) {
-          result.match = true;
-          result.value = current;
+          if (current.has(LEAF_NODE)) {
+            result.match = true;
+            result.value = current.get(LEAF_NODE);
+          }
           break;
         }
       }
@@ -66,10 +70,17 @@ module.exports = class PatternMatch {
       }
 
       if (pattern.length === 2) {
-        // here we don't handle duplicates
-        // this pattern would have already been matched
-        if (!parent.has(pattern[0])) {
-          parent.set(pattern[0], pattern[1]);
+        if (parent.has(pattern[0])) {
+          const pattern0 = parent.get(pattern[0]);
+          if (!pattern0.has(LEAF_NODE)) {
+            pattern0.set(LEAF_NODE, pattern[1]);
+          }
+          // here we don't handle duplicates
+          // this pattern would have already been matched
+        } else {
+          parent.set(pattern[0], new Map([
+            [LEAF_NODE, pattern[1]]
+          ]));
         }
 
         return parent;
