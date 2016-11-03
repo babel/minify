@@ -35,11 +35,22 @@ module.exports = ({ types: t }) => {
         if (binding && binding.scope === parent) {
           break;
         }
+        // this is a hack to make it work along with other plugins
+        // that create or update scope information
+        if (!this.references.has(parent)) {
+          this.addScope(parent);
+        }
         this.references.get(parent).add(name);
       } while (parent = parent.parent);
     }
 
     hasReference(scope, name) {
+      // this is a hack to make it work along with other plugins
+      // that create or update scope information
+      if (!this.references.has(scope)) {
+        this.addScope(scope);
+        return false;
+      }
       return this.references.get(scope).has(name);
     }
 
@@ -49,11 +60,21 @@ module.exports = ({ types: t }) => {
         if (binding.scope === parent) {
           break;
         }
+
+        // this is a hack to make it work along with other plugins
+        // that create or update scope information
+        if (!this.references.has(parent)) {
+          this.addScope(parent);
+          this.addReference(parent, binding, oldName);
+        }
+
+        // update
         const ref = this.references.get(parent);
         if (ref.has(oldName)) {
           ref.delete(oldName);
           ref.add(newName);
         }
+        // else already renamed or not found in the scope
       } while (parent = parent.parent);
     }
 
