@@ -82,7 +82,7 @@ describe("dce-plugin", () => {
     const source = unpad(`
       function foo(p) {
         return 1;
-      };
+      }
       function bar(q) {
         return q + 1;
       }
@@ -2192,5 +2192,21 @@ describe("dce-plugin", () => {
         plugins: ["asyncGenerators"]
       }
     })).toBe(expected);
+  });
+  it("should remove empty statements when children of block", () => {
+    const source = unpad(`
+      (function () {
+        function foo() {};
+        function bar() {};
+        function baz() {};
+        function ban() {};
+        function quux() {};
+        function cake() {};
+      })();
+    `);
+    const expected = unpad(`
+      (function () {})();
+    `);
+    expect(transform(source)).toBe(expected);
   });
 });

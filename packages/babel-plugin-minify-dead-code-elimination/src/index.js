@@ -678,6 +678,11 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-dead-code-elimination",
     visitor: {
+      EmptyStatement(path) {
+        if (path.parentPath.isBlockStatement() || path.parentPath.isProgram()) {
+          path.remove();
+        }
+      },
       Program(path, {
         opts: {
           // set defaults
