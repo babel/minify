@@ -1,5 +1,7 @@
 "use strict";
 
+const evaluate = require("babel-helper-evaluate-path");
+
 module.exports = ({ types: t, traverse }) => {
   const seen = Symbol("seen");
 
@@ -92,7 +94,7 @@ module.exports = ({ types: t, traverse }) => {
           return;
         }
 
-        const res = path.evaluate();
+        const res = evaluate(path);
         if (res.confident) {
           // Avoid fractions because they can be longer than the original expression.
           // There is also issues with number percision?
