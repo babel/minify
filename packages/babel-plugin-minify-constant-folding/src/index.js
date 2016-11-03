@@ -1,5 +1,7 @@
 "use strict";
 
+const evaluate = require("babel-helper-evaluate-path");
+
 module.exports = ({ types: t, traverse }) => {
   const seen = Symbol("seen");
 
@@ -118,14 +120,3 @@ module.exports = ({ types: t, traverse }) => {
     },
   };
 };
-
-function evaluate(path) {
-  try {
-    return path.evaluate();
-  } catch (e) {
-    return {
-      confident: false,
-      error: e
-    };
-  }
-}
