@@ -201,7 +201,7 @@ module.exports = ({ types: t }) => {
               next = getNext();
             } while (
               !t.isValidIdentifier(next)
-              || scope.hasBinding(next)
+              || hop.call(bindings, next)
               || scope.hasGlobal(next)
               || mangler.hasReference(scope, next)
             );
