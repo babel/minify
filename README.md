@@ -9,11 +9,9 @@
   <a href="https://slack.babeljs.io/"><img alt="Slack Status" src="https://slack.babeljs.io/badge.svg"></a>
 </p>
 
-- NOTE: We are in a [feature freeze](https://github.com/babel/babili/issues/71) as we're trying to hammer out all the bugs to get to beta release. The best way to contribute is to test, report bugs, and add test cases.
-
 - Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
 
-- babili is consumable via API, CLI, or babel preset.
+- Babili is consumable via API, CLI, or Babel preset.
 
 - Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false&lineWrap=false&presets=react%2Cstage-2&code=%2F%2F%20Example%20ES2015%20Code%0Aclass%20Mangler%20%7B%0A%20%20constructor(program)%20%7B%0A%20%20%20%20this.program%20%3D%20program%3B%0A%20%20%7D%0A%7D%0Anew%20Mangler()%3B%20%2F%2F%20without%20this%20it%20would%20just%20output%20nothing%20since%20Mangler%20isn%27t%20used)
 
