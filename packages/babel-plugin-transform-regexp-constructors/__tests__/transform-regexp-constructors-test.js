@@ -59,4 +59,10 @@ const flags = "g";
 const ret = /ab+c\\wd/g;`;
     expect(transform(source)).toBe(expected);
   });
+
+  it("should work with newlines", () => {
+    const source = "var x = new RegExp('\\r\\n\\n')";
+    const expected = "var x = /\\r\\n\\n/;";
+    expect(transform(source)).toBe(expected);
+  });
 });
