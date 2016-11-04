@@ -185,6 +185,12 @@ babili     102.8kB 191%    35.26kB 140%     14ms       3786ms
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
 
+## Browser support
+
+Babili is best at targeting latest browsers ([with full ES6+ support](https://kangax.github.io/compat-table/es6/)) but can also be used with the usual Babel es2015 preset to transpile down the code first.
+
+Babili requires Babel 6.14+
+
 ## Team
 
 [![Amjad Masad](https://avatars.githubusercontent.com/u/587518?s=96)](https://github.com/amasad) | [![Boopathi Rajaa](https://avatars.githubusercontent.com/u/294474?s=96)](https://github.com/boopathi) | [![Juriy Zaytsev](https://avatars.githubusercontent.com/u/383?s=96)](https://github.com/kangax) | [![Henry Zhu](https://avatars.githubusercontent.com/u/588473?s=96)](https://github.com/hzoo)
