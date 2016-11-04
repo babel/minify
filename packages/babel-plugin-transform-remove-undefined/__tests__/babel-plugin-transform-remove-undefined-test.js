@@ -11,7 +11,7 @@ function transform(code) {
 }
 
 describe("transform-remove-undefined-plugin", () => {
-  it("should remove multiple undefined assignments", () => {
+  it("should remove multiple undefined assignments in 1 statement", () => {
     const source = "let a = undefined, b = 3, c = undefined, d;";
     const expected = "let a,\n    b = 3,\n    c,\n    d;";
     expect(transform(source)).toBe(expected);
@@ -29,15 +29,18 @@ describe("transform-remove-undefined-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should not remove const-assignments to undefined", () => {
+    const source = "const a = undefined;";
+    expect(transform(source)).toBe(source);
+  });
+
   it("should remove undefined return value", () => {
     const source = unpad(`
       function foo() {
-        const a = undefined;
         return undefined;
       }`);
     const expected = unpad(`
       function foo() {
-        const a = undefined;
         return;
       }`);
     expect(transform(source)).toBe(expected);
@@ -69,12 +72,7 @@ describe("transform-remove-undefined-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should not remove const-assignments to undefined", () => {
-    const source = "const a = undefined;";
-    expect(transform(source)).toBe(source);
-  });
-
-  it("should remove var-assignments in loops", () => {
+  it("should remove var-assignments in loops if no modify", () => {
     const source = unpad(`
       for (var a = undefined;;) {
         var b = undefined;
@@ -86,7 +84,7 @@ describe("transform-remove-undefined-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should not remove var-assignments in loops 2", () => {
+  it("should not remove var-assignments in loops if modify", () => {
     const source = unpad(`
       for (var a;;) {
         var b = undefined;
@@ -114,7 +112,7 @@ describe("transform-remove-undefined-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
-  it("should not remove if call to constant violation function", () => {
+  it("should not remove if lval is reference before via a function", () => {
     const source = unpad(`
       function foo() {
         bar();
@@ -149,31 +147,7 @@ describe("transform-remove-undefined-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should remove ...", () => {
-    const source = unpad(`
-      foo();
-      function foo() {
-        var x = undefined;
-        bar();
-        console.log(x);
-        function bar() {
-          x = 3;
-        }
-      }`);
-    const expected = unpad(`
-      foo();
-      function foo() {
-        var x;
-        bar();
-        console.log(x);
-        function bar() {
-          x = 3;
-        }
-      }`);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not remove nor break on mutually recursive function", () => {
+  it("should not remove on mutually recursive function", () => {
     const source = unpad(`
       function foo() {
         a();
