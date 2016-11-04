@@ -60,9 +60,9 @@ const ret = /ab+c\\wd/g;`;
     expect(transform(source)).toBe(expected);
   });
 
-  it("should work with newlines", () => {
-    const source = "var x = new RegExp('\\r\\n\\n')";
-    const expected = "var x = /\\r\\n\\n/;";
+  it("should escape invalid chars", () => {
+    const source = "var x = new RegExp('\\r\\n\\n/x/')";
+    const expected = "var x = /\\r\\n\\n\\/x\\//;";
     expect(transform(source)).toBe(expected);
   });
 });
