@@ -1,4 +1,5 @@
 const _getBindingIdentifiers = require("./get-binding-identifiers");
+const CountedSet = require("./counted-set");
 
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
@@ -27,7 +28,9 @@ module.exports = ({ types: t }) => {
 
     addScope(scope) {
       if (!this.references.has(scope)) {
-        this.references.set(scope, new Set);
+        this.references.set(scope, new CountedSet);
+      }
+      if (!this.bindings.has(scope)) {
         this.bindings.set(scope, new Map);
       }
     }
@@ -128,11 +131,11 @@ module.exports = ({ types: t }) => {
       } while (parent = parent.parent);
     }
 
-    addBinding(scope, binding) {
+    addBinding(binding) {
       if (!binding) {
         return ;
       }
-      const bindings = this.bindings.get(scope);
+      const bindings = this.bindings.get(binding.scope);
       if (!bindings.has(binding.identifier.name)) {
         bindings.set(binding.identifier.name, binding);
       }
@@ -146,6 +149,53 @@ module.exports = ({ types: t }) => {
       const bindings = this.bindings.get(scope);
       bindings.set(newName, bindings.get(oldName));
       bindings.delete(oldName);
+    }
+
+    // DEADCODE
+    registerBinding(idPath) {
+      const keys = t.getBindingIdentifiers.keys;
+      const bindableTypes = Object.keys(keys);
+
+      let parent = idPath;
+      do {
+        if (bindableTypes.indexOf(parent.type) !== -1) {
+          break;
+        }
+      } while (parent = parent.parentPath);
+
+      if (parent) {
+        if (
+          parent.isBlockScoped()
+          || parent.isFunctionDeclaration()
+        ) {
+          parent.scope.getBlockParent().registerDeclaration(parent, idPath.node.name);
+        } else if (parent.isExportDeclaration()) {
+          // do nothing
+        } else if (parent.isDeclaration()) {
+          parent.scope.getFunctionParent().registerDeclaration(parent);
+        } else {
+          console.log(parent.type);
+          throw new Error("why");
+        }
+
+        // parent.scope.registerDeclaration(parent);
+        const binding = parent.scope.getBinding(idPath.node.name);
+        if (!binding) {
+          throw new Error("Binding register Error: " + idPath.node.name);
+        }
+        parent.scope.path.traverse({
+          ReferencedIdentifier(path) {
+            if (path.node.name !== idPath.node.name) return;
+
+            const actualBinding = path.scope.getBinding(path.node.name);
+            if (binding === actualBinding) {
+              binding.reference(path);
+            }
+          }
+        });
+      } else {
+        throw new Error("Unregistered Binding - ", idPath.node.name);
+      }
     }
 
     run() {
@@ -211,21 +261,24 @@ module.exports = ({ types: t }) => {
         Scopable({scope}) {
           mangler.addScope(scope);
           Object.keys(scope.bindings).forEach((name) => {
-            mangler.addBinding(scope, scope.bindings[name]);
+            mangler.addBinding(scope.bindings[name]);
           });
         },
         ReferencedIdentifier(path) {
+          if (isLabelIdentifier(path)) return;
           const {scope, node: {name}} = path;
           const binding = scope.getBinding(name);
           mangler.addReference(scope, binding, name);
         },
         BindingIdentifier(path) {
+          if (isLabelIdentifier(path)) return;
           const {scope, node: {name}} = path;
-          let binding = scope.bindings[name];
+          let binding = scope.getBinding(name);
           if (!binding) {
-            return;
+            if (scope.hasGlobal(name)) return;
+            throw new Error("binding not found " + name);
           }
-          mangler.addBinding(scope, binding);
+          mangler.addBinding(binding);
         }
       };
 
@@ -364,18 +417,6 @@ module.exports = ({ types: t }) => {
 
           mangler.updateReference(violations[i].scope, binding, oldName, newName);
         });
-
-        // Object
-        //   .keys(bindings)
-        //   .map((b) => {
-        //     if (bindings[b].name === oldName) {
-        //       bindings[b] = t.identifier(newName);
-        //       console.log(bindings[b].path);
-        //       mangler.renamedNodes.add(bindings[b]);
-        //       console.log("violation", oldName, newName, violations[i].node.type);
-        //       mangler.updateReference(violations[i].scope, binding, oldName, newName, bindings[b]);
-        //     }
-        //   });
       }
 
       // update all referenced places
@@ -411,15 +452,17 @@ module.exports = ({ types: t }) => {
           });
         } else if (!isLabelIdentifier(path)) {
           if (node.name === oldName) {
+            mangler.renamedNodes.add(path.node);
             path.replaceWith(t.identifier(newName));
-            mangler.renamedNodes.add(node);
             mangler.renamedNodes.add(path.node);
 
             mangler.updateReference(path.scope, binding, oldName, newName);
           } else if (mangler.renamedNodes.has(node)) {
             mangler.updateReference(path.scope, binding, oldName, newName);
           } else {
-            throw new Error("but why?");
+            throw new Error(
+              `Unexpected Error - Trying to replace ${node.name}: from ${oldName} to ${newName}`
+            );
           }
         }
         // else label
