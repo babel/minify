@@ -600,8 +600,8 @@ describe("mangle-names", () => {
           g(() => b);
         };
 
-        for (var a = 0; a; a++) {
-          var c = b(a);
+        for (var d = 0; d; d++) {
+          var c = b(d);
           if (typeof c === "object") return c.v;
         }
       }
@@ -743,13 +743,13 @@ describe("mangle-names", () => {
 
       (function () {
         (function () {
-          for (var a in y) {
-            y[a];
+          for (var b in y) {
+            y[b];
           }f(function () {
-            b();
+            a();
           });
         })();
-        function b() {}
+        function a() {}
       })();
     `);
 

@@ -1,5 +1,8 @@
+const _getBindingIdentifiers = require("./get-binding-identifiers");
+
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
+  const getBindingIdentifiers = _getBindingIdentifiers(t);
 
   class Mangler {
     constructor(charset, program, {
@@ -18,6 +21,8 @@ module.exports = ({ types: t }) => {
 
       this.references = new Map;
       this.bindings = new Map;
+
+      this.renamedNodes = new Set;
     }
 
     addScope(scope) {
@@ -101,7 +106,7 @@ module.exports = ({ types: t }) => {
       return canUse;
     }
 
-    updateReference(scope, binding, oldName, newName, node) {
+    updateReference(scope, binding, oldName, newName) {
       let parent = scope;
       do {
         if (!this.references.has(parent)) {
@@ -114,13 +119,8 @@ module.exports = ({ types: t }) => {
         if (ref.has(oldName)) {
           ref.delete(oldName);
           ref.add(newName);
-        } else {
-          if (node.name === newName) {
-            ref.add(newName);
-            continue;
-          }
-          throw new Error("why - " + oldName);
         }
+        // else already renamed
 
         if (binding.scope === parent) {
           break;
@@ -149,23 +149,7 @@ module.exports = ({ types: t }) => {
     }
 
     run() {
-      this.program.traverse({
-        // this is to fix a bug where block scoping plugin
-        // doesn't register new defintions
-        Scopable(path) {
-          path.scope.crawl();
-        },
-        // this fixes a bug where let to var doesnt change binding scope
-        // VariableDeclaration(path) {
-        //   if (path.node.kind !== "var") {
-        //     return;
-        //   }
-        //   const ids = path.getBindingIdentifiers();
-        //   Object.keys(ids).forEach(id => {
-        //     path.scope.moveBindingTo(id, path.scope.getFunctionParent());
-        //   });
-        // }
-      });
+      this.crawlScope();
       this.collect();
       this.charset.sort();
       this.mangle();
@@ -180,6 +164,31 @@ module.exports = ({ types: t }) => {
       do {
         this.unsafeScopes.add(evalScope);
       } while (evalScope = evalScope.parent);
+    }
+
+    crawlScope() {
+      this.program.traverse({
+        // this is to fix a bug where block scoping plugin
+        // doesn't register new defintions
+        Scopable(path) {
+          path.scope.crawl();
+        },
+        // this fixes a bug where let to var doesnt change binding scope
+        VariableDeclaration: {
+          enter(path) {
+            if (path.node.kind !== "var") {
+              return;
+            }
+            const ids = path.getOuterBindingIdentifiers();
+            Object.keys(ids).forEach((id) => {
+              const binding = path.scope.getBinding(id);
+              if (binding.scope !== path.scope.getFunctionParent()) {
+                path.scope.moveBindingTo(id, path.scope.getFunctionParent());
+              }
+            });
+          }
+        }
+      });
     }
 
     collect() {
@@ -270,10 +279,13 @@ module.exports = ({ types: t }) => {
 
           const bindings = mangler.bindings.get(scope);
           const names = [...bindings.keys()];
+          // const bindings = scope.bindings;
+          // const names = Object.keys(bindings);
 
           for (let i = 0; i < names.length; i++) {
             const oldName = names[i];
             const binding = bindings.get(oldName);
+            // const binding = bindings[oldName]
 
             if (
               // already renamed bindings
@@ -299,6 +311,7 @@ module.exports = ({ types: t }) => {
               next = getNext();
             } while (
               !t.isValidIdentifier(next)
+              // || hop.call(bindings, next)
               || mangler.hasBinding(scope, next)
               || scope.hasGlobal(next)
               || mangler.hasReference(scope, next)
@@ -318,7 +331,16 @@ module.exports = ({ types: t }) => {
       const mangler = this;
 
       // rename at the declaration level
-      binding.identifier.name = newName;
+      // binding.identifier.name = newName;
+      const bindingIds = getBindingIdentifiers(binding.path);
+
+      Object.keys(bindingIds).forEach((id) => {
+        if (id !== oldName) return;
+        const path = bindingIds[id];
+        path.replaceWith(t.identifier(newName));
+      });
+
+      this.renamedNodes.add(binding.identifier);
 
       const {bindings} = scope;
       bindings[newName] = binding;
@@ -331,15 +353,29 @@ module.exports = ({ types: t }) => {
       for (let i = 0; i < violations.length; i++) {
         if (violations[i].isLabeledStatement()) continue;
 
-        const bindings = violations[i].getBindingIdentifiers();
-        Object
-          .keys(bindings)
-          .map((b) => {
-            if (bindings[b].name === oldName) {
-              bindings[b].name = newName;
-              mangler.updateReference(violations[i].scope, binding, oldName, newName, bindings[b]);
-            }
-          });
+        // const bindings = violations[i].getOuterBindingIdentifiers();
+        const ids = getBindingIdentifiers(violations[i]);
+
+        Object.keys(ids).forEach((name) => {
+          const path = ids[name];
+          mangler.renamedNodes.add(path.node);
+          path.replaceWith(t.identifier(newName));
+          mangler.renamedNodes.add(path.node);
+
+          mangler.updateReference(violations[i].scope, binding, oldName, newName);
+        });
+
+        // Object
+        //   .keys(bindings)
+        //   .map((b) => {
+        //     if (bindings[b].name === oldName) {
+        //       bindings[b] = t.identifier(newName);
+        //       console.log(bindings[b].path);
+        //       mangler.renamedNodes.add(bindings[b]);
+        //       console.log("violation", oldName, newName, violations[i].node.type);
+        //       mangler.updateReference(violations[i].scope, binding, oldName, newName, bindings[b]);
+        //     }
+        //   });
       }
 
       // update all referenced places
@@ -359,16 +395,34 @@ module.exports = ({ types: t }) => {
           // replacement in dce from `x` to `!x` gives referencePath as `!x`
           path.traverse({
             ReferencedIdentifier(refPath) {
-              if (refPath.node.name === oldName && refPath.scope === scope) {
-                refPath.node.name = newName;
-                mangler.updateReference(refPath.scope, binding, oldName, newName, refPath.node);
+              if (refPath.node.name !== oldName) {
+                return;
               }
+              const actualBinding = refPath.scope.getBinding(oldName);
+              if (actualBinding !== binding) {
+                return;
+              }
+              mangler.renamedNodes.add(refPath.node);
+              refPath.replaceWith(t.identifier(newName));
+              mangler.renamedNodes.add(refPath.node);
+
+              mangler.updateReference(refPath.scope, binding, oldName, newName);
             }
           });
-        } else if (!isLabelIdentifier(path) && node.name === oldName) {
-          node.name = newName;
-          mangler.updateReference(path.scope, binding, oldName, newName, node, path);
+        } else if (!isLabelIdentifier(path)) {
+          if (node.name === oldName) {
+            path.replaceWith(t.identifier(newName));
+            mangler.renamedNodes.add(node);
+            mangler.renamedNodes.add(path.node);
+
+            mangler.updateReference(path.scope, binding, oldName, newName);
+          } else if (mangler.renamedNodes.has(node)) {
+            mangler.updateReference(path.scope, binding, oldName, newName);
+          } else {
+            throw new Error("but why?");
+          }
         }
+        // else label
       }
     }
   }
