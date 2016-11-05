@@ -104,11 +104,11 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(d, a, e) {
-          b(d, a, e);
+        function a(e, a, b) {
+          d(e, a, b);
         }
 
-        function b() {}
+        function d() {}
       }
     `);
 
@@ -393,8 +393,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(d, e, b) {
-          a(d, e, b);
+        function d(e, a, b) {
+          d(e, a, b);
         }
       }
     `);
@@ -746,10 +746,10 @@ describe("mangle-names", () => {
           for (var a in y) {
             y[a];
           }f(function () {
-            a();
+            b();
           });
         })();
-        function a() {}
+        function b() {}
       })();
     `);
 

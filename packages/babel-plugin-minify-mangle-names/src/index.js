@@ -1,5 +1,3 @@
-const generate = require("babel-generator").default;
-
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
@@ -19,13 +17,13 @@ module.exports = ({ types: t }) => {
       this.visitedScopes = new Set;
 
       this.references = new Map;
-      this.updatedReferences = new Map;
+      this.bindings = new Map;
     }
 
     addScope(scope) {
       if (!this.references.has(scope)) {
         this.references.set(scope, new Set);
-        this.updatedReferences.set(scope, new Set);
+        this.bindings.set(scope, new Map);
       }
     }
 
@@ -38,7 +36,7 @@ module.exports = ({ types: t }) => {
             mangler.addReference(scope, binding, path.node.name);
           }
         }
-      })
+      });
     }
 
     addReference(scope, binding, name) {
@@ -61,7 +59,6 @@ module.exports = ({ types: t }) => {
 
     hasReference(scope, name) {
       if (!this.references.has(scope)) {
-        // console.log("updating");
         this.addScope(scope);
         this.updateScope(scope);
       }
@@ -93,7 +90,7 @@ module.exports = ({ types: t }) => {
                 canUse = false;
               }
             }
-          })
+          });
         } else {
           if (mangler.hasReference(ref.scope, next)) {
             canUse = false;
@@ -104,20 +101,7 @@ module.exports = ({ types: t }) => {
       return canUse;
     }
 
-    updateRenamed(scope, binding, node) {
-      let parent = scope;
-      do {
-        const updatedRefs = this.updatedReferences.get(parent);
-
-        updatedRefs.add(node);
-
-        // if (binding.scope === scope) {
-        //   break;
-        // }
-      } while (parent = parent.parent);
-    }
-
-    updateReference(scope, binding, oldName, newName, node, path) {
+    updateReference(scope, binding, oldName, newName, node) {
       let parent = scope;
       do {
         if (!this.references.has(parent)) {
@@ -128,13 +112,10 @@ module.exports = ({ types: t }) => {
         // update
         const ref = this.references.get(parent);
         if (ref.has(oldName)) {
-          // console.log("Rename", oldName, newName);
           ref.delete(oldName);
           ref.add(newName);
-          // this.updateRenamed(scope, binding, node);
         } else {
           if (node.name === newName) {
-            // console.log("already renamed");
             ref.add(newName);
             continue;
           }
@@ -147,7 +128,44 @@ module.exports = ({ types: t }) => {
       } while (parent = parent.parent);
     }
 
+    addBinding(scope, binding) {
+      if (!binding) {
+        return ;
+      }
+      const bindings = this.bindings.get(scope);
+      if (!bindings.has(binding.identifier.name)) {
+        bindings.set(binding.identifier.name, binding);
+      }
+    }
+
+    hasBinding(scope, name) {
+      return this.bindings.get(scope).has(name);
+    }
+
+    renameBinding(scope, oldName, newName) {
+      const bindings = this.bindings.get(scope);
+      bindings.set(newName, bindings.get(oldName));
+      bindings.delete(oldName);
+    }
+
     run() {
+      this.program.traverse({
+        // this is to fix a bug where block scoping plugin
+        // doesn't register new defintions
+        Scopable(path) {
+          path.scope.crawl();
+        },
+        // this fixes a bug where let to var doesnt change binding scope
+        // VariableDeclaration(path) {
+        //   if (path.node.kind !== "var") {
+        //     return;
+        //   }
+        //   const ids = path.getBindingIdentifiers();
+        //   Object.keys(ids).forEach(id => {
+        //     path.scope.moveBindingTo(id, path.scope.getFunctionParent());
+        //   });
+        // }
+      });
       this.collect();
       this.charset.sort();
       this.mangle();
@@ -183,11 +201,22 @@ module.exports = ({ types: t }) => {
         },
         Scopable({scope}) {
           mangler.addScope(scope);
+          Object.keys(scope.bindings).forEach((name) => {
+            mangler.addBinding(scope, scope.bindings[name]);
+          });
         },
         ReferencedIdentifier(path) {
           const {scope, node: {name}} = path;
           const binding = scope.getBinding(name);
           mangler.addReference(scope, binding, name);
+        },
+        BindingIdentifier(path) {
+          const {scope, node: {name}} = path;
+          let binding = scope.bindings[name];
+          if (!binding) {
+            return;
+          }
+          mangler.addBinding(scope, binding);
         }
       };
 
@@ -239,14 +268,12 @@ module.exports = ({ types: t }) => {
             i = 0;
           }
 
-          const bindings = scope.bindings;
-          const names = Object.keys(bindings);
-          // console.log(names);
-          // console.log(mangler.references.get(scope));
+          const bindings = mangler.bindings.get(scope);
+          const names = [...bindings.keys()];
 
           for (let i = 0; i < names.length; i++) {
             const oldName = names[i];
-            const binding = bindings[oldName];
+            const binding = bindings.get(oldName);
 
             if (
               // already renamed bindings
@@ -256,7 +283,7 @@ module.exports = ({ types: t }) => {
               // globals
               || mangler.program.scope.bindings[oldName] === binding
               // other scope bindings
-              || !scope.hasOwnBinding(oldName)
+              // || !scope.hasOwnBinding(oldName)
               // labels
               || binding.path.isLabeledStatement()
               // blacklisted
@@ -270,30 +297,24 @@ module.exports = ({ types: t }) => {
             let next;
             do {
               next = getNext();
-              if (mangler.hasReference(scope, next)) {
-                // process.stdout.write(next + ",");
-              }
             } while (
               !t.isValidIdentifier(next)
-              || hop.call(bindings, next)
+              || mangler.hasBinding(scope, next)
               || scope.hasGlobal(next)
               || mangler.hasReference(scope, next)
               || !mangler.canUseInReferencedScopes(binding, next)
             );
-            // console.log("");
 
             resetNext();
             mangler.rename(scope, binding, oldName, next);
             // mark the binding as renamed
             binding.renamed = true;
-            // console.log(mangler.references.get(scope));
           }
         }
       });
     }
 
     rename(scope, binding, oldName, newName) {
-      // console.log("Renaming", oldName, newName);
       const mangler = this;
 
       // rename at the declaration level
@@ -303,12 +324,12 @@ module.exports = ({ types: t }) => {
       bindings[newName] = binding;
       delete bindings[oldName];
 
+      this.renameBinding(scope, oldName, newName);
+
       // update all constant violations & redeclarations
       const violations = binding.constantViolations;
       for (let i = 0; i < violations.length; i++) {
         if (violations[i].isLabeledStatement()) continue;
-
-        // console.log("Violation", violations[i].parentPath.type);
 
         const bindings = violations[i].getBindingIdentifiers();
         Object
@@ -316,7 +337,6 @@ module.exports = ({ types: t }) => {
           .map((b) => {
             if (bindings[b].name === oldName) {
               bindings[b].name = newName;
-              // console.log("updating violation", oldName, newName);
               mangler.updateReference(violations[i].scope, binding, oldName, newName, bindings[b]);
             }
           });
@@ -341,14 +361,12 @@ module.exports = ({ types: t }) => {
             ReferencedIdentifier(refPath) {
               if (refPath.node.name === oldName && refPath.scope === scope) {
                 refPath.node.name = newName;
-                // console.log("updating deep traverse", oldName, newName);
                 mangler.updateReference(refPath.scope, binding, oldName, newName, refPath.node);
               }
             }
           });
         } else if (!isLabelIdentifier(path) && node.name === oldName) {
           node.name = newName;
-          // console.log("updating ideal case", oldName, newName);
           mangler.updateReference(path.scope, binding, oldName, newName, node, path);
         }
       }
@@ -360,7 +378,7 @@ module.exports = ({ types: t }) => {
     name: "minify-mangle-names",
     visitor: {
       Program: {
-        enter(path) {
+        enter() {
         },
         exit(path) {
           // If the source code is small then we're going to assume that the user
