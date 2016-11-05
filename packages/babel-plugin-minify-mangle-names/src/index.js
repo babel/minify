@@ -1,3 +1,5 @@
+const generate = require("babel-generator").default;
+
 module.exports = ({ types: t }) => {
   const hop = Object.prototype.hasOwnProperty;
 
@@ -16,65 +18,132 @@ module.exports = ({ types: t }) => {
       this.unsafeScopes = new Set;
       this.visitedScopes = new Set;
 
-      this.referencesToUpdate = new Map;
-
       this.references = new Map;
+      this.updatedReferences = new Map;
     }
 
     addScope(scope) {
       if (!this.references.has(scope)) {
         this.references.set(scope, new Set);
+        this.updatedReferences.set(scope, new Set);
       }
+    }
+
+    updateScope(scope) {
+      const mangler = this;
+      scope.path.traverse({
+        ReferencedIdentifier(path) {
+          if (path.scope === scope) {
+            const binding = scope.getBinding(path.node.name);
+            mangler.addReference(scope, binding, path.node.name);
+          }
+        }
+      })
     }
 
     addReference(scope, binding, name) {
       let parent = scope;
       do {
+        if (!this.references.has(parent)) {
+          this.addScope(parent);
+          this.updateScope(parent);
+        }
+
+        this.references.get(parent).add(name);
+
         // here binding is undefined for globals,
         // so we just add to all scopes up
         if (binding && binding.scope === parent) {
           break;
         }
-        // this is a hack to make it work along with other plugins
-        // that create or update scope information
-        if (!this.references.has(parent)) {
-          this.addScope(parent);
-        }
-        this.references.get(parent).add(name);
       } while (parent = parent.parent);
     }
 
     hasReference(scope, name) {
-      // this is a hack to make it work along with other plugins
-      // that create or update scope information
       if (!this.references.has(scope)) {
+        // console.log("updating");
         this.addScope(scope);
-        return false;
+        this.updateScope(scope);
       }
       return this.references.get(scope).has(name);
     }
 
-    updateReference(scope, binding, oldName, newName) {
+    canUseInReferencedScopes(binding, next) {
+      const mangler = this;
+      let canUse = true;
+
+      binding.constantViolations.forEach((violation) => {
+        if (mangler.hasReference(violation.scope, next)) {
+          canUse = false;
+        }
+      });
+
+      binding.referencePaths.forEach((ref) => {
+        if (!ref.isIdentifier()) {
+          ref.traverse({
+            ReferencedIdentifier(path) {
+              if (path.node.name !== next) {
+                return;
+              }
+              const actualBinding = path.scope.getBinding(path.node.name);
+              if (actualBinding !== binding) {
+                return;
+              }
+              if (mangler.hasReference(path.scope, next)) {
+                canUse = false;
+              }
+            }
+          })
+        } else {
+          if (mangler.hasReference(ref.scope, next)) {
+            canUse = false;
+          }
+        }
+      });
+
+      return canUse;
+    }
+
+    updateRenamed(scope, binding, node) {
       let parent = scope;
       do {
-        if (binding.scope === parent) {
-          break;
-        }
+        const updatedRefs = this.updatedReferences.get(parent);
 
-        // this is a hack to make it work along with other plugins
-        // that create or update scope information
+        updatedRefs.add(node);
+
+        // if (binding.scope === scope) {
+        //   break;
+        // }
+      } while (parent = parent.parent);
+    }
+
+    updateReference(scope, binding, oldName, newName, node, path) {
+      let parent = scope;
+      do {
         if (!this.references.has(parent)) {
           this.addScope(parent);
-          this.addReference(parent, binding, oldName);
+          this.updateScope(parent);
         }
 
         // update
         const ref = this.references.get(parent);
         if (ref.has(oldName)) {
+          // console.log("Rename", oldName, newName);
           ref.delete(oldName);
           ref.add(newName);
+          // this.updateRenamed(scope, binding, node);
+        } else {
+          if (node.name === newName) {
+            // console.log("already renamed");
+            ref.add(newName);
+            continue;
+          }
+          throw new Error("why - " + oldName);
         }
-        // else already renamed or not found in the scope
+
+        if (binding.scope === parent) {
+          break;
+        }
       } while (parent = parent.parent);
     }
 
@@ -172,6 +241,8 @@ module.exports = ({ types: t }) => {
 
           const bindings = scope.bindings;
           const names = Object.keys(bindings);
+          // console.log(names);
+          // console.log(mangler.references.get(scope));
 
           for (let i = 0; i < names.length; i++) {
             const oldName = names[i];
@@ -199,23 +270,30 @@ module.exports = ({ types: t }) => {
             let next;
             do {
               next = getNext();
+              if (mangler.hasReference(scope, next)) {
+                // process.stdout.write(next + ",");
+              }
             } while (
               !t.isValidIdentifier(next)
               || hop.call(bindings, next)
               || scope.hasGlobal(next)
               || mangler.hasReference(scope, next)
+              || !mangler.canUseInReferencedScopes(binding, next)
             );
+            // console.log("");
 
             resetNext();
             mangler.rename(scope, binding, oldName, next);
             // mark the binding as renamed
             binding.renamed = true;
+            // console.log(mangler.references.get(scope));
           }
         }
       });
     }
 
     rename(scope, binding, oldName, newName) {
+      // console.log("Renaming", oldName, newName);
       const mangler = this;
 
       // rename at the declaration level
@@ -230,11 +308,17 @@ module.exports = ({ types: t }) => {
       for (let i = 0; i < violations.length; i++) {
         if (violations[i].isLabeledStatement()) continue;
 
+        // console.log("Violation", violations[i].parentPath.type);
+
         const bindings = violations[i].getBindingIdentifiers();
         Object
           .keys(bindings)
           .map((b) => {
-            bindings[b].name = newName;
+            if (bindings[b].name === oldName) {
+              bindings[b].name = newName;
+              // console.log("updating violation", oldName, newName);
+              mangler.updateReference(violations[i].scope, binding, oldName, newName, bindings[b]);
+            }
           });
       }
 
@@ -243,6 +327,7 @@ module.exports = ({ types: t }) => {
       for (let i = 0; i < refs.length; i++) {
         const path = refs[i];
         const {node} = path;
+
         if (!path.isIdentifier()) {
           // Ideally, this should not happen
           // it happens in these places now -
@@ -256,32 +341,39 @@ module.exports = ({ types: t }) => {
             ReferencedIdentifier(refPath) {
               if (refPath.node.name === oldName && refPath.scope === scope) {
                 refPath.node.name = newName;
-                mangler.updateReference(refPath.scope, binding, oldName, newName);
+                // console.log("updating deep traverse", oldName, newName);
+                mangler.updateReference(refPath.scope, binding, oldName, newName, refPath.node);
               }
             }
           });
-        } else if (!isLabelIdentifier(path)) {
+        } else if (!isLabelIdentifier(path) && node.name === oldName) {
           node.name = newName;
-          mangler.updateReference(path.scope, binding, oldName, newName, path);
+          // console.log("updating ideal case", oldName, newName);
+          mangler.updateReference(path.scope, binding, oldName, newName, node, path);
         }
       }
     }
   }
 
+  let mangler;
   return {
     name: "minify-mangle-names",
     visitor: {
-      Program(path) {
-        // If the source code is small then we're going to assume that the user
-        // is running on this on single files before bundling. Therefore we
-        // need to achieve as much determinisim and we will not do any frequency
-        // sorting on the character set. Currently the number is pretty arbitrary.
-        const shouldConsiderSource = path.getSource().length > 70000;
+      Program: {
+        enter(path) {
+        },
+        exit(path) {
+          // If the source code is small then we're going to assume that the user
+          // is running on this on single files before bundling. Therefore we
+          // need to achieve as much determinisim and we will not do any frequency
+          // sorting on the character set. Currently the number is pretty arbitrary.
+          const shouldConsiderSource = path.getSource().length > 70000;
 
-        const charset = new Charset(shouldConsiderSource);
+          const charset = new Charset(shouldConsiderSource);
 
-        const mangler = new Mangler(charset, path, this.opts);
-        mangler.run();
+          mangler = new Mangler(charset, path, this.opts);
+          mangler.run();
+        }
       },
     },
   };
