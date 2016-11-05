@@ -5,6 +5,7 @@ const babel    = require("babel-core");
 const unpad    = require("../../../utils/unpad");
 
 function transform(code, options = {}, sourceType = "script") {
+  options.reuse = true;
   return babel.transform(code,  {
     sourceType,
     plugins: [
@@ -14,6 +15,7 @@ function transform(code, options = {}, sourceType = "script") {
 }
 
 function transformWithSimplify(code, options = {}, sourceType = "script") {
+  options.reuse = true;
   return babel.transform(code, {
     sourceType,
     plugins: [
@@ -92,9 +94,9 @@ describe("mangle-names", () => {
     const expected = unpad(`
       var a = 1;
       function foo() {
-        var b = 1;
-        if (b) {
-          console.log(b);
+        var a = 1;
+        if (a) {
+          console.log(a);
         }
       }
     `);
@@ -114,11 +116,11 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(f, g, h) {
-          e(f, g, h);
+        function a(d, a, e) {
+          b(d, a, e);
         }
 
-        function e() {}
+        function b() {}
       }
     `);
 
@@ -227,7 +229,7 @@ describe("mangle-names", () => {
           a: {
             console.log(b);
           }
-        } catch (c) {}
+        } catch (a) {}
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -249,12 +251,12 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function foo() {
-        function a(c, d, e) {
-          b(c, d, e);
+        function a(a, c, d) {
+          b(a, c, d);
         }
         function b() {
-          var c = who();
-          c.bam();
+          var a = who();
+          a.bam();
         }
         a();
       }
@@ -281,8 +283,8 @@ describe("mangle-names", () => {
         (function a() {
           a();
           return function () {
-            var b = wow();
-            b.woo();
+            var a = wow();
+            a.woo();
           };
         })();
       }
@@ -304,9 +306,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(c, d) {
+        function a(a, c) {
           if (1) {
-            b(c, d);
+            b(a, c);
           }
         }
         function b() {}
@@ -329,9 +331,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(c, d) {
-          return function (e, f) {
-            c(e, f);
+        function a(a, b) {
+          return function (b, c) {
+            a(b, c);
           };
         }
         function b() {}
@@ -356,8 +358,8 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function foo() {
         function a() {
-          var c;
-          if (c) {
+          var a;
+          if (a) {
             b();
           }
         }
@@ -381,7 +383,7 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(c) {
+        function a(a) {
           return function () {
             b();
           };
@@ -403,8 +405,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(e, f, g) {
-          d(e, f, g);
+        function a(d, e, b) {
+          a(d, e, b);
         }
       }
     `);
@@ -467,12 +469,12 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function xoo() {
-        function a(b, c, d) {
-          function e(f, g, h) {
-            return function (i) {
-              g();
+        function a(a, b, c) {
+          function d(a, b, c) {
+            return function (c) {
+              b();
               return function () {
-                f();
+                a();
               };
             };
           }
@@ -494,7 +496,7 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function xoo() {
         var a;
-        try {} catch (b) {}
+        try {} catch (a) {}
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -563,10 +565,10 @@ describe("mangle-names", () => {
       function foo() {
         var a = 1;
         (function () {
-          var b = 2;
+          var a = 2;
           eval("...");
           (function () {
-            var c = 1;
+            var a = 1;
           })();
         })();
       }
@@ -595,19 +597,19 @@ describe("mangle-names", () => {
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [require("../src/index")],
+      plugins: [[require("../src/index"), { reuse: true }]],
     }).code;
 
     const expected = unpad(`
       function f(a) {
-        var b = function (e) {
-          var h = void 0;
-          if (h) {
+        var b = function (a) {
+          var b = void 0;
+          if (b) {
             return {
               v: void 0
             };
           }
-          g(() => h);
+          g(() => b);
         };
 
         for (var d = 0; d; d++) {
@@ -643,15 +645,15 @@ describe("mangle-names", () => {
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [require("../src/index")],
+      plugins: [[require("../src/index"), { reuse: true }]],
     }).code;
 
     const expected = unpad(`
       (function () {
         function a() {
           if (smth) {
-            var c = blah();
-            c();
+            var a = blah();
+            a();
           }
           b();
         }
@@ -684,7 +686,7 @@ describe("mangle-names", () => {
       (function () {
         function a() {
           {
-            var c = true;
+            var a = true;
 
             {
               b();
@@ -766,9 +768,11 @@ describe("mangle-names", () => {
     expect(actual).toBe(expected);
   });
 
-  it("should NOT mangle functions when keepFnName is true", () => {
+  it("should NOT mangle functions & classes when keepFnName is true", () => {
     const source = unpad(`
       (function() {
+        class Foo {}
+        const Bar = class Bar extends Foo {}
         var foo = function foo() {
           foo();
         }
@@ -782,44 +786,20 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       (function () {
-        var a = function foo() {
+        class Foo {}
+        const a = class Bar extends Foo {};
+        var b = function foo() {
           foo();
         };
         function bar() {
-          a();
+          b();
         }
         bar();
-        var b = a;
-        b();
+        var c = b;
+        c();
       })();
     `);
     expect(transform(source, {keepFnName: true})).toBe(expected);
-  });
-
-  it("should NOT mangle classes when keepClassName is true", () => {
-    const source = unpad(`
-      (function() {
-        class Foo {}
-        const Bar = class Bar extends Foo {}
-        var foo = class Baz {}
-        function bar() {
-          new foo();
-        }
-        bar();
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        class Foo {}
-        const b = class Bar extends Foo {};
-        var c = class Baz {};
-        function a() {
-          new c();
-        }
-        a();
-      })();
-    `);
-    expect(transform(source, {keepClassName: true})).toBe(expected);
   });
 
   it("should mangle variable re-declaration / K violations", () => {
@@ -864,10 +844,10 @@ describe("mangle-names", () => {
         var b = 10;
         a(b);
         function a() {
-          var c = 10;
-          c++;
-          var c = 20;
-          c(c);
+          var a = 10;
+          a++;
+          var a = 20;
+          a(a);
         }
       };
     `);
@@ -898,13 +878,55 @@ describe("mangle-names", () => {
         var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
         var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
         var $, _;
+        a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+        A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+        $, _;
+        function Foo() {
+          var a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+          var $, _;
+          a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+          $, _;
+          function Foo() {
+            var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+            var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+            var $, _;
+            a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+            A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+            $, _;
+          }
+          Foo();
+        }
+        Foo();
       }
     `);
     const expected = unpad(`
       function Foo() {
-        var aa, ba, ca, da, ea, fa, ga, ha, ia, ja, ka, la, ma, na, oa, pa, qa, ra, sa, ta, ua, va, wa, xa, ya, za;
-        var Aa, Ba, Ca, Da, Ea, Fa, Ga, Ha, Ia, Ja, Ka, La, Ma, Na, Oa, Pa, Qa, Ra, Sa, Ta, Ua, Va, Wa, Xa, Ya, Za;
-        var $a, _a;
+        var ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+        var Z, $;
+        ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+        Z, $;
+        function aa() {
+          var aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+          var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+          var Z, $;
+          aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+          z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+          Z, $;
+          function h() {
+            var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+            var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+            var Z, $;
+            aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+            z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+            Z, $;
+          }
+          h();
+        }
+        aa();
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -1007,10 +1029,10 @@ describe("mangle-names", () => {
       new A();
       new B();
       function a() {
+        class a {}
         class b {}
-        class c {}
+        new a();
         new b();
-        new c();
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -1059,9 +1081,9 @@ describe("mangle-names", () => {
         {
           var a;a;a;
           function b() {
-            var c;c;c;
+            var a;a;a;
             {
-              var c;c;c;
+              var a;a;a;
             }
           }
         }
@@ -1088,4 +1110,3 @@ describe("mangle-names", () => {
     expect(transformWithSimplify(source)).toBe(expected);
   });
 });
-
