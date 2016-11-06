@@ -602,7 +602,7 @@ describe("mangle-names", () => {
 
         for (var d = 0; d; d++) {
           var c = b(d);
-          if (typeof c === "object") return c.v;
+          if (typeof c === \"object\") return c.v;
         }
       }
     `);

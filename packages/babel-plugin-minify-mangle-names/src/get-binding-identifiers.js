@@ -23,12 +23,13 @@ module.exports = function (t) {
     while (search.length) {
       let id = search.shift();
       if (!id) continue;
+      if (!id.node) continue;
 
       let keys = KEYS[id.node.type];
 
       if (id.isIdentifier()) {
         if (duplicates) {
-          let _ids = ids[id.name] = ids[id.name] || [];
+          let _ids = ids[id.node.name] = ids[id.node.name] || [];
           _ids.push(id);
         } else {
           ids[id.node.name] = id;

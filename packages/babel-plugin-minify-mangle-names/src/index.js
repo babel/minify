@@ -231,7 +231,24 @@ module.exports = ({ types: t }) => {
             }
             const ids = path.getOuterBindingIdentifiers();
             Object.keys(ids).forEach((id) => {
-              const binding = path.scope.getBinding(id);
+              let binding = path.scope.getBinding(id);
+              // if (!binding) {
+              //   const fnScope = path.scope.getFunctionParent();
+              //   fnScope.registerDeclaration(path);
+              //   binding = path.scope.getBinding(id);
+
+              //   // update references
+              //   fnScope.path.traverse({
+              //     ReferencedIdentifier(refPath) {
+              //       if (refPath.node.name !== id) return;
+
+              //       const actualBinding = refPath.scope.getBinding(refPath.node.name);
+              //       if (binding === actualBinding) {
+              //         binding.reference(refPath);
+              //       }
+              //     }
+              //   });
+              // }
               if (binding.scope !== path.scope.getFunctionParent()) {
                 path.scope.moveBindingTo(id, path.scope.getFunctionParent());
               }
@@ -380,43 +397,49 @@ module.exports = ({ types: t }) => {
       });
     }
 
+    renameBindingIds(path, oldName, newName) {
+      const bindingIds = getBindingIdentifiers(path, true, false);
+      const names = Object.keys(bindingIds);
+      let replace = [];
+
+      for (let i = 0; i < names.length; i++) {
+        if (names[i] !== oldName) continue;
+        const idPath = bindingIds[names[i]];
+        if (Array.isArray(idPath)) {
+          replace = replace.concat(idPath);
+        } else {
+          replace.push(idPath);
+        }
+      }
+
+      for (let i = 0; i < replace.length; i++) {
+        const idPath = replace[i];
+        this.renamedNodes.add(idPath.node);
+        idPath.replaceWith(t.identifier(newName));
+        this.renamedNodes.add(idPath.node);
+      }
+    }
+
     rename(scope, binding, oldName, newName) {
       const mangler = this;
 
       // rename at the declaration level
       // binding.identifier.name = newName;
-      const bindingIds = getBindingIdentifiers(binding.path);
+      this.renameBindingIds(binding.path, oldName, newName);
+      // update bindings map
+      this.renameBinding(scope, oldName, newName);
 
-      Object.keys(bindingIds).forEach((id) => {
-        if (id !== oldName) return;
-        const path = bindingIds[id];
-        path.replaceWith(t.identifier(newName));
-      });
-
-      this.renamedNodes.add(binding.identifier);
-
+      // update scope tracking
       const {bindings} = scope;
       bindings[newName] = binding;
       delete bindings[oldName];
 
-      this.renameBinding(scope, oldName, newName);
-
       // update all constant violations & redeclarations
       const violations = binding.constantViolations;
       for (let i = 0; i < violations.length; i++) {
-        if (violations[i].isLabeledStatement()) continue;
-
-        // const bindings = violations[i].getOuterBindingIdentifiers();
-        const ids = getBindingIdentifiers(violations[i]);
-
-        Object.keys(ids).forEach((name) => {
-          const path = ids[name];
-          mangler.renamedNodes.add(path.node);
-          path.replaceWith(t.identifier(newName));
-          mangler.renamedNodes.add(path.node);
-
-          mangler.updateReference(violations[i].scope, binding, oldName, newName);
-        });
+        if (!violations[i].isLabeledStatement()) {
+          this.renameBindingIds(violations[i], oldName, newName);
+        }
       }
 
       // update all referenced places
@@ -451,13 +474,15 @@ module.exports = ({ types: t }) => {
             }
           });
         } else if (!isLabelIdentifier(path)) {
-          if (node.name === oldName) {
+          if (path.node.name === oldName) {
             mangler.renamedNodes.add(path.node);
             path.replaceWith(t.identifier(newName));
             mangler.renamedNodes.add(path.node);
 
             mangler.updateReference(path.scope, binding, oldName, newName);
-          } else if (mangler.renamedNodes.has(node)) {
+          } else if (mangler.renamedNodes.has(path.node)) {
+            // already renamed,
+            // just update the references
             mangler.updateReference(path.scope, binding, oldName, newName);
           } else {
             throw new Error(
@@ -475,9 +500,7 @@ module.exports = ({ types: t }) => {
     name: "minify-mangle-names",
     visitor: {
       Program: {
-        enter() {
-        },
-        exit(path) {
+        enter(path) {
           // If the source code is small then we're going to assume that the user
           // is running on this on single files before bundling. Therefore we
           // need to achieve as much determinisim and we will not do any frequency
@@ -487,6 +510,8 @@ module.exports = ({ types: t }) => {
           const charset = new Charset(shouldConsiderSource);
 
           mangler = new Mangler(charset, path, this.opts);
+        },
+        exit() {
           mangler.run();
         }
       },
