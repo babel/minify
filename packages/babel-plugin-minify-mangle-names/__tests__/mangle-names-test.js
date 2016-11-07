@@ -1047,4 +1047,36 @@ describe("mangle-names", () => {
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
+
+  it("should handle constant violations across multiple blocks", () => {
+    const source = unpad(`
+      function foo() {
+        var x;x;x;
+        {
+          var x;x;x;
+          function y() {
+            var x;x;x;
+            {
+              var x;x;x;
+            }
+          }
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var a;a;a;
+        {
+          var a;a;a;
+          function b() {
+            var a;a;a;
+            {
+              var a;a;a;
+            }
+          }
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

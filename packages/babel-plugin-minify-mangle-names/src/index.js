@@ -151,53 +151,6 @@ module.exports = ({ types: t }) => {
       bindings.delete(oldName);
     }
 
-    // DEADCODE
-    registerBinding(idPath) {
-      const keys = t.getBindingIdentifiers.keys;
-      const bindableTypes = Object.keys(keys);
-
-      let parent = idPath;
-      do {
-        if (bindableTypes.indexOf(parent.type) !== -1) {
-          break;
-        }
-      } while (parent = parent.parentPath);
-
-      if (parent) {
-        if (
-          parent.isBlockScoped()
-          || parent.isFunctionDeclaration()
-        ) {
-          parent.scope.getBlockParent().registerDeclaration(parent, idPath.node.name);
-        } else if (parent.isExportDeclaration()) {
-          // do nothing
-        } else if (parent.isDeclaration()) {
-          parent.scope.getFunctionParent().registerDeclaration(parent);
-        } else {
-          console.log(parent.type);
-          throw new Error("why");
-        }
-
-        // parent.scope.registerDeclaration(parent);
-        const binding = parent.scope.getBinding(idPath.node.name);
-        if (!binding) {
-          throw new Error("Binding register Error: " + idPath.node.name);
-        }
-        parent.scope.path.traverse({
-          ReferencedIdentifier(path) {
-            if (path.node.name !== idPath.node.name) return;
-
-            const actualBinding = path.scope.getBinding(path.node.name);
-            if (binding === actualBinding) {
-              binding.reference(path);
-            }
-          }
-        });
-      } else {
-        throw new Error("Unregistered Binding - ", idPath.node.name);
-      }
-    }
-
     run() {
       this.crawlScope();
       this.collect();
@@ -222,38 +175,6 @@ module.exports = ({ types: t }) => {
         // doesn't register new defintions
         Scopable(path) {
           path.scope.crawl();
-        },
-        // this fixes a bug where let to var doesnt change binding scope
-        VariableDeclaration: {
-          enter(path) {
-            if (path.node.kind !== "var") {
-              return;
-            }
-            const ids = path.getOuterBindingIdentifiers();
-            Object.keys(ids).forEach((id) => {
-              let binding = path.scope.getBinding(id);
-              // if (!binding) {
-              //   const fnScope = path.scope.getFunctionParent();
-              //   fnScope.registerDeclaration(path);
-              //   binding = path.scope.getBinding(id);
-
-              //   // update references
-              //   fnScope.path.traverse({
-              //     ReferencedIdentifier(refPath) {
-              //       if (refPath.node.name !== id) return;
-
-              //       const actualBinding = refPath.scope.getBinding(refPath.node.name);
-              //       if (binding === actualBinding) {
-              //         binding.reference(refPath);
-              //       }
-              //     }
-              //   });
-              // }
-              if (binding.scope !== path.scope.getFunctionParent()) {
-                path.scope.moveBindingTo(id, path.scope.getFunctionParent());
-              }
-            });
-          }
         }
       });
     }
@@ -287,15 +208,45 @@ module.exports = ({ types: t }) => {
           const binding = scope.getBinding(name);
           mangler.addReference(scope, binding, name);
         },
-        BindingIdentifier(path) {
-          if (isLabelIdentifier(path)) return;
-          const {scope, node: {name}} = path;
-          let binding = scope.getBinding(name);
-          if (!binding) {
-            if (scope.hasGlobal(name)) return;
-            throw new Error("binding not found " + name);
+        // this fixes a bug where converting let to var
+        // doesn't change the binding's scope to function scope
+        VariableDeclaration: {
+          enter(path) {
+            if (path.node.kind !== "var") {
+              return;
+            }
+            const ids = path.getOuterBindingIdentifiers();
+            const fnScope = path.scope.getFunctionParent();
+            Object.keys(ids).forEach((id) => {
+              let binding = path.scope.getBinding(id);
+
+              if (binding.scope !== fnScope) {
+                const existingBinding = fnScope.bindings[id];
+                if (!existingBinding) {
+                  // move binding to the function scope
+                  fnScope.bindings[id] = binding;
+                  binding.scope = fnScope;
+                  delete binding.scope.bindings[id];
+                } else {
+                  throw new Error(
+                    "Some other plugin you're using wrongly creates a variable without checking the scope"
+                  );
+                }
+              }
+            });
           }
-          mangler.addBinding(binding);
+        },
+        BindingIdentifier: {
+          exit(path) {
+            if (isLabelIdentifier(path)) return;
+            const {scope, node: {name}} = path;
+            let binding = scope.getBinding(name);
+            if (!binding) {
+              if (scope.hasGlobal(name)) return;
+              throw new Error("binding not found " + name);
+            }
+            mangler.addBinding(binding);
+          }
         }
       };
 
@@ -429,11 +380,6 @@ module.exports = ({ types: t }) => {
       // update bindings map
       this.renameBinding(scope, oldName, newName);
 
-      // update scope tracking
-      const {bindings} = scope;
-      bindings[newName] = binding;
-      delete bindings[oldName];
-
       // update all constant violations & redeclarations
       const violations = binding.constantViolations;
       for (let i = 0; i < violations.length; i++) {
@@ -492,6 +438,11 @@ module.exports = ({ types: t }) => {
         }
         // else label
       }
+
+      // update scope tracking
+      const {bindings} = scope;
+      bindings[newName] = binding;
+      delete bindings[oldName];
     }
   }
 
@@ -500,7 +451,7 @@ module.exports = ({ types: t }) => {
     name: "minify-mangle-names",
     visitor: {
       Program: {
-        enter(path) {
+        exit(path) {
           // If the source code is small then we're going to assume that the user
           // is running on this on single files before bundling. Therefore we
           // need to achieve as much determinisim and we will not do any frequency
@@ -510,8 +461,6 @@ module.exports = ({ types: t }) => {
           const charset = new Charset(shouldConsiderSource);
 
           mangler = new Mangler(charset, path, this.opts);
-        },
-        exit() {
           mangler.run();
         }
       },
