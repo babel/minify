@@ -116,6 +116,8 @@ module.exports = ({ types: t, traverse }) => {
 
           if (param.isIdentifier()) {
             const binding = scope.bindings[param.node.name];
+            if (!binding) continue;
+
             if (binding.referenced) {
               // when the first binding is referenced (right to left)
               // exit without marking anything after this
