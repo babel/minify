@@ -738,7 +738,7 @@ module.exports = ({ types: t }) => {
               if (t.isReturnStatement(node.consequent)
                   && t.isReturnStatement(node.alternate)
               ) {
-                if (!node.consequent.argument && !node.altenrate.argument) {
+                if (!node.consequent.argument && !node.alternate.argument) {
                   path.replaceWith(t.expressionStatement(node.test));
                   return;
                 }
