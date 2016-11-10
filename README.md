@@ -9,13 +9,20 @@
   <a href="https://slack.babeljs.io/"><img alt="Slack Status" src="https://slack.babeljs.io/badge.svg"></a>
 </p>
 
-- NOTE: We are in a [feature freeze](https://github.com/babel/babili/issues/71) as we're trying to hammer out all the bugs to get to beta release. The best way to contribute is to test, report bugs, and add test cases.
-
 - Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
 
-- babili is consumable via API, CLI, or babel preset.
+- Babili is consumable via API, CLI, or Babel preset.
 
 - Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false&lineWrap=false&presets=react%2Cstage-2&code=%2F%2F%20Example%20ES2015%20Code%0Aclass%20Mangler%20%7B%0A%20%20constructor(program)%20%7B%0A%20%20%20%20this.program%20%3D%20program%3B%0A%20%20%7D%0A%7D%0Anew%20Mangler()%3B%20%2F%2F%20without%20this%20it%20would%20just%20output%20nothing%20since%20Mangler%20isn%27t%20used)
+
+## Table of Contents
+
+- [Why](#why)
+- [CLI](#cli)
+- [Babel Preset](#babel-preset)
+- [Individual Plugins](#individual-plugins)
+- [Benchmarks](#benchmarks)
+- [Team](#team)
 
 ## Why
 
@@ -92,7 +99,7 @@ You'll most likely want to use it only in the production environment. Check out 
 
 Then you'll need to set the env variable which could be something like `BABEL_ENV=production npm run build`
 
-## [Plugins](http://babeljs.io/docs/plugins/) (in `babel-preset-babili`)
+## Individual Plugins
 
 The `babili` repo is comprised of many npm packages. It is a [lerna](https://github.com/lerna/lerna) monorepo similar to [babel](https://github.com/babel/babel) itself.
 
@@ -148,10 +155,10 @@ Add to your `.babelrc`'s plugins array.
 Backbone.js:
 ```
            raw     raw win gzip   gzip win parse time run
-uglify     21.79kB 221%    7.29kB 169%     1ms        247ms
-closure    21.67kB 223%    7.37kB 167%     2ms        1223ms
-babili     21.9kB  219%    7.46kB 164%     2ms        722ms
-closure js 24.01kB 191%    8.04kB 144%     2ms        3301ms
+uglify     21.79kB 221%    7.29kB 169%     2ms        320ms
+closure    21.67kB 223%    7.37kB 167%     2ms        1408ms
+babili     21.86kB 220%    7.46kB 163%     2ms        740ms
+closure js 24.01kB 191%    8.04kB 144%     2ms        3493ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
@@ -159,10 +166,10 @@ Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
 React:
 ```
           raw      raw win gzip    gzip win parse time run
-closure    171.46kB 265%    52.97kB 168%     14ms       2457ms
-uglify     176.36kB 255%    53.13kB 167%     12ms       1367ms
-closure js 173.95kB 260%    53.53kB 165%     12ms       11846ms
-babili     177.87kB 252%    55.41kB 156%     13ms       3059ms
+closure    171.46kB 265%    52.97kB 168%     13ms       2349ms
+uglify     176.36kB 255%    53.13kB 167%     12ms       1889ms
+closure js 173.95kB 260%    53.53kB 165%     12ms       12301ms
+babili     178.06kB 252%    55.28kB 156%     14ms       3282ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
@@ -170,10 +177,24 @@ Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
 jQuery:
 ```
            raw      raw win gzip    gzip win parse time run
-uglify     94.27kB  218%    32.78kB 158%     6ms        955ms
-closure    94.23kB  218%    33.38kB 153%     18ms       1760ms
-closure js 95.64kB  213%    33.78kB 150%     8ms        9295ms
-babili     102.74kB 192%    35.3kB  139%     8ms        2912ms
+uglify     94.27kB 218%    32.78kB 158%     8ms        1265ms
+closure    94.23kB 218%    33.38kB 153%     10ms       2047ms
+closure js 95.64kB 213%    33.78kB 150%     8ms        9980ms
+babili     102.8kB 191%    35.26kB 140%     14ms       3786ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
+
+## Browser support
+
+Babili is best at targeting latest browsers ([with full ES6+ support](https://kangax.github.io/compat-table/es6/)) but can also be used with the usual Babel es2015 preset to transpile down the code first.
+
+Babili requires Babel 6.14+
+
+## Team
+
+[![Amjad Masad](https://avatars.githubusercontent.com/u/587518?s=96)](https://github.com/amasad) | [![Boopathi Rajaa](https://avatars.githubusercontent.com/u/294474?s=96)](https://github.com/boopathi) | [![Juriy Zaytsev](https://avatars.githubusercontent.com/u/383?s=96)](https://github.com/kangax) | [![Henry Zhu](https://avatars.githubusercontent.com/u/588473?s=96)](https://github.com/hzoo)
+---|---|---|---|---|
+Amjad Masad | Boopathi Rajaa | Juriy Zaytsev | Henry Zhu |
+[@amasad](https://github.com/amasad) | [@boopathi](https://github.com/boopathi) | [@kangax](https://github.com/kangax) | [@hzoo](https://github.com/hzoo)
+[@amasad](https://twitter.com/amasad) | [@heisenbugger](https://twitter.com/heisenbugger) | [@kangax](https://twitter.com/kangax) | [@left_pad](https://twitter.com/left_pad)

@@ -17,6 +17,65 @@ module.exports = ({ types: t }) => {
       this.visitedScopes = new Set;
 
       this.referencesToUpdate = new Map;
+
+      this.references = new Map;
+    }
+
+    addScope(scope) {
+      if (!this.references.has(scope)) {
+        this.references.set(scope, new Set);
+      }
+    }
+
+    addReference(scope, binding, name) {
+      let parent = scope;
+      do {
+        // here binding is undefined for globals,
+        // so we just add to all scopes up
+        if (binding && binding.scope === parent) {
+          break;
+        }
+        // this is a hack to make it work along with other plugins
+        // that create or update scope information
+        if (!this.references.has(parent)) {
+          this.addScope(parent);
+        }
+        this.references.get(parent).add(name);
+      } while (parent = parent.parent);
+    }
+
+    hasReference(scope, name) {
+      // this is a hack to make it work along with other plugins
+      // that create or update scope information
+      if (!this.references.has(scope)) {
+        this.addScope(scope);
+        return false;
+      }
+      return this.references.get(scope).has(name);
+    }
+
+    updateReference(scope, binding, oldName, newName) {
+      let parent = scope;
+      do {
+        if (binding.scope === parent) {
+          break;
+        }
+
+        // this is a hack to make it work along with other plugins
+        // that create or update scope information
+        if (!this.references.has(parent)) {
+          this.addScope(parent);
+          this.addReference(parent, binding, oldName);
+        }
+
+        // update
+        const ref = this.references.get(parent);
+        if (ref.has(oldName)) {
+          ref.delete(oldName);
+          ref.add(newName);
+        }
+        // else already renamed or not found in the scope
+      } while (parent = parent.parent);
     }
 
     run() {
@@ -39,6 +98,8 @@ module.exports = ({ types: t }) => {
     collect() {
       const mangler = this;
 
+      mangler.addScope(this.program.scope);
+
       const collectVisitor = {
         // capture direct evals
         CallExpression(path) {
@@ -50,6 +111,14 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.markUnsafeScopes(path.scope);
           }
+        },
+        Scopable({scope}) {
+          mangler.addScope(scope);
+        },
+        ReferencedIdentifier(path) {
+          const {scope, node: {name}} = path;
+          const binding = scope.getBinding(name);
+          mangler.addReference(scope, binding, name);
         }
       };
 
@@ -97,15 +166,11 @@ module.exports = ({ types: t }) => {
           // => var aa, a, b ,c;
           // instead of
           // => var aa, ab, ...;
-          // TODO:
-          // Re-enable after enabling this feature
-          // This doesn't work right now as we are concentrating
-          // on performance improvements
-          // function resetNext() {
-          //   i = 0;
-          // }
+          function resetNext() {
+            i = 0;
+          }
 
-          const bindings = scope.getAllBindings();
+          const bindings = scope.bindings;
           const names = Object.keys(bindings);
 
           for (let i = 0; i < names.length; i++) {
@@ -138,27 +203,20 @@ module.exports = ({ types: t }) => {
               !t.isValidIdentifier(next)
               || hop.call(bindings, next)
               || scope.hasGlobal(next)
-              || scope.hasReference(next)
+              || mangler.hasReference(scope, next)
             );
 
-            // TODO:
-            // re-enable this - check above
-            // resetNext();
-            mangler.rename(scope, oldName, next);
+            resetNext();
+            mangler.rename(scope, binding, oldName, next);
             // mark the binding as renamed
             binding.renamed = true;
           }
         }
       });
-
-      // TODO:
-      // re-enable
-      // check above
-      // this.updateReferences();
     }
 
-    rename(scope, oldName, newName) {
-      const binding = scope.getBinding(oldName);
+    rename(scope, binding, oldName, newName) {
+      const mangler = this;
 
       // rename at the declaration level
       binding.identifier.name = newName;
@@ -198,11 +256,13 @@ module.exports = ({ types: t }) => {
             ReferencedIdentifier(refPath) {
               if (refPath.node.name === oldName && refPath.scope === scope) {
                 refPath.node.name = newName;
+                mangler.updateReference(refPath.scope, binding, oldName, newName);
               }
             }
           });
         } else if (!isLabelIdentifier(path)) {
           node.name = newName;
+          mangler.updateReference(path.scope, binding, oldName, newName, path);
         }
       }
     }

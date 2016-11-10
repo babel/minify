@@ -24,6 +24,10 @@ module.exports = function({ types: t }) {
           return;
         }
 
+        if (path.isLVal() && !path.parentPath.isExpressionStatement()) {
+          return;
+        }
+
         path.replaceWith(INFINITY);
       },
     },

@@ -14,13 +14,19 @@ module.exports = function({ types: t }) {
             typeof a.value === "string")) {
           return;
         }
-        const pattern = (evaluatedArgs.length >= 1 &&
+        let pattern = (evaluatedArgs.length >= 1 &&
                           evaluatedArgs[0].value !== "") ?
                         evaluatedArgs[0].value :
                         "(?:)";
         const flags = evaluatedArgs.length >= 2 ?
                       evaluatedArgs[1].value :
                       "";
+
+        pattern = pattern
+          .replace(/\n/g, '\\n')
+          .replace(/\r/g, '\\r')
+          .replace(/\//g, '\\/');
+
         path.replaceWith(t.regExpLiteral(pattern, flags));
       }
     },

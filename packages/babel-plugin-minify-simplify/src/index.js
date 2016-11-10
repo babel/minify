@@ -84,6 +84,8 @@ module.exports = ({ types: t }) => {
 
     return propNames;
   }
+  const OP_AND = (input) => input === "&&";
+  const OP_OR = (input) => input === "||";
 
   return {
     name: "minify-simplify",
@@ -179,6 +181,73 @@ module.exports = ({ types: t }) => {
             path.replaceWith(node.argument);
           },
         ],
+      },
+
+      LogicalExpression: {
+        exit(path) {
+          // cache of path.evaluate()
+          const evaluateMemo = new Map;
+
+          const TRUTHY = (input) => {
+            // !NaN and !undefined are truthy
+            // separate check here as they are considered impure by babel
+            if (input.isUnaryExpression() && input.get("argument").isIdentifier()) {
+              if (input.node.argument.name === "NaN" || input.node.argument.name === "undefined") {
+                return true;
+              }
+            }
+            const evalResult = input.evaluate();
+            evaluateMemo.set(input, evalResult);
+            return evalResult.confident && input.isPure() && evalResult.value;
+          };
+
+          const FALSY = (input) => {
+            // NaN and undefined are falsy
+            // separate check here as they are considered impure by babel
+            if (input.isIdentifier()) {
+              if (input.node.name === "NaN" || input.node.name === "undefined") {
+                return true;
+              }
+            }
+            const evalResult = input.evaluate();
+            evaluateMemo.set(input, evalResult);
+            return evalResult.confident && input.isPure() && !evalResult.value;
+          };
+
+          const {
+            Expression: EX
+          } = types;
+
+          // Convention:
+          // [left, operator, right, handler(leftNode, rightNode)]
+          const matcher = new PatternMatch([
+            [TRUTHY, OP_AND, EX, (l, r) => r],
+            [FALSY, OP_AND, EX, (l) => l],
+            [TRUTHY, OP_OR, EX, (l) => l],
+            [FALSY, OP_OR, EX, (l, r) => r]
+          ]);
+
+          const left = path.get("left");
+          const right = path.get("right");
+          const operator = path.node.operator;
+
+          const result = matcher.match(
+            [left, operator, right],
+            isPatternMatchesPath
+          );
+
+          if (result.match) {
+            // here we are sure that left.evaluate is always confident becuase
+            // it satisfied one of TRUTHY/FALSY paths
+            let value;
+            if (evaluateMemo.has(left)) {
+              value = evaluateMemo.get(left).value;
+            } else {
+              value = left.evaluate().value;
+            }
+            path.replaceWith(result.value(t.valueToNode(value), right.node));
+          }
+        }
       },
 
       AssignmentExpression(path) {
@@ -775,7 +844,7 @@ module.exports = ({ types: t }) => {
               if (t.isReturnStatement(node.consequent)
                   && t.isReturnStatement(node.alternate)
               ) {
-                if (!node.consequent.argument && !node.altenrate.argument) {
+                if (!node.consequent.argument && !node.alternate.argument) {
                   path.replaceWith(t.expressionStatement(node.test));
                   return;
                 }
@@ -1282,11 +1351,9 @@ module.exports = ({ types: t }) => {
             }
 
             const potentialBreak = lastCase.get("consequent")[lastCase.node.consequent.length - 1];
-            if (!t.isBreakStatement(potentialBreak)) {
-              return;
+            if (t.isBreakStatement(potentialBreak) && potentialBreak.node.label === null) {
+              potentialBreak.remove();
             }
-
-            potentialBreak.remove();
           },
 
           createPrevExpressionEater("switch"),
@@ -1484,6 +1551,9 @@ module.exports = ({ types: t }) => {
         }
       }
       return false;
+    }
+    if (typeof patternValue === "function") {
+      return patternValue(inputPath);
     }
     if (isNodeOfType(inputPath.node, patternValue)) return true;
     let evalResult = inputPath.evaluate();

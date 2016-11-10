@@ -1,36 +1,111 @@
+## Babili v0.0.8: Changelog for 2016-10-31
+
+- babili: 0.0.7 => 0.0.8
+- babel-preset-babili: 0.0.5 => 0.0.8
+- babel-helper-to-multiple-sequence-expressions: 0.0.1 => 0.0.2
+- babel-plugin-minify-dead-code-elimination: 0.0.4 => 0.1.0
+- babel-plugin-minify-mangle-names: 0.0.3 => 0.0.4
+- babel-plugin-minify-numeric-literals: 0.0.1 (new)
+- babel-plugin-minify-simplify: 0.0.3 => 0.0.4
+- babel-plugin-minify-type-constructors: 0.0.1 => 0.0.2
+- babel-plugin-transform-regexp-constructors: 0.0.1 (new)
+
+#### :rocket: New Feature
+* `babel-plugin-minify-numeric-literals`, `babel-preset-babili`
+  * [#222](https://github.com/babel/babili/pull/222) Add numeric literals minification. ([@kangax](https://github.com/kangax))
+  ```js
+  [10000, 0x000001, 0o23420, 0b10011100010000]
+  // =>
+  [1e4, 1, 1e4, 1e4]
+  ```
+* `babel-plugin-transform-regexp-constructors`
+  * [#196](https://github.com/babel/babili/pull/196) Implemented transform-regexp-constructors plugin. ([@shinew](https://github.com/shinew))
+  ```js
+  var x = new RegExp('\\w+\\s')
+  // =>
+  var x = /\w+\s/
+  ```
+* `babel-plugin-minify-dead-code-elimination`
+  * [#182](https://github.com/babel/babili/pull/182) Remove unused fn params. ([@boopathi](https://github.com/boopathi))
+  ```js
+  function foo(unused) { return 1 }
+  // =>
+  function foo() { return 1 }
+  // To prevent this for code depending on foo.length, use keepFnArgs: true
+  {
+    plugins: [ ["minify-dead-code-elimination", { keepFnArgs: true }] ]
+  }
+  ```
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-dead-code-elimination`
+  * [#233](https://github.com/babel/babili/pull/233) Fix array and object patterns in DCE (close #232). ([@boopathi](https://github.com/boopathi))
+  * [#225](https://github.com/babel/babili/pull/225) Fix DCE tests with labels in separate namespace. ([@boopathi](https://github.com/boopathi))
+  * [#214](https://github.com/babel/babili/pull/214) support for for..of/for..await in DCE. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#220](https://github.com/babel/babili/pull/220) Require blocks around single block-scope declaration. ([@boopathi](https://github.com/boopathi))
+  * [#202](https://github.com/babel/babili/pull/202) Fix for merging of vars to successive for loop. ([@boopathi](https://github.com/boopathi))
+* `babel-helper-to-multiple-sequence-expressions`, `babel-plugin-minify-simplify`
+  * [#216](https://github.com/babel/babili/pull/216) Fix undefined in multiple sequence expressions (close #208). ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-type-constructors`
+  * [#215](https://github.com/babel/babili/pull/215) Fix bug where invalid array length throws (close #206). ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-mangle-names`
+  * [#201](https://github.com/babel/babili/pull/201) Fix bug - mangling of name "arguments". ([@boopathi](https://github.com/boopathi))
+  * [#183](https://github.com/babel/babili/pull/183) Mangler - rename keepFnames to keepFnName. ([@boopathi](https://github.com/boopathi))
+
+#### :house: Internal
+* Other
+  * [#229](https://github.com/babel/babili/pull/229) add node 4,7, drop 5. ([@hzoo](https://github.com/hzoo))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#225](https://github.com/babel/babili/pull/225) Fix DCE tests with labels in separate namespace. ([@boopathi](https://github.com/boopathi))
+  * [#218](https://github.com/babel/babili/pull/218) Add more tests for DCE'ing conditional expressions. ([@erikdesjardins](https://github.com/erikdesjardins))
+* `babel-plugin-minify-mangle-names`
+  * [#224](https://github.com/babel/babili/pull/224) Add test for labels shadow in mangle (close #185). ([@boopathi](https://github.com/boopathi))
+* `babel-preset-babili`
+  * [#211](https://github.com/babel/babili/pull/211) Adds babel-plugin-transform-regexp-constructors to preset.. ([@shinew](https://github.com/shinew))
+* `babel-plugin-transform-regexp-constructors`, `babel-preset-babili`
+  * [#199](https://github.com/babel/babili/pull/199) Integrated babel-plugin-transform-regexp-constructors into preset.. ([@shinew](https://github.com/shinew))
+
+#### Commiters: 5
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Erik Desjardins ([erikdesjardins](https://github.com/erikdesjardins))
+- Henry Zhu ([hzoo](https://github.com/hzoo))
+- Juriy Zaytsev ([kangax](https://github.com/kangax))
+- Shine Wang ([shinew](https://github.com/shinew))
+
 ## Changelog for 2016-10-07
- 
+
 - babel-plugin-minify-dead-code-elimination@0.0.4
 - babel-plugin-minify-guarded-expressions@0.0.3
 - babel-preset-babili@0.0.5
 - babili@0.0.7
- 
+
 #### Bug Fix
- 
+
 * `babel-plugin-minify-guarded-expressions`
  * [#179](https://github.com/babel/babili/pull/179) Fix guarded expressions being utilized elsewhere. Fixes #171,#174,#176 ([@boopathi](https://github.com/boopathi))
- 
+
 #### Deps
- 
+
 * `babel-plugin-dead-code-elimination`
  * [#180](https://github.com/babel/babili/pull/180) Use modularized lodash. ([@boopathi](https://github.com/boopathi))
- 
+
 ## Changelog for 2016-09-30
 
  - babel-plugin-minify-dead-code-elimination@0.0.3
  - babel-preset-babili@0.0.4
  - babili@0.0.6
- 
+
 #### Bug Fix
 
 * `babili`
   * [#166](https://github.com/babel/babili/pull/166) use process.execPath when spawing cli. Fixes #108 ([@rossipedia](https://github.com/rossipedia))
- 
+
 Should fix windows support for the cli.
 
 * `babel-plugin-minify-dead-code-elimination`
   * [#155](https://github.com/babel/babili/pull/155) Fix DCE for ArrayPatterns and ObjectPatterns (#155) ([@boopathi](https://github.com/boopathi))
-  
+
 ```js
 // bail out when destructuring with a variable
 const me = lyfe => {

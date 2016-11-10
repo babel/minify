@@ -196,6 +196,10 @@ module.exports = ({ types: t, traverse }) => {
               if (binding.path.parentPath.node.declarations.length !== 1) {
                 continue;
               }
+              // Bail out for ArrayPattern and ObjectPattern
+              if (!binding.path.get("id").isIdentifier()) {
+                continue;
+              }
 
               binding.path.parentPath.replaceWith(binding.path.node.init);
             } else {
@@ -674,6 +678,11 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-dead-code-elimination",
     visitor: {
+      EmptyStatement(path) {
+        if (path.parentPath.isBlockStatement() || path.parentPath.isProgram()) {
+          path.remove();
+        }
+      },
       Program(path, {
         opts: {
           // set defaults
@@ -836,7 +845,7 @@ module.exports = ({ types: t, traverse }) => {
     const binding = scope.getBinding(id.name);
 
     // Check if shadowed or is not referenced.
-    if (binding.path.node !== node || !binding.referenced) {
+    if (binding && (binding.path.node !== node || !binding.referenced)) {
       node.id = null;
     }
   }
@@ -895,7 +904,13 @@ module.exports = ({ types: t, traverse }) => {
         // here we handle the break labels
         // if they are outside switch, we bail out
         // if they are within the case, we keep them
-        const _isAncestor = isAncestor(path.scope.getBinding(label.node.name).path, path);
+        let labelPath;
+        if (path.scope.getLabel) {
+          labelPath = getLabel(label.node.name, path);
+        } else {
+          labelPath = path.scope.getBinding(label.node.name).path;
+        }
+        const _isAncestor = isAncestor(labelPath, path);
 
         return {
           bail: _isAncestor,
@@ -956,5 +971,16 @@ module.exports = ({ types: t, traverse }) => {
   function canExistAfterCompletion(path) {
     return path.isFunctionDeclaration()
       || path.isVariableDeclaration({ kind: "var" });
+  }
+
+  function getLabel(name, _path) {
+    let label, path = _path;
+    do {
+      label = path.scope.getLabel(name);
+      if (label) {
+        return label;
+      }
+    } while (path = path.parentPath);
+    return null;
   }
 };
