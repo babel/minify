@@ -23,9 +23,9 @@ module.exports = function({ types: t }) {
                       "";
 
         pattern = pattern
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
-          .replace(/\//g, '\\/');
+          .replace(/\n/g, "\\n")
+          .replace(/\r/g, "\\r")
+          .replace(/\//g, "\\/");
 
         path.replaceWith(t.regExpLiteral(pattern, flags));
       }
