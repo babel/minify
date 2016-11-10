@@ -269,7 +269,8 @@ module.exports = ({ types: t }) => {
               leftPropNames.includes(undefined) ||
               !rightPropNames ||
               rightPropNames.includes(undefined) ||
-             !isEqual(leftPropNames, rightPropNames)) {
+              !operators.has(rightExpr.node.operator) ||
+              !isEqual(leftPropNames, rightPropNames)) {
             return;
           }
         }

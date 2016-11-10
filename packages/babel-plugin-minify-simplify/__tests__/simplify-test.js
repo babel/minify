@@ -2429,7 +2429,8 @@ describe("simplify-plugin", () => {
       foo.bar.baz = foo.bar.baz + 321,
       this.hello = this.hello + 1,
       foo[null] = foo[null] + 1,
-      foo[undefined] = foo[undefined] + 1;
+      foo[undefined] = foo[undefined] + 1,
+      foo.bar = foo.bar || {};
     `);
     // TODO: foo[void 0] = foo[void 0] + 1;
     const expected = unpad(`
@@ -2450,7 +2451,8 @@ describe("simplify-plugin", () => {
       foo.bar.baz += 321,
       ++this.hello,
       ++foo[null],
-      ++foo[undefined];
+      ++foo[undefined],
+      foo.bar = foo.bar || {};
     `).replace(/\s+/g, ' ');
 
     expect(transform(source)).toBe(expected);
