@@ -266,9 +266,9 @@ module.exports = ({ types: t }) => {
           const rightPropNames = getPropNames(rightExpr.get('left'));
 
           if (!leftPropNames ||
-              leftPropNames.includes(undefined) ||
+              leftPropNames.indexOf(undefined) > -1 ||
               !rightPropNames ||
-              rightPropNames.includes(undefined) ||
+              rightPropNames.indexOf(undefined) > -1 ||
               !operators.has(rightExpr.node.operator) ||
               !isEqual(leftPropNames, rightPropNames)) {
             return;
