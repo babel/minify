@@ -10,13 +10,13 @@ function transform(code) {
 }
 
 describe("transform-regexp-constructors-plugin", () => {
-  it("should work", () => {
+  it("should not duplicate forward-slash escapes", () => {
     const source = String.raw`var x = new RegExp('\\/');`;
     const expected = String.raw`var x = /\//;`;
     expect(transform(source)).toBe(expected);
   });
 
-  it("should work 2", () => {
+  it("should transform newlines fine", () => {
     const source = String.raw`var x = new RegExp('\\n');`;
     const expected = String.raw`var x = /\n/;`;
     expect(transform(source)).toBe(expected);
@@ -24,6 +24,12 @@ describe("transform-regexp-constructors-plugin", () => {
 
   it("should transform RegExp constructors with string literals", () => {
     const source = "var x = new RegExp('ab+c');";
+    const expected = "var x = /ab+c/;";
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should transform RegExp calls with string literals", () => {
+    const source = "var x = RegExp('ab+c');";
     const expected = "var x = /ab+c/;";
     expect(transform(source)).toBe(expected);
   });
