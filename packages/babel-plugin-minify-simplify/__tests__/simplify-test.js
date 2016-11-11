@@ -2382,7 +2382,7 @@ describe("simplify-plugin", () => {
       x ^= 1,
       x /= 1,
       x **= 1;
-    `).replace(/\s+/g, ' ');
+    `).replace(/\s+/g, " ");
 
     expect(transform(source)).toBe(expected);
   });
@@ -2404,7 +2404,7 @@ describe("simplify-plugin", () => {
       foo = 1 + foo,
       x = ++x,
       foo = foo + bar + baz;
-    `).replace(/\s+/g, ' ');
+    `).replace(/\s+/g, " ");
 
     expect(transform(source)).toBe(expected);
   });
@@ -2453,7 +2453,7 @@ describe("simplify-plugin", () => {
       ++foo[null],
       ++foo[undefined],
       foo.bar = foo.bar || {};
-    `).replace(/\s+/g, ' ');
+    `).replace(/\s+/g, " ");
 
     expect(transform(source)).toBe(expected);
   });
@@ -2480,7 +2480,7 @@ describe("simplify-plugin", () => {
 
   it("should not simplify assignments w. template literals", () => {
 
-    const source = unpad('foo[`x`] = foo[`x`] + 1;');
+    const source = unpad("foo[`x`] = foo[`x`] + 1;");
 
     expect(transform(source)).toBe(source);
   });

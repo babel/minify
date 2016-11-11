@@ -29,14 +29,14 @@ module.exports = ({ types: t }) => {
   const and = (a, b) => t.logicalExpression("&&", a, b);
 
   const operators = new Set([
-    '+', '-', '*', '%',
-    '<<', '>>', '>>>',
-    '&', '|', '^', '/',
-    '**'
+    "+", "-", "*", "%",
+    "<<", ">>", ">>>",
+    "&", "|", "^", "/",
+    "**"
   ]);
 
   const updateOperators = new Set([
-    '+', '-'
+    "+", "-"
   ]);
 
   function isEqual(arr1, arr2) {
@@ -46,21 +46,21 @@ module.exports = ({ types: t }) => {
   }
 
   function getName(node) {
-    if (node.type === 'ThisExpression') {
-      return 'this';
+    if (node.type === "ThisExpression") {
+      return "this";
     }
-    if (node.type === 'Super') {
-      return 'super';
+    if (node.type === "Super") {
+      return "super";
     }
-    if (node.type === 'NullLiteral') {
-      return 'null';
+    if (node.type === "NullLiteral") {
+      return "null";
     }
     // augment identifiers so that they don't match
     // string/number literals
     // but still match against each other
     return node.name
-      ? node.name + '_'
-    	: node.value /* Literal */;
+      ? node.name + "_"
+      : node.value /* Literal */;
   }
 
   function getPropNames(path) {
@@ -68,17 +68,17 @@ module.exports = ({ types: t }) => {
       return;
     }
 
-    let obj = path.get('object');
+    let obj = path.get("object");
 
-    const prop = path.get('property');
+    const prop = path.get("property");
     const propNames = [getName(prop.node)];
 
-    while (obj.type === 'MemberExpression') {
-      const node = obj.get('property').node;
+    while (obj.type === "MemberExpression") {
+      const node = obj.get("property").node;
       if (node) {
         propNames.push(getName(node));
       }
-      obj = obj.get('object');
+      obj = obj.get("object");
     }
     propNames.push(getName(obj.node));
 
@@ -252,18 +252,18 @@ module.exports = ({ types: t }) => {
 
       AssignmentExpression(path) {
 
-        const rightExpr = path.get('right');
-        const leftExpr = path.get('left');
+        const rightExpr = path.get("right");
+        const leftExpr = path.get("left");
 
         const canBeUpdateExpression = (
-          rightExpr.get('right').isNumericLiteral() &&
-          rightExpr.get('right').node.value === 1 &&
+          rightExpr.get("right").isNumericLiteral() &&
+          rightExpr.get("right").node.value === 1 &&
           updateOperators.has(rightExpr.node.operator));
 
         if (leftExpr.isMemberExpression()) {
 
           const leftPropNames = getPropNames(leftExpr);
-          const rightPropNames = getPropNames(rightExpr.get('left'));
+          const rightPropNames = getPropNames(rightExpr.get("left"));
 
           if (!leftPropNames ||
               leftPropNames.indexOf(undefined) > -1 ||
@@ -278,7 +278,7 @@ module.exports = ({ types: t }) => {
           if (!rightExpr.isBinaryExpression() ||
               !operators.has(rightExpr.node.operator) ||
               leftExpr.node.name !== rightExpr.node.left.name) {
-          	return;
+            return;
           }
         }
 
@@ -293,7 +293,7 @@ module.exports = ({ types: t }) => {
         }
         else {
           newExpression = t.assignmentExpression(
-            rightExpr.node.operator + '=',
+            rightExpr.node.operator + "=",
             t.clone(leftExpr.node),
             t.clone(rightExpr.node.right));
         }
