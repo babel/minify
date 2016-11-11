@@ -8,8 +8,7 @@ module.exports = function({ types: t }) {
         if (!t.isIdentifier(path.node.callee, {name: "RegExp"})) {
           return;
         }
-        const evaluatedArgs = path.get("arguments")
-                                  .map((a) => a.evaluate());
+        const evaluatedArgs = path.get("arguments").map((a) => a.evaluate());
         if (!evaluatedArgs.every((a) => a.confident === true &&
             typeof a.value === "string")) {
           return;
@@ -22,11 +21,16 @@ module.exports = function({ types: t }) {
                       evaluatedArgs[1].value :
                       "";
 
-        pattern = pattern
-          .replace(/\n/g, "\\n")
-          .replace(/\r/g, "\\r")
-          .replace(/\//g, "\\/");
-
+        pattern = new RegExp(pattern).source;
+        // This step is for prettification -- technically we can just match
+        // literal Unicode fine. e.g. '\t'.replace(/	/, '') === ''.
+        // This makes the output unecessarily bigger.
+        pattern = pattern.replace(/\n/g, "\\n")
+                         .replace(/\t/g, "\\t")
+                         .replace(/[\b]/g, "[\\b]")
+                         .replace(/\v/g, "\\v")
+                         .replace(/\f/g, "\\f")
+                         .replace(/\r/g, "\\r");
         path.replaceWith(t.regExpLiteral(pattern, flags));
       }
     },

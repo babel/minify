@@ -10,6 +10,18 @@ function transform(code) {
 }
 
 describe("transform-regexp-constructors-plugin", () => {
+  it("should work", () => {
+    const source = String.raw`var x = new RegExp('\\/');`;
+    const expected = String.raw`var x = /\//;`;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should work 2", () => {
+    const source = String.raw`var x = new RegExp('\\n');`;
+    const expected = String.raw`var x = /\n/;`;
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should transform RegExp constructors with string literals", () => {
     const source = "var x = new RegExp('ab+c');";
     const expected = "var x = /ab+c/;";
@@ -60,9 +72,15 @@ const ret = /ab+c\\wd/g;`;
     expect(transform(source)).toBe(expected);
   });
 
-  it("should escape invalid chars", () => {
-    const source = "var x = new RegExp('\\r\\n\\n/x/')";
-    const expected = "var x = /\\r\\n\\n\\/x\\//;";
+  it("should prettify special whitespaces", () => {
+    const source = String.raw`var x = new RegExp('\b\f\v\t\r\n\n');`;
+    const expected = String.raw`var x = /[\b]\f\v\t\r\n\n/;`;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should escape forward slashes", () => {
+    const source = String.raw`var x = new RegExp('/x/');`;
+    const expected = String.raw`var x = /\/x\//;`;
     expect(transform(source)).toBe(expected);
   });
 });
