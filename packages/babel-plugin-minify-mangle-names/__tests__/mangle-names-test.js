@@ -590,7 +590,7 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function f(a) {
-        var c = function (a) {
+        var b = function (a) {
           var b = void 0;
           if (b) {
             return {
@@ -600,9 +600,9 @@ describe("mangle-names", () => {
           g(() => b);
         };
 
-        for (var a = 0; a; a++) {
-          var d = c(a);
-          if (typeof d === "object") return d.v;
+        for (var d = 0; d; d++) {
+          var c = b(d);
+          if (typeof c === "object") return c.v;
         }
       }
     `);
