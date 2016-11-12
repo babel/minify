@@ -13,6 +13,16 @@ function transform(code, options = {}, sourceType = "script") {
   }).code;
 }
 
+function transformWithSimplify(code, options, sourceType = "script") {
+  return babel.transform(code, {
+    sourceType,
+    plugins: [
+      require("../../babel-plugin-minify-simplify/src/index"),
+      [require("../src/index"), options]
+    ]
+  }).code;
+}
+
 describe("mangle-names", () => {
   it("should not mangle names in the global namespace", () => {
     const source = unpad(`
@@ -1079,5 +1089,25 @@ describe("mangle-names", () => {
       }
     `);
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should work with if_return optimization changing fn scope", () => {
+    const source = unpad(`
+      function foo() {
+        if (x)
+          return;
+        function bar() {}
+        bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (!x) {
+          function b() {}
+          b(a);
+        }
+      }
+    `);
+    expect(transformWithSimplify(source)).toBe(expected);
   });
 });
