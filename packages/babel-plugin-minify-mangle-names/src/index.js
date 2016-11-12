@@ -1,8 +1,7 @@
 const _getBindingIdentifiers = require("./get-binding-identifiers");
 const CountedSet = require("./counted-set");
-const traverseCache = require("babel-traverse/lib/cache");
 
-module.exports = ({ types: t /*, traverse */ }) => {
+module.exports = ({ types: t, traverse }) => {
   const hop = Object.prototype.hasOwnProperty;
   const getBindingIdentifiers = _getBindingIdentifiers(t);
 
@@ -179,7 +178,8 @@ module.exports = ({ types: t /*, traverse */ }) => {
       // if (traverse.clearCache.clearScope) {
       //   traverse.clearCache.clearScope();
       // }
-      traverseCache.scope = new WeakMap;
+      // traverseCache.scope = new WeakMap;
+      traverse.clearCache();
       this.program.scope.crawl();
     }
 
