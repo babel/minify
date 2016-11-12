@@ -104,11 +104,11 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(e, a, b) {
-          d(e, a, b);
+        function a(d, a, e) {
+          b(d, a, e);
         }
 
-        function d() {}
+        function b() {}
       }
     `);
 
@@ -393,8 +393,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function d(e, a, b) {
-          d(e, a, b);
+        function a(d, e, b) {
+          a(d, e, b);
         }
       }
     `);
@@ -590,7 +590,7 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function f(a) {
-        var b = function (a) {
+        var c = function (a) {
           var b = void 0;
           if (b) {
             return {
@@ -600,12 +600,13 @@ describe("mangle-names", () => {
           g(() => b);
         };
 
-        for (var d = 0; d; d++) {
-          var c = b(d);
-          if (typeof c === "object") return c.v;
+        for (var a = 0; a; a++) {
+          var d = c(a);
+          if (typeof d === "object") return d.v;
         }
       }
     `);
+    // TODO:
 
     expect(actual).toBe(expected);
   });

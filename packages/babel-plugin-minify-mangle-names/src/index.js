@@ -1,7 +1,7 @@
 const _getBindingIdentifiers = require("./get-binding-identifiers");
 const CountedSet = require("./counted-set");
 
-module.exports = ({ types: t }) => {
+module.exports = ({ types: t /*, traverse */ }) => {
   const hop = Object.prototype.hasOwnProperty;
   const getBindingIdentifiers = _getBindingIdentifiers(t);
 
@@ -75,38 +75,41 @@ module.exports = ({ types: t }) => {
 
     canUseInReferencedScopes(binding, next) {
       const mangler = this;
-      let canUse = true;
 
-      binding.constantViolations.forEach((violation) => {
+      if (mangler.hasReference(binding.scope, next)) {
+        return false;
+      }
+
+      for (let i = 0; i < binding.constantViolations.length; i++) {
+        const violation = binding.constantViolations[i];
         if (mangler.hasReference(violation.scope, next)) {
-          canUse = false;
+          return false;
         }
-      });
+      }
 
-      binding.referencePaths.forEach((ref) => {
+      for (let i = 0; i < binding.referencePaths; i++) {
+        const ref = binding.referencePaths[i];
         if (!ref.isIdentifier()) {
+          let canUse = true;
           ref.traverse({
             ReferencedIdentifier(path) {
-              if (path.node.name !== next) {
-                return;
-              }
-              const actualBinding = path.scope.getBinding(path.node.name);
-              if (actualBinding !== binding) {
-                return;
-              }
+              if (path.node.name !== next) return;
               if (mangler.hasReference(path.scope, next)) {
                 canUse = false;
               }
             }
           });
-        } else {
+          if (!canUse) {
+            return canUse;
+          }
+        } else if (!isLabelIdentifier(ref)) {
           if (mangler.hasReference(ref.scope, next)) {
-            canUse = false;
+            return false;
           }
         }
-      });
+      }
 
-      return canUse;
+      return true;
     }
 
     updateReference(scope, binding, oldName, newName) {
@@ -170,13 +173,12 @@ module.exports = ({ types: t }) => {
     }
 
     crawlScope() {
-      this.program.traverse({
-        // this is to fix a bug where block scoping plugin
-        // doesn't register new defintions
-        Scopable(path) {
-          path.scope.crawl();
-        }
-      });
+      // this is to fix a bug where block scoping plugin
+      // doesn't register new defintions
+      // if (traverse.clearCache.clearScope) {
+      //   traverse.clearCache.clearScope();
+      // }
+      this.program.scope.crawl();
     }
 
     collect() {
@@ -228,9 +230,17 @@ module.exports = ({ types: t }) => {
                   binding.scope = fnScope;
                   delete binding.scope.bindings[id];
                 } else {
-                  throw new Error(
-                    "Some other plugin you're using wrongly creates a variable without checking the scope"
-                  );
+                  // we need a new binding that's valid in both the scopes
+                  // binding.scope and fnScope
+                  const newName = fnScope.generateUid(binding.scope.generateUid(id));
+
+                  // rename binding in the original scope
+                  mangler.rename(binding.scope, binding, id, newName);
+
+                  // move binding to fnScope as newName
+                  fnScope.bindings[newName] = binding;
+                  binding.scope = fnScope;
+                  delete binding.scope.bindings[newName];
                 }
               }
             });
