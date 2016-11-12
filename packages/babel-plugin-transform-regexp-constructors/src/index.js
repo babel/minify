@@ -1,6 +1,6 @@
 "use strict";
 
-function createRegExpLiteral(args, t) {
+function createRegExpLiteral(args, prettify, t) {
   const evaluatedArgs = args.map((a) => a.evaluate());
   if (!evaluatedArgs.every((a) => a.confident === true &&
       typeof a.value === "string")) {
@@ -15,15 +15,13 @@ function createRegExpLiteral(args, t) {
                 "";
 
   pattern = new RegExp(pattern).source;
-  // This step is for prettification -- technically we can insert whitespace
-  // literals into a regExpLiteral just fine.
-  // e.g. '\t'.replace(/	/, '') === '\t'.replace(/\t/, '') === ''.
-  pattern = pattern.replace(/\n/g, "\\n")
-                   .replace(/\t/g, "\\t")
-                   .replace(/[\b]/g, "[\\b]")
-                   .replace(/\v/g, "\\v")
-                   .replace(/\f/g, "\\f")
-                   .replace(/\r/g, "\\r");
+  if (prettyify) {
+    pattern = pattern.replace(/\n/g, "\\n")
+                     .replace(/[\b]/g, "[\\b]")
+                     .replace(/\v/g, "\\v")
+                     .replace(/\f/g, "\\f")
+                     .replace(/\r/g, "\\r");
+  }
   return t.regExpLiteral(pattern, flags);
 }
 
@@ -31,7 +29,7 @@ function maybeReplaceWithRegExpLiteral(path, t) {
   if (!t.isIdentifier(path.node.callee, {name: "RegExp"})) {
     return;
   }
-  const regExpLiteral = createRegExpLiteral(path.get("arguments"), t);
+  const regExpLiteral = createRegExpLiteral(path.get("arguments"), true, t);
   if (regExpLiteral) {
     path.replaceWith(regExpLiteral);
   }
