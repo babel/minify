@@ -39,7 +39,7 @@ module.exports = ({ types: t }) => {
     "+", "-"
   ]);
 
-  function isEqual(arr1, arr2) {
+  function areArraysEqual(arr1, arr2) {
     return arr1.every((value, index) => {
       return String(value) === String(arr2[index]);
     });
@@ -270,7 +270,7 @@ module.exports = ({ types: t }) => {
               !rightPropNames ||
               rightPropNames.indexOf(undefined) > -1 ||
               !operators.has(rightExpr.node.operator) ||
-              !isEqual(leftPropNames, rightPropNames)) {
+              !areArraysEqual(leftPropNames, rightPropNames)) {
             return;
           }
         }
