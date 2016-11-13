@@ -835,33 +835,34 @@ module.exports = ({ types: t }) => {
               return;
             }
 
+            // Easy: consequent and alternate are return -- conditional.
+            if (!path.getSibling(path.key + 1).node
+              && t.isReturnStatement(node.consequent)
+              && t.isReturnStatement(node.alternate)
+            ) {
+              if (!node.consequent.argument && !node.alternate.argument) {
+                path.replaceWith(t.expressionStatement(node.test));
+                return;
+              }
+
+              path.replaceWith(
+                t.returnStatement(
+                  t.conditionalExpression(
+                    node.test,
+                    node.consequent.argument || VOID_0,
+                    node.alternate.argument || VOID_0
+                  )
+                )
+              );
+              return;
+            }
+
             // There is nothing after this block. And one or both
             // of the consequent and alternate are either expression statment
             // or return statements.
             if (!path.getSibling(path.key + 1).node && path.parentPath &&
                 path.parentPath.parentPath && path.parentPath.parentPath.isFunction()
             ) {
-              // Easy: consequent and alternate are return -- conditional.
-              if (t.isReturnStatement(node.consequent)
-                  && t.isReturnStatement(node.alternate)
-              ) {
-                if (!node.consequent.argument && !node.alternate.argument) {
-                  path.replaceWith(t.expressionStatement(node.test));
-                  return;
-                }
-
-                path.replaceWith(
-                  t.returnStatement(
-                    t.conditionalExpression(
-                      node.test,
-                      node.consequent.argument || VOID_0,
-                      node.alternate.argument || VOID_0
-                    )
-                  )
-                );
-                return;
-              }
-
               // Only the consequent is a return, void the alternate.
               if (t.isReturnStatement(node.consequent) && t.isExpressionStatement(node.alternate)) {
                 if (!node.consequent.argument) {
@@ -1461,7 +1462,9 @@ module.exports = ({ types: t }) => {
   function genericEarlyExitTransform(path) {
     const { node } = path;
 
-    const statements = path.container.slice(path.key + 1);
+    const statements = path.container.slice(path.key + 1)
+      .filter((stmt) => !t.isFunctionDeclaration(stmt));
+
     if (!statements.length) {
       path.replaceWith(t.expressionStatement(node.test));
       return;
@@ -1480,15 +1483,14 @@ module.exports = ({ types: t }) => {
 
     let l = statements.length;
     while (l-- > 0) {
-      path.getSibling(path.key + 1).remove();
+      if (!t.isFunctionDeclaration(statements[l])) {
+        path.getSibling(path.key + 1).remove();
+      }
     }
 
-    if (statements.length === 1) {
-      node.consequent = statements[0];
-    } else {
-      node.consequent = t.blockStatement(statements);
-    }
+    node.consequent = t.blockStatement(statements);
 
+    // this should take care of removing the block
     path.visit();
   }
 

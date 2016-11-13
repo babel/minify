@@ -2,11 +2,19 @@ jest.autoMockOff();
 
 const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
+const deadcode = require("../src/index");
+const simplify = require("../../babel-plugin-minify-simplify/src/index");
 
 function transform(code, options, babelOpts) {
   return babel.transform(code,  Object.assign({}, {
-    plugins: [[require("../src/index"), options]],
+    plugins: [[deadcode, options]],
   }, babelOpts)).code.trim();
+}
+
+function transformWithSimplify(code) {
+  return babel.transform(code, {
+    plugins: [deadcode, simplify]
+  }).code;
 }
 
 describe("dce-plugin", () => {
@@ -2209,6 +2217,7 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
   it("should NOT remove fn params for setters", () => {
     const source = unpad(`
       function foo() {
@@ -2224,5 +2233,56 @@ describe("dce-plugin", () => {
       }
     `);
     expect(transform(source)).toBe(source);
+  });
+
+  // https://github.com/babel/babili/issues/265
+  it("should not remove return void 0; statement if inside a loop", () => {
+    const source = unpad(`
+      function getParentConditionalPath(path) {
+        let parentPath;
+        while (parentPath = path.parentPath) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
+            if (path.key === "test") {
+              return;
+            } else {
+              return parentPath;
+            }
+          } else {
+            path = parentPath;
+          }
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  // https://github.com/babel/babili/issues/265
+  it("should integrate with simplify plugin changing scopes", () => {
+    const source = unpad(`
+      function getParentConditionalPath(path) {
+        let parentPath;
+        while (parentPath = path.parentPath) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
+            if (path.key === "test") {
+              return;
+            } else {
+              return parentPath;
+            }
+          } else {
+            path = parentPath;
+          }
+        }
+      }
+    `);
+    const expected = unpad(`
+      function getParentConditionalPath(path) {
+        for (let parentPath; parentPath = path.parentPath;) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) return path.key === "test" ? void 0 : parentPath;
+          path = parentPath;
+        }
+      }
+    `);
+    expect(transformWithSimplify(source)).toBe(expected);
   });
 });
