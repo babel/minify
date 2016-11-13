@@ -155,10 +155,10 @@ Add to your `.babelrc`'s plugins array.
 Backbone.js:
 ```
            raw     raw win gzip   gzip win parse time run
-uglify     21.79kB 221%    7.29kB 169%     2ms        320ms
-closure    21.67kB 223%    7.37kB 167%     2ms        1408ms
-babili     21.86kB 220%    7.46kB 163%     2ms        740ms
-closure js 24.01kB 191%    8.04kB 144%     2ms        3493ms
+babili     21.72kB 222%    7.27kB 170%     2ms        859ms
+uglify     21.79kB 221%    7.29kB 169%     3ms        314ms
+closure    21.67kB 223%    7.37kB 167%     2ms        1635ms
+closure js 24.01kB 191%    8.04kB 144%     2ms        4189ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
@@ -166,10 +166,10 @@ Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
 React:
 ```
           raw      raw win gzip    gzip win parse time run
-closure    171.46kB 265%    52.97kB 168%     13ms       2349ms
-uglify     176.36kB 255%    53.13kB 167%     12ms       1889ms
-closure js 173.95kB 260%    53.53kB 165%     12ms       12301ms
-babili     178.06kB 252%    55.28kB 156%     14ms       3282ms
+closure    171.46kB 265%    52.97kB 168%     14ms       4131ms
+uglify     176.36kB 255%    53.13kB 167%     12ms       1654ms
+babili     176.59kB 255%    53.23kB 166%     15ms       4641ms
+closure js 173.95kB 260%    53.53kB 165%     11ms       13792ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
@@ -177,10 +177,10 @@ Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
 jQuery:
 ```
            raw      raw win gzip    gzip win parse time run
-uglify     94.27kB 218%    32.78kB 158%     8ms        1265ms
-closure    94.23kB 218%    33.38kB 153%     10ms       2047ms
-closure js 95.64kB 213%    33.78kB 150%     8ms        9980ms
-babili     102.8kB 191%    35.26kB 140%     14ms       3786ms
+uglify     94.27kB 218%    32.78kB 158%     11ms       1394ms
+babili     94.6kB  217%    32.86kB 157%     16ms       5348ms
+closure    94.23kB 218%    33.38kB 153%     12ms       3152ms
+closure js 95.64kB 213%    33.78kB 150%     10ms       14145ms
 ```
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
