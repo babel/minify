@@ -185,6 +185,17 @@ closure js 95.64kB 213%    33.78kB 150%     10ms       14145ms
 
 Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
 
+Three.js:
+```
+
+           raw      raw win gzip     gzip win parse time run
+babili     478.94kB 99%     122.55kB 60%      44ms       11018ms
+uglify     479.43kB 99%     122.72kB 60%      39ms       3557ms
+closure js 480.78kB 98%     123.34kB 59%      41ms       75621ms
+```
+
+Run with: `./scripts/benchmark.js ./scripts/fixtures/three.js`
+
 ## Browser support
 
 Babili is best at targeting latest browsers ([with full ES6+ support](https://kangax.github.io/compat-table/es6/)) but can also be used with the usual Babel es2015 preset to transpile down the code first.
