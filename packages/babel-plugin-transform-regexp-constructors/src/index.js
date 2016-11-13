@@ -15,7 +15,7 @@ function createRegExpLiteral(args, prettify, t) {
                 "";
 
   pattern = new RegExp(pattern).source;
-  if (prettyify) {
+  if (prettify) {
     pattern = pattern.replace(/\n/g, "\\n")
                      .replace(/[\b]/g, "[\\b]")
                      .replace(/\v/g, "\\v")
