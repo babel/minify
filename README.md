@@ -187,7 +187,6 @@ Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
 
 Three.js:
 ```
-
            raw      raw win gzip     gzip win parse time run
 babili     478.94kB 99%     122.55kB 60%      44ms       11018ms
 uglify     479.43kB 99%     122.72kB 60%      39ms       3557ms
