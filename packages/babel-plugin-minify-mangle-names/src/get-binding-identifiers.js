@@ -7,10 +7,10 @@
  *   in multiple places - binding, binding reference,
  *   and another binding with same name in a different scope
  *
- * - This in future might be moved to babel
+ * - This might be moved to babel in future
  *
  * Note:
- * This uses the KEYS from the oringinal implementation from Babel
+ * This uses the KEYS from the original implementation from Babel
  *
  */
 module.exports = function (t) {

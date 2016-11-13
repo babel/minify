@@ -35,26 +35,9 @@ module.exports = ({ types: t, traverse }) => {
       }
     }
 
-    updateScope(scope) {
-      const mangler = this;
-      scope.path.traverse({
-        ReferencedIdentifier(path) {
-          if (path.scope === scope) {
-            const binding = scope.getBinding(path.node.name);
-            mangler.addReference(scope, binding, path.node.name);
-          }
-        }
-      });
-    }
-
     addReference(scope, binding, name) {
       let parent = scope;
       do {
-        if (!this.references.has(parent)) {
-          this.addScope(parent);
-          this.updateScope(parent);
-        }
-
         this.references.get(parent).add(name);
 
         // here binding is undefined for globals,
@@ -66,10 +49,6 @@ module.exports = ({ types: t, traverse }) => {
     }
 
     hasReference(scope, name) {
-      if (!this.references.has(scope)) {
-        this.addScope(scope);
-        this.updateScope(scope);
-      }
       return this.references.get(scope).has(name);
     }
 
@@ -136,7 +115,7 @@ module.exports = ({ types: t, traverse }) => {
 
     addBinding(binding) {
       if (!binding) {
-        return ;
+        return;
       }
       const bindings = this.bindings.get(binding.scope);
       if (!bindings.has(binding.identifier.name)) {
@@ -173,12 +152,6 @@ module.exports = ({ types: t, traverse }) => {
     }
 
     crawlScope() {
-      // this is to fix a bug where block scoping plugin
-      // doesn't register new defintions
-      // if (traverse.clearCache.clearScope) {
-      //   traverse.clearCache.clearScope();
-      // }
-      // traverseCache.scope = new WeakMap;
       traverse.clearCache();
       this.program.scope.crawl();
     }
@@ -312,13 +285,10 @@ module.exports = ({ types: t, traverse }) => {
 
           const bindings = mangler.bindings.get(scope);
           const names = [...bindings.keys()];
-          // const bindings = scope.bindings;
-          // const names = Object.keys(bindings);
 
           for (let i = 0; i < names.length; i++) {
             const oldName = names[i];
             const binding = bindings.get(oldName);
-            // const binding = bindings[oldName]
 
             if (
               // already renamed bindings
@@ -327,8 +297,6 @@ module.exports = ({ types: t, traverse }) => {
               || oldName === "arguments"
               // globals
               || mangler.program.scope.bindings[oldName] === binding
-              // other scope bindings
-              // || !scope.hasOwnBinding(oldName)
               // labels
               || binding.path.isLabeledStatement()
               // blacklisted
@@ -344,7 +312,6 @@ module.exports = ({ types: t, traverse }) => {
               next = getNext();
             } while (
               !t.isValidIdentifier(next)
-              // || hop.call(bindings, next)
               || mangler.hasBinding(scope, next)
               || scope.hasGlobal(next)
               || mangler.hasReference(scope, next)
