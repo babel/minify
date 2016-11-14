@@ -2209,4 +2209,20 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+  it("should NOT remove fn params for setters", () => {
+    const source = unpad(`
+      function foo() {
+        var x = {
+          set a(b) {}
+        };
+        class A {
+          set c(d) {
+            x.a = 5;
+          }
+        }
+        return new A();
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
 });

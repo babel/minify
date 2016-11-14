@@ -108,7 +108,8 @@ module.exports = ({ types: t, traverse }) => {
 
         // if the scope is created by a function, we obtain its
         // parameter list
-        const paramsList = path.isFunction() ? path.get("params") : [];
+        const canRemoveParams = path.isFunction() && path.node.kind !== "set";
+        const paramsList = canRemoveParams ? path.get("params") : [];
 
         for (let i = paramsList.length - 1; i >= 0; i--) {
           const param = paramsList[i];
