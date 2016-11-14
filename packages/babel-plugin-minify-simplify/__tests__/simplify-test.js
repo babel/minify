@@ -2352,4 +2352,136 @@ describe("simplify-plugin", () => {
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
+
+  it("should simplify assignments", () => {
+
+    const source = unpad(`
+      x = x + 1,
+      x = x - 1,
+      x = x * 1,
+      x = x % 1,
+      x = x << 1,
+      x = x >> 1,
+      x = x >>> 1,
+      x = x & 1,
+      x = x | 1,
+      x = x ^ 1,
+      x = x / 1,
+      x = x ** 1;
+    `);
+    const expected = unpad(`
+      ++x,
+      --x,
+      x *= 1,
+      x %= 1,
+      x <<= 1,
+      x >>= 1,
+      x >>>= 1,
+      x &= 1,
+      x |= 1,
+      x ^= 1,
+      x /= 1,
+      x **= 1;
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments 2", () => {
+
+    const source = unpad(`
+      foo = foo + bar,
+      foo = foo * function(){},
+      foo += 123,
+      foo = 1 + foo,
+      x = x = x + 1,
+      foo = foo + bar + baz
+    `);
+    const expected = unpad(`
+      foo += bar,
+      foo *= function () {},
+      foo += 123,
+      foo = 1 + foo,
+      x = ++x,
+      foo = foo + bar + baz;
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments w. member expressions", () => {
+
+    const source = unpad(`
+      foo.bar = foo.bar + 1,
+      foo.bar = foo.bar + 2,
+      foo["x"] = foo[x] + 2,
+      foo[x] = foo[x] + 2,
+      foo[x] = foo["x"] + 2,
+      foo["x"] = foo["x"] + 2,
+      foo[1] = foo["1"] + 2,
+      foo["bar"] = foo["bar"] + 2,
+      foo[bar()] = foo[bar()] + 2,
+      foo[""] = foo[""] + 2,
+      foo[2] = foo[2] + 2,
+      foo[{}] = foo[{}] + 1,
+      foo[function(){}] = foo[function(){}] + 1,
+      foo[false] = foo[false] + 1,
+      foo.bar.baz = foo.bar.baz + 321,
+      this.hello = this.hello + 1,
+      foo[null] = foo[null] + 1,
+      foo[undefined] = foo[undefined] + 1,
+      foo.bar = foo.bar || {};
+    `);
+    // TODO: foo[void 0] = foo[void 0] + 1;
+    const expected = unpad(`
+      ++foo.bar,
+      foo.bar += 2,
+      foo["x"] = foo[x] + 2,
+      foo[x] += 2,
+      foo[x] = foo["x"] + 2,
+      foo["x"] += 2,
+      foo[1] += 2,
+      foo["bar"] += 2,
+      foo[bar()] = foo[bar()] + 2,
+      foo[""] += 2,
+      foo[2] += 2,
+      foo[{}] = foo[{}] + 1,
+      foo[function () {}] = foo[function () {}] + 1,
+      ++foo[false],
+      foo.bar.baz += 321,
+      ++this.hello,
+      ++foo[null],
+      ++foo[undefined],
+      foo.bar = foo.bar || {};
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments w. super", () => {
+
+    const source = unpad(`
+      class Foo {
+        foo() {
+          super.foo = super.foo + 1;
+        }
+      };
+    `);
+    const expected = unpad(`
+      class Foo {
+        foo() {
+          ++super.foo;
+        }
+      };
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not simplify assignments w. template literals", () => {
+
+    const source = unpad("foo[`x`] = foo[`x`] + 1;");
+
+    expect(transform(source)).toBe(source);
+  });
 });
