@@ -80,7 +80,7 @@ const ret = /ab+c\\wd/g;`;
 
   it("should prettify special whitespaces", () => {
     const source = String.raw`var x = new RegExp('\b\f\v\t\r\n\n');`;
-    const expected = String.raw`var x = /[\b]\f\v\t\r\n\n/;`;
+    const expected = String.raw`var x = /[\b]\f\v	\r\n\n/;`;
     expect(transform(source)).toBe(expected);
   });
 
