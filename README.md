@@ -147,12 +147,11 @@ Add to your `.babelrc`'s plugins array.
 
 ## Benchmarks
 > Bootstrap: `npm run bootstrap`
+> Build: `npm run build`
 
-> Build:  `npm run build`
+> Running the benchmarks: `./scripts/benchmark.js <package>[@version] [relative-path/file.js]` - defaults to the package's main file if no file provided.
 
-> Running the benchmarks: `./scripts/benchmark.js file.js`
-
-Backbone.js:
+Backbone.js v1.2.3:
 ```
            raw     raw win gzip   gzip win parse time run
 babili     21.72kB 222%    7.27kB 170%     2ms        859ms
@@ -161,9 +160,9 @@ closure    21.67kB 223%    7.37kB 167%     2ms        1635ms
 closure js 24.01kB 191%    8.04kB 144%     2ms        4189ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
+Run with: `./scripts/benchmark.js backbone@1.2.3`
 
-React:
+React v0.14.3:
 ```
           raw      raw win gzip    gzip win parse time run
 closure    171.46kB 265%    52.97kB 168%     14ms       4131ms
@@ -172,9 +171,9 @@ babili     176.59kB 255%    53.23kB 166%     15ms       4641ms
 closure js 173.95kB 260%    53.53kB 165%     11ms       13792ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
+Run with: `./scripts/benchmark.js react@0.14.3 react/dist/react.js`
 
-jQuery:
+jQuery v1.11.3:
 ```
            raw      raw win gzip    gzip win parse time run
 uglify     94.27kB 218%    32.78kB 158%     11ms       1394ms
@@ -183,7 +182,7 @@ closure    94.23kB 218%    33.38kB 153%     12ms       3152ms
 closure js 95.64kB 213%    33.78kB 150%     10ms       14145ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
+Run with: `./scripts/benchmark.js jquery@1.11.3`
 
 Three.js:
 ```
@@ -193,7 +192,7 @@ uglify     479.43kB 99%     122.72kB 60%      39ms       3557ms
 closure js 480.78kB 98%     123.34kB 59%      41ms       75621ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/three.js`
+Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
 
 ## Browser support
 
