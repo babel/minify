@@ -192,7 +192,7 @@ uglify     479.43kB 99%     122.72kB 60%      39ms       3557ms
 closure js 480.78kB 98%     123.34kB 59%      41ms       75621ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/three.js`
+Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
 
 ## Browser support
 

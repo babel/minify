@@ -140,7 +140,8 @@ function testFile() {
 
   test("closure", function (/*code*/) {
     return child.execSync(
-      "java -jar " + path.join(__dirname, "gcc.jar") + " --env=CUSTOM --jscomp_off=* --js " + filename
+      "java -jar " + path.join(__dirname, "gcc.jar") +
+      " --language_in=ECMASCRIPT5 --env=CUSTOM --jscomp_off=* --js " + filename
     ).toString();
   });
 

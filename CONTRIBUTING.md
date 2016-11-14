@@ -44,6 +44,8 @@ To run current benchmarks on a file:
 
 ```sh
 $ ./scripts/benchmark.js package [file.js]
+# do not remove package after installing to node_modules
+$ ./scripts/benchmark.js package [file.js] --offline
 ```
 
 To run current plugin timing on a file:
