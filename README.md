@@ -187,9 +187,10 @@ Run with: `./scripts/benchmark.js jquery@1.11.3`
 Three.js:
 ```
            raw      raw win gzip     gzip win parse time run
-babili     478.94kB 99%     122.55kB 60%      44ms       11018ms
-uglify     479.43kB 99%     122.72kB 60%      39ms       3557ms
-closure js 480.78kB 98%     123.34kB 59%      41ms       75621ms
+closure    472.57kB 107%    122.22kB 61%      29ms       4100ms
+uglify     478.79kB 104%    122.53kB 61%      28ms       3648ms
+closure js 480.11kB 104%    123.44kB 60%      28ms       64889ms
+babili     507.96kB 93%     127.85kB 54%      33ms       9282ms
 ```
 
 Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
