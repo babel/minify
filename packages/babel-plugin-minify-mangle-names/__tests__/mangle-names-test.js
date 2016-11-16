@@ -726,7 +726,7 @@ describe("mangle-names", () => {
     `);
 
     const ast = babel.transform(source, {
-      presets: ["es2015"],
+      presets: ["env"],
       sourceType: "script",
       code: false
     }).ast;
