@@ -3,7 +3,6 @@
 const PatternMatch = require("./pattern-match");
 
 module.exports = ({ types: t }) => {
-  const isNodesEquiv = require("babel-helper-is-nodes-equiv")(t);
   const flipExpressions = require("babel-helper-flip-expressions")(t);
   const toMultipleSequenceExpressions = require("babel-helper-to-multiple-sequence-expressions")(t);
 
@@ -397,7 +396,7 @@ module.exports = ({ types: t }) => {
               const left = path.get("left").node;
               if (firstLeft == null) {
                 firstLeft = left;
-              } else if (!isNodesEquiv(left, firstLeft)) {
+              } else if (!t.isNodesEquivalent(left, firstLeft)) {
                 return true;
               }
 
