@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-member-expression-literals",
-  "version": "6.8.0",
+  "version": "0.0.3",
   "description": "Turn valid member expression property literals into plain identifiers",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-member-expression-literals",
