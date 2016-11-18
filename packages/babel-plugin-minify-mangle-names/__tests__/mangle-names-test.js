@@ -13,6 +13,16 @@ function transform(code, options = {}, sourceType = "script") {
   }).code;
 }
 
+function transformWithSimplify(code, options, sourceType = "script") {
+  return babel.transform(code, {
+    sourceType,
+    plugins: [
+      require("../../babel-plugin-minify-simplify/src/index"),
+      [require("../src/index"), options]
+    ]
+  }).code;
+}
+
 describe("mangle-names", () => {
   it("should not mangle names in the global namespace", () => {
     const source = unpad(`
@@ -600,12 +610,13 @@ describe("mangle-names", () => {
           g(() => b);
         };
 
-        for (var a = 0; a; a++) {
-          var c = b(a);
+        for (var d = 0; d; d++) {
+          var c = b(d);
           if (typeof c === "object") return c.v;
         }
       }
     `);
+    // TODO:
 
     expect(actual).toBe(expected);
   });
@@ -743,8 +754,8 @@ describe("mangle-names", () => {
 
       (function () {
         (function () {
-          for (var a in y) {
-            y[a];
+          for (var b in y) {
+            y[b];
           }f(function () {
             a();
           });
@@ -866,13 +877,55 @@ describe("mangle-names", () => {
         var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
         var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
         var $, _;
+        a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+        A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+        $, _;
+        function Foo() {
+          var a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+          var $, _;
+          a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+          $, _;
+          function Foo() {
+            var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+            var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+            var $, _;
+            a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+            A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+            $, _;
+          }
+          Foo();
+        }
+        Foo();
       }
     `);
     const expected = unpad(`
       function Foo() {
-        var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        var ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
         var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
         var Z, $;
+        ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+        Z, $;
+        function aa() {
+          var aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+          var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+          var Z, $;
+          aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+          z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+          Z, $;
+          function h() {
+            var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+            var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+            var Z, $;
+            aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+            z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+            Z, $;
+          }
+          h();
+        }
+        aa();
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -1004,5 +1057,57 @@ describe("mangle-names", () => {
     `);
     const expected = source;
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle constant violations across multiple blocks", () => {
+    const source = unpad(`
+      function foo() {
+        var x;x;x;
+        {
+          var x;x;x;
+          function y() {
+            var x;x;x;
+            {
+              var x;x;x;
+            }
+          }
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var a;a;a;
+        {
+          var a;a;a;
+          function b() {
+            var a;a;a;
+            {
+              var a;a;a;
+            }
+          }
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should work with if_return optimization changing fn scope", () => {
+    const source = unpad(`
+      function foo() {
+        if (x)
+          return;
+        function bar() {}
+        bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (!x) {
+          function b() {}
+          b(a);
+        }
+      }
+    `);
+    expect(transformWithSimplify(source)).toBe(expected);
   });
 });
