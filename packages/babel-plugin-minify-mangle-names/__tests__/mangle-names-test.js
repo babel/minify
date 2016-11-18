@@ -82,9 +82,9 @@ describe("mangle-names", () => {
     const expected = unpad(`
       var a = 1;
       function foo() {
-        var a = 1;
-        if (a) {
-          console.log(a);
+        var b = 1;
+        if (b) {
+          console.log(b);
         }
       }
     `);
@@ -104,11 +104,11 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(d, a, e) {
-          b(d, a, e);
+        function d(f, g, h) {
+          e(f, g, h);
         }
 
-        function b() {}
+        function e() {}
       }
     `);
 
@@ -217,7 +217,7 @@ describe("mangle-names", () => {
           a: {
             console.log(b);
           }
-        } catch (a) {}
+        } catch (c) {}
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -239,12 +239,12 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function foo() {
-        function a(a, c, d) {
-          b(a, c, d);
+        function a(c, d, e) {
+          b(c, d, e);
         }
         function b() {
-          var a = who();
-          a.bam();
+          var c = who();
+          c.bam();
         }
         a();
       }
@@ -271,8 +271,8 @@ describe("mangle-names", () => {
         (function a() {
           a();
           return function () {
-            var a = wow();
-            a.woo();
+            var b = wow();
+            b.woo();
           };
         })();
       }
@@ -294,9 +294,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(a, c) {
+        function a(c, d) {
           if (1) {
-            b(a, c);
+            b(c, d);
           }
         }
         function b() {}
@@ -319,9 +319,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(a, b) {
-          return function (b, c) {
-            a(b, c);
+        function a(c, d) {
+          return function (e, f) {
+            c(e, f);
           };
         }
         function b() {}
@@ -346,8 +346,8 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function foo() {
         function a() {
-          var a;
-          if (a) {
+          var c;
+          if (c) {
             b();
           }
         }
@@ -371,7 +371,7 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function foo() {
-        function a(a) {
+        function a(c) {
           return function () {
             b();
           };
@@ -393,8 +393,8 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function bar() {
-        function a(d, e, b) {
-          a(d, e, b);
+        function d(e, f, g) {
+          d(e, f, g);
         }
       }
     `);
@@ -457,12 +457,12 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function xoo() {
-        function a(a, b, c) {
-          function d(a, b, c) {
-            return function (c) {
-              b();
+        function a(b, c, d) {
+          function e(f, g, h) {
+            return function (i) {
+              g();
               return function () {
-                a();
+                f();
               };
             };
           }
@@ -484,7 +484,7 @@ describe("mangle-names", () => {
     const expected = unpad(`
       function xoo() {
         var a;
-        try {} catch (a) {}
+        try {} catch (b) {}
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -553,10 +553,10 @@ describe("mangle-names", () => {
       function foo() {
         var a = 1;
         (function () {
-          var a = 2;
+          var b = 2;
           eval("...");
           (function () {
-            var a = 1;
+            var c = 1;
           })();
         })();
       }
@@ -590,18 +590,18 @@ describe("mangle-names", () => {
 
     const expected = unpad(`
       function f(a) {
-        var b = function (a) {
-          var b = void 0;
-          if (b) {
+        var b = function (d) {
+          var e = void 0;
+          if (e) {
             return {
               v: void 0
             };
           }
-          g(() => b);
+          g(() => e);
         };
 
-        for (var a = 0; a; a++) {
-          var c = b(a);
+        for (var d = 0; d; d++) {
+          var c = b(d);
           if (typeof c === "object") return c.v;
         }
       }
@@ -640,8 +640,8 @@ describe("mangle-names", () => {
       (function () {
         function a() {
           if (smth) {
-            var a = blah();
-            a();
+            var c = blah();
+            c();
           }
           b();
         }
@@ -674,7 +674,7 @@ describe("mangle-names", () => {
       (function () {
         function a() {
           {
-            var a = true;
+            var c = true;
 
             {
               b();
@@ -743,8 +743,8 @@ describe("mangle-names", () => {
 
       (function () {
         (function () {
-          for (var a in y) {
-            y[a];
+          for (var b in y) {
+            y[b];
           }f(function () {
             a();
           });
@@ -832,10 +832,10 @@ describe("mangle-names", () => {
         var b = 10;
         a(b);
         function a() {
-          var a = 10;
-          a++;
-          var a = 20;
-          a(a);
+          var c = 10;
+          c++;
+          var c = 20;
+          c(c);
         }
       };
     `);
@@ -870,9 +870,9 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       function Foo() {
-        var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
-        var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
-        var Z, $;
+        var aa, ba, ca, da, ea, fa, ga, ha, ia, ja, ka, la, ma, na, oa, pa, qa, ra, sa, ta, ua, va, wa, xa, ya, za;
+        var Aa, Ba, Ca, Da, Ea, Fa, Ga, Ha, Ia, Ja, Ka, La, Ma, Na, Oa, Pa, Qa, Ra, Sa, Ta, Ua, Va, Wa, Xa, Ya, Za;
+        var $a, _a;
       }
     `);
     expect(transform(source)).toBe(expected);
@@ -975,10 +975,10 @@ describe("mangle-names", () => {
       new A();
       new B();
       function a() {
-        class a {}
         class b {}
-        new a();
+        class c {}
         new b();
+        new c();
       }
     `);
     expect(transform(source)).toBe(expected);
