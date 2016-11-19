@@ -507,10 +507,7 @@ module.exports = ({ types: t }) => {
       },
 
       Function: {
-        enter: earlyReturnTransform,
-
         exit(path) {
-          // Useful to do on enter and exit because more oppurtinties can open.
           earlyReturnTransform(path);
 
           if (!path.node[shouldRevisit]) {
@@ -835,8 +832,7 @@ module.exports = ({ types: t }) => {
             }
 
             // Easy: consequent and alternate are return -- conditional.
-            if (!path.getSibling(path.key + 1).node
-              && t.isReturnStatement(node.consequent)
+            if (t.isReturnStatement(node.consequent)
               && t.isReturnStatement(node.alternate)
             ) {
               if (!node.consequent.argument && !node.alternate.argument) {

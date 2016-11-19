@@ -569,7 +569,7 @@ describe("simplify-plugin", () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        !lol && (doThings(), doOtherThings());
+        lol || (doThings(), doOtherThings());
       }
       function bar(a) {
         if (!lol) try {
@@ -753,7 +753,7 @@ describe("simplify-plugin", () => {
 
     const expected = unpad(`
       function foo() {
-        if (!bar && !far && !faz) return e;
+        return bar || far || faz ? void 0 : e;
       }
     `);
 
@@ -2527,6 +2527,24 @@ describe("simplify-plugin", () => {
         if (a) return x ? void 0 : x;
         const b = 1;
         return "doesn't matter if this is reached or not";
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should fix issue#281 with if..return", () => {
+    const source = unpad(`
+      function foo() {
+        if (x)
+          return;
+        function bar() {}
+        bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function bar() {}
+        x || bar(a);
       }
     `);
     expect(transform(source)).toBe(expected);
