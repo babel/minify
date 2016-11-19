@@ -350,7 +350,9 @@ module.exports = ({ types: t, traverse }) => {
               || !mangler.canUseInReferencedScopes(binding, next)
             );
 
-            resetNext();
+            if (mangler.reuse) {
+              resetNext();
+            }
             mangler.rename(scope, binding, oldName, next);
             // mark the binding as renamed
             binding.renamed = true;
