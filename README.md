@@ -17,12 +17,18 @@
 
 ## Table of Contents
 
+- [Requirements](#requirements)
 - [Why](#why)
 - [CLI](#cli)
 - [Babel Preset](#babel-preset)
 - [Individual Plugins](#individual-plugins)
 - [Benchmarks](#benchmarks)
 - [Team](#team)
+
+## Requirements
+
+- node >= 4
+- babel-core >= 6.19.0
 
 ## Why
 
