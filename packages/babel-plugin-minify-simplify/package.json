@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-simplify",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-simplify",

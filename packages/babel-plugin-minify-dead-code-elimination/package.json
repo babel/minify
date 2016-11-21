@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-dead-code-elimination",
-  "version": "0.0.5",
+  "version": "0.1.1",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-dead-code-elimination",
