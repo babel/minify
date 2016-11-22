@@ -27,7 +27,7 @@
     ]
   },
   "devDependencies": {
-    "babel-core": "^6.19.0",
+    "babel-core": "^6.18.2",
     "babel-jest": "^16.0.0",
     "babel-plugin-transform-es2015-block-scoping": "^6.18.0",
     "babel-preset-env": "^0.0.8",
