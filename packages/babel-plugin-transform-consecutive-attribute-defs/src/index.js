@@ -7,15 +7,15 @@ function getLeftRightNodes(statements) {
   ]);
 }
 
-function getExpressionStatements(body, start, end, matcher) {
+function getExpressionStatements(body, start, end, validator) {
   const statements = [];
-  for (let i = start; i < end && matcher(body[i]); i++) {
+  for (let i = start; i < end && validator(body[i]); i++) {
     statements.push(body[i]);
   }
   return statements;
 }
 
-function getMatcher(objName) {
+function getValidator(objName) {
   return (statement) => {
     if (!statement.isExpressionStatement()) {
       return false;
@@ -79,13 +79,13 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        const matcher = getMatcher(id.node.name);
+        const validator = getValidator(id.node.name);
 
         const statements = getExpressionStatements(
           body,
           startIndex + 1,
           body.length,
-          matcher
+          validator
         );
 
         const leftRightNodes = getLeftRightNodes(statements);
