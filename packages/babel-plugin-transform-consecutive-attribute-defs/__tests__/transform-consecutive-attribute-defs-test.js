@@ -65,7 +65,7 @@ describe("transform-consecutive-attribute-defs-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
-  it("should not collapse if has dependency issues", () => {
+  it("should not collapse if has direct dependency issues", () => {
     const source = unpad(`
       const foo = {};
       foo.a = function () {
@@ -81,6 +81,67 @@ describe("transform-consecutive-attribute-defs-plugin", () => {
       };
 
       foo.b = foo.a();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse if has indirect dependency issues", () => {
+    const source = unpad(`
+      var foo = {};
+      foo.a = 4;
+      foo.b = cat();
+      function cat() {
+        return bar();
+      }
+      function bar() {
+        console.log(foo);
+        return 0;
+      }
+    `);
+    const expected = unpad(`
+      var foo = {
+        a: 4
+      };
+
+      foo.b = cat();
+      function cat() {
+        return bar();
+      }
+      function bar() {
+        console.log(foo);
+        return 0;
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+
+  it("should not collapse if has indirect, nested dependency issues", () => {
+    const source = unpad(`
+      var foo = {};
+      foo.a = 4;
+      foo.b = cat();
+      function cat() {
+        return bar();
+        function bar() {
+          console.log(foo);
+          return 0;
+        }
+      }
+    `);
+    const expected = unpad(`
+      var foo = {
+        a: 4
+      };
+
+      foo.b = cat();
+      function cat() {
+        return bar();
+        function bar() {
+          console.log(foo);
+          return 0;
+        }
+      }
     `);
     expect(transform(source)).toBe(expected);
   });

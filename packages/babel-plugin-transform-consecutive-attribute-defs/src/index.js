@@ -1,5 +1,40 @@
 "use strict";
 
+function getFunctionParent(path, scopeParent) {
+  const parent = path.findParent((p) => p.isFunction());
+  // don't traverse higher than the function the var is defined in.
+  return parent === scopeParent ? null : parent;
+}
+
+function getFunctionReferences(path, scopeParent, references = new Set()) {
+  for (let func = getFunctionParent(path, scopeParent); func; func = getFunctionParent(func, scopeParent)) {
+    const id = func.node.id;
+    const binding = id && func.scope.getBinding(id.name);
+
+    if (!binding) {
+      continue;
+    }
+
+    binding.referencePaths.forEach((path) => {
+      if (!references.has(path)) {
+        references.add(path);
+        getFunctionReferences(path, scopeParent, references);
+      }
+    });
+  }
+  return references;
+}
+
+function getIdAndFunctionReferences(name, parent) {
+  const binding = parent.scope.getBinding(name);
+
+  return binding.referencePaths.reduce((s, r) => {
+    s.add(r);
+    getFunctionReferences(r, parent, s);
+    return s;
+  }, new Set());
+}
+
 function getLeftRightNodes(statements) {
   return statements.map((s) => [
     s.node.expression.left.property,
@@ -15,7 +50,7 @@ function getExpressionStatements(body, start, end, validator) {
   return statements;
 }
 
-function getValidator(objName) {
+function makeValidator(objName, references) {
   return (statement) => {
     if (!statement.isExpressionStatement()) {
       return false;
@@ -38,17 +73,13 @@ function getValidator(objName) {
       return false;
     }
 
-    // simple dependency check
-    let seen = false;
-    right.traverse({
-      Identifier(path) {
-        if (path.node.name === objName) {
-          seen = true;
-        }
-      },
-    });
+    for (let r of references) {
+      if (r.isDescendant(right)) {
+        return false;
+      }
+    }
 
-    return !seen;
+    return true;
   };
 }
 
@@ -69,7 +100,7 @@ module.exports = function({ types: t }) {
         }
 
         const parent = path.parentPath;
-        if (!parent.isBlockParent()) {
+        if (!parent.isBlockParent() || !parent.isScopable()) {
           return;
         }
 
@@ -79,7 +110,11 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        const validator = getValidator(id.node.name);
+        const references = getIdAndFunctionReferences(id.node.name, parent);
+        const validator = makeValidator(id.node.name, references);
+        if (validator === null) {
+          return;
+        }
 
         const statements = getExpressionStatements(
           body,
