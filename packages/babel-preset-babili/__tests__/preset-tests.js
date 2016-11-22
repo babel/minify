@@ -34,7 +34,7 @@ describe("preset", () => {
     const expected = unpad(`
       function foo() {
         var d, e, f;
-        d ? e && f : !b && f;
+        d ? e && f : e || f;
       }
     `);
     expect(transform(source)).toBe(expected);
