@@ -1,0 +1,87 @@
+jest.autoMockOff();
+
+const babel = require("babel-core");
+const unpad = require("../../../utils/unpad");
+const plugin = require("../src/index");
+
+function transform(code) {
+  return babel.transform(code,  {
+    plugins: [plugin],
+  }).code;
+}
+
+describe("transform-consecutive-attribute-defs-plugin", () => {
+  it("should collapse simple consecutive", () => {
+    const source = unpad(`
+      const foo = {
+        z: 3.0
+      };
+      foo.a = 42;
+      foo.b = ["hi"];
+      foo.c = bar();
+      foo.d = "str";
+    `);
+    const expected = unpad(`
+      const foo = {
+        z: 3.0,
+        a: 42,
+        b: ["hi"],
+        c: bar(),
+        d: "str"
+      };
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should collapse only up to last ExpressionStatement", () => {
+    const source = unpad(`
+      const foo = {};
+      foo.a = 42;
+      console.log(foo);
+    `);
+    const expected = unpad(`
+      const foo = {
+        a: 42
+      };
+
+      console.log(foo);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse if lval is nested MemberExpression", () => {
+    const source = unpad(`
+      const foo = {};
+      foo.bar.a = 42;
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not collapse if lval has wrong name", () => {
+    const source = unpad(`
+      const foo = {};
+      bar.a = 42;
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not collapse if has dependency issues", () => {
+    const source = unpad(`
+      const foo = {};
+      foo.a = function () {
+        console.log(3);
+      };
+      foo.b = foo.a();
+    `);
+    const expected = unpad(`
+      const foo = {
+        a: function () {
+          console.log(3);
+        }
+      };
+
+      foo.b = foo.a();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+});

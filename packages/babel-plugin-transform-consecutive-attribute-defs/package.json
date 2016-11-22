@@ -1,0 +1,16 @@
+{
+  "name": "babel-plugin-transform-consecutive-attribute-defs",
+  "version": "0.0.4",
+  "description": "This plugin inlines consecutive attribute definitions.",
+  "homepage": "https://github.com/babel/babili#readme",
+  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-consecutive-attribute-defs",
+  "bugs": "https://github.com/babel/babili/issues",
+  "author": "shinew",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
