@@ -5,25 +5,26 @@ const {group, option, proxy, generate} = require("./options-manager");
 // This is to prevent dynamic requires - require('babel-plugin-' + name);
 // as it suffers during bundling of this code with webpack/browserify
 const PLUGINS = [
-  ["evaluate",            require("babel-plugin-minify-constant-folding"),                 true],
+  ["booleans",            require("babel-plugin-transform-minify-booleans"),               true],
+  ["consecutiveAdds",     require("babel-plugin-transform-inline-consecutive-adds"),       true],
   ["deadcode",            require("babel-plugin-minify-dead-code-elimination"),            true],
+  ["evaluate",            require("babel-plugin-minify-constant-folding"),                 true],
   ["flipComparisons",     require("babel-plugin-minify-flip-comparisons"),                 true],
   ["guards",              require("babel-plugin-minify-guarded-expressions"),              true],
   ["infinity",            require("babel-plugin-minify-infinity"),                         true],
   ["mangle",              require("babel-plugin-minify-mangle-names"),                     true],
-  ["numericLiterals",     require("babel-plugin-minify-numeric-literals"),                 true],
-  ["replace",             require("babel-plugin-minify-replace"),                          true],
-  ["simplify",            require("babel-plugin-minify-simplify"),                         true],
-  ["typeConstructors",    require("babel-plugin-minify-type-constructors"),                true],
   ["memberExpressions",   require("babel-plugin-transform-member-expression-literals"),    true],
   ["mergeVars",           require("babel-plugin-transform-merge-sibling-variables"),       true],
-  ["booleans",            require("babel-plugin-transform-minify-booleans"),               true],
+  ["numericLiterals",     require("babel-plugin-minify-numeric-literals"),                 true],
   ["propertyLiterals",    require("babel-plugin-transform-property-literals"),             true],
   ["regexpConstructors",  require("babel-plugin-transform-regexp-constructors"),           true],
   ["removeConsole",       require("babel-plugin-transform-remove-console"),                false],
   ["removeDebugger",      require("babel-plugin-transform-remove-debugger"),               false],
   ["removeUndefined",     require("babel-plugin-transform-remove-undefined"),              true],
+  ["replace",             require("babel-plugin-minify-replace"),                          true],
+  ["simplify",            require("babel-plugin-minify-simplify"),                         true],
   ["simplifyComparisons", require("babel-plugin-transform-simplify-comparison-operators"), true],
+  ["typeConstructors",    require("babel-plugin-minify-type-constructors"),                true],
   ["undefinedToVoid",     require("babel-plugin-transform-undefined-to-void"),             true],
 ];
 
@@ -67,6 +68,7 @@ function preset(context, _opts = {}) {
       optionsMap.simplify,
 
       group("properties", [
+        optionsMap.consecutiveAdds,
         optionsMap.memberExpressions,
         optionsMap.propertyLiterals,
       ]),
@@ -100,6 +102,9 @@ function preset(context, _opts = {}) {
 
   return {
     minified: true,
-    plugins,
+    presets: [
+      { plugins }
+    ],
+    passPerPreset: true,
   };
 }
