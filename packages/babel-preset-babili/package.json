@@ -29,7 +29,10 @@
     "babel-plugin-transform-regexp-constructors": "^0.0.4",
     "babel-plugin-transform-remove-undefined": "^0.0.3",
     "babel-plugin-transform-simplify-comparison-operators": "^6.8.0",
-    "babel-plugin-transform-undefined-to-void": "^6.8.0"
+    "babel-plugin-transform-undefined-to-void": "^6.8.0",
+    "babel-plugin-transform-remove-debugger": "^6.8.0",
+    "babel-plugin-transform-remove-console": "^6.8.0",
+    "lodash.isplainobject": "^4.0.6"
   },
   "devDependencies": {}
 }
