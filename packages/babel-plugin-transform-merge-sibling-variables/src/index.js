@@ -1,9 +1,39 @@
 "use strict";
 
-module.exports = function() {
+module.exports = function({ types: t }) {
   return {
     name: "transform-merge-sibling-variables",
     visitor: {
+      ForStatement(path) {
+        // Lift var declarations to the loop initializer
+        let body = path.get("body");
+        if (body.isBlockStatement()) {
+          body = body.get("body");
+          if (body[0].isVariableDeclaration({ kind: "var" })) {
+
+            if (body[1] && body[1].isVariableDeclaration({ kind: "var" })) {
+              return;
+            }
+
+            let firstNode = body[0].node.declarations[0];
+
+            if (!t.isIdentifier(firstNode.id)) {
+              return;
+            }
+
+            let init = path.get("init");
+            init.node.declarations = init.node.declarations.concat(
+              firstNode.id
+            );
+
+            body[0].replaceWith(t.assignmentExpression(
+              "=",
+              t.clone(firstNode.id),
+              t.clone(firstNode.init)
+            ));
+          }
+        }
+      },
       VariableDeclaration: {
         enter: [
           // concat variables of the same kind with their siblings

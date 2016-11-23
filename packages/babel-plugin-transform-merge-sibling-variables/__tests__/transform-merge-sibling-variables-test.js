@@ -70,4 +70,40 @@ describe("transform-merge-sibling-variables-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("lift var declarations to loop intializer", () => {
+    const source = unpad(`
+      for (var i = 0; i < 0; i++) {
+        var j = jj();
+      }
+    `);
+    const expected = unpad(`
+      for (var i = 0, j; i < 0; i++) {
+        j = jj();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("dont lift var declarations for object/array pattern", () => {
+    const source = unpad(`
+      for (var i = 0; i < 0; i++) {
+        var [j] = jj();
+      }
+      for (var i = 0; i < 0; i++) {
+        var {j} = jj();
+      }
+    `);
+    const expected = unpad(`
+      for (var i = 0; i < 0; i++) {
+        var [j] = jj();
+      }
+      for (var i = 0; i < 0; i++) {
+        var { j } = jj();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
