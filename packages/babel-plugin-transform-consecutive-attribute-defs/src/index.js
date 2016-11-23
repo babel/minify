@@ -36,10 +36,9 @@ function getIdAndFunctionReferences(name, parent) {
 }
 
 function getLeftRightNodes(statements) {
-  return statements.map((s) => [
-    s.node.expression.left.property,
-    s.node.expression.right,
-  ]);
+  return statements.map((s) => collectAssignmentExpressions(s))
+                   .reduce((s, n) => s.concat(n), [])
+                   .map((s) => [s.node.left.property, s.node.right]);
 }
 
 function getExpressionStatements(body, start, end, validator) {
@@ -50,32 +49,56 @@ function getExpressionStatements(body, start, end, validator) {
   return statements;
 }
 
+function collectAssignmentExpressions(path) {
+  // returns null if found inconsistency, else returns Array<assignexprs>
+  if (path.isExpressionStatement()) {
+    const exprs = collectAssignmentExpressions(path.get("expression"));
+    return (exprs !== null) ? exprs : null;
+  }
+
+  if (path.isSequenceExpression()) {
+    const exprs = path.get("expressions")
+                      .map((p) => collectAssignmentExpressions(p));
+    if (exprs.some((e) => e === null)) {
+      return null;
+    } else {
+      return exprs.reduce((s, n) => s.concat(n), []);
+    }
+  }
+
+  if (path.isAssignmentExpression()) {
+    return [path];
+  }
+
+  return null;
+}
+
 function makeValidator(objName, references) {
   return (statement) => {
-    if (!statement.isExpressionStatement()) {
+
+    const exprs = collectAssignmentExpressions(statement);
+    if (exprs === null) {
       return false;
     }
 
-    const expr = statement.get("expression");
-    if (!expr.isAssignmentExpression()) {
-      return false;
-    }
-
-    const left = expr.get("left"), right = expr.get("right");
-    if (!left.isMemberExpression()) {
-      return false;
-    }
-
-    const obj = left.get("object"), prop = left.get("property");
-    if (!obj.isIdentifier() ||
-        obj.node.name !== objName ||
-        !prop.isIdentifier()) {
-      return false;
-    }
-
-    for (let r of references) {
-      if (r.isDescendant(right)) {
+    for (let expr of exprs) {
+      const left = expr.get("left"), right = expr.get("right");
+      if (!left.isMemberExpression()) {
         return false;
+      }
+
+      const obj = left.get("object"), prop = left.get("property");
+      if (!obj.isIdentifier() || obj.node.name !== objName) {
+        return false;
+      }
+
+      for (let r of references) {
+        if (r.isDescendant(right)) {
+          return false;
+        }
+        if (!prop.isIdentifier() && r.isDescendant(prop)) {
+          return false;
+        }
       }
     }
 

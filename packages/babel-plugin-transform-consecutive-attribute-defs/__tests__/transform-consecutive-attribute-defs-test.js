@@ -145,4 +145,57 @@ describe("transform-consecutive-attribute-defs-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should collapse normal computed properties", () => {
+    const source = unpad(`
+      var foo = {};
+      foo["a"] = 0;
+      foo[4] = 1;
+    `);
+    const expected = unpad(`
+      var foo = {
+        "a": 0,
+        4: 1
+      };
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse computed properties with dependency issues", () => {
+    const source = unpad(`
+      var foo = {};
+      foo[bar()] = 0;
+      function bar() {
+        console.log(foo);
+        return 0;
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should collapse statements with multiple assignments", () => {
+    const source = unpad(`
+      var foo = {};
+      foo.a = 0, foo.b = 2;
+    `);
+    const expected = unpad(`
+      var foo = {
+        a: 0,
+        b: 2
+      };
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse statements with multiple assignments and dependency issues", () => {
+    const source = unpad(`
+      var foo = {};
+      foo.a = 0, foo.b = bar();
+      function bar() {
+        console.log(foo);
+        return 0;
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
 });
