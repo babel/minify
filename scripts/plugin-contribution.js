@@ -5,6 +5,8 @@ const path = require("path");
 const {transform} = require("babel-core");
 const Table = require("cli-table");
 const zlib = require("zlib");
+const chalk = require('chalk');
+const vm = require('vm');
 
 run(process.argv[2]);
 
@@ -17,7 +19,8 @@ function run(inputFile) {
       "output gzip(bytes)",
       "raw compression (%)",
       "gzip win (%)",
-      "gzip % (%)"
+      "gzip % (%)",
+      "parse time Δ (ms)"
     ],
   }, tableStyle()));
 
@@ -29,6 +32,8 @@ function run(inputFile) {
 
   const baseGzip = zlib.gzipSync(baseOutput);
 
+  const baseParseTime = getParseTime(baseOutput);
+
   getPlugins().forEach(({name, plugin}) => {
     const output = transform(baseOutput, {
       plugins: [plugin],
@@ -39,9 +44,13 @@ function run(inputFile) {
 
     const gzippedOutput = zlib.gzipSync(output);
 
+    const parseTime = getParseTime(output);
+
     const percentage = (1 - len(output) / len(baseOutput)) * 100;
     const gzipWin = (1 - len(gzippedOutput) / len(baseGzip)) * 100;
     const gzipPercentage = (1 - len(gzippedOutput) / len(output)) * 100;
+
+    const parseTimeDiff = baseParseTime - parseTime;
 
     table.push([
       name.split("babel-plugin-")[1],
@@ -50,6 +59,7 @@ function run(inputFile) {
       percentage.toFixed(3),
       gzipWin.toFixed(3),
       gzipPercentage.toFixed(3),
+      chalk[parseTimeDiff < 0 ? 'green' : 'red'](parseTimeDiff),
     ]);
   });
 
@@ -87,6 +97,17 @@ function getPlugins() {
       name: pluginName,
       plugin: require(`../packages/${pluginName}`)
     }));
+}
+
+function getParseTime(code) {
+  // const context = vm.createContext();
+  // const script = new vm.Script(code);
+
+  const parseStart = process.hrtime();
+  new Function(code + ';void(' + Math.random() + ');');
+  // script.runInContext(context);
+  const diff = process.hrtime(parseStart);
+  return diff[1] / 1000000;
 }
 
 function isDir(p) {
