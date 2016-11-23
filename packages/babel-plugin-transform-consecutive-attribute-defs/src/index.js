@@ -139,12 +139,7 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        const statements = getExpressionStatements(
-          body,
-          startIndex + 1,
-          body.length,
-          validator
-        );
+        const statements = getExpressionStatements(body, startIndex + 1, body.length, validator);
 
         const leftRightNodes = getLeftRightNodes(statements);
 
