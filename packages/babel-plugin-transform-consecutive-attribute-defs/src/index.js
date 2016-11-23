@@ -1,8 +1,18 @@
 "use strict";
 
+const objectCollapse = require("./object-collapse");
+const arrayCollapse = require("./array-collapse");
+const setCollapse = require("./set-collapse");
+
+const collapsers = [
+  objectCollapse,
+  arrayCollapse,
+  setCollapse,
+];
+
 function getFunctionParent(path, scopeParent) {
   const parent = path.findParent((p) => p.isFunction());
-  // don't traverse higher than the function the var is defined in.
+  // don"t traverse higher than the function the var is defined in.
   return parent === scopeParent ? null : parent;
 }
 
@@ -28,126 +38,123 @@ function getFunctionReferences(path, scopeParent, references = new Set()) {
 function getIdAndFunctionReferences(name, parent) {
   const binding = parent.scope.getBinding(name);
 
-  return binding.referencePaths.reduce((s, r) => {
-    s.add(r);
-    getFunctionReferences(r, parent, s);
-    return s;
+  return binding.referencePaths.reduce((references, ref) => {
+    references.add(ref);
+    getFunctionReferences(ref, parent, references);
+    return references;
   }, new Set());
 }
 
-function getLeftRightNodes(statements) {
-  return statements.map((s) => collectAssignmentExpressions(s))
-                   .reduce((s, n) => s.concat(n), [])
-                   .map((s) => [s.node.left.property, s.node.right]);
-}
+function validateTopLevel(path) {
+  // Ensures the structure is of the form (roughly):
+  // {
+  //   ...
+  //   var foo = expr;
+  //   ...
+  // }
+  // returns null if not of this form
+  // otherwise returns [foo as string, ?rval, index of the variable declaration]
 
-function getExpressionStatements(body, start, end, validator) {
-  const statements = [];
-  for (let i = start; i < end && validator(body[i]); i++) {
-    statements.push(body[i]);
+  const declarations = path.get("declarations");
+  if (declarations.length !== 1) {
+    return;
   }
-  return statements;
+
+  const declaration = declarations[0];
+  const id = declaration.get("id"), init = declaration.get("init");
+  if (!id.isIdentifier()) {
+    return;
+  }
+
+  const parent = path.parentPath;
+  if (!parent.isBlockParent() || !parent.isScopable()) {
+    return;
+  }
+
+  const body = parent.get("body");
+  const startIndex = body.indexOf(path);
+  if (startIndex === -1) {
+    return;
+  }
+
+  return [id.node.name, init, startIndex];
 }
 
-function collectAssignmentExpressions(path) {
-  // returns null if found inconsistency, else returns Array<assignexprs>
+function collectExpressions(path, checkExprType) {
+  // input: ExprStatement => "a | SequenceExpression
+  // SequenceExpression => "a list
+  // Validates "a is of the right type
+  // returns null if found inconsistency, else returns Array<"a>
   if (path.isExpressionStatement()) {
-    const exprs = collectAssignmentExpressions(path.get("expression"));
+    const exprs = collectExpressions(path.get("expression"), checkExprType);
     return (exprs !== null) ? exprs : null;
   }
 
   if (path.isSequenceExpression()) {
     const exprs = path.get("expressions")
-                      .map((p) => collectAssignmentExpressions(p));
+                      .map((p) => collectExpressions(p, checkExprType));
     if (exprs.some((e) => e === null)) {
       return null;
     } else {
-      return exprs.reduce((s, n) => s.concat(n), []);
+      return exprs.reduce((s, n) => s.concat(n), []);  // === Array.flatten
     }
   }
 
-  if (path.isAssignmentExpression()) {
+  if (checkExprType(path)) {
     return [path];
   }
 
   return null;
 }
 
-function makeValidator(objName, references) {
-  return (statement) => {
-
-    const exprs = collectAssignmentExpressions(statement);
-    if (exprs === null) {
-      return false;
+function getContiguousStatementsAndExpressions(body, start, end, checkExprType, checkExpr) {
+  const statements = [];
+  let allExprs = [];
+  for (let i = start; i < end; i++) {
+    const exprs = collectExpressions(body[i], checkExprType);
+    if (exprs === null || !exprs.every((e) => checkExpr(e))) {
+      break;
     }
-
-    for (let expr of exprs) {
-      const left = expr.get("left"), right = expr.get("right");
-      if (!left.isMemberExpression()) {
-        return false;
-      }
-
-      const obj = left.get("object"), prop = left.get("property");
-      if (!obj.isIdentifier() || obj.node.name !== objName) {
-        return false;
-      }
-
-      for (let r of references) {
-        if (r.isDescendant(right)) {
-          return false;
-        }
-        if (!prop.isIdentifier() && r.isDescendant(prop)) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  };
+    statements.push(body[i]);
+    allExprs = allExprs.concat(exprs);
+  }
+  return [statements, allExprs];
 }
+
 
 module.exports = function({ types: t }) {
   return {
     name: "transform-consecutive-attribute-defs",
     visitor: {
       VariableDeclaration(path) {
-        const declarations = path.get("declarations");
-        if (declarations.length !== 1) {
+        const topLevel = validateTopLevel(path);
+        if (topLevel === null) {
           return;
         }
 
-        const declaration = declarations[0];
-        const id = declaration.get("id"), init = declaration.get("init");
-        if (!id.isIdentifier() || !init.isObjectExpression()) {
-          return;
+        const [name, init, startIndex] = topLevel;
+        const references = getIdAndFunctionReferences(name, path.parentPath);
+        const body = path.parentPath.get("body");
+
+        for (let collapser of collapsers) {
+          if (!collapser.checkInitType(init)) {
+            continue;
+          }
+
+          const [statements, exprs] = getContiguousStatementsAndExpressions(
+            body,
+            startIndex + 1,
+            body.length,
+            collapser.checkExpressionType,
+            collapser.makeCheckExpression(name, references)
+          );
+
+          if (statements.length > 0) {
+            const addons = exprs.map((e) => collapser.extractAddon(e));
+            addons.forEach((addon) => collapser.addAddon(t, addon, init));
+            statements.forEach((s) => s.remove());
+          }
         }
-
-        const parent = path.parentPath;
-        if (!parent.isBlockParent() || !parent.isScopable()) {
-          return;
-        }
-
-        const body = parent.get("body");
-        const startIndex = body.indexOf(path);
-        if (startIndex === -1) {
-          return;
-        }
-
-        const references = getIdAndFunctionReferences(id.node.name, parent);
-        const validator = makeValidator(id.node.name, references);
-        if (validator === null) {
-          return;
-        }
-
-        const statements = getExpressionStatements(body, startIndex + 1, body.length, validator);
-
-        const leftRightNodes = getLeftRightNodes(statements);
-
-        leftRightNodes.forEach(([left, right]) => {
-          init.node.properties.push(t.objectProperty(left, right));
-        });
-
-        statements.forEach((s) => s.remove());
       },
     },
   };

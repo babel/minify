@@ -198,4 +198,28 @@ describe("transform-consecutive-attribute-defs-plugin", () => {
     `);
     expect(transform(source)).toBe(source);
   });
+
+  it("should collapse statements for arrays", () => {
+    const source = unpad(`
+      var foo = [1, 2];
+      foo.push(3, 4), foo.push(5);
+      foo.push(6);
+    `);
+    const expected = unpad(`
+      var foo = [1, 2, 3, 4, 5, 6];
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should collapse statements for sets", () => {
+    const source = unpad(`
+      var foo = new Set();
+      foo.add(1), foo.add(2);
+      foo.add(3);
+    `);
+    const expected = unpad(`
+      var foo = new Set([1, 2, 3]);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
