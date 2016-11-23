@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = {
   checkInitType: (init) => init.isNewExpression() &&
                            init.get("callee").isIdentifier() &&

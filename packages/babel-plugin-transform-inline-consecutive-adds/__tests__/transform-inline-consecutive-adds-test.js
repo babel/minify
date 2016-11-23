@@ -10,7 +10,7 @@ function transform(code) {
   }).code;
 }
 
-describe("transform-consecutive-attribute-defs-plugin", () => {
+describe("transform-inline-consecutive-adds-plugin", () => {
   it("should collapse simple consecutive", () => {
     const source = unpad(`
       const foo = {

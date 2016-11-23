@@ -124,7 +124,7 @@ function getContiguousStatementsAndExpressions(body, start, end, checkExprType, 
 
 module.exports = function({ types: t }) {
   return {
-    name: "transform-consecutive-attribute-defs",
+    name: "transform-inline-consecutive-adds",
     visitor: {
       VariableDeclaration(path) {
         const topLevel = validateTopLevel(path);
