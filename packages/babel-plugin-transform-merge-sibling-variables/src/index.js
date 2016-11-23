@@ -11,6 +11,10 @@ module.exports = function({ types: t }) {
           body = body.get("body");
           if (body[0] && body[0].isVariableDeclaration({ kind: "var" })) {
 
+            if (body[0].node.declarations.length > 1) {
+              return;
+            }
+
             if (body[1] && body[1].isVariableDeclaration({ kind: "var" })) {
               return;
             }
@@ -22,6 +26,10 @@ module.exports = function({ types: t }) {
             }
 
             let init = path.get("init");
+            if (!init.isVariableDeclaration({ kind: "var" })) {
+              return;
+            }
+
             init.node.declarations = init.node.declarations.concat(
               firstNode.id
             );

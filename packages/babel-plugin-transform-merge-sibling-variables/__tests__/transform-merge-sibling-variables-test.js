@@ -94,7 +94,11 @@ describe("transform-merge-sibling-variables-plugin", () => {
       for (var i = 0; i < 0; i++) {
         var {j} = jj();
       }
-      for(;;) {}
+      for (;;) {}
+      for (;;) var i = 0;
+      for(var i=foo;;){
+        var j=bar;var k=baz
+      }
     `);
     const expected = unpad(`
       for (var i = 0; i < 0; i++) {
@@ -103,7 +107,12 @@ describe("transform-merge-sibling-variables-plugin", () => {
       for (var i = 0; i < 0; i++) {
         var { j } = jj();
       }
-      for(;;) {}
+      for (;;) {}
+      for (;;) var i = 0;
+      for (var i = foo;;) {
+        var j = bar,
+            k = baz;
+      }
     `);
 
     expect(transform(source)).toBe(expected);
