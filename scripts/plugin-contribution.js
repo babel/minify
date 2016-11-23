@@ -5,8 +5,8 @@ const path = require("path");
 const {transform} = require("babel-core");
 const Table = require("cli-table");
 const zlib = require("zlib");
-const chalk = require('chalk');
-const vm = require('vm');
+const chalk = require("chalk");
+// const vm = require("vm");
 
 run(process.argv[2]);
 
@@ -34,7 +34,12 @@ function run(inputFile) {
 
   const baseParseTime = getParseTime(baseOutput);
 
-  getPlugins().forEach(({name, plugin}) => {
+  const plugins = getPlugins();
+  let current = 1;
+
+  plugins.forEach(({name, plugin}) => {
+    process.stdout.write(`Plugin ${current++}/${plugins.length}\r`);
+
     const output = transform(baseOutput, {
       plugins: [plugin],
       minified: true,
@@ -57,9 +62,9 @@ function run(inputFile) {
       len(output),
       len(gzippedOutput),
       percentage.toFixed(3),
-      gzipWin.toFixed(3),
+      gzipWin < 0 ? chalk.red(gzipWin.toFixed(3)) : gzipWin.toFixed(3),
       gzipPercentage.toFixed(3),
-      chalk[parseTimeDiff < 0 ? 'green' : 'red'](parseTimeDiff),
+      chalk[parseTimeDiff < 0 ? "green" : "red"](parseTimeDiff),
     ]);
   });
 
@@ -104,7 +109,7 @@ function getParseTime(code) {
   // const script = new vm.Script(code);
 
   const parseStart = process.hrtime();
-  new Function(code + ';void(' + Math.random() + ');');
+  new Function(code + ";void(" + Math.random() + ");");
   // script.runInContext(context);
   const diff = process.hrtime(parseStart);
   return diff[1] / 1000000;
