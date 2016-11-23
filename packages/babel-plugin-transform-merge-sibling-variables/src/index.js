@@ -7,39 +7,38 @@ module.exports = function({ types: t }) {
       ForStatement(path) {
         // Lift var declarations to the loop initializer
         let body = path.get("body");
-        if (body.isBlockStatement()) {
-          body = body.get("body");
-          if (body[0] && body[0].isVariableDeclaration({ kind: "var" })) {
+        body = body.isBlockStatement() ? body.get("body") : [ body ];
 
-            if (body[0].node.declarations.length > 1) {
-              return;
-            }
+        if (body[0] && body[0].isVariableDeclaration({ kind: "var" })) {
 
-            if (body[1] && body[1].isVariableDeclaration({ kind: "var" })) {
-              return;
-            }
-
-            let firstNode = body[0].node.declarations[0];
-
-            if (!t.isIdentifier(firstNode.id)) {
-              return;
-            }
-
-            let init = path.get("init");
-            if (!init.isVariableDeclaration({ kind: "var" })) {
-              return;
-            }
-
-            init.node.declarations = init.node.declarations.concat(
-              firstNode.id
-            );
-
-            body[0].replaceWith(t.assignmentExpression(
-              "=",
-              t.clone(firstNode.id),
-              t.clone(firstNode.init)
-            ));
+          if (body[0].node.declarations.length > 1) {
+            return;
           }
+
+          if (body[1] && body[1].isVariableDeclaration({ kind: "var" })) {
+            return;
+          }
+
+          let firstNode = body[0].node.declarations[0];
+
+          if (!t.isIdentifier(firstNode.id)) {
+            return;
+          }
+
+          let init = path.get("init");
+          if (!init.isVariableDeclaration({ kind: "var" })) {
+            return;
+          }
+
+          init.node.declarations = init.node.declarations.concat(
+            firstNode.id
+          );
+
+          body[0].replaceWith(t.assignmentExpression(
+            "=",
+            t.clone(firstNode.id),
+            t.clone(firstNode.init)
+          ));
         }
       },
       VariableDeclaration: {

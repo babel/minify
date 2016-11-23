@@ -76,11 +76,13 @@ describe("transform-merge-sibling-variables-plugin", () => {
       for (var i = 0; i < 0; i++) {
         var j = jj();
       }
+      for (var i=0;;) var j = 0;
     `);
     const expected = unpad(`
       for (var i = 0, j; i < 0; i++) {
         j = jj();
       }
+      for (var i = 0, j;;) j = 0;
     `);
 
     expect(transform(source)).toBe(expected);
