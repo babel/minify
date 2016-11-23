@@ -86,7 +86,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("dont lift var declarations for object/array pattern", () => {
+  it("dont lift var declarations in these scenarios", () => {
     const source = unpad(`
       for (var i = 0; i < 0; i++) {
         var [j] = jj();
@@ -94,6 +94,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
       for (var i = 0; i < 0; i++) {
         var {j} = jj();
       }
+      for(;;) {}
     `);
     const expected = unpad(`
       for (var i = 0; i < 0; i++) {
@@ -102,6 +103,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
       for (var i = 0; i < 0; i++) {
         var { j } = jj();
       }
+      for(;;) {}
     `);
 
     expect(transform(source)).toBe(expected);

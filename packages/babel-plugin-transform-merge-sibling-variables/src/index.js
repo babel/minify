@@ -9,7 +9,7 @@ module.exports = function({ types: t }) {
         let body = path.get("body");
         if (body.isBlockStatement()) {
           body = body.get("body");
-          if (body[0].isVariableDeclaration({ kind: "var" })) {
+          if (body[0] && body[0].isVariableDeclaration({ kind: "var" })) {
 
             if (body[1] && body[1].isVariableDeclaration({ kind: "var" })) {
               return;
