@@ -19,10 +19,6 @@ let packagename, filename;
 
 const NUM_TEST_RUNS = 10;
 
-const filename = process.argv[2];
-if (!filename) {
-  console.error("Error: No filename specified");
-
 const script = new Command("benchmark.js")
   .option("-o, --offline", "Only install package if not present; package not removed after testing")
   .usage("[options] <package> [file]")
@@ -171,7 +167,40 @@ function testFile() {
     return out.compiledCode;
   });
 
+  test("uglify", function (code) {
+    return uglify.minify(code, {
+      fromString: true,
+    }).code;
+  });
+}
+
+function processResults() {
   results = results.sort((a, b) => a.gzip > b.gzip);
+
+  results.forEach(function (result, i) {
+    let row = [
+      chalk.bold(result.name),
+      bytes(result.raw),
+      Math.round(((code.length / result.raw) * 100) - 100) + "%",
+      bytes(result.gzip),
+      Math.round(((gzippedCode.length / result.gzip) * 100) - 100) + "%",
+      Math.round(result.parse) + "ms",
+      Math.round(result.run) + "ms",
+    ];
+
+    let style = chalk.yellow;
+    if (i === 0) {
+      style = chalk.green;
+    }
+    if (i === results.length - 1) {
+      style = chalk.red;
+    }
+    row = row.map(function (item) {
+      return style(item);
+    });
+
+    table.push(row);
+  });
 
   console.log(table.toString());
 }
