@@ -507,7 +507,12 @@ module.exports = ({ types: t }) => {
       },
 
       Function: {
-        exit(path) {
+        exit(path, state) {
+          const multiPass = state.opts.multiPass === false ? false : true;
+          if (!multiPass) {
+            return;
+          }
+
           earlyReturnTransform(path);
 
           if (!path.node[shouldRevisit]) {
