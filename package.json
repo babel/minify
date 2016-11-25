@@ -48,22 +48,6 @@
     "lerna": "2.0.0-beta.26",
     "lerna-changelog": "^0.2.1",
     "through2": "^2.0.1",
-    "uglify-js": "^2.7.3",
-
-    "babel-plugin-minify-constant-folding": "^0.0.1",
-    "babel-plugin-minify-dead-code-elimination": "^0.0.1",
-    "babel-plugin-minify-flip-comparisons": "^0.0.1",
-    "babel-plugin-minify-guarded-expressions": "^0.0.1",
-    "babel-plugin-minify-infinity": "^0.0.1",
-    "babel-plugin-minify-mangle-names": "^0.0.2",
-    "babel-plugin-minify-replace": "^0.0.1",
-    "babel-plugin-minify-simplify": "^0.0.2",
-    "babel-plugin-minify-type-constructors": "^0.0.1",
-    "babel-plugin-transform-member-expression-literals": "^6.8.0",
-    "babel-plugin-transform-merge-sibling-variables": "^6.8.0",
-    "babel-plugin-transform-minify-booleans": "^6.8.0",
-    "babel-plugin-transform-property-literals": "^6.8.0",
-    "babel-plugin-transform-simplify-comparison-operators": "^6.8.0",
-    "babel-plugin-transform-undefined-to-void": "^6.8.0"
+    "uglify-js": "^2.7.3"
   }
 }
