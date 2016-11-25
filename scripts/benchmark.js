@@ -17,7 +17,7 @@ const compile = require("google-closure-compiler-js").compile;
 
 let packagename, filename;
 
-const NUM_TEST_RUNS = 10;
+const NUM_TEST_RUNS = 3;
 
 const script = new Command("benchmark.js")
   .option("-o, --offline", "Only install package if not present; package not removed after testing")
@@ -143,10 +143,30 @@ function testFile() {
   code = fs.readFileSync(filename, "utf8");
   gzippedCode = zlib.gzipSync(code);
 
-  test("babili", function (code) {
+  test("babili (best speed)", function (code) {
     return babel.transform(code, {
       sourceType: "script",
-      presets: [require("../packages/babel-preset-babili")],
+      presets: [
+        [require("../packages/babel-preset-babili"), {
+          simplify: {
+            multiPass: false
+          }
+        }]
+      ],
+      comments: false,
+    }).code;
+  });
+
+  test("babili (best size)", function (code) {
+    return babel.transform(code, {
+      sourceType: "script",
+      presets: [
+        [require("../packages/babel-preset-babili"), {
+          simplify: {
+            multiPass: true
+          }
+        }]
+      ],
       comments: false,
     }).code;
   });
