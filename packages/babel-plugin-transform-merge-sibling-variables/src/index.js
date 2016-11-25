@@ -5,40 +5,45 @@ module.exports = function({ types: t }) {
     name: "transform-merge-sibling-variables",
     visitor: {
       ForStatement(path) {
-        // Lift var declarations to the loop initializer
+        // Lift declarations to the loop initializer
         let body = path.get("body");
         body = body.isBlockStatement() ? body.get("body") : [ body ];
 
-        if (body[0] && body[0].isVariableDeclaration({ kind: "var" })) {
+        liftDeclaration(body, "var");
+        liftDeclaration(body, "let");
 
-          if (body[0].node.declarations.length > 1) {
-            return;
+        function liftDeclaration(body, kind) {
+          if (body[0] && body[0].isVariableDeclaration({ kind: kind })) {
+
+            if (body[0].node.declarations.length > 1) {
+              return;
+            }
+
+            if (body[1] && body[1].isVariableDeclaration({ kind: kind })) {
+              return;
+            }
+
+            let firstNode = body[0].node.declarations[0];
+
+            if (!t.isIdentifier(firstNode.id)) {
+              return;
+            }
+
+            let init = path.get("init");
+            if (!init.isVariableDeclaration({ kind: kind })) {
+              return;
+            }
+
+            init.node.declarations = init.node.declarations.concat(
+              firstNode.id
+            );
+
+            body[0].replaceWith(t.assignmentExpression(
+              "=",
+              t.clone(firstNode.id),
+              t.clone(firstNode.init)
+            ));
           }
-
-          if (body[1] && body[1].isVariableDeclaration({ kind: "var" })) {
-            return;
-          }
-
-          let firstNode = body[0].node.declarations[0];
-
-          if (!t.isIdentifier(firstNode.id)) {
-            return;
-          }
-
-          let init = path.get("init");
-          if (!init.isVariableDeclaration({ kind: "var" })) {
-            return;
-          }
-
-          init.node.declarations = init.node.declarations.concat(
-            firstNode.id
-          );
-
-          body[0].replaceWith(t.assignmentExpression(
-            "=",
-            t.clone(firstNode.id),
-            t.clone(firstNode.init)
-          ));
         }
       },
       VariableDeclaration: {
