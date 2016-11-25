@@ -103,7 +103,7 @@ function checkFile() {
 
 function test(name, callback) {
 
-  console.log('testing', name);
+  console.log("testing", name);
 
   const start = Date.now();
   const result = callback(code);
@@ -121,9 +121,9 @@ function test(name, callback) {
 
   const runTimes = [run];
 
-  for (var i = 1; i < NUM_TEST_RUNS; i++) {
+  for (let i = 1; i < NUM_TEST_RUNS; i++) {
     const start = Date.now();
-    const result = callback(code);
+    callback(code);
     runTimes.push(Date.now() - start);
   }
 
