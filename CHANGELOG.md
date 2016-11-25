@@ -1,3 +1,69 @@
+## Babili v0.0.9: Changelog for 2016-11-21
+
+- babili: 0.0.8 => 0.0.9
+- babel-preset-babili: 0.0.8 => 0.0.9
+- babel-plugin-minify-constant-folding: 0.0.1 => 0.0.3
+- babel-plugin-minify-dead-code-elimination: 0.1.0 => 0.1.1
+- babel-plugin-minify-infinity: 0.0.1 => 0.0.3
+- babel-plugin-minify-mangle-names: 0.0.4 => 0.0.5
+- babel-plugin-minify-simplify: 0.0.4 => 0.0.5
+- babel-plugin-transform-regexp-constructors: 0.0.1 => 0.0.4
+- babel-plugin-transform-remove-undefined: 0.0.4 (new)
+- babel-helper-evaluate-path: 0.0.3 (new)
+- babel-helper-is-nodes-equiv: (removed)
+
+### :rocket: New Feature
+
+* `babel-plugin-transform-remove-undefined`
+  * [#197](https://github.com/babel/babili/pull/197) Implemented transform-remove-undefined plugin. ([@shinew](https://github.com/shinew))
+* `babel-plugin-minify-simplify`
+  * [#230](https://github.com/babel/babili/pull/230) Shorten assignments to itself. ([@kangax](https://github.com/kangax))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#248](https://github.com/babel/babili/pull/248) Remove Empty Functions in block. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#277](https://github.com/babel/babili/pull/227) Minify some Logical Expression patterns. ([@boopathi](https://github.com/boopathi))
+
+### :bug: Bug Fix
+
+* `babel-plugin-minify-simplify`
+  * [#240](https://github.com/babel/babili/pull/240) Fix labeled break stmt removal from last switch case. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-infinity`
+  * [#241](https://github.com/babel/babili/pull/241) fix for infinity as lval. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-helper-evaluate-path`, `babel-plugin-minify-constant-folding`
+  * [#246](https://github.com/babel/babili/pull/246) Fix path.evaluate for runtime errors in constant-folding. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-regexp-constructors`
+  * [#256](https://github.com/babel/babili/pull/256) Fix regexp escape. ([@kangax](https://github.com/kangax))
+* `babel-plugin-transform-regexp-constructors`
+  * [#264](https://github.com/babel/babili/pull/264) RegExp literal fixes. ([@shinew](https://github.com/shinew))
+* `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-simplify`
+  * [#266](https://github.com/babel/babili/pull/266) Fix if_return & dce ifelse..return within loops. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#270](https://github.com/babel/babili/pull/270) Fix dce: don't remove fn param from setters. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#282](https://github.com/babel/babili/pull/282) Don't transform earlyReturn on function enter. ([@boopathi](https://github.com/boopathi))
+
+### :house: Internal
+
+* `babel-plugin-minify-simplify`
+  * [#234](https://github.com/babel/babili/pull/234) Pattern match tests and bug fixes. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#244](https://github.com/babel/babili/pull/244) Ensure binding exists. ([@kangax](https://github.com/kangax))
+* Benchmarks
+  * [#271](https://github.com/babel/babili/pull/271) benchmark npm packages directly. ([@garyjN7](https://github.com/garyjN7))
+* `babel-plugin-minify-simplify`
+  * [#276](https://github.com/babel/babili/pull/276) Remove helper, use the built-in t.isNodesEquivalent. ([@hzoo](https://github.com/hzoo))
+* Use babel preset env
+  * [#277](https://github.com/babel/babili/pull/277) compile to node 4. ([@hzoo](https://github.com/hzoo))
+
+### Commiters: 6
+
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Gary Johnson ([garyjN7](https://github.com/garyjN7))
+- Henry Zhu ([hzoo](https://github.com/hzoo))
+- Juriy Zaytsev ([kangax](https://github.com/kangax))
+- Shine Wang ([shinew](https://github.com/shinew))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## Babili v0.0.8: Changelog for 2016-10-31
 
 - babili: 0.0.7 => 0.0.8
