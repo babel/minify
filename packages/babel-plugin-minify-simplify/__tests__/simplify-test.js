@@ -1,3 +1,35 @@
+/**
+ * This file also contains code from UglifyJS, which is BSD Licensed.
+ *
+ * UglifyJS is Copyright 2012-2013 (c) Mihai Bazon <mihai.bazon@gmail.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *     * Redistributions of source code must retain the above
+ *       copyright notice, this list of conditions and the following
+ *       disclaimer.
+ *
+ *     * Redistributions in binary form must reproduce the above
+ *       copyright notice, this list of conditions and the following
+ *       disclaimer in the documentation and/or other materials
+ *       provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 jest.autoMockOff();
 
 const babel = require("babel-core");
@@ -246,6 +278,24 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // https://github.com/babel/babili/issues/208
+  it("should handle empty blocks when merging to sequences", () => {
+    const source = unpad(`
+      !function () {
+        var x;
+        { }
+        alert(x);
+      }()
+    `);
+    const expected = unpad(`
+      !function () {
+        var x;
+        alert(x);
+      }();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should merge expressions into the init part of for", () => {
     const source = unpad(`
       function foo() {
@@ -409,19 +459,64 @@ describe("simplify-plugin", () => {
 
   it("should convert whiles to fors and merge vars", () => {
     const source = unpad(`
-      function foo(a) {
-        var bar = baz;
+      function foo() {
+        let bar = baz;
         while(true) {
           bar();
         }
       }
     `);
     const expected = unpad(`
-      function foo(a) {
-        for (var bar = baz; true;) bar();
+      function foo() {
+        for (let bar = baz; true;) bar();
       }
     `);
 
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://github.com/babel/babili/issues/198
+  it("should convert while->for and NOT merge let/const if any is refereced outside the loop", () => {
+    const source = unpad(`
+      function foo() {
+        let a,
+            { b } = x;
+        while (true) {
+          bar(a, b);
+        }
+        return [a, b];
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        let a,
+            { b } = x;
+
+        for (; true;) bar(a, b);
+
+        return [a, b];
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should convert while->for and merge var even if any is refereced outside the loop", () => {
+    const source = unpad(`
+      function foo() {
+        var a = 1;
+        while (true) {
+          bar(a);
+        }
+        return a;
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        for (var a = 1; true;) bar(a);
+
+        return a;
+      }
+    `);
     expect(transform(source)).toBe(expected);
   });
 
@@ -474,14 +569,14 @@ describe("simplify-plugin", () => {
     `);
     const expected = unpad(`
       function foo(a) {
-        !lol && (doThings(), doOtherThings());
+        lol || (doThings(), doOtherThings());
       }
       function bar(a) {
         if (!lol) try {
-          doThings();
-        } catch (e) {
-          doOtherThings();
-        }
+            doThings();
+          } catch (e) {
+            doOtherThings();
+          }
       }
       function baz() {
         for (; wow;) if (lol) return;
@@ -658,7 +753,7 @@ describe("simplify-plugin", () => {
 
     const expected = unpad(`
       function foo() {
-        if (!bar && !far && !faz) return e;
+        return bar || far || faz ? void 0 : e;
       }
     `);
 
@@ -1613,6 +1708,33 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should not remove last break statement if it contains a label", () => {
+    const source = unpad(`
+      loop: while (foo) {
+        switch (bar) {
+          case 47:
+            break;
+        }
+        switch (baz) {
+          default:
+            break loop;
+        }
+      }
+    `);
+    const expected = unpad(`
+      loop: for (; foo;) {
+        switch (bar) {
+          case 47:
+        }
+        switch (baz) {
+          default:
+            break loop;
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should convert consequents in switch into sequence expressions", () => {
     const source = unpad(`
       function bar() {
@@ -2044,6 +2166,163 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // From UglifyJS
+  it("should simplify logical expression of the following forms of &&", () => {
+    // compress to right
+    let sources = unpad(`
+      a = true && foo
+      a = 1 && console.log("asdf")
+      a = 4 * 2 && foo()
+      a = 10 == 10 && foo() + bar()
+      a = "foo" && foo()
+      a = 1 + "a" && foo / 10
+      a = -1 && 5 << foo
+      a = 6 && 10
+      a = !NaN && foo()
+    `).split("\n");
+
+    let expected = unpad(`
+      a = foo;
+      a = console.log("asdf");
+      a = foo();
+      a = foo() + bar();
+      a = foo();
+      a = foo / 10;
+      a = 5 << foo;
+      a = 10;
+      a = foo();
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
+
+    // compress to left
+    sources = unpad(`
+      a = false && bar
+      a = NaN && console.log("a")
+      a = 0 && bar()
+      a = undefined && foo(bar)
+      a = 3 * 3 - 9 && bar(foo)
+      a = 9 == 10 && foo()
+      a = !"string" && foo % bar
+      a = 0 && 7
+    `).split("\n");
+
+    expected = unpad(`
+      a = false;
+      a = NaN;
+      a = 0;
+      a = undefined;
+      a = 0;
+      a = false;
+      a = false;
+      a = 0;
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
+
+    // don't compress
+    sources = unpad(`
+      a = foo() && true;
+      a = console.log && 3 + 8;
+      a = foo + bar + 5 && "a";
+      a = 4 << foo && -1.5;
+      a = bar() && false;
+      a = foo() && 0;
+      a = bar() && NaN;
+      a = foo() && null;
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(sources);
+  });
+
+  it("should simplify logical expression of the following forms of ||", () => {
+    // compress to left
+    let sources = unpad(`
+      a = true     || condition;
+      a = 1        || console.log("a");
+      a = 2 * 3    || 2 * condition;
+      a = 5 == 5   || condition + 3;
+      a = "string" || 4 - condition;
+      a = 5 + ""   || condition / 5;
+      a = -4.5     || 6 << condition;
+      a = 6        || 7;
+    `).split("\n");
+
+    let expected = unpad(`
+      a = true;
+      a = 1;
+      a = 6;
+      a = true;
+      a = "string";
+      a = "5";
+      a = -4.5;
+      a = 6;
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
+
+    sources = unpad(`
+      a = false     || condition;
+      a = 0         || console.log("b");
+      a = NaN       || console.log("c");
+      a = undefined || 2 * condition;
+      a = null      || condition + 3;
+      a = 2 * 3 - 6 || 4 - condition;
+      a = 10 == 7   || condition / 5;
+      a = !"string" || 6 % condition;
+      a = null      || 7;
+    `).split("\n");
+
+    expected = unpad(`
+      a = condition;
+      a = console.log("b");
+      a = console.log("c");
+      a = 2 * condition;
+      a = condition + 3;
+      a = 4 - condition;
+      a = condition / 5;
+      a = 6 % condition;
+      a = 7;
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
+
+    // don't compress
+    sources = unpad(`
+      a = condition || true;
+      a = console.log("a") || 2;
+      a = 4 - condition || "string";
+      a = 6 << condition || -4.5;
+      a = condition || false;
+      a = console.log("b") || NaN;
+      a = console.log("c") || 0;
+      a = 2 * condition || undefined;
+      a = condition + 3 || null;
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(sources);
+  });
+
+  it("should transform complex logical expressions", () => {
+    let sources = unpad(`
+      a = true && 1 && foo
+      a = 1 && 4 * 2 && console.log("asdf")
+      a = 4 * 2 && NaN && foo()
+      a = 10 == 11 || undefined && foo() + bar() && bar()
+      a = -1 && undefined || 5 << foo
+    `).split("\n");
+
+    let expected = unpad(`
+      a = foo;
+      a = console.log("asdf");
+      a = NaN;
+      a = undefined;
+      a = 5 << foo;
+    `).split("\n");
+
+    expect(sources.map((s) => transform(s))).toEqual(expected);
+  });
+
   // https://github.com/babel/babili/issues/115
   it("should transform impure conditional statements correctly - issue#115", () => {
     const source = unpad(`
@@ -2056,6 +2335,217 @@ describe("simplify-plugin", () => {
       (function () {
         a = !!x, c = 1 ? (this.get(x), a = b, true) : (foo.bar, false);
       })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should require block for single block scoped declaration in if/else", () => {
+    const source = unpad(`
+      if (false) {
+        let { a } = foo();
+      } else if (true) {
+        const x = bar();
+      } else {
+        function baz() {}
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments", () => {
+
+    const source = unpad(`
+      x = x + 1,
+      x = x - 1,
+      x = x * 1,
+      x = x % 1,
+      x = x << 1,
+      x = x >> 1,
+      x = x >>> 1,
+      x = x & 1,
+      x = x | 1,
+      x = x ^ 1,
+      x = x / 1,
+      x = x ** 1;
+    `);
+    const expected = unpad(`
+      ++x,
+      --x,
+      x *= 1,
+      x %= 1,
+      x <<= 1,
+      x >>= 1,
+      x >>>= 1,
+      x &= 1,
+      x |= 1,
+      x ^= 1,
+      x /= 1,
+      x **= 1;
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments 2", () => {
+
+    const source = unpad(`
+      foo = foo + bar,
+      foo = foo * function(){},
+      foo += 123,
+      foo = 1 + foo,
+      x = x = x + 1,
+      foo = foo + bar + baz
+    `);
+    const expected = unpad(`
+      foo += bar,
+      foo *= function () {},
+      foo += 123,
+      foo = 1 + foo,
+      x = ++x,
+      foo = foo + bar + baz;
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments w. member expressions", () => {
+
+    const source = unpad(`
+      foo.bar = foo.bar + 1,
+      foo.bar = foo.bar + 2,
+      foo["x"] = foo[x] + 2,
+      foo[x] = foo[x] + 2,
+      foo[x] = foo["x"] + 2,
+      foo["x"] = foo["x"] + 2,
+      foo[1] = foo["1"] + 2,
+      foo["bar"] = foo["bar"] + 2,
+      foo[bar()] = foo[bar()] + 2,
+      foo[""] = foo[""] + 2,
+      foo[2] = foo[2] + 2,
+      foo[{}] = foo[{}] + 1,
+      foo[function(){}] = foo[function(){}] + 1,
+      foo[false] = foo[false] + 1,
+      foo.bar.baz = foo.bar.baz + 321,
+      this.hello = this.hello + 1,
+      foo[null] = foo[null] + 1,
+      foo[undefined] = foo[undefined] + 1,
+      foo.bar = foo.bar || {};
+    `);
+    // TODO: foo[void 0] = foo[void 0] + 1;
+    const expected = unpad(`
+      ++foo.bar,
+      foo.bar += 2,
+      foo["x"] = foo[x] + 2,
+      foo[x] += 2,
+      foo[x] = foo["x"] + 2,
+      foo["x"] += 2,
+      foo[1] += 2,
+      foo["bar"] += 2,
+      foo[bar()] = foo[bar()] + 2,
+      foo[""] += 2,
+      foo[2] += 2,
+      foo[{}] = foo[{}] + 1,
+      foo[function () {}] = foo[function () {}] + 1,
+      ++foo[false],
+      foo.bar.baz += 321,
+      ++this.hello,
+      ++foo[null],
+      ++foo[undefined],
+      foo.bar = foo.bar || {};
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should simplify assignments w. super", () => {
+
+    const source = unpad(`
+      class Foo {
+        foo() {
+          super.foo = super.foo + 1;
+        }
+      };
+    `);
+    const expected = unpad(`
+      class Foo {
+        foo() {
+          ++super.foo;
+        }
+      };
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not simplify assignments w. template literals", () => {
+
+    const source = unpad("foo[`x`] = foo[`x`] + 1;");
+
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should consider hoisted definitions in if_return", () => {
+    const source = unpad(`
+      function foo() {
+        bar();
+        if(x) return;
+        const {a}=b;
+        function bar () {
+          baz();
+          bar();
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function bar() {
+          baz(), bar();
+        }
+
+        if (bar(), !x) {
+          const { a } = b;
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should optimize if..else..returns", () => {
+    const source = unpad(`
+      function foo() {
+        if (a) {
+          if (x) return;
+          else return x;
+        }
+        const b = 1;
+        return "doesn't matter if this is reached or not";
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        if (a) return x ? void 0 : x;
+        const b = 1;
+        return "doesn't matter if this is reached or not";
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should fix issue#281 with if..return", () => {
+    const source = unpad(`
+      function foo() {
+        if (x)
+          return;
+        function bar() {}
+        bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function bar() {}
+        x || bar(a);
+      }
     `);
     expect(transform(source)).toBe(expected);
   });

@@ -43,7 +43,9 @@ $ npm run fix
 To run current benchmarks on a file:
 
 ```sh
-$ ./scripts/benchmark.js file.js
+$ ./scripts/benchmark.js package [file.js]
+# do not remove package after installing to node_modules
+$ ./scripts/benchmark.js package [file.js] --offline
 ```
 
 To run current plugin timing on a file:
@@ -51,3 +53,9 @@ To run current plugin timing on a file:
 ```sh
 $ ./scripts/plugin-timing.js file.js
 ```
+
+### Releasing
+
+Use `npm run publish`. It will run `lerna publish` (we use --independent) so it will prompt the version number for every package.
+
+If you are releasing a new package, you'll want to run `./scripts/npm-owner-update.sh` to add all owners to the new npm package. 

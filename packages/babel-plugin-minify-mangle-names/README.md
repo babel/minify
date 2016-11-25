@@ -70,4 +70,4 @@ require("babel-core").transform("code", {
 
 + `blacklist` - A plain JS Object with keys as identifier names and values indicating whether to exclude
 + `eval` - mangle identifiers in scopes accessible by eval
-+ `keepFnames` - prevent mangler from alterning function names. Useful for code depending on `fn.name`
++ `keepFnName` - prevent mangler from altering function names. Useful for code depending on `fn.name`

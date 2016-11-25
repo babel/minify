@@ -49,4 +49,15 @@ describe("constant-folding-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should handle runtime errors", () => {
+    const source = unpad(`
+      try {
+        x({
+          toString: 0
+        } + '');
+      } catch (e) {}
+    `);
+    expect(transform(source)).toBe(source);
+  });
 });

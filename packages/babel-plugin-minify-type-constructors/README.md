@@ -10,6 +10,9 @@
 Boolean(x);
 Number(x);
 String(x);
+Array(3);
+Array(3,1);
+Object({foo: 'bar'});
 ```
 
 **Out**
@@ -18,6 +21,9 @@ String(x);
 !!x;
 +x;
 x + "";
+[,,,];
+[3, 1];
+{foo: 'bar'};
 ```
 
 ## Installation

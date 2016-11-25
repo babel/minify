@@ -4,13 +4,13 @@ module.exports = ({ types: t }) => {
   class Mangler {
     constructor(charset, program, {
       blacklist = {},
-      keepFnames = false,
+      keepFnName = false,
       eval: _eval = false
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
-      this.keepFnames = keepFnames;
+      this.keepFnName = keepFnName;
       this.eval = _eval;
 
       this.unsafeScopes = new Set;
@@ -79,8 +79,6 @@ module.exports = ({ types: t }) => {
 
       this.program.traverse({
         Scopable(path) {
-          if (path.isProgram()) return;
-
           const {scope} = path;
 
           if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
@@ -115,10 +113,20 @@ module.exports = ({ types: t }) => {
             const binding = bindings[oldName];
 
             if (
-              !scope.hasOwnBinding(oldName)
+              // already renamed bindings
+              binding.renamed
+              // arguments
+              || oldName === "arguments"
+              // globals
+              || mangler.program.scope.bindings[oldName] === binding
+              // other scope bindings
+              || !scope.hasOwnBinding(oldName)
+              // labels
               || binding.path.isLabeledStatement()
+              // blacklisted
               || mangler.isBlacklist(oldName)
-              || (mangler.keepFnames ? isFunction(binding.path) : false)
+              // function names
+              || (mangler.keepFnName ? isFunction(binding.path) : false)
             ) {
               continue;
             }
@@ -137,6 +145,8 @@ module.exports = ({ types: t }) => {
             // re-enable this - check above
             // resetNext();
             mangler.rename(scope, oldName, next);
+            // mark the binding as renamed
+            binding.renamed = true;
           }
         }
       });
@@ -267,7 +277,7 @@ class Charset {
   }
 }
 
-// for keepFnames
+// for keepFnName
 function isFunction(path) {
   return path.isFunctionExpression()
     || path.isFunctionDeclaration()

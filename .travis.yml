@@ -1,6 +1,6 @@
 ---
 git:
-  depth: 1
+  depth: 10
 sudo: false
 language: node_js
 cache:
@@ -8,11 +8,18 @@ cache:
   - node_modules
 
 node_js:
+- '7'
 - '6'
-- '5'
+- '4'
 
 script:
+- 'if [ -n "${LINT-}" ]; then npm run lint ; fi'
 - npm run bootstrap
 - npm run build
-- npm run lint
 - npm run test
+
+matrix:
+  fast_finish: true
+  include:
+    - node_js: "node"
+      env: LINT=true

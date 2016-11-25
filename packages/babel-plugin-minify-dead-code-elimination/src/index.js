@@ -1,10 +1,15 @@
 "use strict";
 
-const { some } = require("lodash");
+const some = require("lodash.some");
 
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
   const shouldRevisit = Symbol("shouldRevisit");
+
+  // this is used for tracking fn params that can be removed
+  // as traversal takes place from left and
+  // unused params can be removed only on the right
+  const markForRemoval = Symbol("markForRemoval");
 
   const main = {
     // remove side effectless statement
@@ -100,17 +105,62 @@ module.exports = ({ types: t, traverse }) => {
         }
 
         const { scope } = path;
+
+        // if the scope is created by a function, we obtain its
+        // parameter list
+        const canRemoveParams = path.isFunction() && path.node.kind !== "set";
+        const paramsList = canRemoveParams ? path.get("params") : [];
+
+        for (let i = paramsList.length - 1; i >= 0; i--) {
+          const param = paramsList[i];
+
+          if (param.isIdentifier()) {
+            const binding = scope.bindings[param.node.name];
+            if (binding.referenced) {
+              // when the first binding is referenced (right to left)
+              // exit without marking anything after this
+              break;
+            }
+
+            binding[markForRemoval] = true;
+            continue;
+          } else if (param.isAssignmentPattern()) {
+            const left = param.get("left");
+            const right = param.get("right");
+
+            if (left.isIdentifier() && right.isPure()) {
+              const binding = scope.bindings[left.node.name];
+              if (binding.referenced) {
+                // when the first binding is referenced (right to left)
+                // exit without marking anything after this
+                break;
+              }
+
+              binding[markForRemoval] = true;
+              continue;
+            }
+          }
+
+          // other patterns - assignment, object have side-effects
+          // and cannot be safely removed
+          break;
+        }
+
         for (let name in scope.bindings) {
           let binding = scope.bindings[name];
-          if (!binding.referenced && binding.kind !== "param" && binding.kind !== "module") {
-            if (binding.path.isVariableDeclarator()) {
+
+          if (!binding.referenced && binding.kind !== "module") {
+            if (binding.kind === "param" && (this.keepFnArgs || !binding[markForRemoval])) {
+              continue;
+            } else if (binding.path.isVariableDeclarator()) {
               if (binding.path.parentPath.parentPath &&
-                binding.path.parentPath.parentPath.isForInStatement()
+                binding.path.parentPath.parentPath.isForXStatement()
               ) {
-                // Can't remove if in a for in statement `for (var x in wat)`.
+                // Can't remove if in a for-in/for-of/for-await statement `for (var x in wat)`.
                 continue;
               }
             } else if (!scope.isPure(binding.path.node)) {
+              // TODO: AssignmentPattern are marked as impure and unused ids aren't removed yet
               continue;
             } else if (binding.path.isFunctionExpression() || binding.path.isClassExpression()) {
               // `bar(function foo() {})` foo is not referenced but it's used.
@@ -141,9 +191,14 @@ module.exports = ({ types: t, traverse }) => {
             }
 
             if (binding.path.isVariableDeclarator() && binding.path.node.init &&
-              !scope.isPure(binding.path.node.init)
+              !scope.isPure(binding.path.node.init) &&
+              binding.path.parentPath.node.declarations
             ) {
               if (binding.path.parentPath.node.declarations.length !== 1) {
+                continue;
+              }
+              // Bail out for ArrayPattern and ObjectPattern
+              if (!binding.path.get("id").isIdentifier()) {
                 continue;
               }
 
@@ -180,6 +235,11 @@ module.exports = ({ types: t, traverse }) => {
               let replacementPath = binding.path;
               if (t.isVariableDeclarator(replacement)) {
                 replacement = replacement.init;
+                // Bail out for ArrayPattern and ObjectPattern
+                // TODO: maybe a more intelligent approach instead of simply bailing out
+                if (!replacementPath.get("id").isIdentifier()) {
+                  continue;
+                }
                 replacementPath = replacementPath.get("init");
               }
               if (!replacement) {
@@ -277,7 +337,7 @@ module.exports = ({ types: t, traverse }) => {
           continue;
         }
 
-        if (purge && !p.isFunctionDeclaration()) {
+        if (purge && !canExistAfterCompletion(p)) {
           removeOrVoid(p);
         }
       }
@@ -293,7 +353,7 @@ module.exports = ({ types: t, traverse }) => {
 
       // Not last in it's block? (See BlockStatement visitor)
       if (path.container.length - 1 !== path.key &&
-          !path.getSibling(path.key + 1).isFunctionDeclaration() &&
+          !canExistAfterCompletion(path.getSibling(path.key + 1)) &&
           path.parentPath.isBlockStatement()
       ) {
         // This is probably a new oppurtinity by some other transform
@@ -312,6 +372,12 @@ module.exports = ({ types: t, traverse }) => {
       let noNext = true;
       let parentPath = path.parentPath;
       while (parentPath && !parentPath.isFunction() && noNext) {
+        // https://github.com/babel/babili/issues/265
+        if (hasLoopParent(parentPath)) {
+          noNext = false;
+          break;
+        }
+
         const nextPath = parentPath.getSibling(parentPath.key + 1);
         if (nextPath.node) {
           if (nextPath.isReturnStatement()) {
@@ -571,7 +637,7 @@ module.exports = ({ types: t, traverse }) => {
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
     "FunctionExpression|ClassExpression"(path) {
-      if (!this.keepFnames) {
+      if (!this.keepFnName) {
         removeUnreferencedId(path);
       }
     },
@@ -619,19 +685,28 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-dead-code-elimination",
     visitor: {
-      Program(path, {
-        opts: {
-          // set defaults
-          optimizeRawSize = false,
-          keepFnames = false
-        } = {}
-      } = {}) {
-        // We need to run this plugin in isolation.
-        path.traverse(main, {
-          functionToBindings: new Map(),
-          optimizeRawSize,
-          keepFnames
-        });
+      EmptyStatement(path) {
+        if (path.parentPath.isBlockStatement() || path.parentPath.isProgram()) {
+          path.remove();
+        }
+      },
+      Program: {
+        exit(path, {
+          opts: {
+            // set defaults
+            optimizeRawSize = false,
+            keepFnName = false,
+            keepFnArgs = false,
+          } = {}
+        } = {}) {
+          // We need to run this plugin in isolation.
+          path.traverse(main, {
+            functionToBindings: new Map(),
+            optimizeRawSize,
+            keepFnName,
+            keepFnArgs,
+          });
+        }
       },
     },
   };
@@ -779,7 +854,7 @@ module.exports = ({ types: t, traverse }) => {
     const binding = scope.getBinding(id.name);
 
     // Check if shadowed or is not referenced.
-    if (binding.path.node !== node || !binding.referenced) {
+    if (binding && (binding.path.node !== node || !binding.referenced)) {
       node.id = null;
     }
   }
@@ -838,7 +913,13 @@ module.exports = ({ types: t, traverse }) => {
         // here we handle the break labels
         // if they are outside switch, we bail out
         // if they are within the case, we keep them
-        const _isAncestor = isAncestor(path.scope.getBinding(label.node.name).path, path);
+        let labelPath;
+        if (path.scope.getLabel) {
+          labelPath = getLabel(label.node.name, path);
+        } else {
+          labelPath = path.scope.getBinding(label.node.name).path;
+        }
+        const _isAncestor = isAncestor(labelPath, path);
 
         return {
           bail: _isAncestor,
@@ -893,5 +974,32 @@ module.exports = ({ types: t, traverse }) => {
         bail: possibleRunTimeBreak
       };
     }
+  }
+
+  // things that are hoisted
+  function canExistAfterCompletion(path) {
+    return path.isFunctionDeclaration()
+      || path.isVariableDeclaration({ kind: "var" });
+  }
+
+  function getLabel(name, _path) {
+    let label, path = _path;
+    do {
+      label = path.scope.getLabel(name);
+      if (label) {
+        return label;
+      }
+    } while (path = path.parentPath);
+    return null;
+  }
+
+  function hasLoopParent(path) {
+    let parent = path;
+    do {
+      if (parent.isLoop()) {
+        return true;
+      }
+    } while (parent = parent.parentPath);
+    return false;
   }
 };

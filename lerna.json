@@ -10,10 +10,14 @@
   "changelog": {
     "repo": "babel/babili",
     "labels": {
-      "bug": "Bug Fix",
-      "docs": "Docs",
-      "chore": "Chore",
-      "feature": "New Feature"
+      "Tag: Spec Compliancy": ":eyeglasses: Spec Compliancy",
+      "Tag: Breaking Change": ":boom: Breaking Change",
+      "Tag: New Feature": ":rocket: New Feature",
+      "Tag: Bug Fix": ":bug: Bug Fix",
+      "Tag: Polish": ":nail_care: Polish",
+      "Tag: Docs": ":memo: Documentation",
+      "Tag: Internal": ":house: Internal",
+      "Tag: Chore": "Chore"
     }
   }
 }
