@@ -699,6 +699,9 @@ module.exports = ({ types: t, traverse }) => {
             keepFnArgs = false,
           } = {}
         } = {}) {
+          traverse.clearCache();
+          path.scope.crawl();
+
           // We need to run this plugin in isolation.
           path.traverse(main, {
             functionToBindings: new Map(),
