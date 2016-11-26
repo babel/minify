@@ -22,6 +22,12 @@ describe("transform-regexp-constructors-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should transform unicode newlines fine", () => {
+    const source = String.raw`var x = new RegExp('\u2028\u2029');`;
+    const expected = String.raw`var x = /\u2028\u2029/;`;
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should transform RegExp constructors with string literals", () => {
     const source = "var x = new RegExp('ab+c');";
     const expected = "var x = /ab+c/;";
