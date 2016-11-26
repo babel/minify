@@ -17,6 +17,8 @@ function createRegExpLiteral(args, prettify, t) {
   pattern = new RegExp(pattern).source;
   if (prettify) {
     pattern = pattern.replace(/\n/g, "\\n")
+                     .replace(/\u2028/g, "\\u2028")
+                     .replace(/\u2029/g, "\\u2029")
                      .replace(/[\b]/g, "[\\b]")
                      .replace(/\v/g, "\\v")
                      .replace(/\f/g, "\\f")
