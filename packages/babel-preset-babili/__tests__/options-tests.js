@@ -31,7 +31,7 @@ mocks.forEach((mockName) => {
 const preset = require("../src/index");
 
 function getPlugins(opts) {
-  return preset({}, opts).plugins;
+  return preset({}, opts).presets[0].plugins;
 }
 
 function testOpts(opts) {
