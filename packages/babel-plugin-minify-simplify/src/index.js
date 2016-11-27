@@ -507,7 +507,7 @@ module.exports = ({ types: t }) => {
       },
 
       Function: {
-        exit(path, state) {
+        exit(path) {
           earlyReturnTransform(path);
 
           if (!path.node[shouldRevisit]) {
