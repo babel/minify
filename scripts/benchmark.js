@@ -17,10 +17,9 @@ const compile = require("google-closure-compiler-js").compile;
 
 let packagename, filename;
 
-const NUM_TEST_RUNS = 3;
-
 const script = new Command("benchmark.js")
   .option("-o, --offline", "Only install package if not present; package not removed after testing")
+  .option("-r, --runs <n>", "Number of times to run tests")
   .usage("[options] <package> [file]")
   .arguments("<package> [file]")
   .action(function(pname, fname) {
@@ -34,6 +33,7 @@ if (!packagename) {
   process.exit(1);
 }
 
+const numTestRuns = script.runs || 3;
 const pathToScripts = __dirname;
 
 const table = new Table({
@@ -121,7 +121,7 @@ function test(name, callback) {
 
   const runTimes = [run];
 
-  for (let i = 1; i < NUM_TEST_RUNS; i++) {
+  for (let i = 1; i < numTestRuns; i++) {
     const start = Date.now();
     callback(code);
     runTimes.push(Date.now() - start);
