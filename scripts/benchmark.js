@@ -146,13 +146,7 @@ function testFile() {
   test("babili (best speed)", function (code) {
     return babel.transform(code, {
       sourceType: "script",
-      presets: [
-        [require("../packages/babel-preset-babili"), {
-          simplify: {
-            multiPass: false
-          }
-        }]
-      ],
+      presets: [require("../packages/babel-preset-babili")],
       comments: false,
     }).code;
   });
@@ -160,13 +154,7 @@ function testFile() {
   test("babili (best size)", function (code) {
     return babel.transform(code, {
       sourceType: "script",
-      presets: [
-        [require("../packages/babel-preset-babili"), {
-          simplify: {
-            multiPass: true
-          }
-        }]
-      ],
+      presets: [require("../packages/babel-preset-babili")],
       comments: false,
     }).code;
   });
