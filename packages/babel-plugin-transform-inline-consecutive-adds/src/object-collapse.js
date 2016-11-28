@@ -1,11 +1,11 @@
 "use strict";
 
 module.exports = {
-  checkInitType: (init) => init.isObjectExpression(),
+  isInitTypeValid: (init) => init.isObjectExpression(),
 
-  checkExpressionType: (expr) => expr.isAssignmentExpression(),
+  isExpressionTypeValid: (expr) => expr.isAssignmentExpression(),
 
-  makeCheckExpression: (objName, references) => (expr) => {
+  getExpressionChecker: (objName, references) => (expr) => {
     // checks expr is of form:
     // foo.a = rval
 
@@ -31,8 +31,8 @@ module.exports = {
     return true;
   },
 
-  extractAddon: (expr) => [expr.node.left.property, expr.node.right],
+  extractAssignment: (expr) => [expr.node.left.property, expr.node.right],
 
-  addAddon: (t, [left, right], init) =>
+  addAssignment: (t, [left, right], init) =>
     init.node.properties.push(t.objectProperty(left, right)),
 };

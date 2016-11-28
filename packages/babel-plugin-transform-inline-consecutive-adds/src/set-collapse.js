@@ -1,15 +1,15 @@
 "use strict";
 
 module.exports = {
-  checkInitType: (init) => init.isNewExpression() &&
+  isInitTypeValid: (init) => init.isNewExpression() &&
                            init.get("callee").isIdentifier() &&
                            init.node.callee.name === "Set" &&
                            // other iterables might not be inline-able, except for arrays
                            init.node.arguments.length === 0,
 
-  checkExpressionType: (expr) => expr.isCallExpression(),
+  isExpressionTypeValid: (expr) => expr.isCallExpression(),
 
-  makeCheckExpression: (objName, references) => (expr) => {
+  getExpressionChecker: (objName, references) => (expr) => {
     // checks expr is of form:
     // foo.push(rval1, ...)
 
@@ -40,9 +40,9 @@ module.exports = {
     return true;
   },
 
-  extractAddon: (expr) => expr.node.arguments[0],
+  extractAssignment: (expr) => expr.node.arguments[0],
 
-  addAddon: (t, arg, init) => {
+  addAssignment: (t, arg, init) => {
     if (init.node.arguments.length === 0) {
       init.node.arguments.push(t.arrayExpression());
     }

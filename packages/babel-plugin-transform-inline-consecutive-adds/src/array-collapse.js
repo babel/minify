@@ -1,11 +1,11 @@
 "use strict";
 
 module.exports = {
-  checkInitType: (init) => init.isArrayExpression(),
+  isInitTypeValid: (init) => init.isArrayExpression(),
 
-  checkExpressionType: (expr) => expr.isCallExpression(),
+  isExpressionTypeValid: (expr) => expr.isCallExpression(),
 
-  makeCheckExpression: (objName, references) => (expr) => {
+  getExpressionChecker: (objName, references) => (expr) => {
     // checks expr is of form:
     // foo.push(rval1, ...)
 
@@ -35,8 +35,8 @@ module.exports = {
     return true;
   },
 
-  extractAddon: (expr) => expr.node.arguments,
+  extractAssignment: (expr) => expr.node.arguments,
 
-  addAddon: (t, args, init) =>
+  addAssignment: (t, args, init) =>
     args.map((a) => init.node.elements.push(a)),
 };

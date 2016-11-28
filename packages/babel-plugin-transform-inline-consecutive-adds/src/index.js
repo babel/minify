@@ -137,7 +137,7 @@ module.exports = function({ types: t }) {
         const body = path.parentPath.get("body");
 
         for (let collapser of collapsers) {
-          if (!collapser.checkInitType(init)) {
+          if (!collapser.isInitTypeValid(init)) {
             continue;
           }
 
@@ -145,13 +145,13 @@ module.exports = function({ types: t }) {
             body,
             startIndex + 1,
             body.length,
-            collapser.checkExpressionType,
-            collapser.makeCheckExpression(name, references)
+            collapser.isExpressionTypeValid,
+            collapser.getExpressionChecker(name, references)
           );
 
           if (statements.length > 0) {
-            const addons = exprs.map((e) => collapser.extractAddon(e));
-            addons.forEach((addon) => collapser.addAddon(t, addon, init));
+            const assigns = exprs.map((e) => collapser.extractAssignment(e));
+            assigns.forEach((assign) => collapser.addAssignment(t, assign, init));
             statements.forEach((s) => s.remove());
           }
         }

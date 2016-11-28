@@ -1,6 +1,6 @@
 # babel-plugin-transform-inline-consecutive-adds
 
-This plugin inlines consecutive attribute definitions, array pushes, etc.
+This plugin inlines consecutive property assignments, array pushes, etc.
 
 ## Example
 
