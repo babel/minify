@@ -19,6 +19,7 @@ let packagename, filename;
 
 const script = new Command("benchmark.js")
   .option("-o, --offline", "Only install package if not present; package not removed after testing")
+  .option("-r, --runs <n>", "Number of times to run tests")
   .usage("[options] <package> [file]")
   .arguments("<package> [file]")
   .action(function(pname, fname) {
@@ -32,10 +33,11 @@ if (!packagename) {
   process.exit(1);
 }
 
+const numTestRuns = script.runs || 3;
 const pathToScripts = __dirname;
 
 const table = new Table({
-  head: ["", "raw", "raw win", "gzip", "gzip win", "parse time", "run"],
+  head: ["", "raw", "raw win", "gzip", "gzip win", "parse time", "run time (average)"],
   chars: {
     top: "",
     "top-mid": "" ,
@@ -100,6 +102,7 @@ function checkFile() {
 }
 
 function test(name, callback) {
+
   console.log("testing", name);
 
   const start = Date.now();
@@ -116,12 +119,23 @@ function test(name, callback) {
   const parseEnd = Date.now();
   const parseNow = parseEnd - parseStart;
 
+  const runTimes = [run];
+
+  for (let i = 1; i < numTestRuns; i++) {
+    const start = Date.now();
+    callback(code);
+    runTimes.push(Date.now() - start);
+  }
+
+  const totalTime = runTimes.reduce((a, b) => a + b, 0);
+  const average = parseInt(totalTime / runTimes.length, 10);
+
   results.push({
     name: name,
     raw: result.length,
     gzip: gzipped.length,
     parse: parseNow,
-    run: run,
+    run: average,
   });
 }
 
@@ -129,7 +143,15 @@ function testFile() {
   code = fs.readFileSync(filename, "utf8");
   gzippedCode = zlib.gzipSync(code);
 
-  test("babili", function (code) {
+  test("babili (best speed)", function (code) {
+    return babel.transform(code, {
+      sourceType: "script",
+      presets: [require("../packages/babel-preset-babili")],
+      comments: false,
+    }).code;
+  });
+
+  test("babili (best size)", function (code) {
     return babel.transform(code, {
       sourceType: "script",
       presets: [require("../packages/babel-preset-babili")],
@@ -161,9 +183,7 @@ function testFile() {
 }
 
 function processResults() {
-  results = results.sort(function (a, b) {
-    return a.gzip > b.gzip;
-  });
+  results = results.sort((a, b) => a.gzip > b.gzip);
 
   results.forEach(function (result, i) {
     let row = [

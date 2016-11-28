@@ -70,4 +70,86 @@ describe("transform-merge-sibling-variables-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("lift var declarations to loop intializer", () => {
+    const source = unpad(`
+      for (var i = 0; i < 0; i++) {
+        var j = jj();
+      }
+      for (var i=0;;) var j = 0;
+    `);
+    const expected = unpad(`
+      for (var i = 0, j; i < 0; i++) {
+        j = jj();
+      }
+      for (var i = 0, j;;) j = 0;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("lift let declarations to loop intializer", () => {
+    const source = unpad(`
+      for (let i = 0; i < 0; i++) {
+        let j = jj();
+      }
+    `);
+    const expected = unpad(`
+      for (let i = 0, j; i < 0; i++) {
+        j = jj();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("dont lift declarations on object/array pattern", () => {
+    const source = unpad(`
+      for (var i = 0; i < 0; i++) {
+        var [j] = jj();
+      }
+      for (var i = 0; i < 0; i++) {
+        var { j } = jj();
+      }
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  it("dont lift declarations when no body is present", () => {
+    const source = unpad(`
+      for (;;) {}
+      for (;;) var i = 0;
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  it("dont lift when the declarations are of different kind", () => {
+    const source = unpad(`
+      for (let i = 0; i < 0; i++) {
+        var i = 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  it("dont lift when there are multiple declarations", () => {
+    const source = unpad(`
+      for (var i = 0; i < 0; i++) {
+        var i = 0, k = 0;
+      }
+    `);
+
+    const expected = unpad(`
+      for (var i = 0; i < 0; i++) {
+        var i = 0,
+            k = 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
 });

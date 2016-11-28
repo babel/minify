@@ -1,0 +1,322 @@
+exports[`preset-options should handle groups - remove entire group 1`] = `
+Object {
+  "input": Object {
+    "unsafe": false,
+  },
+  "output": Array [
+    "babel-plugin-minify-constant-folding",
+    "babel-plugin-minify-dead-code-elimination",
+    "babel-plugin-minify-infinity",
+    "babel-plugin-minify-mangle-names",
+    "babel-plugin-minify-numeric-literals",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-simplify",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-undefined-to-void",
+    "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-remove-undefined",
+  ],
+}
+`;
+
+exports[`preset-options should handle individual items in a group of options 1`] = `
+Object {
+  "input": Object {
+    "mangle": false,
+    "unsafe": Object {
+      "flipComparisons": false,
+    },
+  },
+  "output": Array [
+    "babel-plugin-minify-constant-folding",
+    "babel-plugin-minify-dead-code-elimination",
+    "babel-plugin-transform-simplify-comparison-operators",
+    "babel-plugin-minify-guarded-expressions",
+    "babel-plugin-minify-type-constructors",
+    "babel-plugin-minify-infinity",
+    "babel-plugin-minify-numeric-literals",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-simplify",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-undefined-to-void",
+    "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-remove-undefined",
+  ],
+}
+`;
+
+exports[`preset-options should handle options that are delegated to multiple other options 1`] = `
+Object {
+  "input": Object {
+    "keepFnName": false,
+  },
+  "output": Array [
+    "babel-plugin-minify-constant-folding",
+    Array [
+      "babel-plugin-minify-dead-code-elimination",
+      Object {
+        "keepFnName": false,
+      },
+    ],
+    "babel-plugin-minify-flip-comparisons",
+    "babel-plugin-transform-simplify-comparison-operators",
+    "babel-plugin-minify-guarded-expressions",
+    "babel-plugin-minify-type-constructors",
+    "babel-plugin-minify-infinity",
+    Array [
+      "babel-plugin-minify-mangle-names",
+      Object {
+        "keepFnName": false,
+      },
+    ],
+    "babel-plugin-minify-numeric-literals",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-simplify",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-undefined-to-void",
+    "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-remove-undefined",
+  ],
+}
+`;
+
+exports[`preset-options should handle options that are delegated to multiple other options 2`] = `
+Object {
+  "input": Object {
+    "keepFnName": true,
+    "mangle": Object {
+      "blacklist": Array [
+        "foo",
+        "bar",
+      ],
+    },
+  },
+  "output": Array [
+    "babel-plugin-minify-constant-folding",
+    Array [
+      "babel-plugin-minify-dead-code-elimination",
+      Object {
+        "keepFnName": true,
+      },
+    ],
+    "babel-plugin-minify-flip-comparisons",
+    "babel-plugin-transform-simplify-comparison-operators",
+    "babel-plugin-minify-guarded-expressions",
+    "babel-plugin-minify-type-constructors",
+    "babel-plugin-minify-infinity",
+    Array [
+      "babel-plugin-minify-mangle-names",
+      Object {
+        "blacklist": Array [
+          "foo",
+          "bar",
+        ],
+        "keepFnName": true,
+      },
+    ],
+    "babel-plugin-minify-numeric-literals",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-simplify",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-undefined-to-void",
+    "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-remove-undefined",
+  ],
+}
+`;
+
+exports[`preset-options should handle options that are delegated to multiple other options 3`] = `
+Object {
+  "input": Object {
+    "keepFnName": true,
+    "mangle": Object {
+      "blacklist": Array [
+        "baz",
+      ],
+      "keepFnName": false,
+    },
+  },
+  "output": Array [
+    "babel-plugin-minify-constant-folding",
+    Array [
+      "babel-plugin-minify-dead-code-elimination",
+      Object {
+        "keepFnName": true,
+      },
+    ],
+    "babel-plugin-minify-flip-comparisons",
+    "babel-plugin-transform-simplify-comparison-operators",
+    "babel-plugin-minify-guarded-expressions",
+    "babel-plugin-minify-type-constructors",
+    "babel-plugin-minify-infinity",
+    Array [
+      "babel-plugin-minify-mangle-names",
+      Object {
+        "blacklist": Array [
+          "baz",
+        ],
+        "keepFnName": false,
+      },
+    ],
+    "babel-plugin-minify-numeric-literals",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-simplify",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-undefined-to-void",
+    "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-remove-undefined",
+  ],
+}
+`;
+
+exports[`preset-options should handle simple options 1`] = `
+Object {
+  "input": Object {
+    "deadcode": false,
+    "mangle": false,
+  },
+  "output": Array [
+    "babel-plugin-minify-constant-folding",
+    "babel-plugin-minify-flip-comparisons",
+    "babel-plugin-transform-simplify-comparison-operators",
+    "babel-plugin-minify-guarded-expressions",
+    "babel-plugin-minify-type-constructors",
+    "babel-plugin-minify-infinity",
+    "babel-plugin-minify-numeric-literals",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-simplify",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-undefined-to-void",
+    "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-remove-undefined",
+  ],
+}
+`;
+
+exports[`preset-options should pass options to respective plugin when its an object 1`] = `
+Object {
+  "input": Object {
+    "mangle": Object {
+      "blacklist": Array [
+        "foo",
+        "bar",
+      ],
+    },
+  },
+  "output": Array [
+    "babel-plugin-minify-constant-folding",
+    "babel-plugin-minify-dead-code-elimination",
+    "babel-plugin-minify-flip-comparisons",
+    "babel-plugin-transform-simplify-comparison-operators",
+    "babel-plugin-minify-guarded-expressions",
+    "babel-plugin-minify-type-constructors",
+    "babel-plugin-minify-infinity",
+    Array [
+      "babel-plugin-minify-mangle-names",
+      Object {
+        "blacklist": Array [
+          "foo",
+          "bar",
+        ],
+      },
+    ],
+    "babel-plugin-minify-numeric-literals",
+    "babel-plugin-minify-replace",
+    "babel-plugin-minify-simplify",
+    "babel-plugin-transform-member-expression-literals",
+    "babel-plugin-transform-property-literals",
+    "babel-plugin-transform-merge-sibling-variables",
+    "babel-plugin-transform-minify-booleans",
+    "babel-plugin-transform-undefined-to-void",
+    "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-remove-undefined",
+  ],
+}
+`;
+
+exports[`preset-options should return defaults with no options 1`] = `
+Array [
+  "babel-plugin-minify-constant-folding",
+  "babel-plugin-minify-dead-code-elimination",
+  "babel-plugin-minify-flip-comparisons",
+  "babel-plugin-transform-simplify-comparison-operators",
+  "babel-plugin-minify-guarded-expressions",
+  "babel-plugin-minify-type-constructors",
+  "babel-plugin-minify-infinity",
+  "babel-plugin-minify-mangle-names",
+  "babel-plugin-minify-numeric-literals",
+  "babel-plugin-minify-replace",
+  "babel-plugin-minify-simplify",
+  "babel-plugin-transform-member-expression-literals",
+  "babel-plugin-transform-property-literals",
+  "babel-plugin-transform-merge-sibling-variables",
+  "babel-plugin-transform-minify-booleans",
+  "babel-plugin-transform-undefined-to-void",
+  "babel-plugin-transform-regexp-constructors",
+  "babel-plugin-transform-remove-undefined",
+]
+`;
+
+exports[`preset-options should return defaults with no options 2`] = `
+Array [
+  "babel-plugin-minify-constant-folding",
+  "babel-plugin-minify-dead-code-elimination",
+  "babel-plugin-minify-flip-comparisons",
+  "babel-plugin-transform-simplify-comparison-operators",
+  "babel-plugin-minify-guarded-expressions",
+  "babel-plugin-minify-type-constructors",
+  "babel-plugin-minify-infinity",
+  "babel-plugin-minify-mangle-names",
+  "babel-plugin-minify-numeric-literals",
+  "babel-plugin-minify-replace",
+  "babel-plugin-minify-simplify",
+  "babel-plugin-transform-member-expression-literals",
+  "babel-plugin-transform-property-literals",
+  "babel-plugin-transform-merge-sibling-variables",
+  "babel-plugin-transform-minify-booleans",
+  "babel-plugin-transform-undefined-to-void",
+  "babel-plugin-transform-regexp-constructors",
+  "babel-plugin-transform-remove-undefined",
+]
+`;
+
+exports[`preset-options should return defaults with no options 3`] = `
+Array [
+  "babel-plugin-minify-constant-folding",
+  "babel-plugin-minify-dead-code-elimination",
+  "babel-plugin-minify-flip-comparisons",
+  "babel-plugin-transform-simplify-comparison-operators",
+  "babel-plugin-minify-guarded-expressions",
+  "babel-plugin-minify-type-constructors",
+  "babel-plugin-minify-infinity",
+  "babel-plugin-minify-mangle-names",
+  "babel-plugin-minify-numeric-literals",
+  "babel-plugin-minify-replace",
+  "babel-plugin-minify-simplify",
+  "babel-plugin-transform-member-expression-literals",
+  "babel-plugin-transform-property-literals",
+  "babel-plugin-transform-merge-sibling-variables",
+  "babel-plugin-transform-minify-booleans",
+  "babel-plugin-transform-undefined-to-void",
+  "babel-plugin-transform-regexp-constructors",
+  "babel-plugin-transform-remove-undefined",
+]
+`;

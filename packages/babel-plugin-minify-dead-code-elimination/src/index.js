@@ -690,21 +690,26 @@ module.exports = ({ types: t, traverse }) => {
           path.remove();
         }
       },
-      Program(path, {
-        opts: {
-          // set defaults
-          optimizeRawSize = false,
-          keepFnName = false,
-          keepFnArgs = false,
-        } = {}
-      } = {}) {
-        // We need to run this plugin in isolation.
-        path.traverse(main, {
-          functionToBindings: new Map(),
-          optimizeRawSize,
-          keepFnName,
-          keepFnArgs,
-        });
+      Program: {
+        exit(path, {
+          opts: {
+            // set defaults
+            optimizeRawSize = false,
+            keepFnName = false,
+            keepFnArgs = false,
+          } = {}
+        } = {}) {
+          traverse.clearCache();
+          path.scope.crawl();
+
+          // We need to run this plugin in isolation.
+          path.traverse(main, {
+            functionToBindings: new Map(),
+            optimizeRawSize,
+            keepFnName,
+            keepFnArgs,
+          });
+        }
       },
     },
   };
