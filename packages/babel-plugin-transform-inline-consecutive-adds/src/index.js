@@ -2,11 +2,13 @@
 
 const objectCollapse = require("./object-collapse");
 const arrayCollapse = require("./array-collapse");
+const arrayAssignCollapse = require("./array-assign-collapse");
 const setCollapse = require("./set-collapse");
 
 const collapsers = [
   objectCollapse,
   arrayCollapse,
+  arrayAssignCollapse,
   setCollapse,
 ];
 
@@ -149,9 +151,18 @@ module.exports = function({ types: t }) {
             collapser.getExpressionChecker(name, references)
           );
 
-          if (statements.length > 0) {
-            const assigns = exprs.map((e) => collapser.extractAssignment(e));
-            assigns.forEach((assign) => collapser.addAssignment(t, assign, init));
+          if (statements.length === 0) {
+            continue;
+          }
+
+          const assignments = exprs.map((e) => collapser.extractAssignment(e));
+          const initCopy = t.cloneDeep(init.node);
+          assignments.forEach((assign) => collapser.addAssignment(t, assign, initCopy));
+
+          // some collapses may increase the size
+          if (collapser.isSizeSmaller === undefined ||
+              collapser.isSizeSmaller(initCopy, init.node, path, assignments, statements)) {
+            init.replaceWith(initCopy);
             statements.forEach((s) => s.remove());
           }
         }

@@ -43,9 +43,9 @@ module.exports = {
   extractAssignment: (expr) => expr.node.arguments[0],
 
   addAssignment: (t, arg, init) => {
-    if (init.node.arguments.length === 0) {
-      init.node.arguments.push(t.arrayExpression());
+    if (init.arguments.length === 0) {
+      init.arguments.push(t.arrayExpression());
     }
-    init.node.arguments[0].elements.push(arg);
+    init.arguments[0].elements.push(arg);
   }
 };

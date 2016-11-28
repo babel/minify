@@ -222,4 +222,25 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not collapse array assignments if long", () => {
+    const source = unpad(`
+      var foo = [];
+      foo[10] = 'blah';
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should collapse array assignments if short", () => {
+    const source = unpad(`
+      var foo = [];
+      foo[3] = 'blah';
+      foo[5] = 'blah';
+      foo[7] = 'blah';
+    `);
+    const expected = unpad(`
+      var foo = [,,, 'blah',, 'blah',, 'blah'];
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
