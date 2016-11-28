@@ -2,10 +2,11 @@
 
 module.exports = {
   isInitTypeValid: (init) => init.isNewExpression() &&
-                           init.get("callee").isIdentifier() &&
-                           init.node.callee.name === "Set" &&
-                           // other iterables might not be inline-able, except for arrays
-                           init.node.arguments.length === 0,
+                             init.get("callee").isIdentifier() &&
+                             init.node.callee.name === "Set" &&
+                             // other iterables might not be append-able
+                             (init.node.arguments.length === 0 ||
+                               (init.node.arguments.length === 1 && init.get("arguments")[0].isArrayExpression())),
 
   isExpressionTypeValid: (expr) => expr.isCallExpression(),
 

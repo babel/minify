@@ -223,32 +223,18 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should not collapse array assignments if long", () => {
+  it("should collapse statements for array-initialized sets", () => {
     const source = unpad(`
-      var foo = [];
-      foo[10] = 'blah';
+      var foo = new Set([1, 2]);
+      foo.add(3);
     `);
-    expect(transform(source)).toBe(source);
+    const expected = unpad(`
+      var foo = new Set([1, 2, 3]);
+    `);
+    expect(transform(source)).toBe(expected);
   });
 
-  it("should not collapse array assignments if override initial", () => {
-    const source = unpad(`
-      var foo = [1, 2, 3];
-      foo[2] = 'blah';
-    `);
-    expect(transform(source)).toBe(source);
-  });
-
-  it("should not collapse array assignments if override dynamic", () => {
-    const source = unpad(`
-      var foo = [1, 2];
-      foo[2] = 'blah';
-      foo[2] = 'ok';
-    `);
-    expect(transform(source)).toBe(source);
-  });
-
-  it("should collapse array assignments if short", () => {
+  it("should collapse array property assignments", () => {
     const source = unpad(`
       var foo = [];
       foo[5] = 'blah';
@@ -259,5 +245,30 @@ describe("transform-inline-consecutive-adds-plugin", () => {
       var foo = [,,, 'blah',, 'blah',, 'blah'];
     `);
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse array property assignments if long", () => {
+    const source = unpad(`
+      var foo = [];
+      foo[10] = 'blah';
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not collapse array property assignments if override initial", () => {
+    const source = unpad(`
+      var foo = [1, 2, 3];
+      foo[2] = 'blah';
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not collapse array property assignments if override dynamic", () => {
+    const source = unpad(`
+      var foo = [1, 2];
+      foo[2] = 'blah';
+      foo[2] = 'ok';
+    `);
+    expect(transform(source)).toBe(source);
   });
 });
