@@ -42,7 +42,7 @@ module.exports = {
 
   extractAssignment: (expr) => expr.node.arguments[0],
 
-  addAssignment: (t, arg, init) => {
+  tryAddAssignment: (t, arg, init) => {
     if (init.arguments.length === 0) {
       init.arguments.push(t.arrayExpression());
     }

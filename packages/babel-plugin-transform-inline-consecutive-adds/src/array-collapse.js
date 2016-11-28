@@ -37,6 +37,6 @@ module.exports = {
 
   extractAssignment: (expr) => expr.node.arguments,
 
-  addAssignment: (t, args, init) =>
+  tryAddAssignment: (t, args, init) =>
     args.map((a) => init.elements.push(a)),
 };

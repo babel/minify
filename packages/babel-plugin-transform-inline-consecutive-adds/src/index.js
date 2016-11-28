@@ -2,13 +2,13 @@
 
 const objectCollapse = require("./object-collapse");
 const arrayCollapse = require("./array-collapse");
-const arrayAssignCollapse = require("./array-assign-collapse");
+const arrayPropertyCollapse = require("./array-property-collapse");
 const setCollapse = require("./set-collapse");
 
 const collapsers = [
   objectCollapse,
   arrayCollapse,
-  arrayAssignCollapse,
+  arrayPropertyCollapse,
   setCollapse,
 ];
 
@@ -156,13 +156,20 @@ module.exports = function({ types: t }) {
           }
 
           const assignments = exprs.map((e) => collapser.extractAssignment(e));
-          const initCopy = t.cloneDeep(init.node);
-          assignments.forEach((assign) => collapser.addAssignment(t, assign, initCopy));
+          const initCopyNode = t.cloneDeep(init.node);
+          try {
+            assignments.forEach((assignment) => collapser.tryAddAssignment(t, assignment, initCopyNode));
+          } catch (e) {
+            if (e === "NotNullError") {
+              continue;
+            }
+            throw e;
+          }
 
           // some collapses may increase the size
           if (collapser.isSizeSmaller === undefined ||
-              collapser.isSizeSmaller(initCopy, init.node, path, assignments, statements)) {
-            init.replaceWith(initCopy);
+              collapser.isSizeSmaller(initCopyNode, init.node, path, assignments, statements)) {
+            init.replaceWith(initCopyNode);
             statements.forEach((s) => s.remove());
           }
         }

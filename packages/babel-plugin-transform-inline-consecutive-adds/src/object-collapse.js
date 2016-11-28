@@ -33,6 +33,6 @@ module.exports = {
 
   extractAssignment: (expr) => [expr.node.left.property, expr.node.right],
 
-  addAssignment: (t, [left, right], init) =>
+  tryAddAssignment: (t, [left, right], init) =>
     init.properties.push(t.objectProperty(left, right)),
 };

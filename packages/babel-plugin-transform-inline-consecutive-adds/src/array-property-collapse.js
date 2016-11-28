@@ -7,7 +7,7 @@ module.exports = {
 
   getExpressionChecker: (objName, references) => (expr) => {
     // checks expr is of form:
-    // foo[num] = expr
+    // foo[num] = rval
 
     const left = expr.get("left");
 
@@ -36,28 +36,31 @@ module.exports = {
 
   extractAssignment: (expr) => [expr.node.left.property.value, expr.get("right")],
 
-  addAssignment: (t, [index, rval], init) => {
+  tryAddAssignment: (t, [index, rval], init) => {
     const elements = init.elements;
     for (let i = elements.length; i <= index; i++) {
       elements.push(null);
     }
+    if (elements[index] !== null) {
+      throw "NotNullError";
+    }
     elements[index] = rval.node;
   },
 
-  isSizeSmaller: (initCopy, init, varDecl, assignments, statements) => {
+  isSizeSmaller: (initCopyNode, initNode, varDecl, assignments, statements) => {
     // We make an inexact calculation of how much space we save.
     // It's inexact because we don't know how whitespaces will get minimized,
     // and other factors.
     const statementsLength = statements[statements.length - 1].node.end - varDecl.node.end;
 
-    // Approx. formula of increasing init's length =
-    // (# commas added) + (all the rvals added), where
+    // Approx. formula of the change in `init`'s length =
+    // (# commas added) + (size of all the new rvals added), where
     // # commas added = (difference between the lengths of the old and new arrays)
 
-    const numCommaAdded = initCopy.elements.length - init.elements.length;
+    const numCommaAdded = initCopyNode.elements.length - initNode.elements.length;
     const sizeOfRvals = assignments.map(([, rval]) => rval.node.end - rval.node.start + 1)  // add 1 for space in front
                                    .reduce((a, b) => a + b, 0); // sum
 
-    return (statementsLength > numCommaAdded + sizeOfRvals);
+    return (numCommaAdded + sizeOfRvals < statementsLength);
   },
 };

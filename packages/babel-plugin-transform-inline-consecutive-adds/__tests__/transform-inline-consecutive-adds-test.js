@@ -231,11 +231,28 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
+  it("should not collapse array assignments if override initial", () => {
+    const source = unpad(`
+      var foo = [1, 2, 3];
+      foo[2] = 'blah';
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not collapse array assignments if override dynamic", () => {
+    const source = unpad(`
+      var foo = [1, 2];
+      foo[2] = 'blah';
+      foo[2] = 'ok';
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
   it("should collapse array assignments if short", () => {
     const source = unpad(`
       var foo = [];
-      foo[3] = 'blah';
       foo[5] = 'blah';
+      foo[3] = 'blah';
       foo[7] = 'blah';
     `);
     const expected = unpad(`
