@@ -59,4 +59,4 @@ class SetCollapser extends Collapser {
   }
 }
 
-module.exports = new SetCollapser();
+module.exports = SetCollapser;

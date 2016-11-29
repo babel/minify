@@ -77,4 +77,4 @@ class ArrayPropertyCollapser extends Collapser {
   }
 }
 
-module.exports = new ArrayPropertyCollapser();
+module.exports = ArrayPropertyCollapser;

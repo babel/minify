@@ -5,7 +5,10 @@ const COLLAPSERS = [
   "./array-collapser",
   "./array-property-collapser",
   "./set-collapser"
-].map((x) => require(x));
+].map((x) => {
+  const Collapser = require(x);
+  return new Collapser();
+});
 
 function getFunctionParent(path, scopeParent) {
   const parent = path.findParent((p) => p.isFunction());

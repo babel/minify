@@ -48,4 +48,4 @@ class ArrayCollapser extends Collapser {
   }
 }
 
-module.exports = new ArrayCollapser();
+module.exports = ArrayCollapser;

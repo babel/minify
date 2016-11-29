@@ -47,4 +47,4 @@ class ObjectCollapser extends Collapser {
   }
 }
 
-module.exports = new ObjectCollapser();
+module.exports = ObjectCollapser;
