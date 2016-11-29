@@ -135,16 +135,16 @@ module.exports = function({ types: t }) {
   return {
     name: "transform-inline-consecutive-adds",
     visitor: {
-      VariableDeclaration(path) {
-        const topLevel = validateTopLevel(path);
+      VariableDeclaration(varDecl) {
+        const topLevel = validateTopLevel(varDecl);
         if (topLevel === null) {
           return;
         }
 
         const [name, init, startIndex] = topLevel;
-        const references = getIdAndFunctionReferences(name, path.parentPath);
+        const references = getIdAndFunctionReferences(name, varDecl.parentPath);
         const checkReference = getReferenceChecker(references);
-        const body = path.parentPath.get("body");
+        const body = varDecl.parentPath.get("body");
 
         for (let collapser of COLLAPSERS) {
           if (!collapser.isInitTypeValid(init)) {
@@ -164,9 +164,10 @@ module.exports = function({ types: t }) {
           }
 
           const assignments = exprs.map((e) => collapser.extractAssignment(e));
-          const initCopyNode = t.cloneDeep(init.node);
+          const oldInit = init.node;
+          const newInit = t.cloneDeep(oldInit);
           try {
-            assignments.forEach((assignment) => collapser.tryAddAssignment(t, assignment, initCopyNode));
+            assignments.forEach((assignment) => collapser.tryAddAssignment(t, assignment, newInit));
           } catch (e) {
             if (e === "NotNullError") {
               continue;
@@ -175,14 +176,8 @@ module.exports = function({ types: t }) {
           }
 
           // some collapses may increase the size
-          if (collapser.isSizeSmaller({
-            newInit: initCopyNode,
-            oldInit: init.node,
-            varDecl: path,
-            assignments,
-            statements
-          })) {
-            init.replaceWith(initCopyNode);
+          if (collapser.isSizeSmaller({ newInit, oldInit, varDecl, assignments, statements })) {
+            init.replaceWith(newInit);
             statements.forEach((s) => s.remove());
           }
         }
