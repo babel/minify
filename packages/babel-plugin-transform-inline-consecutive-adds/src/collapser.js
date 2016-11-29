@@ -3,27 +3,27 @@
 const NotImplementedError = Error("NotImplementedError");
 
 class Collapser {
-  isInitTypeValid(init) {
+  isInitTypeValid() {
     throw NotImplementedError;
   }
 
-  isExpressionTypeValid(expr) {
+  isExpressionTypeValid() {
     throw NotImplementedError;
   }
 
-  getExpressionChecker(objName, checkReference) {
+  getExpressionChecker() {
     throw NotImplementedError;
   }
 
-  extractAssignment(expr) {
+  extractAssignment() {
     throw NotImplementedError;
   }
 
-  tryAddAssignment(t, expr, init) {
+  tryAddAssignment() {
     throw NotImplementedError;
   }
 
-  isSizeSmaller(obj) {
+  isSizeSmaller() {
     return true;
   }
 }

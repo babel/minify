@@ -127,7 +127,7 @@ function getReferenceChecker(references) {
       }
     }
     return false;
-  }
+  };
 }
 
 
@@ -175,7 +175,13 @@ module.exports = function({ types: t }) {
           }
 
           // some collapses may increase the size
-          if (collapser.isSizeSmaller({ newInit: initCopyNode, oldInit: init.node, varDecl: path, assignments, statements })) {
+          if (collapser.isSizeSmaller({
+            newInit: initCopyNode,
+            oldInit: init.node,
+            varDecl: path,
+            assignments,
+            statements
+          })) {
             init.replaceWith(initCopyNode);
             statements.forEach((s) => s.remove());
           }

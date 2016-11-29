@@ -57,6 +57,6 @@ class SetCollapser extends Collapser {
     }
     init.arguments[0].elements.push(arg);
   }
-};
+}
 
 module.exports = new SetCollapser();
