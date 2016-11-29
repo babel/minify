@@ -1,16 +1,11 @@
 "use strict";
 
-const objectCollapse = require("./object-collapse");
-const arrayCollapse = require("./array-collapse");
-const arrayPropertyCollapse = require("./array-property-collapse");
-const setCollapse = require("./set-collapse");
-
-const collapsers = [
-  objectCollapse,
-  arrayCollapse,
-  arrayPropertyCollapse,
-  setCollapse,
-];
+const COLLAPSERS = [
+  "./object-collapser",
+  "./array-collapser",
+  "./array-property-collapser",
+  "./set-collapser"
+].map((x) => require(x));
 
 function getFunctionParent(path, scopeParent) {
   const parent = path.findParent((p) => p.isFunction());
@@ -82,19 +77,19 @@ function validateTopLevel(path) {
   return [id.node.name, init, startIndex];
 }
 
-function collectExpressions(path, checkExprType) {
-  // input: ExprStatement => "a | SequenceExpression
-  // SequenceExpression => "a list
-  // Validates "a is of the right type
+function collectExpressions(path, isExprTypeValid) {
+  // input: ExprStatement => 'a | SequenceExpression
+  // SequenceExpression => 'a list
+  // Validates 'a is of the right type
   // returns null if found inconsistency, else returns Array<"a>
   if (path.isExpressionStatement()) {
-    const exprs = collectExpressions(path.get("expression"), checkExprType);
+    const exprs = collectExpressions(path.get("expression"), isExprTypeValid);
     return (exprs !== null) ? exprs : null;
   }
 
   if (path.isSequenceExpression()) {
     const exprs = path.get("expressions")
-                      .map((p) => collectExpressions(p, checkExprType));
+                      .map((p) => collectExpressions(p, isExprTypeValid));
     if (exprs.some((e) => e === null)) {
       return null;
     } else {
@@ -102,7 +97,7 @@ function collectExpressions(path, checkExprType) {
     }
   }
 
-  if (checkExprType(path)) {
+  if (isExprTypeValid(path)) {
     return [path];
   }
 
@@ -151,7 +146,7 @@ module.exports = function({ types: t }) {
         const checkReference = getReferenceChecker(references);
         const body = path.parentPath.get("body");
 
-        for (let collapser of collapsers) {
+        for (let collapser of COLLAPSERS) {
           if (!collapser.isInitTypeValid(init)) {
             continue;
           }
@@ -180,8 +175,7 @@ module.exports = function({ types: t }) {
           }
 
           // some collapses may increase the size
-          if (collapser.isSizeSmaller === undefined ||
-              collapser.isSizeSmaller(initCopyNode, init.node, path, assignments, statements)) {
+          if (collapser.isSizeSmaller({ newInit: initCopyNode, oldInit: init.node, varDecl: path, assignments, statements })) {
             init.replaceWith(initCopyNode);
             statements.forEach((s) => s.remove());
           }

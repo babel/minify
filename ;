@@ -49,7 +49,7 @@ module.exports = {
     elements[index] = rval.node;
   },
 
-  isSizeSmaller: (initCopyNode, initNode, varDecl, assignments, statements) => {
+  isSizeSmaller: (newInit, oldInit, varDecl, assignments, statements) => {
     // We make an inexact calculation of how much space we save.
     // It's inexact because we don't know how whitespaces will get minimized,
     // and other factors.
@@ -59,7 +59,7 @@ module.exports = {
     // (# commas added) + (size of all the new rvals added), where
     // # commas added = (difference between the lengths of the old and new arrays)
 
-    const numCommaAdded = initCopyNode.elements.length - initNode.elements.length;
+    const numCommaAdded = newInit.elements.length - oldInit.elements.length;
     const sizeOfRvals = assignments.map(([, rval]) => rval.node.end - rval.node.start + 1)  // add 1 for space in front
                                    .reduce((a, b) => a + b, 0); // sum
 
