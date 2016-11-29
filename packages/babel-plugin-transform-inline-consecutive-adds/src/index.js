@@ -35,7 +35,11 @@ function getFunctionReferences(path, scopeParent, references = new Set()) {
 }
 
 function getIdAndFunctionReferences(name, parent) {
+  // Returns false if there's an error. Otherwise returns a list of references.
   const binding = parent.scope.getBinding(name);
+  if (!binding) {
+    return false;
+  }
 
   const references = binding.referencePaths
                             .reduce((references, ref) => {
@@ -181,6 +185,9 @@ module.exports = function({ types: t }) {
 
         const [name,,] = topLevel;
         const references = getIdAndFunctionReferences(name, varDecl.parentPath);
+        if (references === false) {
+          return;
+        }
         const checkReference = getReferenceChecker(references);
 
         if (COLLAPSERS.some((c) => tryUseCollapser(t, c, varDecl, topLevel, checkReference))) {
