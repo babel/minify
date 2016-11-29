@@ -109,11 +109,11 @@ function collectExpressions(path, checkExprType) {
   return null;
 }
 
-function getContiguousStatementsAndExpressions(body, start, end, checkExprType, checkExpr) {
+function getContiguousStatementsAndExpressions(body, start, end, isExprTypeValid, checkExpr) {
   const statements = [];
   let allExprs = [];
   for (let i = start; i < end; i++) {
-    const exprs = collectExpressions(body[i], checkExprType);
+    const exprs = collectExpressions(body[i], isExprTypeValid);
     if (exprs === null || !exprs.every((e) => checkExpr(e))) {
       break;
     }
@@ -121,6 +121,18 @@ function getContiguousStatementsAndExpressions(body, start, end, checkExprType, 
     allExprs = allExprs.concat(exprs);
   }
   return [statements, allExprs];
+}
+
+function getReferenceChecker(references) {
+  // returns true iff expr is an ancestor of a reference
+  return (expr) => {
+    for (let ref of references) {
+      if (ref.isDescendant(expr)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 
@@ -136,6 +148,7 @@ module.exports = function({ types: t }) {
 
         const [name, init, startIndex] = topLevel;
         const references = getIdAndFunctionReferences(name, path.parentPath);
+        const checkReference = getReferenceChecker(references);
         const body = path.parentPath.get("body");
 
         for (let collapser of collapsers) {
@@ -148,7 +161,7 @@ module.exports = function({ types: t }) {
             startIndex + 1,
             body.length,
             collapser.isExpressionTypeValid,
-            collapser.getExpressionChecker(name, references)
+            collapser.getExpressionChecker(name, checkReference)
           );
 
           if (statements.length === 0) {

@@ -10,7 +10,7 @@ module.exports = {
 
   isExpressionTypeValid: (expr) => expr.isCallExpression(),
 
-  getExpressionChecker: (objName, references) => (expr) => {
+  getExpressionChecker: (objName, checkReference) => (expr) => {
     // checks expr is of form:
     // foo.push(rval1, ...)
 
@@ -33,10 +33,8 @@ module.exports = {
     if (args.length !== 1) {
       return false;
     }
-    for (let ref of references) {
-      if (ref.isDescendant(args[0])) {
-        return false;
-      }
+    if (checkReference(args[0])) {
+      return false;
     }
     return true;
   },

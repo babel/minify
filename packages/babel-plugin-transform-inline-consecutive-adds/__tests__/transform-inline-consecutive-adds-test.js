@@ -271,4 +271,31 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     `);
     expect(transform(source)).toBe(source);
   });
+
+  it("should not collapse array property assignments if index is float", () => {
+    const source = unpad(`
+      var foo = [];
+      foo[2.1] = 'blah';
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should not collapse array property assignments if index is non-int as string", () => {
+    const source = unpad(`
+      var foo = [];
+      foo['2.1'] = 'blah';
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should collapse array property assignments if index is int as string", () => {
+    const source = unpad(`
+      var foo = [];
+      foo['2'] = 'blah';
+    `);
+    const expected = unpad(`
+      var foo = [,, 'blah'];
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

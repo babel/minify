@@ -5,7 +5,7 @@ module.exports = {
 
   isExpressionTypeValid: (expr) => expr.isCallExpression(),
 
-  getExpressionChecker: (objName, references) => (expr) => {
+  getExpressionChecker: (objName, checkReference) => (expr) => {
     // checks expr is of form:
     // foo.push(rval1, ...)
 
@@ -25,12 +25,8 @@ module.exports = {
     }
 
     const args = expr.get("arguments");
-    for (let arg of args) {
-      for (let ref of references) {
-        if (ref.isDescendant(arg)) {
-          return false;
-        }
-      }
+    if (args.some(checkReference)) {
+      return false;
     }
     return true;
   },

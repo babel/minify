@@ -5,7 +5,7 @@ module.exports = {
 
   isExpressionTypeValid: (expr) => expr.isAssignmentExpression(),
 
-  getExpressionChecker: (objName, references) => (expr) => {
+  getExpressionChecker: (objName, checkReference) => (expr) => {
     // checks expr is of form:
     // foo.a = rval
 
@@ -18,16 +18,15 @@ module.exports = {
     if (!obj.isIdentifier() || obj.node.name !== objName) {
       return false;
     }
+    if (!prop.isIdentifier() && checkReference(prop)) {
+      return false;
+    }
 
     const right = expr.get("right");
-    for (let ref of references) {
-      if (ref.isDescendant(right)) {
-        return false;
-      }
-      if (!prop.isIdentifier() && ref.isDescendant(prop)) {
-        return false;
-      }
+    if (checkReference(right)) {
+      return false;
     }
+
     return true;
   },
 
