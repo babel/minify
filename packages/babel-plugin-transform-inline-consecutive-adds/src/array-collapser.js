@@ -14,7 +14,7 @@ class ArrayCollapser extends Collapser {
   getExpressionChecker(objName, checkReference) {
     return (expr) => {
       // checks expr is of form:
-      // foo.push(rval1, ...)
+      // foo.push(rval1, ...nrvals)
 
       const callee = expr.get("callee");
 
@@ -43,8 +43,9 @@ class ArrayCollapser extends Collapser {
     return expr.node.arguments;
   }
 
-  tryAddAssignment(t, args, init) {
+  addSuccessfully(t, args, init) {
     args.map((a) => init.elements.push(a));
+    return true;
   }
 }
 

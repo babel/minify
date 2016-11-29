@@ -42,8 +42,9 @@ class ObjectCollapser extends Collapser {
     return [expr.node.left.property, expr.node.right];
   }
 
-  tryAddAssignment(t, [left, right], init) {
+  addSuccessfully(t, [left, right], init) {
     init.properties.push(t.objectProperty(left, right));
+    return true;
   }
 }
 

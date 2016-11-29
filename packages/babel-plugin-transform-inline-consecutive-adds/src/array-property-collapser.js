@@ -48,15 +48,16 @@ class ArrayPropertyCollapser extends Collapser {
     return [expr.node.left.property.value, expr.get("right")];
   }
 
-  tryAddAssignment(t, [index, rval], init) {
+  addSuccessfully(t, [index, rval], init) {
     const elements = init.elements;
     for (let i = elements.length; i <= index; i++) {
       elements.push(null);
     }
     if (elements[index] !== null) {
-      throw "NotNullError";
+      return false;
     }
     elements[index] = rval.node;
+    return true;
   }
 
   isSizeSmaller({ newInit, oldInit, varDecl, assignments, statements }) {

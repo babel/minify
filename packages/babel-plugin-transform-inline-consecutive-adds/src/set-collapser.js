@@ -19,7 +19,7 @@ class SetCollapser extends Collapser {
   getExpressionChecker(objName, checkReference) {
     return (expr) => {
       // checks expr is of form:
-      // foo.push(rval1, ...)
+      // foo.add(rval)
 
       const callee = expr.get("callee");
 
@@ -40,7 +40,7 @@ class SetCollapser extends Collapser {
       if (args.length !== 1) {
         return false;
       }
-      if (checkReference(args[0])) {
+      if (checkReference(args)) {
         return false;
       }
       return true;
@@ -51,11 +51,12 @@ class SetCollapser extends Collapser {
     return expr.node.arguments[0];
   }
 
-  tryAddAssignment(t, arg, init) {
+  addSuccessfully(t, arg, init) {
     if (init.arguments.length === 0) {
       init.arguments.push(t.arrayExpression());
     }
     init.arguments[0].elements.push(arg);
+    return true;
   }
 }
 

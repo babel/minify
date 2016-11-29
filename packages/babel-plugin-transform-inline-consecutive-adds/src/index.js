@@ -38,11 +38,14 @@ function getFunctionReferences(path, scopeParent, references = new Set()) {
 function getIdAndFunctionReferences(name, parent) {
   const binding = parent.scope.getBinding(name);
 
-  return binding.referencePaths.reduce((references, ref) => {
-    references.add(ref);
-    getFunctionReferences(ref, parent, references);
-    return references;
-  }, new Set());
+  const references = binding.referencePaths
+                            .reduce((references, ref) => {
+                              references.add(ref);
+                              getFunctionReferences(ref, parent, references);
+                              return references;
+                            }, new Set());
+
+  return Array.from(references);
 }
 
 function validateTopLevel(path) {
@@ -71,8 +74,7 @@ function validateTopLevel(path) {
     return;
   }
 
-  const body = parent.get("body");
-  const startIndex = body.indexOf(path);
+  const startIndex = parent.get("body").indexOf(path);
   if (startIndex === -1) {
     return;
   }
@@ -122,17 +124,47 @@ function getContiguousStatementsAndExpressions(body, start, end, isExprTypeValid
 }
 
 function getReferenceChecker(references) {
-  // returns true iff expr is an ancestor of a reference
-  return (expr) => {
-    for (let ref of references) {
-      if (ref.isDescendant(expr)) {
-        return true;
-      }
-    }
-    return false;
-  };
+  // returns a function s.t. given an expr, returns true iff expr is an ancestor of a reference
+  return (expr) => references.some((r) => r.isDescendant(expr));
 }
 
+function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
+  // Returns true iff successfully used the collapser. Otherwise returns undefined.
+  const [name, init, startIndex] = topLevel;
+  const body = varDecl.parentPath.get("body");
+  if (!collapser.isInitTypeValid(init)) {
+    return;
+  }
+
+  const [statements, exprs] = getContiguousStatementsAndExpressions(
+    body,
+    startIndex + 1,
+    body.length,
+    collapser.isExpressionTypeValid,
+    collapser.getExpressionChecker(name, checkReference)
+  );
+
+  if (statements.length === 0) {
+    return;
+  }
+
+  const assignments = exprs.map((e) => collapser.extractAssignment(e));
+  const oldInit = init.node;
+  const newInit = t.cloneDeep(oldInit);
+  if (!assignments.every(
+      (assignment) => collapser.addSuccessfully(t, assignment, newInit))) {
+    return;
+  }
+
+  // some collapses may increase the size
+  if (!collapser.isSizeSmaller({ newInit, oldInit, varDecl, assignments, statements })) {
+    return;
+  }
+
+  init.replaceWith(newInit);
+  statements.forEach((s) => s.remove());
+  return true;
+}
 
 module.exports = function({ types: t }) {
   return {
@@ -144,45 +176,12 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        const [name, init, startIndex] = topLevel;
+        const [name,,] = topLevel;
         const references = getIdAndFunctionReferences(name, varDecl.parentPath);
         const checkReference = getReferenceChecker(references);
-        const body = varDecl.parentPath.get("body");
 
-        for (let collapser of COLLAPSERS) {
-          if (!collapser.isInitTypeValid(init)) {
-            continue;
-          }
-
-          const [statements, exprs] = getContiguousStatementsAndExpressions(
-            body,
-            startIndex + 1,
-            body.length,
-            collapser.isExpressionTypeValid,
-            collapser.getExpressionChecker(name, checkReference)
-          );
-
-          if (statements.length === 0) {
-            continue;
-          }
-
-          const assignments = exprs.map((e) => collapser.extractAssignment(e));
-          const oldInit = init.node;
-          const newInit = t.cloneDeep(oldInit);
-          try {
-            assignments.forEach((assignment) => collapser.tryAddAssignment(t, assignment, newInit));
-          } catch (e) {
-            if (e === "NotNullError") {
-              continue;
-            }
-            throw e;
-          }
-
-          // some collapses may increase the size
-          if (collapser.isSizeSmaller({ newInit, oldInit, varDecl, assignments, statements })) {
-            init.replaceWith(newInit);
-            statements.forEach((s) => s.remove());
-          }
+        if (COLLAPSERS.some((c) => tryUseCollapser(t, c, varDecl, topLevel, checkReference))) {
+          return;
         }
       },
     },

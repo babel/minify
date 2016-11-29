@@ -19,7 +19,7 @@ class Collapser {
     throw NotImplementedError;
   }
 
-  tryAddAssignment() {
+  addSuccessfully() {
     throw NotImplementedError;
   }
 
