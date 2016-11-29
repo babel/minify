@@ -74,7 +74,11 @@ function validateTopLevel(path) {
     return;
   }
 
-  const startIndex = parent.get("body").indexOf(path);
+  const body = parent.get("body");
+  if (!Array.isArray(body)) {
+    return;
+  }
+  const startIndex = body.indexOf(path);
   if (startIndex === -1) {
     return;
   }
@@ -172,7 +176,7 @@ module.exports = function({ types: t }) {
     visitor: {
       VariableDeclaration(varDecl) {
         const topLevel = validateTopLevel(varDecl);
-        if (topLevel === null) {
+        if (topLevel === undefined) {
           return;
         }
 
