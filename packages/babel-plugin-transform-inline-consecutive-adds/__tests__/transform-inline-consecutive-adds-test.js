@@ -146,7 +146,7 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should collapse normal computed properties", () => {
+  it("should collapse computed properties if they are literals", () => {
     const source = unpad(`
       var foo = {};
       foo["a"] = 0;
@@ -159,6 +159,14 @@ describe("transform-inline-consecutive-adds-plugin", () => {
       };
     `);
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse computed properties otherwise", () => {
+    const source = unpad(`
+      var foo = {};
+      foo[global] = 0;
+    `);
+    expect(transform(source)).toBe(source);
   });
 
   it("should not collapse computed properties with dependency issues", () => {

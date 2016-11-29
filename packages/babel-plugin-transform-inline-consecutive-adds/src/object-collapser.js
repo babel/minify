@@ -14,7 +14,7 @@ class ObjectCollapser extends Collapser {
   getExpressionChecker(objName, checkReference) {
     return (expr) => {
       // checks expr is of form:
-      // foo.a = rval
+      // foo.a = rval | foo[a] = rval
 
       const left = expr.get("left");
       if (!left.isMemberExpression()) {
@@ -26,6 +26,10 @@ class ObjectCollapser extends Collapser {
         return false;
       }
       if (!prop.isIdentifier() && checkReference(prop)) {
+        return false;
+      }
+      if (left.node.computed &&
+          !(prop.isStringLiteral() || prop.isNumericLiteral())) {
         return false;
       }
 
