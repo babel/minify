@@ -1,12 +1,11 @@
 "use strict";
 
 const COLLAPSERS = [
-  "./object-collapser",
-  "./array-collapser",
-  "./array-property-collapser",
-  "./set-collapser"
-].map((x) => {
-  const Collapser = require(x);
+  require("./object-collapser"),
+  require("./array-collapser"),
+  require("./array-property-collapser"),
+  require("./set-collapser"),
+].map((Collapser) => {
   return new Collapser();
 });
 
@@ -176,7 +175,7 @@ module.exports = function({ types: t }) {
     visitor: {
       VariableDeclaration(varDecl) {
         const topLevel = validateTopLevel(varDecl);
-        if (topLevel === undefined) {
+        if (!topLevel) {
           return;
         }
 
