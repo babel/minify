@@ -1,7 +1,6 @@
 jest.autoMockOff();
 
 const mocks = [
-  "babel-plugin-transform-inline-consecutive-adds",
   "babel-plugin-minify-constant-folding",
   "babel-plugin-minify-dead-code-elimination",
   "babel-plugin-minify-flip-comparisons",
@@ -12,6 +11,7 @@ const mocks = [
   "babel-plugin-minify-replace",
   "babel-plugin-minify-simplify",
   "babel-plugin-minify-type-constructors",
+  "babel-plugin-transform-inline-consecutive-adds",
   "babel-plugin-transform-member-expression-literals",
   "babel-plugin-transform-merge-sibling-variables",
   "babel-plugin-transform-minify-booleans",
