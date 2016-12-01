@@ -15,7 +15,7 @@ module.exports = function({ types: t }) {
 
       let firstNode = body[0].node.declarations[0];
 
-      if (!t.isIdentifier(firstNode.id)) {
+      if (!t.isIdentifier(firstNode.id) || !firstNode.init) {
         return;
       }
 

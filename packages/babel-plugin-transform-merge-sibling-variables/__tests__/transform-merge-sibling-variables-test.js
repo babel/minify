@@ -135,6 +135,16 @@ describe("transform-merge-sibling-variables-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
+  it("dont lift when the declarations are not initialized", () => {
+    const source = unpad(`
+      for (var i = 0;;) {
+        var i;
+      }
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
   it("dont lift when there are multiple declarations", () => {
     const source = unpad(`
       for (var i = 0; i < 0; i++) {
