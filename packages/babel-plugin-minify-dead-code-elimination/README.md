@@ -69,3 +69,4 @@ require("babel-core").transform("code", {
 
 + `keepFnName` - prevent plugin from removing function name. Useful for code depending on `fn.name`
 + `keepFnArgs` - prevent plugin from removing function args. Useful for code depending on `fn.length`
++ `keepClassName` - prevent mangler from altering class names.

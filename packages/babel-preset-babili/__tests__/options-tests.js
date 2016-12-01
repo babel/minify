@@ -85,19 +85,23 @@ describe("preset-options", () => {
 
   it("should handle options that are delegated to multiple other options", () => {
     testOpts({
-      keepFnName: false
+      keepFnName: false,
+      keepClassName: false
     });
     testOpts({
       keepFnName: true,
+      keepClassName: true,
       mangle: {
         blacklist: ["foo", "bar"]
       }
     });
     testOpts({
       keepFnName: true,
+      keepClassName: true,
       mangle: {
         blacklist: ["baz"],
-        keepFnName: false
+        keepFnName: false,
+        keepClassName: false,
       }
     });
   });
