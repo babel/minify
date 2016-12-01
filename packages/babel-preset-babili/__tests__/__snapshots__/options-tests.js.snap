@@ -56,7 +56,6 @@ Object {
 exports[`preset-options should handle options that are delegated to multiple other options 1`] = `
 Object {
   "input": Object {
-    "keepClassName": false,
     "keepFnName": false,
   },
   "output": Array [
@@ -64,7 +63,6 @@ Object {
     Array [
       "babel-plugin-minify-dead-code-elimination",
       Object {
-        "keepClassName": false,
         "keepFnName": false,
       },
     ],
@@ -76,7 +74,6 @@ Object {
     Array [
       "babel-plugin-minify-mangle-names",
       Object {
-        "keepClassName": false,
         "keepFnName": false,
       },
     ],
@@ -98,7 +95,6 @@ Object {
 exports[`preset-options should handle options that are delegated to multiple other options 2`] = `
 Object {
   "input": Object {
-    "keepClassName": true,
     "keepFnName": true,
     "mangle": Object {
       "blacklist": Array [
@@ -112,7 +108,6 @@ Object {
     Array [
       "babel-plugin-minify-dead-code-elimination",
       Object {
-        "keepClassName": true,
         "keepFnName": true,
       },
     ],
@@ -128,7 +123,6 @@ Object {
           "foo",
           "bar",
         ],
-        "keepClassName": true,
         "keepFnName": true,
       },
     ],
@@ -150,13 +144,11 @@ Object {
 exports[`preset-options should handle options that are delegated to multiple other options 3`] = `
 Object {
   "input": Object {
-    "keepClassName": true,
     "keepFnName": true,
     "mangle": Object {
       "blacklist": Array [
         "baz",
       ],
-      "keepClassName": false,
       "keepFnName": false,
     },
   },
@@ -165,7 +157,6 @@ Object {
     Array [
       "babel-plugin-minify-dead-code-elimination",
       Object {
-        "keepClassName": true,
         "keepFnName": true,
       },
     ],
@@ -180,7 +171,6 @@ Object {
         "blacklist": Array [
           "baz",
         ],
-        "keepClassName": false,
         "keepFnName": false,
       },
     ],
