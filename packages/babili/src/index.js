@@ -3,7 +3,7 @@ import child from "child_process";
 const args = [
   require.resolve("babel-cli/bin/babel.js"),
   ...process.argv.slice(2),
-  "--presets=babili",
+  `--presets=${require.resolve("babel-preset-babili")}`,
   "--no-babelrc",
 ];
 
