@@ -1,6 +1,6 @@
 {
   "name": "gulp-babili",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Gulp Babili",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/gulp-babili",
