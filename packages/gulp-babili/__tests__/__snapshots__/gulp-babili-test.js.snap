@@ -1,0 +1,5 @@
+exports[`gulp-babili comments should remove all comments when false 1`] = `"foo(),bar(),baz();"`;
+
+exports[`gulp-babili comments should remove comments by default except license and preserve 1`] = `"foo(),bar(),baz();"`;
+
+exports[`gulp-babili comments should take a custom function 1`] = `"foo(),bar(),baz();"`;

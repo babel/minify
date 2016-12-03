@@ -1,0 +1,21 @@
+{
+  "name": "gulp-babili",
+  "version": "0.0.0",
+  "description": "Gulp Babili",
+  "homepage": "https://github.com/babel/babili#readme",
+  "repository": "https://github.com/babel/babili/tree/master/packages/gulp-babili",
+  "bugs": "https://github.com/babel/babili/issues",
+  "author": "boopathi",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-preset",
+    "babili"
+  ],
+  "dependencies": {
+    "babel-core": "^6.18.2",
+    "babel-preset-babili": "^0.0.9",
+    "vinyl-sourcemaps-apply": "^0.2.1"
+  },
+  "devDependencies": {}
+}
