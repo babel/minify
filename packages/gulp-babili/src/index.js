@@ -10,9 +10,11 @@ const NAME = "gulp-babili";
 
 module.exports = gulpBabili;
 
-function gulpBabili(_opts = {}) {
-  const opts = Object.assign({}, _opts);
-
+function gulpBabili(babiliOpts = {}, {
+  babel = babelCore,
+  babili = babiliPreset,
+  comments = /@preserve|@license/
+} = {}) {
   return through2.obj(function (file, enc, callback) {
     if (file.isNull()) {
       return callback(null, file);
@@ -21,22 +23,6 @@ function gulpBabili(_opts = {}) {
     if (file.isStream()) {
       return callback(new PluginError(NAME, "Streaming not supported"));
     }
-
-    let babel = babelCore;
-    let babili = babiliPreset;
-
-    if (opts.babel) {
-      babel = opts.babel;
-      delete opts.babel;
-    }
-    if (opts.babili) {
-      babili = opts.babili;
-      delete opts.babili;
-    }
-
-    const commentsRegex = typeof opts.comments === "undefined"
-      ? /@preserve|@license/
-      : opts.comments;
 
     let inputSourceMap;
     if (file.sourceMap && file.sourceMap.mappings) {
@@ -49,15 +35,15 @@ function gulpBabili(_opts = {}) {
       ast: false,
 
       /* preset */
-      presets: [[babili, opts]],
+      presets: [[babili, babiliOpts]],
 
       /* sourcemaps */
-      sourceMaps: true,
+      sourceMaps: !!file.sourceMap,
       inputSourceMap,
 
       /* remove comments */
       shouldPrintComment(contents) {
-        return shouldPrintComment(contents, commentsRegex);
+        return shouldPrintComment(contents, comments);
       },
 
       /* file */
@@ -73,7 +59,9 @@ function gulpBabili(_opts = {}) {
 
     if (success) {
       file.contents = new Buffer(result.code);
-      applySourceMap(file, result.map);
+      if (file.sourceMap) {
+        applySourceMap(file, result.map);
+      }
       return callback(null, file);
     }
 
@@ -102,4 +90,3 @@ function shouldPrintComment(contents, predicate) {
   default: return !!predicate;
   }
 }
-

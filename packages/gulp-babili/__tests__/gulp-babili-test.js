@@ -81,7 +81,7 @@ describe("gulp-babili", () => {
         return babiliPreset(...args);
       };
 
-      const stream = gulpBabili({
+      const stream = gulpBabili({}, {
         babel,
         babili,
       });
@@ -136,7 +136,7 @@ describe("gulp-babili", () => {
 
     it("should remove all comments when false", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({
+        const stream = gulpBabili({}, {
           comments: false
         });
         stream.on("data", () => {
@@ -150,7 +150,7 @@ describe("gulp-babili", () => {
 
     it("should take a custom function", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({
+        const stream = gulpBabili({}, {
           comments(contents) {
             return contents.indexOf("YAC") !== -1;
           }
