@@ -31,7 +31,7 @@ function foo() {
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-mangle-names
+npm install babel-plugin-minify-mangle-names
 ```
 
 ## Usage
@@ -55,7 +55,7 @@ $ npm install babel-plugin-minify-mangle-names
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-mangle-names script.js
+babel --plugins minify-mangle-names script.js
 ```
 
 ### Via Node API

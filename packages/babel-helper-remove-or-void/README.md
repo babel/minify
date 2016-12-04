@@ -3,5 +3,5 @@
 ## Installation
 
 ```sh
-$ npm install babel-helper-remove-or-void
+npm install babel-helper-remove-or-void
 ```

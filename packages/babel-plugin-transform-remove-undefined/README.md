@@ -29,7 +29,7 @@ function foo() {
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-remove-undefined
+npm install babel-plugin-transform-remove-undefined
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ $ npm install babel-plugin-transform-remove-undefined
 ### Via CLI
 
 ```sh
-$ babel --plugins babel-plugin-transform-remove-undefined script.js
+babel --plugins babel-plugin-transform-remove-undefined script.js
 ```
 
 ### Via Node API

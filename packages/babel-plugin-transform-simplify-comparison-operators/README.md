@@ -19,7 +19,7 @@ typeof foo == "object";
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-simplify-comparison-operators
+npm install babel-plugin-transform-simplify-comparison-operators
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ $ npm install babel-plugin-transform-simplify-comparison-operators
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-simplify-comparison-operators script.js
+babel --plugins transform-simplify-comparison-operators script.js
 ```
 
 ### Via Node API

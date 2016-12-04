@@ -20,7 +20,7 @@ process.env.NODE_ENV;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-inline-environment-variables
+npm install babel-plugin-transform-inline-environment-variables
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ $ npm install babel-plugin-transform-inline-environment-variables
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-inline-environment-variables script.js
+babel --plugins transform-inline-environment-variables script.js
 ```
 
 ### Via Node API

@@ -15,7 +15,7 @@ process.env.NODE_ENV === "production";
 **Out**
 
 ```sh
-$ NODE_ENV=development babel in.js --plugins transform-node-env-inline
+NODE_ENV=development babel in.js --plugins transform-node-env-inline
 ```
 
 ```javascript
@@ -26,7 +26,7 @@ false;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-node-env-inline
+npm install babel-plugin-transform-node-env-inline
 ```
 
 ## Usage
@@ -44,7 +44,7 @@ $ npm install babel-plugin-transform-node-env-inline
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-node-env-inline script.js
+babel --plugins transform-node-env-inline script.js
 ```
 
 ### Via Node API

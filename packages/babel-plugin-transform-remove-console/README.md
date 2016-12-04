@@ -19,7 +19,7 @@ console.error("bar");
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-remove-console
+npm install babel-plugin-transform-remove-console
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ $ npm install babel-plugin-transform-remove-console
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-remove-console script.js
+babel --plugins transform-remove-console script.js
 ```
 
 ### Via Node API

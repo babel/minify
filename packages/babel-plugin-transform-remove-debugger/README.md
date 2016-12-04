@@ -18,7 +18,7 @@ debugger;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-remove-debugger
+npm install babel-plugin-transform-remove-debugger
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ $ npm install babel-plugin-transform-remove-debugger
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-remove-debugger script.js
+babel --plugins transform-remove-debugger script.js
 ```
 
 ### Via Node API

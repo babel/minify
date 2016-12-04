@@ -9,7 +9,7 @@ Babel preset for all minify plugins.
 ## Install
 
 ```sh
-$ npm install --save-dev babel-preset-babili
+npm install --save-dev babel-preset-babili
 ```
 
 ## Usage
@@ -43,7 +43,7 @@ or pass in options -
 ### Via CLI
 
 ```sh
-$ babel script.js --presets babili
+babel script.js --presets babili
 ```
 
 ### Via Node API
