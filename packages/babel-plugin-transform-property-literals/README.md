@@ -35,7 +35,7 @@ var foo = {
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-property-literals
+npm install babel-plugin-transform-property-literals
 ```
 
 ## Usage
@@ -53,7 +53,7 @@ $ npm install babel-plugin-transform-property-literals
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-property-literals script.js
+babel --plugins transform-property-literals script.js
 ```
 
 ### Via Node API

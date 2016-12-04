@@ -22,7 +22,7 @@ foo(false);
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-empty-function
+npm install babel-plugin-minify-empty-function
 ```
 
 ## Usage
@@ -40,7 +40,7 @@ $ npm install babel-plugin-minify-empty-function
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-empty-function script.js
+babel --plugins minify-empty-function script.js
 ```
 
 ### Via Node API

@@ -29,7 +29,7 @@ x + "";
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-type-constructors
+npm install babel-plugin-minify-type-constructors
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ $ npm install babel-plugin-minify-type-constructors
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-type-constructors script.js
+babel --plugins minify-type-constructors script.js
 ```
 
 ### Via Node API

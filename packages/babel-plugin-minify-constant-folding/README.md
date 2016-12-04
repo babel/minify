@@ -25,7 +25,7 @@ Tries to evaluate expressions and inline the result. For now only deals with num
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-constant-folding
+npm install babel-plugin-minify-constant-folding
 ```
 
 ## Usage
@@ -43,7 +43,7 @@ $ npm install babel-plugin-minify-constant-folding
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-constant-folding script.js
+babel --plugins minify-constant-folding script.js
 ```
 
 ### Via Node API

@@ -30,7 +30,7 @@ foo(0);
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-dead-code-elimination
+npm install babel-plugin-minify-dead-code-elimination
 ```
 
 ## Usage
@@ -54,7 +54,7 @@ $ npm install babel-plugin-minify-dead-code-elimination
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-dead-code-elimination script.js
+babel --plugins minify-dead-code-elimination script.js
 ```
 
 ### Via Node API

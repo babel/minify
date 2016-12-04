@@ -45,7 +45,7 @@ foo.bar
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-simplify
+npm install babel-plugin-minify-simplify
 ```
 
 ## Usage
@@ -63,7 +63,7 @@ $ npm install babel-plugin-minify-simplify
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-simplify script.js
+babel --plugins minify-simplify script.js
 ```
 
 ### Via Node API

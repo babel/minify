@@ -7,7 +7,7 @@ Use `babili` if you don't already use babel (as a preset) or want to run it stan
 ## Installation
 
 ```sh
-$ npm install babili --save-dev
+npm install babili --save-dev
 ```
 
 ### Usage
