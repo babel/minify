@@ -4,7 +4,8 @@ This plugin will transform code in mainly two ways:
 
 1. Reduce as much statements as possible into expressions
 
-**In**
+## In
+
 ```js
 function foo() {
   if (x) a();
@@ -15,7 +16,8 @@ function foo2() {
 }
 ```
 
-**Out**
+## Out
+
 ```js
 function foo() {
   x && a();
@@ -27,14 +29,16 @@ function foo2() {
 
 2. Make expressions as uniform as possible for better compressibility
 
-**In**
+## In
+
 ```js
 undefined
 foo['bar']
 Number(foo)
 ```
 
-**Out**
+## Out
+
 ```js
 void 0
 foo.bar
