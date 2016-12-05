@@ -636,8 +636,15 @@ module.exports = ({ types: t, traverse }) => {
 
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
-    "FunctionExpression|ClassExpression"(path) {
+    "FunctionExpression"(path) {
       if (!this.keepFnName) {
+        removeUnreferencedId(path);
+      }
+    },
+
+    // remove class names
+    "ClassExpression"(path) {
+      if (!this.keepClassName) {
         removeUnreferencedId(path);
       }
     },
@@ -696,6 +703,7 @@ module.exports = ({ types: t, traverse }) => {
             // set defaults
             optimizeRawSize = false,
             keepFnName = false,
+            keepClassName = false,
             keepFnArgs = false,
           } = {}
         } = {}) {
@@ -707,6 +715,7 @@ module.exports = ({ types: t, traverse }) => {
             functionToBindings: new Map(),
             optimizeRawSize,
             keepFnName,
+            keepClassName,
             keepFnArgs,
           });
         }

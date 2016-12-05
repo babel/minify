@@ -5,12 +5,14 @@ module.exports = ({ types: t }) => {
     constructor(charset, program, {
       blacklist = {},
       keepFnName = false,
+      keepClassName = false,
       eval: _eval = false
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
       this.keepFnName = keepFnName;
+      this.keepClassName = keepClassName;
       this.eval = _eval;
 
       this.unsafeScopes = new Set;
@@ -127,6 +129,8 @@ module.exports = ({ types: t }) => {
               || mangler.isBlacklist(oldName)
               // function names
               || (mangler.keepFnName ? isFunction(binding.path) : false)
+              // class names
+              || (mangler.keepClassName ? isClass(binding.path) : false)
             ) {
               continue;
             }
@@ -280,8 +284,12 @@ class Charset {
 // for keepFnName
 function isFunction(path) {
   return path.isFunctionExpression()
-    || path.isFunctionDeclaration()
-    || path.isClassExpression()
+    || path.isFunctionDeclaration();
+}
+
+// for keepClassName
+function isClass(path) {
+  return path.isClassExpression()
     || path.isClassDeclaration();
 }
 

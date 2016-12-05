@@ -756,11 +756,9 @@ describe("mangle-names", () => {
     expect(actual).toBe(expected);
   });
 
-  it("should NOT mangle functions & classes when keepFnName is true", () => {
+  it("should NOT mangle functions when keepFnName is true", () => {
     const source = unpad(`
       (function() {
-        class Foo {}
-        const Bar = class Bar extends Foo {}
         var foo = function foo() {
           foo();
         }
@@ -774,20 +772,44 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       (function () {
-        class Foo {}
-        const a = class Bar extends Foo {};
-        var b = function foo() {
+        var a = function foo() {
           foo();
         };
         function bar() {
-          b();
+          a();
         }
         bar();
-        var c = b;
-        c();
+        var b = a;
+        b();
       })();
     `);
     expect(transform(source, {keepFnName: true})).toBe(expected);
+  });
+
+  it("should NOT mangle classes when keepClassName is true", () => {
+    const source = unpad(`
+      (function() {
+        class Foo {}
+        const Bar = class Bar extends Foo {}
+        var foo = class Baz {}
+        function bar() {
+          new foo();
+        }
+        bar();
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        class Foo {}
+        const b = class Bar extends Foo {};
+        var c = class Baz {};
+        function a() {
+          new c();
+        }
+        a();
+      })();
+    `);
+    expect(transform(source, {keepClassName: true})).toBe(expected);
   });
 
   it("should mangle variable re-declaration / K violations", () => {

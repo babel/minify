@@ -85,6 +85,11 @@ function preset(context, _opts = {}) {
       proxy("keepFnName", [
         optionsMap.mangle,
         optionsMap.deadcode
+      ]),
+
+      proxy("keepClassName", [
+        optionsMap.mangle,
+        optionsMap.deadcode
       ])
     ],
     "some"

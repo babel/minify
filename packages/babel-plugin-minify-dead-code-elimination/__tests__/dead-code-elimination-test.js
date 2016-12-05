@@ -1292,12 +1292,12 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should preserve fn/class names when keepFnName is true", () => {
+  it("should preserve fn names when keepFnName is true", () => {
     const source = unpad(`
       (function () {
         function A() {}
         exports.A = A;
-        var B = class B {};
+        var B = function B() {};
         exports.B = B;
         onClick(function C() {});
       })();
@@ -1306,11 +1306,32 @@ describe("dce-plugin", () => {
       (function () {
         exports.A = function A() {};
 
-        exports.B = class B {};
+        exports.B = function B() {};
         onClick(function C() {});
       })();
     `);
     expect(transform(source, { keepFnName: true })).toBe(expected);
+  });
+
+  it("should preserve class names when keepClassName is true", () => {
+    const source = unpad(`
+      (function () {
+        class A {}
+        exports.A = A;
+        var B = class B {};
+        exports.B = B;
+        class AA {} new AA()
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        exports.A = class A {};
+
+        exports.B = class B {};
+        new class AA {}();
+      })();
+    `);
+    expect(transform(source, { keepClassName: true })).toBe(expected);
   });
 
   // NCE = Named Class Expressions
