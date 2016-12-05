@@ -39,4 +39,26 @@ describe("preset", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix remove comments", () => {
+    const source = unpad(`
+      var asdf = 1; // test
+    `);
+    const expected = unpad(`
+      var asdf = 1;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should keep license/preserve annotated comments", () => {
+    const source = unpad(`
+      /* @license */
+      var asdf = 1;
+    `);
+    const expected = unpad(`
+      /* @license */
+      var asdf = 1;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
