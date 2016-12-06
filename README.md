@@ -7,6 +7,7 @@
 <p align="center">
   <a href="https://travis-ci.org/babel/babili"><img alt="Travis Status" src="https://travis-ci.org/babel/babili.svg?branch=master"></a>
   <a href="https://slack.babeljs.io/"><img alt="Slack Status" src="https://slack.babeljs.io/badge.svg"></a>
+  <a href="https://www.npmjs.com/package/babel-preset-babili"><img alt="NPM Downloads" src="https://img.shields.io/npm/dm/babel-preset-babili.svg"></a>
 </p>
 
 - Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
