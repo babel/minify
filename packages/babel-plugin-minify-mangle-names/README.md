@@ -45,7 +45,9 @@ npm install babel-plugin-minify-mangle-names
 {
   "plugins": ["minify-mangle-names"]
 }
+```
 
+```json
 // with options
 {
   "plugins": ["minify-mangle-names", { "blacklist": { "foo": true, "bar": true} }]
