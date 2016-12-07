@@ -57,7 +57,9 @@ npm install babel-plugin-minify-replace
 {
   "plugins": ["minify-replace"]
 }
+```
 
+```json
 // with options
 {
   "plugins": [
