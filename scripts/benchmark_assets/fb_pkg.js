@@ -1,5 +1,5 @@
 /**
- * Copyright 20__-present, Facebook, Inc.
+ * Copyright 2008-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the
