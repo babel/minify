@@ -25,7 +25,7 @@ const script = new Command("benchmark.js")
   .arguments("<package> [file]")
   .action(function(pname, fname, command) {
     if (command.local) {
-      packagename = '';
+      packagename = "";
       filename = pname;
     }
     else {
