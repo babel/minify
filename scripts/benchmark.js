@@ -20,15 +20,22 @@ let packagename, filename;
 const script = new Command("benchmark.js")
   .option("-o, --offline", "Only install package if not present; package not removed after testing")
   .option("-r, --runs <n>", "Number of times to run tests")
+  .option("-l, --local", "Use local file instead of a package")
   .usage("[options] <package> [file]")
   .arguments("<package> [file]")
-  .action(function(pname, fname) {
-    packagename = pname;
-    filename = fname;
+  .action(function(pname, fname, command) {
+    if (command.local) {
+      packagename = '';
+      filename = pname;
+    }
+    else {
+      packagename = pname;
+      filename = fname;
+    }
   })
   .parse(process.argv);
 
-if (!packagename) {
+if (!packagename && !script.local) {
   console.error("Error: No package specified");
   process.exit(1);
 }
@@ -91,8 +98,14 @@ function uninstallPackage() {
 }
 
 function checkFile() {
-  // If filename has not been passed as an argument, attempt to resolve file from package.json
-  filename = filename ? path.join(pathToScripts, "node_modules", filename) : require.resolve(packagename.split("@")[0]);
+
+  if (!script.local) {
+    // If filename has not been passed as an argument, attempt to resolve file from package.json
+    filename = filename
+      ? path.join(pathToScripts, "node_modules", filename)
+      : require.resolve(packagename.split("@")[0]);
+  }
+
   console.log("file: " + path.basename(filename));
 
   if (!filename || !pathExists(filename)) {
@@ -224,7 +237,7 @@ function pathExists(path) {
 
 const packagePath = path.join(pathToScripts, "node_modules", packagename);
 
-if (!pathExists(packagePath) || !script.offline) {
+if ((!pathExists(packagePath) || !script.offline) && !script.local) {
   installPackage();
 }
 
@@ -232,6 +245,6 @@ checkFile();
 testFile();
 processResults();
 
-if (!script.offline) {
+if (!script.offline && !script.local) {
   uninstallPackage();
 }
