@@ -2600,6 +2600,29 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should replace object literal member expressions with values", () => {
+    const source = unpad(`
+      foo = {
+        a: 1,
+        b: 2,
+        c: 3
+      }.b;
+    `);
+    const expected = unpad(`
+      foo = 2;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not replace object literal member expressions assignments", () => {
+    const source = unpad(`
+      foo({
+        bar: 1
+      }.bar = 2);
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
   it("should fix issue#281 with if..return", () => {
     const source = unpad(`
       function foo() {
