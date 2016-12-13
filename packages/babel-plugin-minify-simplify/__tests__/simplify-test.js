@@ -2387,6 +2387,74 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should not simplify assignments when it is not an equal operator", () => {
+
+    const source = unpad(`
+      x += x + 1,
+      x -= x - 1,
+      x *= x * 1,
+      x %= x % 1,
+      x <<= x << 1,
+      x >>= x >> 1,
+      x >>>= x >>> 1,
+      x &= x & 1,
+      x |= x | 1,
+      x ^= x ^ 1,
+      x /= x / 1,
+      x **= x ** 1;
+    `);
+    const expected = unpad(`
+      x += x + 1,
+      x -= x - 1,
+      x *= x * 1,
+      x %= x % 1,
+      x <<= x << 1,
+      x >>= x >> 1,
+      x >>>= x >>> 1,
+      x &= x & 1,
+      x |= x | 1,
+      x ^= x ^ 1,
+      x /= x / 1,
+      x **= x ** 1;
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not simplify assignments further when it is not an equal operator", () => {
+
+    const source = unpad(`
+      x = x + (x >> 1),
+      x = x - (x >> 1),
+      x = x * (x >> 1),
+      x = x % (x >> 1),
+      x = x << (x >> 1),
+      x = x >> (x >> 1),
+      x = x >>> (x >> 1),
+      x = x & (x >> 1),
+      x = x | (x >> 1),
+      x = x ^ (x >> 1),
+      x = x / (x >> 1),
+      x = x ** (x >> 1);
+    `);
+    const expected = unpad(`
+      x += x >> 1,
+      x -= x >> 1,
+      x *= x >> 1,
+      x %= x >> 1,
+      x <<= x >> 1,
+      x >>= x >> 1,
+      x >>>= x >> 1,
+      x &= x >> 1,
+      x |= x >> 1,
+      x ^= x >> 1,
+      x /= x >> 1,
+      x **= x >> 1;
+    `).replace(/\s+/g, " ");
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should simplify assignments 2", () => {
 
     const source = unpad(`
