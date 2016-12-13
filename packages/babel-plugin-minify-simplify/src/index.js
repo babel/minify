@@ -254,6 +254,10 @@ module.exports = ({ types: t }) => {
         const rightExpr = path.get("right");
         const leftExpr = path.get("left");
 
+        if (path.node.operator !== "=") {
+          return;
+        }
+
         const canBeUpdateExpression = (
           rightExpr.get("right").isNumericLiteral() &&
           rightExpr.get("right").node.value === 1 &&
