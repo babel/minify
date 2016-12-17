@@ -70,12 +70,23 @@ class a{constructor(b){this.program=b}}new a;
 
 This is simple wrapper around the regular `babel-cli` and thus takes in the same [cli options](http://babeljs.io/docs/usage/cli/#options) as running babel on its own. You can use this if you don't already use babel or want to run it standalone.
 
+### Install
+
+```sh
+npm install babili --save-dev
+```
+
 ### Usage
 
-`babili src -d lib`
+```sh
+babili src -d lib
+```
 
 Equivalent to:
-`babel src -d lib --presets=babili --no-babelrc`
+
+```sh
+babel src -d lib --presets=babili --no-babelrc
+```
 
 ## [Babel preset](http://babeljs.io/docs/plugins/#presets)
 
@@ -83,7 +94,11 @@ Equivalent to:
 |--------|-------|------------|
 | [`babel-preset-babili`](/packages/babel-preset-babili) | [![npm](https://img.shields.io/npm/v/babel-preset-babili.svg?maxAge=86400)](https://www.npmjs.com/package/babel-preset-babili) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-preset-babili)](https://david-dm.org/babel/babili?path=packages/babel-preset-babili) |
 
-It's a Babel preset (like `babel-preset-es2015`).
+### Install
+
+```sh
+npm install babel-preset-babili --save-dev
+```
 
 ### Usage
 
