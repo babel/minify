@@ -57,3 +57,11 @@ require("babel-core").transform("code", {
   plugins: ["minify-type-constructors"]
 });
 ```
+
+## Options
+
++ `array` - prevent plugin from minifying arrays
++ `boolean` - prevent plugin from minifying booleans
++ `number` — prevent plugin from minifying numbers
++ `object` — prevent plugin from minifying objects
++ `string` — prevent plugin from minifying strings
