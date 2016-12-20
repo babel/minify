@@ -19,7 +19,7 @@ alert(0);
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-guarded-expressions
+npm install babel-plugin-minify-guarded-expressions
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ $ npm install babel-plugin-minify-guarded-expressions
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-guarded-expressions script.js
+babel --plugins minify-guarded-expressions script.js
 ```
 
 ### Via Node API

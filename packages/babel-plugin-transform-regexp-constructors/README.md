@@ -21,7 +21,7 @@ var a = /ab+c/i;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-regexp-constructors
+npm install babel-plugin-transform-regexp-constructors
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ $ npm install babel-plugin-transform-regexp-constructors
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-regexp-constructors script.js
+babel --plugins transform-regexp-constructors script.js
 ```
 
 ### Via Node API

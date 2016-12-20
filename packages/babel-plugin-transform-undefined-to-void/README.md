@@ -21,7 +21,7 @@ foo === void 0;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-undefined-to-void
+npm install babel-plugin-transform-undefined-to-void
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ $ npm install babel-plugin-transform-undefined-to-void
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-undefined-to-void script.js
+babel --plugins transform-undefined-to-void script.js
 ```
 
 ### Via Node API

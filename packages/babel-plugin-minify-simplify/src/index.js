@@ -3,7 +3,6 @@
 const PatternMatch = require("./pattern-match");
 
 module.exports = ({ types: t }) => {
-  const isNodesEquiv = require("babel-helper-is-nodes-equiv")(t);
   const flipExpressions = require("babel-helper-flip-expressions")(t);
   const toMultipleSequenceExpressions = require("babel-helper-to-multiple-sequence-expressions")(t);
 
@@ -27,6 +26,65 @@ module.exports = ({ types: t }) => {
   const notnot = (node) => not(not(node));
   const or = (a, b) => t.logicalExpression("||", a, b);
   const and = (a, b) => t.logicalExpression("&&", a, b);
+
+  const operators = new Set([
+    "+", "-", "*", "%",
+    "<<", ">>", ">>>",
+    "&", "|", "^", "/",
+    "**"
+  ]);
+
+  const updateOperators = new Set([
+    "+", "-"
+  ]);
+
+  function areArraysEqual(arr1, arr2) {
+    return arr1.every((value, index) => {
+      return String(value) === String(arr2[index]);
+    });
+  }
+
+  function getName(node) {
+    if (node.type === "ThisExpression") {
+      return "this";
+    }
+    if (node.type === "Super") {
+      return "super";
+    }
+    if (node.type === "NullLiteral") {
+      return "null";
+    }
+    // augment identifiers so that they don't match
+    // string/number literals
+    // but still match against each other
+    return node.name
+      ? node.name + "_"
+      : node.value /* Literal */;
+  }
+
+  function getPropNames(path) {
+    if (!path.isMemberExpression()) {
+      return;
+    }
+
+    let obj = path.get("object");
+
+    const prop = path.get("property");
+    const propNames = [getName(prop.node)];
+
+    while (obj.type === "MemberExpression") {
+      const node = obj.get("property").node;
+      if (node) {
+        propNames.push(getName(node));
+      }
+      obj = obj.get("object");
+    }
+    propNames.push(getName(obj.node));
+
+    return propNames;
+  }
+  const OP_AND = (input) => input === "&&";
+  const OP_OR = (input) => input === "||";
 
   return {
     name: "minify-simplify",
@@ -122,6 +180,128 @@ module.exports = ({ types: t }) => {
             path.replaceWith(node.argument);
           },
         ],
+      },
+
+      LogicalExpression: {
+        exit(path) {
+          // cache of path.evaluate()
+          const evaluateMemo = new Map;
+
+          const TRUTHY = (input) => {
+            // !NaN and !undefined are truthy
+            // separate check here as they are considered impure by babel
+            if (input.isUnaryExpression() && input.get("argument").isIdentifier()) {
+              if (input.node.argument.name === "NaN" || input.node.argument.name === "undefined") {
+                return true;
+              }
+            }
+            const evalResult = input.evaluate();
+            evaluateMemo.set(input, evalResult);
+            return evalResult.confident && input.isPure() && evalResult.value;
+          };
+
+          const FALSY = (input) => {
+            // NaN and undefined are falsy
+            // separate check here as they are considered impure by babel
+            if (input.isIdentifier()) {
+              if (input.node.name === "NaN" || input.node.name === "undefined") {
+                return true;
+              }
+            }
+            const evalResult = input.evaluate();
+            evaluateMemo.set(input, evalResult);
+            return evalResult.confident && input.isPure() && !evalResult.value;
+          };
+
+          const {
+            Expression: EX
+          } = types;
+
+          // Convention:
+          // [left, operator, right, handler(leftNode, rightNode)]
+          const matcher = new PatternMatch([
+            [TRUTHY, OP_AND, EX, (l, r) => r],
+            [FALSY, OP_AND, EX, (l) => l],
+            [TRUTHY, OP_OR, EX, (l) => l],
+            [FALSY, OP_OR, EX, (l, r) => r]
+          ]);
+
+          const left = path.get("left");
+          const right = path.get("right");
+          const operator = path.node.operator;
+
+          const result = matcher.match(
+            [left, operator, right],
+            isPatternMatchesPath
+          );
+
+          if (result.match) {
+            // here we are sure that left.evaluate is always confident becuase
+            // it satisfied one of TRUTHY/FALSY paths
+            let value;
+            if (evaluateMemo.has(left)) {
+              value = evaluateMemo.get(left).value;
+            } else {
+              value = left.evaluate().value;
+            }
+            path.replaceWith(result.value(t.valueToNode(value), right.node));
+          }
+        }
+      },
+
+      AssignmentExpression(path) {
+
+        const rightExpr = path.get("right");
+        const leftExpr = path.get("left");
+
+        if (path.node.operator !== "=") {
+          return;
+        }
+
+        const canBeUpdateExpression = (
+          rightExpr.get("right").isNumericLiteral() &&
+          rightExpr.get("right").node.value === 1 &&
+          updateOperators.has(rightExpr.node.operator));
+
+        if (leftExpr.isMemberExpression()) {
+
+          const leftPropNames = getPropNames(leftExpr);
+          const rightPropNames = getPropNames(rightExpr.get("left"));
+
+          if (!leftPropNames ||
+              leftPropNames.indexOf(undefined) > -1 ||
+              !rightPropNames ||
+              rightPropNames.indexOf(undefined) > -1 ||
+              !operators.has(rightExpr.node.operator) ||
+              !areArraysEqual(leftPropNames, rightPropNames)) {
+            return;
+          }
+        }
+        else {
+          if (!rightExpr.isBinaryExpression() ||
+              !operators.has(rightExpr.node.operator) ||
+              leftExpr.node.name !== rightExpr.node.left.name) {
+            return;
+          }
+        }
+
+        let newExpression;
+
+        // special case x=x+1 --> ++x
+        if (canBeUpdateExpression) {
+          newExpression = t.updateExpression(
+            rightExpr.node.operator + rightExpr.node.operator,
+            t.clone(leftExpr.node),
+            true /* prefix */);
+        }
+        else {
+          newExpression = t.assignmentExpression(
+            rightExpr.node.operator + "=",
+            t.clone(leftExpr.node),
+            t.clone(rightExpr.node.right));
+        }
+
+        path.replaceWith(newExpression);
       },
 
       ConditionalExpression: {
@@ -220,7 +400,7 @@ module.exports = ({ types: t }) => {
               const left = path.get("left").node;
               if (firstLeft == null) {
                 firstLeft = left;
-              } else if (!isNodesEquiv(left, firstLeft)) {
+              } else if (!t.isNodesEquivalent(left, firstLeft)) {
                 return true;
               }
 
@@ -331,10 +511,7 @@ module.exports = ({ types: t }) => {
       },
 
       Function: {
-        enter: earlyReturnTransform,
-
         exit(path) {
-          // Useful to do on enter and exit because more oppurtinties can open.
           earlyReturnTransform(path);
 
           if (!path.node[shouldRevisit]) {
@@ -363,7 +540,24 @@ module.exports = ({ types: t }) => {
           const prev = path.getSibling(path.key - 1);
           let consumed = false;
           if (prev.isVariableDeclaration()) {
-            if (!node.init) {
+            let referencedOutsideLoop = false;
+
+            // we don't care if vars are referenced outside the loop as they are fn scope
+            if (prev.node.kind === "let" || prev.node.kind === "const") {
+              const ids = Object.keys(prev.getBindingIdentifiers());
+
+              idloop: for (let i = 0; i < ids.length; i++) {
+                const refs = prev.scope.bindings[ids[i]].referencePaths;
+                for (let j = 0; j < refs.length; j++) {
+                  if (!isAncestor(path, refs[j])) {
+                    referencedOutsideLoop = true;
+                    break idloop;
+                  }
+                }
+              }
+            }
+
+            if (!node.init && !referencedOutsideLoop) {
               node.init = prev.node;
               consumed = true;
             }
@@ -641,33 +835,33 @@ module.exports = ({ types: t }) => {
               return;
             }
 
+            // Easy: consequent and alternate are return -- conditional.
+            if (t.isReturnStatement(node.consequent)
+              && t.isReturnStatement(node.alternate)
+            ) {
+              if (!node.consequent.argument && !node.alternate.argument) {
+                path.replaceWith(t.expressionStatement(node.test));
+                return;
+              }
+
+              path.replaceWith(
+                t.returnStatement(
+                  t.conditionalExpression(
+                    node.test,
+                    node.consequent.argument || VOID_0,
+                    node.alternate.argument || VOID_0
+                  )
+                )
+              );
+              return;
+            }
+
             // There is nothing after this block. And one or both
             // of the consequent and alternate are either expression statment
             // or return statements.
             if (!path.getSibling(path.key + 1).node && path.parentPath &&
                 path.parentPath.parentPath && path.parentPath.parentPath.isFunction()
             ) {
-              // Easy: consequent and alternate are return -- conditional.
-              if (t.isReturnStatement(node.consequent)
-                  && t.isReturnStatement(node.alternate)
-              ) {
-                if (!node.consequent.argument && !node.altenrate.argument) {
-                  path.replaceWith(t.expressionStatement(node.test));
-                  return;
-                }
-
-                path.replaceWith(
-                  t.returnStatement(
-                    t.conditionalExpression(
-                      node.test,
-                      node.consequent.argument || VOID_0,
-                      node.alternate.argument || VOID_0
-                    )
-                  )
-                );
-                return;
-              }
-
               // Only the consequent is a return, void the alternate.
               if (t.isReturnStatement(node.consequent) && t.isExpressionStatement(node.alternate)) {
                 if (!node.consequent.argument) {
@@ -1158,11 +1352,9 @@ module.exports = ({ types: t }) => {
             }
 
             const potentialBreak = lastCase.get("consequent")[lastCase.node.consequent.length - 1];
-            if (!t.isBreakStatement(potentialBreak)) {
-              return;
+            if (t.isBreakStatement(potentialBreak) && potentialBreak.node.label === null) {
+              potentialBreak.remove();
             }
-
-            potentialBreak.remove();
           },
 
           createPrevExpressionEater("switch"),
@@ -1206,7 +1398,18 @@ module.exports = ({ types: t }) => {
   function needsBlock(node, parent) {
     return (t.isFunction(parent) && node === parent.body) ||
            t.isTryStatement(parent) || t.isCatchClause(parent) ||
-           t.isSwitchStatement(parent);
+           t.isSwitchStatement(parent) ||
+           (isSingleBlockScopeDeclaration(node) && t.isIfStatement(parent));
+  }
+
+  function isSingleBlockScopeDeclaration(block) {
+    return t.isBlockStatement(block) &&
+      block.body.length === 1 &&
+      (
+        t.isVariableDeclaration(block.body[0], { kind: "let" }) ||
+        t.isVariableDeclaration(block.body[0], { kind: "const" }) ||
+        t.isFunctionDeclaration(block.body[0])
+      );
   }
 
   function isVoid0(expr) {
@@ -1258,7 +1461,9 @@ module.exports = ({ types: t }) => {
   function genericEarlyExitTransform(path) {
     const { node } = path;
 
-    const statements = path.container.slice(path.key + 1);
+    const statements = path.container.slice(path.key + 1)
+      .filter((stmt) => !t.isFunctionDeclaration(stmt));
+
     if (!statements.length) {
       path.replaceWith(t.expressionStatement(node.test));
       return;
@@ -1277,15 +1482,14 @@ module.exports = ({ types: t }) => {
 
     let l = statements.length;
     while (l-- > 0) {
-      path.getSibling(path.key + 1).remove();
+      if (!t.isFunctionDeclaration(statements[l])) {
+        path.getSibling(path.key + 1).remove();
+      }
     }
 
-    if (statements.length === 1) {
-      node.consequent = statements[0];
-    } else {
-      node.consequent = t.blockStatement(statements);
-    }
+    node.consequent = t.blockStatement(statements);
 
+    // this should take care of removing the block
     path.visit();
   }
 
@@ -1350,9 +1554,18 @@ module.exports = ({ types: t }) => {
       }
       return false;
     }
+    if (typeof patternValue === "function") {
+      return patternValue(inputPath);
+    }
     if (isNodeOfType(inputPath.node, patternValue)) return true;
     let evalResult = inputPath.evaluate();
     if (!evalResult.confident || !inputPath.isPure()) return false;
     return evalResult.value === patternValue;
+  }
+
+  // path1 -> path2
+  // is path1 an ancestor of path2
+  function isAncestor(path1, path2) {
+    return !!path2.findParent((parent) => parent === path1);
   }
 };

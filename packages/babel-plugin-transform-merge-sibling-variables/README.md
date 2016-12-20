@@ -30,7 +30,7 @@ for (var i = 0, x = 0; x < 10; x++) {}
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-merge-sibling-variables
+npm install babel-plugin-transform-merge-sibling-variables
 ```
 
 ## Usage
@@ -48,7 +48,7 @@ $ npm install babel-plugin-transform-merge-sibling-variables
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-merge-sibling-variables script.js
+babel --plugins transform-merge-sibling-variables script.js
 ```
 
 ### Via Node API

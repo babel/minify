@@ -12,16 +12,39 @@ const babel  = require("babel-core");
 const zlib   = require("zlib");
 const fs     = require("fs");
 const path   = require("path");
+const Command = require("commander").Command;
 const compile = require("google-closure-compiler-js").compile;
 
-const filename = process.argv[2];
-if (!filename) {
-  console.error("Error: No filename specified");
+let packagename, filename;
+
+const script = new Command("benchmark.js")
+  .option("-o, --offline", "Only install package if not present; package not removed after testing")
+  .option("-r, --runs <n>", "Number of times to run tests")
+  .option("-l, --local", "Use local file instead of a package")
+  .usage("[options] <package> [file]")
+  .arguments("<package> [file]")
+  .action(function(pname, fname, command) {
+    if (command.local) {
+      packagename = "";
+      filename = pname;
+    }
+    else {
+      packagename = pname;
+      filename = fname;
+    }
+  })
+  .parse(process.argv);
+
+if (!packagename && !script.local) {
+  console.error("Error: No package specified");
   process.exit(1);
 }
 
+const numTestRuns = script.runs || 3;
+const pathToScripts = __dirname;
+
 const table = new Table({
-  head: ["", "raw", "raw win", "gzip", "gzip win", "parse time", "run"],
+  head: ["", "raw", "raw win", "gzip", "gzip win", "parse time", "run time (average)"],
   chars: {
     top: "",
     "top-mid": "" ,
@@ -46,12 +69,53 @@ const table = new Table({
   },
 });
 
-let results = [];
+let results = [],
+  code,
+  gzippedCode;
 
-const code = fs.readFileSync(filename, "utf8");
-const gzippedCode = zlib.gzipSync(code);
+function installPackage() {
+  const command = "npm install --prefix " + pathToScripts + " " + packagename;
+
+  try {
+    child.execSync(command);
+  }
+  catch (e) {
+	// Unecessary to print out error as the failure of the execSync will print it anyway
+    process.exit(1);
+  }
+}
+
+function uninstallPackage() {
+  const command = "npm uninstall --prefix " + pathToScripts + " " + packagename.split("@")[0];
+
+  try {
+    child.execSync(command);
+  }
+  catch (e) {
+    console.error("Error uninstalling package " + packagename + ": " + e);
+    process.exit(1);
+  }
+}
+
+function checkFile() {
+
+  if (!script.local) {
+    // If filename has not been passed as an argument, attempt to resolve file from package.json
+    filename = filename
+      ? path.join(pathToScripts, "node_modules", filename)
+      : require.resolve(packagename.split("@")[0]);
+  }
+
+  console.log("file: " + path.basename(filename));
+
+  if (!filename || !pathExists(filename)) {
+    console.error("File not found. Exiting.");
+    process.exit(1);
+  }
+}
 
 function test(name, callback) {
+
   console.log("testing", name);
 
   const start = Date.now();
@@ -64,76 +128,123 @@ function test(name, callback) {
   const gzipped = zlib.gzipSync(result);
 
   const parseStart = Date.now();
-  // disable for now we have a failing test in dce
   new Function(result);
   const parseEnd = Date.now();
   const parseNow = parseEnd - parseStart;
+
+  const runTimes = [run];
+
+  for (let i = 1; i < numTestRuns; i++) {
+    const start = Date.now();
+    callback(code);
+    runTimes.push(Date.now() - start);
+  }
+
+  const totalTime = runTimes.reduce((a, b) => a + b, 0);
+  const average = parseInt(totalTime / runTimes.length, 10);
 
   results.push({
     name: name,
     raw: result.length,
     gzip: gzipped.length,
     parse: parseNow,
-    run: run,
+    run: average,
   });
 }
 
-test("babili", function (code) {
-  return babel.transform(code, {
-    sourceType: "script",
-    presets: [require("../packages/babel-preset-babili")],
-    comments: false,
-  }).code;
-});
+function testFile() {
+  code = fs.readFileSync(filename, "utf8");
+  gzippedCode = zlib.gzipSync(code);
 
-test("closure", function (/*code*/) {
-  return child.execSync(
-    "java -jar " + path.join(__dirname, "gcc.jar") + " --env=CUSTOM --jscomp_off=* --js " + filename
-  ).toString();
-});
-
-test("closure js", function (code) {
-  const flags = {
-    jsCode: [{ src: code }],
-    env: "CUSTOM",
-  };
-  const out = compile(flags);
-  return out.compiledCode;
-});
-
-test("uglify", function (code) {
-  return uglify.minify(code, {
-    fromString: true,
-  }).code;
-});
-
-results = results.sort(function (a, b) {
-  return a.gzip > b.gzip;
-});
-
-results.forEach(function (result, i) {
-  let row = [
-    chalk.bold(result.name),
-    bytes(result.raw),
-    Math.round(((code.length / result.raw) * 100) - 100) + "%",
-    bytes(result.gzip),
-    Math.round(((gzippedCode.length / result.gzip) * 100) - 100) + "%",
-    Math.round(result.parse) + "ms",
-    Math.round(result.run) + "ms",
-  ];
-
-  let style = chalk.yellow;
-  if (i === 0) {
-    style = chalk.green;
-  }
-  if (i === results.length - 1) {
-    style = chalk.red;
-  }
-  row = row.map(function (item) {
-    return style(item);
+  test("babili (best speed)", function (code) {
+    return babel.transform(code, {
+      sourceType: "script",
+      presets: [require("../packages/babel-preset-babili")],
+      comments: false,
+    }).code;
   });
 
-  table.push(row);
-});
+  test("babili (best size)", function (code) {
+    return babel.transform(code, {
+      sourceType: "script",
+      presets: [require("../packages/babel-preset-babili")],
+      comments: false,
+    }).code;
+  });
 
-console.log(table.toString());
+  test("closure", function (/*code*/) {
+    return child.execSync(
+      "java -jar " + path.join(__dirname, "gcc.jar") +
+      " --language_in=ECMASCRIPT5 --env=CUSTOM --jscomp_off=* --js " + filename
+    ).toString();
+  });
+
+  test("closure js", function (code) {
+    const flags = {
+      jsCode: [{ src: code }],
+      env: "CUSTOM",
+    };
+    const out = compile(flags);
+    return out.compiledCode;
+  });
+
+  test("uglify", function (code) {
+    return uglify.minify(code, {
+      fromString: true,
+    }).code;
+  });
+}
+
+function processResults() {
+  results = results.sort((a, b) => a.gzip > b.gzip);
+
+  results.forEach(function (result, i) {
+    let row = [
+      chalk.bold(result.name),
+      bytes(result.raw),
+      Math.round(((code.length / result.raw) * 100) - 100) + "%",
+      bytes(result.gzip),
+      Math.round(((gzippedCode.length / result.gzip) * 100) - 100) + "%",
+      Math.round(result.parse) + "ms",
+      Math.round(result.run) + "ms",
+    ];
+
+    let style = chalk.yellow;
+    if (i === 0) {
+      style = chalk.green;
+    }
+    if (i === results.length - 1) {
+      style = chalk.red;
+    }
+    row = row.map(function (item) {
+      return style(item);
+    });
+
+    table.push(row);
+  });
+
+  console.log(table.toString());
+}
+
+function pathExists(path) {
+  try {
+    return fs.statSync(path);
+  }
+  catch (e) {
+    return false;
+  }
+}
+
+const packagePath = path.join(pathToScripts, "node_modules", packagename);
+
+if ((!pathExists(packagePath) || !script.offline) && !script.local) {
+  installPackage();
+}
+
+checkFile();
+testFile();
+processResults();
+
+if (!script.offline && !script.local) {
+  uninstallPackage();
+}

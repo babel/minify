@@ -29,7 +29,7 @@ x + "";
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-type-constructors
+npm install babel-plugin-minify-type-constructors
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ $ npm install babel-plugin-minify-type-constructors
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-type-constructors script.js
+babel --plugins minify-type-constructors script.js
 ```
 
 ### Via Node API
@@ -57,3 +57,11 @@ require("babel-core").transform("code", {
   plugins: ["minify-type-constructors"]
 });
 ```
+
+## Options
+
++ `array` - prevent plugin from minifying arrays
++ `boolean` - prevent plugin from minifying booleans
++ `number` — prevent plugin from minifying numbers
++ `object` — prevent plugin from minifying objects
++ `string` — prevent plugin from minifying strings

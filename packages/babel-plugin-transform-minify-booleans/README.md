@@ -21,7 +21,7 @@ false;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-transform-minify-booleans
+npm install babel-plugin-transform-minify-booleans
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ $ npm install babel-plugin-transform-minify-booleans
 ### Via CLI
 
 ```sh
-$ babel --plugins transform-minify-booleans script.js
+babel --plugins transform-minify-booleans script.js
 ```
 
 ### Via Node API

@@ -108,7 +108,8 @@ module.exports = ({ types: t, traverse }) => {
 
         // if the scope is created by a function, we obtain its
         // parameter list
-        const paramsList = path.isFunction() ? path.get("params") : [];
+        const canRemoveParams = path.isFunction() && path.node.kind !== "set";
+        const paramsList = canRemoveParams ? path.get("params") : [];
 
         for (let i = paramsList.length - 1; i >= 0; i--) {
           const param = paramsList[i];
@@ -153,9 +154,9 @@ module.exports = ({ types: t, traverse }) => {
               continue;
             } else if (binding.path.isVariableDeclarator()) {
               if (binding.path.parentPath.parentPath &&
-                binding.path.parentPath.parentPath.isForInStatement()
+                binding.path.parentPath.parentPath.isForXStatement()
               ) {
-                // Can't remove if in a for in statement `for (var x in wat)`.
+                // Can't remove if in a for-in/for-of/for-await statement `for (var x in wat)`.
                 continue;
               }
             } else if (!scope.isPure(binding.path.node)) {
@@ -194,6 +195,10 @@ module.exports = ({ types: t, traverse }) => {
               binding.path.parentPath.node.declarations
             ) {
               if (binding.path.parentPath.node.declarations.length !== 1) {
+                continue;
+              }
+              // Bail out for ArrayPattern and ObjectPattern
+              if (!binding.path.get("id").isIdentifier()) {
                 continue;
               }
 
@@ -367,6 +372,12 @@ module.exports = ({ types: t, traverse }) => {
       let noNext = true;
       let parentPath = path.parentPath;
       while (parentPath && !parentPath.isFunction() && noNext) {
+        // https://github.com/babel/babili/issues/265
+        if (hasLoopParent(parentPath)) {
+          noNext = false;
+          break;
+        }
+
         const nextPath = parentPath.getSibling(parentPath.key + 1);
         if (nextPath.node) {
           if (nextPath.isReturnStatement()) {
@@ -625,8 +636,15 @@ module.exports = ({ types: t, traverse }) => {
 
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
-    "FunctionExpression|ClassExpression"(path) {
+    "FunctionExpression"(path) {
       if (!this.keepFnName) {
+        removeUnreferencedId(path);
+      }
+    },
+
+    // remove class names
+    "ClassExpression"(path) {
+      if (!this.keepClassName) {
         removeUnreferencedId(path);
       }
     },
@@ -674,21 +692,33 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-dead-code-elimination",
     visitor: {
-      Program(path, {
-        opts: {
-          // set defaults
-          optimizeRawSize = false,
-          keepFnName = false,
-          keepFnArgs = false,
-        } = {}
-      } = {}) {
-        // We need to run this plugin in isolation.
-        path.traverse(main, {
-          functionToBindings: new Map(),
-          optimizeRawSize,
-          keepFnName,
-          keepFnArgs,
-        });
+      EmptyStatement(path) {
+        if (path.parentPath.isBlockStatement() || path.parentPath.isProgram()) {
+          path.remove();
+        }
+      },
+      Program: {
+        exit(path, {
+          opts: {
+            // set defaults
+            optimizeRawSize = false,
+            keepFnName = false,
+            keepClassName = false,
+            keepFnArgs = false,
+          } = {}
+        } = {}) {
+          traverse.clearCache();
+          path.scope.crawl();
+
+          // We need to run this plugin in isolation.
+          path.traverse(main, {
+            functionToBindings: new Map(),
+            optimizeRawSize,
+            keepFnName,
+            keepClassName,
+            keepFnArgs,
+          });
+        }
       },
     },
   };
@@ -836,7 +866,7 @@ module.exports = ({ types: t, traverse }) => {
     const binding = scope.getBinding(id.name);
 
     // Check if shadowed or is not referenced.
-    if (binding.path.node !== node || !binding.referenced) {
+    if (binding && (binding.path.node !== node || !binding.referenced)) {
       node.id = null;
     }
   }
@@ -895,7 +925,13 @@ module.exports = ({ types: t, traverse }) => {
         // here we handle the break labels
         // if they are outside switch, we bail out
         // if they are within the case, we keep them
-        const _isAncestor = isAncestor(path.scope.getBinding(label.node.name).path, path);
+        let labelPath;
+        if (path.scope.getLabel) {
+          labelPath = getLabel(label.node.name, path);
+        } else {
+          labelPath = path.scope.getBinding(label.node.name).path;
+        }
+        const _isAncestor = isAncestor(labelPath, path);
 
         return {
           bail: _isAncestor,
@@ -956,5 +992,26 @@ module.exports = ({ types: t, traverse }) => {
   function canExistAfterCompletion(path) {
     return path.isFunctionDeclaration()
       || path.isVariableDeclaration({ kind: "var" });
+  }
+
+  function getLabel(name, _path) {
+    let label, path = _path;
+    do {
+      label = path.scope.getLabel(name);
+      if (label) {
+        return label;
+      }
+    } while (path = path.parentPath);
+    return null;
+  }
+
+  function hasLoopParent(path) {
+    let parent = path;
+    do {
+      if (parent.isLoop()) {
+        return true;
+      }
+    } while (parent = parent.parentPath);
+    return false;
   }
 };

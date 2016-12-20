@@ -7,11 +7,13 @@ module.exports = ({ types: t }) => {
       keepFnName = false,
       eval: _eval = false,
       topLevel = false,
+      keepClassName = false,
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
       this.keepFnName = keepFnName;
+      this.keepClassName = keepClassName;
       this.eval = _eval;
       this.topLevel = topLevel;
 
@@ -137,6 +139,8 @@ module.exports = ({ types: t }) => {
               || mangler.isBlacklist(oldName)
               // function names
               || (mangler.keepFnName ? isFunction(binding.path) : false)
+              // class names
+              || (mangler.keepClassName ? isClass(binding.path) : false)
             ) {
               continue;
             }
@@ -293,8 +297,12 @@ class Charset {
 // for keepFnName
 function isFunction(path) {
   return path.isFunctionExpression()
-    || path.isFunctionDeclaration()
-    || path.isClassExpression()
+    || path.isFunctionDeclaration();
+}
+
+// for keepClassName
+function isClass(path) {
+  return path.isClassExpression()
     || path.isClassDeclaration();
 }
 

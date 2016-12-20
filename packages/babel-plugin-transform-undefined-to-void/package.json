@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-undefined-to-void",
-  "version": "0.0.1",
+  "version": "6.8.0",
   "description": "Replace references to `undefined` with `void 0`",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-undefined-to-void",

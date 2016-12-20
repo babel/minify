@@ -2,11 +2,19 @@ jest.autoMockOff();
 
 const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
+const deadcode = require("../src/index");
+const simplify = require("../../babel-plugin-minify-simplify/src/index");
 
-function transform(code, options) {
-  return babel.transform(code,  {
-    plugins: [[require("../src/index"), options]],
-  }).code.trim();
+function transform(code, options, babelOpts) {
+  return babel.transform(code,  Object.assign({}, {
+    plugins: [[deadcode, options]],
+  }, babelOpts)).code.trim();
+}
+
+function transformWithSimplify(code) {
+  return babel.transform(code, {
+    plugins: [deadcode, simplify]
+  }).code;
 }
 
 describe("dce-plugin", () => {
@@ -82,7 +90,7 @@ describe("dce-plugin", () => {
     const source = unpad(`
       function foo(p) {
         return 1;
-      };
+      }
       function bar(q) {
         return q + 1;
       }
@@ -791,6 +799,30 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
+  it("should evaluate conditional expressions 3", () => {
+    const source = "'foo' ? a() : b();";
+    const expected = "a();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should evaluate conditional expressions 4", () => {
+    const source = "null ? a() : b();";
+    const expected = "b();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should evaluate conditional expressions 5", () => {
+    const source = "'foo' === 'foo' ? a() : b();";
+    const expected = "a();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should evaluate conditional expressions 6", () => {
+    const source = "'foo' !== 'bar' ? a() : b();";
+    const expected = "a();";
+    expect(transform(source).trim()).toBe(expected);
+  });
+
   it("should not remove needed expressions", () => {
     const source = unpad(`
       var n = 1;
@@ -1260,12 +1292,12 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should preserve fn/class names when keepFnName is true", () => {
+  it("should preserve fn names when keepFnName is true", () => {
     const source = unpad(`
       (function () {
         function A() {}
         exports.A = A;
-        var B = class B {};
+        var B = function B() {};
         exports.B = B;
         onClick(function C() {});
       })();
@@ -1274,11 +1306,32 @@ describe("dce-plugin", () => {
       (function () {
         exports.A = function A() {};
 
-        exports.B = class B {};
+        exports.B = function B() {};
         onClick(function C() {});
       })();
     `);
     expect(transform(source, { keepFnName: true })).toBe(expected);
+  });
+
+  it("should preserve class names when keepClassName is true", () => {
+    const source = unpad(`
+      (function () {
+        class A {}
+        exports.A = A;
+        var B = class B {};
+        exports.B = B;
+        class AA {} new AA()
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        exports.A = class A {};
+
+        exports.B = class B {};
+        new class AA {}();
+      })();
+    `);
+    expect(transform(source, { keepClassName: true })).toBe(expected);
   });
 
   // NCE = Named Class Expressions
@@ -2081,6 +2134,35 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  // https://github.com/babel/babili/issues/232
+  it("should fix issue#232 - array patterns and object patterns with non constant init", () => {
+    const source = unpad(`
+      const a = {
+        lol: input => {
+          const [hello, world] = input.split('|');
+          if (hello === 't' || hello === 'top') {
+            return 'top';
+          }
+          return 'bottom';
+        }
+      };
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://github.com/babel/babili/issues/232
+  it("should fix issue#232 - array & object patterns with non-constant init", () => {
+    const source = unpad(`
+      function foo() {
+        const { bar1, bar2 } = baz();
+        return bar1;
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should preserve variabledeclarations(var) after completion statements", () => {
     const source = unpad(`
       function foo() {
@@ -2114,5 +2196,114 @@ describe("dce-plugin", () => {
     `);
 
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove var from for..in/for..of statements", () => {
+    const source = unpad(`
+      function foo() {
+        for (var i in x) console.log("foo");
+        for (var j of y) console.log("foo");
+      }
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove var from for..await statements", () => {
+    const source = unpad(`
+      async function foo() {
+        for await (var x of y) console.log("bar");
+      }
+    `);
+    const expected = source;
+    expect(transform(source, {}, {
+      parserOpts: {
+        plugins: ["asyncGenerators"]
+      }
+    })).toBe(expected);
+  });
+  it("should remove empty statements when children of block", () => {
+    const source = unpad(`
+      (function () {
+        function foo() {};
+        function bar() {};
+        function baz() {};
+        function ban() {};
+        function quux() {};
+        function cake() {};
+      })();
+    `);
+    const expected = unpad(`
+      (function () {})();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT remove fn params for setters", () => {
+    const source = unpad(`
+      function foo() {
+        var x = {
+          set a(b) {}
+        };
+        class A {
+          set c(d) {
+            x.a = 5;
+          }
+        }
+        return new A();
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  // https://github.com/babel/babili/issues/265
+  it("should not remove return void 0; statement if inside a loop", () => {
+    const source = unpad(`
+      function getParentConditionalPath(path) {
+        let parentPath;
+        while (parentPath = path.parentPath) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
+            if (path.key === "test") {
+              return;
+            } else {
+              return parentPath;
+            }
+          } else {
+            path = parentPath;
+          }
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  // https://github.com/babel/babili/issues/265
+  it("should integrate with simplify plugin changing scopes", () => {
+    const source = unpad(`
+      function getParentConditionalPath(path) {
+        let parentPath;
+        while (parentPath = path.parentPath) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
+            if (path.key === "test") {
+              return;
+            } else {
+              return parentPath;
+            }
+          } else {
+            path = parentPath;
+          }
+        }
+      }
+    `);
+    const expected = unpad(`
+      function getParentConditionalPath(path) {
+        for (let parentPath; parentPath = path.parentPath;) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) return path.key === "test" ? void 0 : parentPath;
+          path = parentPath;
+        }
+      }
+    `);
+    expect(transformWithSimplify(source)).toBe(expected);
   });
 });

@@ -4,9 +4,9 @@ const babel = require("babel-core");
 const plugin = require("../src/index");
 const unpad = require("../../../utils/unpad");
 
-function transform(code) {
+function transform(code, opts = {}) {
   return babel.transform(code,  {
-    plugins: [plugin],
+    plugins: [[plugin, opts]],
   }).code;
 }
 
@@ -226,6 +226,42 @@ describe("type-constructors-plugin", () => {
       (function (Boolean, String, Number, Array, Object) {
         return Boolean(a), String(b), Number(c), Array(d), Object(d);
       })(MyBoolean, MyString, MyNumber, MyArray, MyObject);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  // options tests
+  it("should not transform type for falsy option", () => {
+    const types = {
+      boolean: "Boolean",
+      number: "Number",
+      array: "Array",
+      object: "Object",
+      string: "String"
+    };
+    const names = Object.keys(types);
+    for (let i = 0; i < names.length; i++) {
+      const source = unpad(`
+        (function () {
+          var foo = ${types[names[i]]}(1);
+          var bar = ${types[names[i]]}(x);
+          var baz = ${types[names[i]]}();
+        })();
+      `);
+      const expected = source;
+      expect(transform(source, {[names[i]]: false})).toBe(expected);
+    }
+  });
+
+  // https://github.com/babel/babili/issues/206
+  it("should handle floating point numbers in Array()", () => {
+    const source = unpad(`
+      new Array(-0.01);
+      new Array(-1);
+    `);
+    const expected = unpad(`
+      Array(-0.01);
+      Array(-1);
     `);
     expect(transform(source)).toBe(expected);
   });
