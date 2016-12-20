@@ -31,7 +31,7 @@ function foo() {
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-mangle-names
+npm install babel-plugin-minify-mangle-names
 ```
 
 ## Usage
@@ -45,7 +45,9 @@ $ npm install babel-plugin-minify-mangle-names
 {
   "plugins": ["minify-mangle-names"]
 }
+```
 
+```json
 // with options
 {
   "plugins": ["minify-mangle-names", { "blacklist": { "foo": true, "bar": true} }]
@@ -55,7 +57,7 @@ $ npm install babel-plugin-minify-mangle-names
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-mangle-names script.js
+babel --plugins minify-mangle-names script.js
 ```
 
 ### Via Node API
@@ -70,4 +72,5 @@ require("babel-core").transform("code", {
 
 + `blacklist` - A plain JS Object with keys as identifier names and values indicating whether to exclude
 + `eval` - mangle identifiers in scopes accessible by eval
-+ `keepFnames` - prevent mangler from alterning function names. Useful for code depending on `fn.name`
++ `keepFnName` - prevent mangler from altering function names. Useful for code depending on `fn.name`
++ `keepClassName` - prevent mangler from altering class names.

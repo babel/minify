@@ -252,4 +252,17 @@ describe("type-constructors-plugin", () => {
       expect(transform(source, {[names[i]]: false})).toBe(expected);
     }
   });
+
+  // https://github.com/babel/babili/issues/206
+  it("should handle floating point numbers in Array()", () => {
+    const source = unpad(`
+      new Array(-0.01);
+      new Array(-1);
+    `);
+    const expected = unpad(`
+      Array(-0.01);
+      Array(-1);
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

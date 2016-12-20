@@ -15,8 +15,38 @@ module.exports = function({ types: t }) {
           function(path) {
             const { node } = path;
 
-            if (path.evaluateTruthy(node) === false) {
-              path.replaceWith(node.left);
+            const left = path.get("left");
+            const right = path.get("right");
+
+            // issues - 171, 174, 176
+            // we assume that it is returned/assigned/part of a bigger expression
+            // or utilized somehow
+            // we check if we shouldBail only when evaluating
+            // the rightside of the expression;
+            // if the left side is evaluated to be deterministic,
+            // we can safely replace the entire expression
+            const shouldBail = !path.parentPath.isExpressionStatement();
+
+            if (node.operator === "&&") {
+              const leftTruthy = left.evaluateTruthy();
+              if (leftTruthy === false) {
+                // Short-circuit
+                path.replaceWith(node.left);
+              } else if (leftTruthy === true && left.isPure()) {
+                path.replaceWith(node.right);
+              } else if (right.evaluateTruthy() === false && right.isPure() && !shouldBail) {
+                path.replaceWith(node.left);
+              }
+            } else if (node.operator === "||") {
+              const leftTruthy = left.evaluateTruthy();
+              if (leftTruthy === false && left.isPure()) {
+                path.replaceWith(node.right);
+              } else if (leftTruthy === true) {
+                // Short-circuit
+                path.replaceWith(node.left);
+              } else if (right.evaluateTruthy() === false && right.isPure() && !shouldBail) {
+                path.replaceWith(node.left);
+              }
             }
           },
 

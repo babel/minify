@@ -43,7 +43,7 @@ if (a.__DEV__) {
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-replace
+npm install babel-plugin-minify-replace
 ```
 
 ## Usage
@@ -57,23 +57,29 @@ $ npm install babel-plugin-minify-replace
 {
   "plugins": ["minify-replace"]
 }
+```
 
-// with plugins
+```json
+// with options
 {
-  "plugins": ["minify-replace", {
-    "identifierName": "__DEV__",
-    "replacement": {
-      "type": "booleanLiteral",
-      "value": true
-    }
-  }]
+  "plugins": [
+    ["minify-replace", {
+      "replacements": [{
+        "identifierName": "__DEV__",
+        "replacement": {
+          "type": "booleanLiteral",
+          "value": true
+        }
+      }]
+    }]
+  ]
 }
 ```
 
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-replace script.js
+babel --plugins minify-replace script.js
 ```
 
 ### Via Node API

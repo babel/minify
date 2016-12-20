@@ -17,7 +17,7 @@ Infinity;
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-infinity
+npm install babel-plugin-minify-infinity
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ $ npm install babel-plugin-minify-infinity
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-infinity script.js
+babel --plugins minify-infinity script.js
 ```
 
 ### Via Node API

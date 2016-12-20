@@ -1,10 +1,13 @@
 # babel-plugin-minify-simplify
 
-This plugin will transform code in mainly two ways:
+> Simplifies code for minification by reducing statements into expressions and making expressions uniform where possible.
 
-1. Reduce as much statements as possible into expressions
+## Example
+
+### Reduce statement into expression
 
 **In**
+
 ```js
 function foo() {
   if (x) a();
@@ -16,6 +19,7 @@ function foo2() {
 ```
 
 **Out**
+
 ```js
 function foo() {
   x && a();
@@ -25,9 +29,10 @@ function foo2() {
 }
 ```
 
-2. Make expressions as uniform as possible for better compressibility
+### Make expression as uniform as possible for better compressibility
 
 **In**
+
 ```js
 undefined
 foo['bar']
@@ -35,6 +40,7 @@ Number(foo)
 ```
 
 **Out**
+
 ```js
 void 0
 foo.bar
@@ -45,7 +51,7 @@ foo.bar
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-simplify
+npm install babel-plugin-minify-simplify
 ```
 
 ## Usage
@@ -63,7 +69,7 @@ $ npm install babel-plugin-minify-simplify
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-simplify script.js
+babel --plugins minify-simplify script.js
 ```
 
 ### Via Node API

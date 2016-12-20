@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-dead-code-elimination",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-dead-code-elimination",
@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "babel-helper-remove-or-void": "^0.0.1",
-    "lodash": "^4.14.1"
+    "lodash.some": "^4.6.0"
   },
   "devDependencies": {}
 }

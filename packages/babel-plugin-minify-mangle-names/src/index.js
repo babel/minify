@@ -4,13 +4,15 @@ module.exports = ({ types: t }) => {
   class Mangler {
     constructor(charset, program, {
       blacklist = {},
-      keepFnames = false,
+      keepFnName = false,
+      keepClassName = false,
       eval: _eval = false
     } = {}) {
       this.charset = charset;
       this.program = program;
       this.blacklist = blacklist;
-      this.keepFnames = keepFnames;
+      this.keepFnName = keepFnName;
+      this.keepClassName = keepClassName;
       this.eval = _eval;
 
       this.unsafeScopes = new Set;
@@ -39,7 +41,7 @@ module.exports = ({ types: t }) => {
     collect() {
       const mangler = this;
 
-      this.program.traverse({
+      const collectVisitor = {
         // capture direct evals
         CallExpression(path) {
           const callee = path.get("callee");
@@ -50,10 +52,12 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.markUnsafeScopes(path.scope);
           }
-        },
+        }
+      };
 
+      if (this.charset.shouldConsider) {
         // charset considerations
-        Identifier(path) {
+        collectVisitor.Identifier = function Identifier(path) {
           const { node } = path;
 
           if ((path.parentPath.isMemberExpression({ property: node })) ||
@@ -61,13 +65,15 @@ module.exports = ({ types: t }) => {
           ) {
             mangler.charset.consider(node.name);
           }
-        },
+        };
 
         // charset considerations
-        Literal({ node }) {
+        collectVisitor.Literal = function Literal({ node }) {
           mangler.charset.consider(String(node.value));
-        }
-      });
+        };
+      }
+
+      this.program.traverse(collectVisitor);
     }
 
     mangle() {
@@ -75,8 +81,6 @@ module.exports = ({ types: t }) => {
 
       this.program.traverse({
         Scopable(path) {
-          if (path.isProgram()) return;
-
           const {scope} = path;
 
           if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
@@ -103,26 +107,51 @@ module.exports = ({ types: t }) => {
           //   i = 0;
           // }
 
-          Object
-            .keys(scope.getAllBindings())
-            .filter((b) => {
-              const binding = scope.getBinding(b);
+          const bindings = scope.getAllBindings();
+          const names = Object.keys(bindings);
 
-              return scope.hasOwnBinding(b)
-                && !binding.path.isLabeledStatement()
-                && !mangler.isBlacklist(b, mangler.blacklist)
-                && (mangler.keepFnames ? !isFunction(binding.path) : true);
-            })
-            .map((b) => {
-              let next;
-              do {
-                next = getNext();
-              } while (!t.isValidIdentifier(next) || scope.hasBinding(next) || scope.hasGlobal(next) || scope.hasReference(next));
-              // TODO:
-              // re-enable this
-              // resetNext();
-              mangler.rename(scope, b, next);
-            });
+          for (let i = 0; i < names.length; i++) {
+            const oldName = names[i];
+            const binding = bindings[oldName];
+
+            if (
+              // already renamed bindings
+              binding.renamed
+              // arguments
+              || oldName === "arguments"
+              // globals
+              || mangler.program.scope.bindings[oldName] === binding
+              // other scope bindings
+              || !scope.hasOwnBinding(oldName)
+              // labels
+              || binding.path.isLabeledStatement()
+              // blacklisted
+              || mangler.isBlacklist(oldName)
+              // function names
+              || (mangler.keepFnName ? isFunction(binding.path) : false)
+              // class names
+              || (mangler.keepClassName ? isClass(binding.path) : false)
+            ) {
+              continue;
+            }
+
+            let next;
+            do {
+              next = getNext();
+            } while (
+              !t.isValidIdentifier(next)
+              || hop.call(bindings, next)
+              || scope.hasGlobal(next)
+              || scope.hasReference(next)
+            );
+
+            // TODO:
+            // re-enable this - check above
+            // resetNext();
+            mangler.rename(scope, oldName, next);
+            // mark the binding as renamed
+            binding.renamed = true;
+          }
         }
       });
 
@@ -252,11 +281,15 @@ class Charset {
   }
 }
 
-// for keepFnames
+// for keepFnName
 function isFunction(path) {
   return path.isFunctionExpression()
-    || path.isFunctionDeclaration()
-    || path.isClassExpression()
+    || path.isFunctionDeclaration();
+}
+
+// for keepClassName
+function isClass(path) {
+  return path.isClassExpression()
     || path.isClassDeclaration();
 }
 

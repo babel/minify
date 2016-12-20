@@ -177,7 +177,7 @@ describe("mangle-names", () => {
   });
 
   // https://phabricator.babeljs.io/T6957
-  xit("labels should not shadow bindings", () => {
+  it("labels should not shadow bindings", () => {
     const source = unpad(`
       function foo() {
         var meh;
@@ -198,6 +198,28 @@ describe("mangle-names", () => {
       }
     `);
 
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("labels should not shadow bindings 2", () => {
+    const source = unpad(`
+      function f(a) {
+        try {
+          a: {
+            console.log(a);
+          }
+        } catch ($a) { }
+      }
+    `);
+    const expected = unpad(`
+      function f(b) {
+        try {
+          a: {
+            console.log(b);
+          }
+        } catch (c) {}
+      }
+    `);
     expect(transform(source)).toBe(expected);
   });
 
@@ -704,7 +726,7 @@ describe("mangle-names", () => {
     `);
 
     const ast = babel.transform(source, {
-      presets: ["es2015"],
+      presets: ["env"],
       sourceType: "script",
       code: false
     }).ast;
@@ -734,11 +756,9 @@ describe("mangle-names", () => {
     expect(actual).toBe(expected);
   });
 
-  it("should NOT mangle functions & classes when keep_fnames is true", () => {
+  it("should NOT mangle functions when keepFnName is true", () => {
     const source = unpad(`
       (function() {
-        class Foo {}
-        const Bar = class Bar extends Foo {}
         var foo = function foo() {
           foo();
         }
@@ -752,20 +772,44 @@ describe("mangle-names", () => {
     `);
     const expected = unpad(`
       (function () {
-        class Foo {}
-        const a = class Bar extends Foo {};
-        var b = function foo() {
+        var a = function foo() {
           foo();
         };
         function bar() {
-          b();
+          a();
         }
         bar();
-        var c = b;
-        c();
+        var b = a;
+        b();
       })();
     `);
-    expect(transform(source, {keepFnames: true})).toBe(expected);
+    expect(transform(source, {keepFnName: true})).toBe(expected);
+  });
+
+  it("should NOT mangle classes when keepClassName is true", () => {
+    const source = unpad(`
+      (function() {
+        class Foo {}
+        const Bar = class Bar extends Foo {}
+        var foo = class Baz {}
+        function bar() {
+          new foo();
+        }
+        bar();
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        class Foo {}
+        const b = class Bar extends Foo {};
+        var c = class Baz {};
+        function a() {
+          new c();
+        }
+        a();
+      })();
+    `);
+    expect(transform(source, {keepClassName: true})).toBe(expected);
   });
 
   it("should mangle variable re-declaration / K violations", () => {
@@ -902,5 +946,85 @@ describe("mangle-names", () => {
       }
     `);
     expect(transform(source, {}, "module")).toBe(expected);
+  });
+
+  it("should find global scope properly", () => {
+    const source = unpad(`
+      class A {}
+      class B extends A {}
+      (function () {
+        class C {
+          constructor() {
+            new A();
+            new B();
+            C;
+          }
+        }
+      })();
+    `);
+    const expected = unpad(`
+      class A {}
+      class B extends A {}
+      (function () {
+        class a {
+          constructor() {
+            new A();
+            new B();
+            a;
+          }
+        }
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should mangle classes properly", () => {
+    const source = unpad(`
+      class A {}
+      class B {}
+      new A();
+      new B();
+      function a() {
+        class A {}
+        class B {}
+        new A();
+        new B();
+      }
+    `);
+    const expected = unpad(`
+      class A {}
+      class B {}
+      new A();
+      new B();
+      function a() {
+        class b {}
+        class c {}
+        new b();
+        new c();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  // https://github.com/babel/babili/issues/138
+  it("should handle class exports in modules - issue#138", () => {
+    const source = unpad(`
+      export class App extends Object {};
+    `);
+    const expected = source;
+    expect(transform(source, {}, "module")).toBe(expected);
+  });
+
+  it("should not mangle the name arguments", () => {
+    const source = unpad(`
+      (function () {
+        var arguments = void 0;
+        (function () {
+          console.log(arguments);
+        })("argument");
+      })();
+    `);
+    const expected = source;
+    expect(transform(source)).toBe(expected);
   });
 });

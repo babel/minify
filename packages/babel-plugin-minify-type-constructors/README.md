@@ -10,6 +10,9 @@
 Boolean(x);
 Number(x);
 String(x);
+Array(3);
+Array(3,1);
+Object({foo: 'bar'});
 ```
 
 **Out**
@@ -18,12 +21,15 @@ String(x);
 !!x;
 +x;
 x + "";
+[,,,];
+[3, 1];
+{foo: 'bar'};
 ```
 
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-type-constructors
+npm install babel-plugin-minify-type-constructors
 ```
 
 ## Usage
@@ -41,7 +47,7 @@ $ npm install babel-plugin-minify-type-constructors
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-type-constructors script.js
+babel --plugins minify-type-constructors script.js
 ```
 
 ### Via Node API
