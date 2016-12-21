@@ -7,3 +7,6 @@
 [submodule "scripts/jquery"]
 	path = scripts/jquery
 	url = https://github.com/jquery/jquery
+[submodule "scripts/draft-js"]
+	path = scripts/draft-js
+	url = https://github.com/facebook/draft-js
