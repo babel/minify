@@ -1,0 +1,9 @@
+[submodule "scripts/react"]
+	path = scripts/react
+	url = https://github.com/facebook/react
+[submodule "scripts/immutable-js"]
+	path = scripts/immutable-js
+	url = https://github.com/facebook/immutable-js
+[submodule "scripts/jquery"]
+	path = scripts/jquery
+	url = https://github.com/jquery/jquery
