@@ -10,3 +10,6 @@
 [submodule "scripts/draft-js"]
 	path = scripts/draft-js
 	url = https://github.com/facebook/draft-js
+[submodule "scripts/html-minifier"]
+	path = scripts/html-minifier
+	url = https://github.com/kangax/html-minifier
