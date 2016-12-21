@@ -3,17 +3,17 @@ const fs = require("fs");
 const transform = require("babel-core").transform;
 const chalk = require("chalk");
 
-module.exports = function(dirPath, filePath, commands) {
+module.exports = function(dirPath, filePath, options) {
 
-  if (commands.build) {
-    commands.build = `cd ${dirPath} && ${commands.build}`;
+  if (options.build) {
+    options.build = `cd ${dirPath} && ${options.build}`;
   }
-  commands.test = `cd ${dirPath} && ${commands.test}`;
+  options.test = `cd ${dirPath} && ${options.test}`;
 
-  console.log(chalk.green("1.", commands.build || "Nothing to build"));
+  console.log(chalk.green("1.", options.build || "Nothing to build"));
 
-  if (commands.build) {
-    const buildProcess = exec(commands.build, (err) => {
+  if (options.build) {
+    const buildProcess = exec(options.build, (err) => {
       if (err) {
         console.error(`Error building: ${err}`);
         return;
@@ -40,7 +40,7 @@ module.exports = function(dirPath, filePath, commands) {
         comments: false,
         minified: true,
         passPerPreset: true,
-        presets: ["babili"],
+        presets: [["babili", options.babiliOptions]],
       });
 
       fs.writeFile(`${dirPath}/${filePath}`, minified, (err) => {
@@ -49,13 +49,15 @@ module.exports = function(dirPath, filePath, commands) {
           return;
         }
 
-        console.log(chalk.green("3.", commands.test));
-        const testProcess = exec(commands.test, (err, stdout) => {
+        console.log(chalk.green("3.", options.test));
+        const testProcess = exec(options.test, (err, stdout) => {
           if (err) {
             console.error(`Error testing: ${err}`);
             return;
           }
-          console.log(stdout);
+          if (options.success && stdout.indexOf(options.success) > -1) {
+            console.log(chalk.black.bgGreen('Success!'));
+          }
           process.exit(0);
         });
 
