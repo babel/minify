@@ -3,12 +3,12 @@ const fs = require("fs");
 const transform = require("babel-core").transform;
 const chalk = require("chalk");
 
-module.exports = function(dirPath, filePath, options) {
+module.exports = function(options, done) {
 
   if (options.build) {
-    options.build = `cd ${dirPath} && ${options.build}`;
+    options.build = `cd ${options.dir} && ${options.build}`;
   }
-  options.test = `cd ${dirPath} && ${options.test}`;
+  options.test = `cd ${options.dir} && ${options.test}`;
 
   console.log(chalk.green("1.", options.build || "Nothing to build"));
 
@@ -28,13 +28,13 @@ module.exports = function(dirPath, filePath, options) {
   }
 
   function minify() {
-    fs.readFile(`${dirPath}/${filePath}`, (err, data) => {
+    fs.readFile(`${options.dir}/${options.file}`, (err, data) => {
       if (err) {
         console.error(`Error reading file: ${err}`);
         return;
       }
 
-      console.log(chalk.green("2. Minifying", filePath));
+      console.log(chalk.green("2. Minifying", options.file));
 
       const { code: minified } = transform(data.toString(), {
         comments: false,
@@ -43,7 +43,7 @@ module.exports = function(dirPath, filePath, options) {
         presets: [["babili", options.babiliOptions]],
       });
 
-      fs.writeFile(`${dirPath}/${filePath}`, minified, (err) => {
+      fs.writeFile(`${options.dir}/${options.file}`, minified, (err) => {
         if (err) {
           console.error(`Error writing file: ${err}`);
           return;
@@ -55,10 +55,17 @@ module.exports = function(dirPath, filePath, options) {
             console.error(`Error testing: ${err}`);
             return;
           }
-          if (options.success && stdout.indexOf(options.success) > -1) {
+
+          const isSuccessful = (
+            options.success &&
+            stdout.indexOf(options.success) > -1
+          );
+
+          if (isSuccessful) {
             console.log(chalk.black.bgGreen('Success!'));
           }
-          process.exit(0);
+
+          done(isSuccessful);
         });
 
         testProcess.stdout.pipe(process.stdout);
