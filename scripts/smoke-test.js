@@ -62,7 +62,7 @@ module.exports = function(options, done) {
           );
 
           if (isSuccessful) {
-            console.log(chalk.black.bgGreen('Success!'));
+            console.log(chalk.black.bgGreen("Success!"));
           }
 
           done(isSuccessful);

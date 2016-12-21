@@ -1,6 +1,6 @@
 const smoke = require("./smoke-test.js");
 
-var tests = [
+const tests = [
   {
     dir: "jquery",
     file: "dist/jquery.js",
