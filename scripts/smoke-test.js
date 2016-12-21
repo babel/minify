@@ -5,18 +5,30 @@ const chalk = require('chalk');
 
 module.exports = function(dirPath, filePath, commands) {
 
-	commands.build = `cd ${dirPath} && ${commands.build}`;
+	if (commands.build) {
+		commands.build = `cd ${dirPath} && ${commands.build}`;
+	}
 	commands.test = `cd ${dirPath} && ${commands.test}`;
 
-	console.log(chalk.green('1.', commands.build));
+	console.log(chalk.green('1.', commands.build || 'Nothing to build'));
 
-	const buildProcess = exec(commands.build, (err, stdout, stderr) => {
-	  if (err) {
-	    console.error(`Error building: ${err}`);
-	    return;
-	  }
+	if (commands.build) {
+		const buildProcess = exec(commands.build, (err, stdout, stderr) => {
+		  if (err) {
+		    console.error(`Error building: ${err}`);
+		    return;
+		  }
+		  minify();
+		});
 
-	  fs.readFile(`${dirPath}/${filePath}`, (err, data) => {
+		buildProcess.stdout.pipe(process.stdout);
+	}
+	else {
+		minify();
+	}
+
+	function minify() {
+		fs.readFile(`${dirPath}/${filePath}`, (err, data) => {
 	  	if (err) {
 	  	  console.error(`Error reading file: ${err}`);
 	  	  return;
@@ -50,7 +62,5 @@ module.exports = function(dirPath, filePath, commands) {
 	  		testProcess.stdout.pipe(process.stdout);
 	  	});
 	  });
-	});
-
-	buildProcess.stdout.pipe(process.stdout);
+	}
 }
