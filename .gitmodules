@@ -13,3 +13,9 @@
 [submodule "scripts/html-minifier"]
 	path = scripts/html-minifier
 	url = https://github.com/kangax/html-minifier
+[submodule "scripts/babel"]
+	path = scripts/babel
+	url = https://github.com/babel/babel
+[submodule "scripts/stylelint"]
+	path = scripts/stylelint
+	url = https://github.com/stylelint/stylelint
