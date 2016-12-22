@@ -8,7 +8,7 @@ function transform(code, options = {}, sourceType = "script") {
     sourceType,
     minified: false,
     presets: [
-      require("../src/index")
+      [require("../src/index"), options]
     ],
   }).code;
 }
@@ -60,5 +60,45 @@ describe("preset", () => {
       var asdf = 1;
     `);
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should fix bug#326 - object destructuring", () => {
+    const source = unpad(`
+      function a() {
+        let foo, bar, baz;
+        ({foo, bar, baz} = {});
+        return {foo, bar, baz};
+      }
+    `);
+    const expected = unpad(`
+      function a() {
+        let a, b, c;
+
+        return ({ foo: a, bar: b, baz: c } = {}), { foo: a, bar: b, baz: c };
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should fix bug#326 - object destructuring", () => {
+    const source = unpad(`
+      function a() {
+        let foo, bar, baz;
+        ({foo, bar, baz} = {});
+        return {foo, bar, baz};
+      }
+    `);
+    const expected = unpad(`
+      function a() {
+        let b, c, d;
+
+        return ({ foo: b, bar: c, baz: d } = {}), { foo: b, bar: c, baz: d };
+      }
+    `);
+    expect(transform(source, {
+      mangle: {
+        reuse: false
+      }
+    })).toBe(expected);
   });
 });

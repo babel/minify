@@ -1089,5 +1089,22 @@ describe("mangle-names", () => {
     `);
     expect(transformWithSimplify(source)).toBe(expected);
   });
-});
 
+  it("should work with object destructuring", () => {
+    const source = unpad(`
+      function a() {
+        let foo, bar, baz;
+        ({foo, bar, baz} = {});
+        return {foo, bar, baz};
+      }
+    `);
+    const expected = unpad(`
+      function a() {
+        let b, c, d;
+        ({ foo: b, bar: c, baz: d } = {});
+        return { foo: b, bar: c, baz: d };
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+});
