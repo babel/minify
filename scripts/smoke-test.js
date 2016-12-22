@@ -2,6 +2,7 @@ const exec = require("child_process").exec;
 const fs = require("fs");
 const transform = require("babel-core").transform;
 const chalk = require("chalk");
+const glob = require("glob");
 
 module.exports = function(options, done) {
 
@@ -18,58 +19,87 @@ module.exports = function(options, done) {
         console.error(`Error building: ${err}`);
         return;
       }
-      minify();
+      minifyAll();
     });
 
     buildProcess.stdout.pipe(process.stdout);
   }
   else {
-    minify();
+    minifyAll();
   }
 
-  function minify() {
-    fs.readFile(`${options.dir}/${options.file}`, (err, data) => {
+  function minifyAll() {
+    const globOptions = {
+      ignore: "**/__tests__/**"
+    };
+    glob(`${options.dir}/${options.files}`, globOptions, (err, files) => {
+      if (err) {
+        console.log(`Error getting file(s) path: ${err}`);
+        return;
+      }
+      (function process(file) {
+        minify(file, () => {
+          const file = files.pop();
+          if (file) {
+            process(file);
+          }
+          else {
+            test();
+          }
+        });
+      })(files.pop());
+    });
+  }
+
+  function minify(file, done) {
+    fs.readFile(file, (err, data) => {
       if (err) {
         console.error(`Error reading file: ${err}`);
         return;
       }
 
-      console.log(chalk.green("2. Minifying", options.file));
+      console.log(chalk.green("2. Minifying", file));
 
-      const { code: minified } = transform(data.toString(), {
+      const babelOptions = Object.assign(options.babelOptions || { }, {
         comments: false,
         minified: true,
         passPerPreset: true,
-        presets: [["babili", options.babiliOptions]],
+        presets: ["react", ["babili", options.babiliOptions]],
       });
 
-      fs.writeFile(`${options.dir}/${options.file}`, minified, (err) => {
+      const { code: minified } = transform(data.toString(), babelOptions);
+
+      fs.writeFile(file, minified, (err) => {
         if (err) {
           console.error(`Error writing file: ${err}`);
           return;
         }
-
-        console.log(chalk.green("3.", options.test));
-        const testProcess = exec(options.test, (err, stdout) => {
-          if (err) {
-            console.error(`Error testing: ${err}`);
-            return;
-          }
-
-          const isSuccessful = (
-            options.success &&
-            stdout.indexOf(options.success) > -1
-          );
-
-          if (isSuccessful) {
-            console.log(chalk.black.bgGreen("Success!"));
-          }
-
-          done(isSuccessful);
-        });
-
-        testProcess.stdout.pipe(process.stdout);
+        done();
       });
     });
+  }
+
+  function test() {
+    console.log(chalk.green("3.", options.test));
+    const testProcess = exec(options.test, (err, stdout) => {
+
+      if (err) {
+        console.error(`Error testing: ${err}`);
+        return;
+      }
+
+      const isSuccessful = (
+        options.success &&
+        stdout.indexOf(options.success) > -1
+      );
+
+      if (isSuccessful) {
+        console.log(chalk.black.bgGreen("Success!"));
+      }
+
+      done(isSuccessful);
+    });
+
+    testProcess.stdout.pipe(process.stdout);
   }
 };
