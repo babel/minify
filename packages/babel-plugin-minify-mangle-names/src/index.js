@@ -11,7 +11,7 @@ module.exports = ({ types: t, traverse }) => {
       keepFnName = false,
       keepClassName = false,
       eval: _eval = false,
-      reuse = false,
+      reuse = true,
     } = {}) {
       this.charset = charset;
       this.program = program;

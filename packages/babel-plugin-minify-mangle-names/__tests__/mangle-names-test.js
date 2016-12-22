@@ -5,6 +5,7 @@ const babel    = require("babel-core");
 const unpad    = require("../../../utils/unpad");
 
 function transform(code, options = {}, sourceType = "script") {
+  options.reuse = false;
   return babel.transform(code,  {
     sourceType,
     plugins: [
@@ -14,6 +15,7 @@ function transform(code, options = {}, sourceType = "script") {
 }
 
 function transformWithSimplify(code, options = {}, sourceType = "script") {
+  options.reuse = false;
   return babel.transform(code, {
     sourceType,
     plugins: [
@@ -595,7 +597,7 @@ describe("mangle-names", () => {
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [require("../src/index")],
+      plugins: [[require("../src/index"), { reuse: false }]],
     }).code;
 
     const expected = unpad(`
@@ -643,7 +645,7 @@ describe("mangle-names", () => {
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [require("../src/index")],
+      plugins: [[require("../src/index"), { reuse: false }]],
     }).code;
 
     const expected = unpad(`
