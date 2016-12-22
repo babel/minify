@@ -9,7 +9,8 @@ module.exports = function(options, done) {
   if (options.build) {
     options.build = `cd ${options.dir} && ${options.build}`;
   }
-  options.test = `cd ${options.dir} && ${options.test}`;
+
+  options.test = `cd ${options.dir} && git reset --hard HEAD && ${options.test}`;
 
   console.log(chalk.green("1.", options.build || "Nothing to build"));
 
@@ -30,7 +31,7 @@ module.exports = function(options, done) {
 
   function minifyAll() {
     const globOptions = {
-      ignore: "**/__tests__/**"
+      ignore: options.ignore
     };
     glob(`${options.dir}/${options.files}`, globOptions, (err, files) => {
       if (err) {
@@ -64,7 +65,11 @@ module.exports = function(options, done) {
         comments: false,
         minified: true,
         passPerPreset: true,
-        presets: ["react", ["babili", options.babiliOptions]],
+        presets: [
+          "es2015",
+          "react",
+          ["babili", options.babiliOptions]
+        ],
       });
 
       const { code: minified } = transform(data.toString(), babelOptions);
