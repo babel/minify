@@ -12,8 +12,10 @@ function bar() { var x = f(); }
 function baz() {
   var x = 1;
   console.log(x);
+  function unused() {
+    return 5;
+  }
 }
-foo(0 && bar());
 ```
 
 **Out**
@@ -24,7 +26,6 @@ function bar() { f(); }
 function baz() {
   console.log(1);
 }
-foo(0);
 ```
 
 ## Installation
