@@ -24,26 +24,26 @@ const tests = [
   //   test: "grunt qunit",
   //   success: "0 failed",
   // },
-  {
-    dir: "stylelint",
-    files: "lib/**/*.js",
-    ignore: [
-      "**/__tests__/**",
-      "**/lib/rules/declaration-block-properties-order/index.js",
-      "**/lib/rules/declaration-block-no-redundant-longhand-properties/index.js",
-      "**/lib/rules/at-rule-empty-line-before/index.js",
-      "**/lib/rules/max-empty-lines/index.js",
-      "**/lib/rules/block-closing-brace-newline-before/index.js",
-      "**/lib/rules/function-calc-no-unspaced-operator/index.js",
-      "**/lib/rules/font-weight-notation/index.js",
-      "**/lib/rules/max-line-length/index.js",
-      "**/lib/rules/selector-class-pattern/index.js",
-      "**/lib/rules/declaration-colon-newline-after/index.js",
-    ],
-    build: "npm install",
-    test: "npm run jest",
-    success: "Test Suites: 264 passed, 264 total",
-  },
+  // {
+  //   dir: "stylelint",
+  //   files: "lib/**/*.js",
+  //   ignore: [
+  //     "**/__tests__/**",
+  //     "**/lib/rules/declaration-block-properties-order/index.js",
+  //     "**/lib/rules/declaration-block-no-redundant-longhand-properties/index.js",
+  //     "**/lib/rules/at-rule-empty-line-before/index.js",
+  //     "**/lib/rules/max-empty-lines/index.js",
+  //     "**/lib/rules/block-closing-brace-newline-before/index.js",
+  //     "**/lib/rules/function-calc-no-unspaced-operator/index.js",
+  //     "**/lib/rules/font-weight-notation/index.js",
+  //     "**/lib/rules/max-line-length/index.js",
+  //     "**/lib/rules/selector-class-pattern/index.js",
+  //     "**/lib/rules/declaration-colon-newline-after/index.js",
+  //   ],
+  //   build: "npm install",
+  //   test: "npm run jest",
+  //   success: "Test Suites: 264 passed, 264 total",
+  // },
   // {
   //   dir: "immutable-js",
   //   files: "dist/immutable.js",
@@ -61,19 +61,18 @@ const tests = [
   //   build: "npm install && npm run build",
   //   test: "npm test",
   // },
-  // {
-  //   dir: "draft-js",
-  //   files: "dist/Draft.js",
-  //   build: "npm install && gulp build",
-  //   test: "npm test",
-  // }
+  {
+    dir: "draft-js",
+    files: "dist/Draft.js",
+    build: "npm cache clean && npm install",
+    test: "npm test",
+    verbose: false
+  }
 ];
 
 (function tick(test) {
-  smoke(test, (isSuccessful) => {
+  smoke(test, () => {
     const test = tests.pop();
-    if (isSuccessful && test) {
-      tick(test);
-    }
+    test && tick(test);
   });
 })(tests.pop());

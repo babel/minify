@@ -4,13 +4,18 @@ const transform = require("babel-core").transform;
 const chalk = require("chalk");
 const glob = require("glob");
 
-module.exports = function(options, done) {
+module.exports = function smoke(options, done) {
+
+  // clone options not to mutate them
+  options = Object.assign({}, options);
+
+  let _es2015 = true;
 
   if (options.build) {
     options.build = `cd ${options.dir} && ${options.build}`;
   }
 
-  options.test = `cd ${options.dir} && git reset --hard HEAD && ${options.test}`;
+  options.test = `cd ${options.dir} && ${options.test}`;
 
   console.log(chalk.green("1.", options.build || "Nothing to build"));
 
@@ -23,7 +28,7 @@ module.exports = function(options, done) {
       minifyAll();
     });
 
-    buildProcess.stdout.pipe(process.stdout);
+    options.verbose && buildProcess.stdout.pipe(process.stdout);
   }
   else {
     minifyAll();
@@ -39,7 +44,7 @@ module.exports = function(options, done) {
         return;
       }
       (function process(file) {
-        minify(file, () => {
+        minify(file, _es2015, () => {
           const file = files.pop();
           if (file) {
             process(file);
@@ -52,24 +57,29 @@ module.exports = function(options, done) {
     });
   }
 
-  function minify(file, done) {
+  function minify(file, es2015, done) {
     fs.readFile(file, (err, data) => {
       if (err) {
         console.error(`Error reading file: ${err}`);
         return;
       }
 
-      console.log(chalk.green("2. Minifying", file));
+      console.log(chalk.green(`2. Minifying ${file}, es2015=${es2015}`));
+
+      const presets = [
+        "react",
+        ["babili", options.babiliOptions],
+      ];
+
+      if (es2015) {
+        presets.unshift("es2015");
+      }
 
       const babelOptions = Object.assign(options.babelOptions || { }, {
         comments: false,
         minified: true,
         passPerPreset: true,
-        presets: [
-          "es2015",
-          "react",
-          ["babili", options.babiliOptions]
-        ],
+        presets,
       });
 
       const { code: minified } = transform(data.toString(), babelOptions);
@@ -102,9 +112,16 @@ module.exports = function(options, done) {
         console.log(chalk.black.bgGreen("Success!"));
       }
 
-      done(isSuccessful);
+      // this is brittle but for now... whatever
+      if (_es2015) {
+        _es2015 = false;
+        minifyAll();
+      }
+      else {
+        done(isSuccessful);
+      }
     });
 
-    testProcess.stdout.pipe(process.stdout);
+    options.verbose && testProcess.stdout.pipe(process.stdout);
   }
 };
