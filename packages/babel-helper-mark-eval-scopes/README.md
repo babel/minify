@@ -1,9 +1,9 @@
-# # babel-helper-evaluate-path
+# babel-helper-mark-eval-scopes
 
-`path.evaluate` wrapped in a try catch
+Traverse through input path and mark all scopes that contain Direct eval (`eval("")`) calls.
 
 ## Installation
 
 ```sh
-npm install babel-helper-evaluate-path
+npm install babel-helper-mark-eval-scopes
 ```
