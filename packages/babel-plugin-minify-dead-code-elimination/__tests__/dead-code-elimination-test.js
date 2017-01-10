@@ -2306,4 +2306,30 @@ describe("dce-plugin", () => {
     `);
     expect(transformWithSimplify(source)).toBe(expected);
   });
+
+  it("should not remove params from functions containing direct eval", () => {
+    const source = unpad(`
+      function a(b, c, d) {
+        eval(";");
+        return b;
+      }
+      function b(c, d, e) {
+        (1, eval)(";");
+        return c;
+      }
+    `);
+
+    const expected = unpad(`
+      function a(b, c, d) {
+        eval(";");
+        return b;
+      }
+      function b(c) {
+        (1, eval)(";");
+        return c;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
