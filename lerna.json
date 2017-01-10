@@ -1,5 +1,5 @@
 {
-  "lerna": "2.0.0-beta.26",
+  "lerna": "2.0.0-beta.32",
   "version": "independent",
   "publishConfig": {
     "ignore": [
