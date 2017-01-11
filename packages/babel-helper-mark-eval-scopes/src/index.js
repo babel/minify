@@ -1,6 +1,6 @@
 "use strict";
 
-const EVAL_SCOPE_MARKER = "evalInScope";
+const EVAL_SCOPE_MARKER = Symbol("evalInScope");
 
 module.exports = {
   EVAL_SCOPE_MARKER,
