@@ -490,7 +490,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should not mangle vars in scope with eval" , () => {
+  it("should not mangle vars in scope with eval", () => {
     const source = unpad(`
       function foo() {
         var inScopeOuter = 1;

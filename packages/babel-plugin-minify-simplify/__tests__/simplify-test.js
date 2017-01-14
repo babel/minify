@@ -2304,7 +2304,7 @@ describe("simplify-plugin", () => {
   });
 
   it("should transform complex logical expressions", () => {
-    let sources = unpad(`
+    const sources = unpad(`
       a = true && 1 && foo
       a = 1 && 4 * 2 && console.log("asdf")
       a = 4 * 2 && NaN && foo()
@@ -2312,7 +2312,7 @@ describe("simplify-plugin", () => {
       a = -1 && undefined || 5 << foo
     `).split("\n");
 
-    let expected = unpad(`
+    const expected = unpad(`
       a = foo;
       a = console.log("asdf");
       a = NaN;

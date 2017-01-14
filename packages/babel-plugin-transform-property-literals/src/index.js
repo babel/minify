@@ -7,7 +7,7 @@ module.exports = function({ types: t }) {
       // { 'foo': 'bar' } -> { foo: 'bar' }
       ObjectProperty: {
         exit({ node }) {
-          let key = node.key;
+          const key = node.key;
           if (!t.isStringLiteral(key)) {
             return;
           }

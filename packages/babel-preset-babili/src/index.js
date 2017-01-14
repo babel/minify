@@ -34,7 +34,7 @@ function preset(context, _opts = {}) {
   const opts = isPlainObject(_opts) ? _opts : {};
 
   // to track every plugin is used
-  let usedPlugins = new Set;
+  const usedPlugins = new Set;
 
   const optionsMap = PLUGINS
     .map((plugin) => option(plugin[0], plugin[1], plugin[2]))

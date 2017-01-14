@@ -13,13 +13,13 @@ module.exports = function({ types: t }) {
         return;
       }
 
-      let firstNode = body[0].node.declarations[0];
+      const firstNode = body[0].node.declarations[0];
 
       if (!t.isIdentifier(firstNode.id) || !firstNode.init) {
         return;
       }
 
-      let init = path.get("init");
+      const init = path.get("init");
       if (!init.isVariableDeclaration({ kind: kind })) {
         return;
       }
@@ -56,10 +56,10 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            let { node } = path;
+            const { node } = path;
 
             while (true) {
-              let sibling = path.getSibling(path.key + 1);
+              const sibling = path.getSibling(path.key + 1);
               if (!sibling.isVariableDeclaration({ kind: node.kind })) {
                 break;
               }
@@ -82,12 +82,12 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            let next = path.getSibling(path.key + 1);
+            const next = path.getSibling(path.key + 1);
             if (!next.isForStatement()) {
               return;
             }
 
-            let init = next.get("init");
+            const init = next.get("init");
             if (!init.isVariableDeclaration({ kind: node.kind })) {
               return;
             }

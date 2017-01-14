@@ -351,7 +351,7 @@ module.exports = ({ types: t }) => {
               [EX, EX, false, (e, c) => and(notnot(e), c)]
             ]);
 
-            let result = matcher.match(
+            const result = matcher.match(
               [test, consequent, alternate],
               isPatternMatchesPath
             );
@@ -372,7 +372,7 @@ module.exports = ({ types: t }) => {
               return;
             }
 
-            let mutations = [];
+            const mutations = [];
             let firstLeft = null;
             let operator = null;
             function visit(path) {
@@ -409,7 +409,7 @@ module.exports = ({ types: t }) => {
               );
             }
 
-            let bail = visit(topPath);
+            const bail = visit(topPath);
             if (bail) {
               return;
             }
@@ -488,9 +488,9 @@ module.exports = ({ types: t }) => {
               return;
             }
 
-            let inits = [];
-            let empty = [];
-            for (let decl of node.declarations) {
+            const inits = [];
+            const empty = [];
+            for (const decl of node.declarations) {
               if (!decl.init) {
                 empty.push(decl);
               } else {
@@ -636,7 +636,7 @@ module.exports = ({ types: t }) => {
             return;
           }
 
-          let rest = [];
+          const rest = [];
 
           if (breakAt = "consequent") {
             if (t.isBlockStatement(ifStatement.alternate)) {
@@ -745,7 +745,7 @@ module.exports = ({ types: t }) => {
             return;
           }
 
-          for (let statement of statements) {
+          for (const statement of statements) {
             if (!t.isExpressionStatement(statement)) {
               return;
             }
@@ -1102,7 +1102,7 @@ module.exports = ({ types: t }) => {
 
             const expr = exprs.length === 1 ? exprs[0] : t.sequenceExpression(exprs);
 
-            let replacement = t.logicalExpression("&&", node.test, expr);
+            const replacement = t.logicalExpression("&&", node.test, expr);
 
             path.replaceWith(t.ifStatement(
               replacement,
@@ -1131,8 +1131,8 @@ module.exports = ({ types: t }) => {
 
           function flatten(node) {
             node[seqExprSeen] = true;
-            let ret = [];
-            for (let n of node.expressions) {
+            const ret = [];
+            for (const n of node.expressions) {
               if (t.isSequenceExpression(n)) {
                 ret.push(...flatten(n));
               } else {
@@ -1176,7 +1176,7 @@ module.exports = ({ types: t }) => {
             const consTestPairs = [];
             let fallThru = [];
             let defaultRet;
-            for (let switchCase of node.cases) {
+            for (const switchCase of node.cases) {
               if (switchCase.consequent.length > 1) {
                 return;
               }
@@ -1277,7 +1277,7 @@ module.exports = ({ types: t }) => {
             const exprTestPairs = [];
             let fallThru = [];
             let defaultExpr;
-            for (let switchCase of node.cases) {
+            for (const switchCase of node.cases) {
               if (!switchCase.test) {
                 if (switchCase.consequent.length !== 1) {
                   return;
@@ -1368,7 +1368,7 @@ module.exports = ({ types: t }) => {
       return;
     }
 
-    let test = node.test;
+    const test = node.test;
     let flip = false;
 
     if (t.isBinaryExpression(test)) {
@@ -1389,7 +1389,7 @@ module.exports = ({ types: t }) => {
     }
 
     if (flip) {
-      let consequent = node.consequent;
+      const consequent = node.consequent;
       node.consequent = node.alternate;
       node.alternate = consequent;
     }
@@ -1496,11 +1496,11 @@ module.exports = ({ types: t }) => {
   function createPrevExpressionEater(keyword) {
     let key;
     switch (keyword) {
-    case "switch": key = "discriminant"; break;
-    case "throw":
-    case "return": key = "argument"; break;
-    case "if": key = "test"; break;
-    case "for-in": key = "right"; break;
+      case "switch": key = "discriminant"; break;
+      case "throw":
+      case "return": key = "argument"; break;
+      case "if": key = "test"; break;
+      case "for-in": key = "right"; break;
     }
 
     return function(path) {
@@ -1558,7 +1558,7 @@ module.exports = ({ types: t }) => {
       return patternValue(inputPath);
     }
     if (isNodeOfType(inputPath.node, patternValue)) return true;
-    let evalResult = inputPath.evaluate();
+    const evalResult = inputPath.evaluate();
     if (!evalResult.confident || !inputPath.isPure()) return false;
     return evalResult.value === patternValue;
   }
