@@ -65,10 +65,10 @@ module.exports = function(t) {
         if (t.isBinaryExpression(node)) {
           let operator;
           switch (node.operator) {
-          case "!==": operator = "==="; break;
-          case "===": operator = "!=="; break;
-          case "!=": operator = "=="; break;
-          case "==": operator = "!="; break;
+            case "!==": operator = "==="; break;
+            case "===": operator = "!=="; break;
+            case "!=": operator = "=="; break;
+            case "==": operator = "!="; break;
           }
 
           if (operator) {

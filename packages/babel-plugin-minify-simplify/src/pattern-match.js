@@ -5,7 +5,7 @@ module.exports = class PatternMatch {
     this.decisionTree = this.makeDecisionTree(patterns);
   }
   handle(input, isMatch) {
-    let result = this.match(input, isMatch);
+    const result = this.match(input, isMatch);
 
     if (!result.match) {
       throw new Error("No Match Found for " + input.toString());
@@ -32,7 +32,7 @@ module.exports = class PatternMatch {
       let matchedKey = NO_MATCH;
 
       // because map doesn't support custom key equal function
-      for (let key of current.keys()) {
+      for (const key of current.keys()) {
         if (isMatch(key, input[i])) {
           matchedKey = key;
           result.keys.push(matchedKey);
@@ -58,9 +58,9 @@ module.exports = class PatternMatch {
   }
   makeDecisionTree(patterns) {
     // order of keys in a Map is the order of insertion
-    let root = new Map;
+    const root = new Map;
 
-    for (let pattern of patterns) {
+    for (const pattern of patterns) {
       make(root, pattern);
     }
 

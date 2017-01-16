@@ -475,7 +475,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should remove redundant returns" , () => {
+  it("should remove redundant returns", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -495,7 +495,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should remove redundant returns part 2" , () => {
+  it("should remove redundant returns part 2", () => {
     const source = unpad(`
       function foo() {
         y();
@@ -511,7 +511,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should remove redundant returns (complex)" , () => {
+  it("should remove redundant returns (complex)", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -536,7 +536,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should keep needed returns" , () => {
+  it("should keep needed returns", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -635,7 +635,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should handle orphaned + redundant returns" , () => {
+  it("should handle orphaned + redundant returns", () => {
     const source = unpad(`
       var x = true;
       function foo() {

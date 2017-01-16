@@ -90,29 +90,29 @@ module.exports = function() {
 
       VariableDeclaration(path) {
         switch (path.node.kind) {
-        case "const":
-          break;
-        case "let":
-          for (const declarator of path.get("declarations")) {
-            if (isPureAndUndefined(declarator.get("init"))) {
-              declarator.node.init = null;
-            }
-          }
-          break;
-        case "var":
-          const start = path.node.start;
-          if (start === undefined) {
-            // This is common for plugin-generated nodes
+          case "const":
             break;
-          }
-          const scope = path.scope;
-          for (const declarator of path.get("declarations")) {
-            if (isPureAndUndefined(declarator.get("init")) &&
-                !hasViolation(declarator, scope, start)) {
-              declarator.node.init = null;
+          case "let":
+            for (const declarator of path.get("declarations")) {
+              if (isPureAndUndefined(declarator.get("init"))) {
+                declarator.node.init = null;
+              }
             }
-          }
-          break;
+            break;
+          case "var":
+            const start = path.node.start;
+            if (start === undefined) {
+              // This is common for plugin-generated nodes
+              break;
+            }
+            const scope = path.scope;
+            for (const declarator of path.get("declarations")) {
+              if (isPureAndUndefined(declarator.get("init")) &&
+                !hasViolation(declarator, scope, start)) {
+                declarator.node.init = null;
+              }
+            }
+            break;
         }
       },
     },
