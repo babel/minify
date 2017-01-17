@@ -55,14 +55,14 @@ function generateResult(resolvedOpts) {
     const option = options[i];
 
     switch (option.type) {
-    case "option":
-      if (option.resolvedValue) {
-        result.push(option.resolvedValue);
-      }
-      break;
-    case "group":
-      result.push(...generateResult(option));
-      break;
+      case "option":
+        if (option.resolvedValue) {
+          result.push(option.resolvedValue);
+        }
+        break;
+      case "group":
+        result.push(...generateResult(option));
+        break;
     }
   }
 
@@ -82,23 +82,23 @@ function resolveOptions(optionTree, inputOpts = {}) {
   for (let i = 0; i < options.length; i++) {
     const option = options[i];
     switch (option.type) {
-    case "option":
-      resolveTypeOption(option, inputOpts);
-      break;
-
-    case "group":
-      resolveTypeGroup(option, inputOpts);
-      break;
-
-    case "proxy":
-      if (!hop(inputOpts, option.name)) {
+      case "option":
+        resolveTypeOption(option, inputOpts);
         break;
-      }
-      proxiesToResolve.push(option);
-      break;
 
-    default:
-      throw new TypeError("Option type not supported - " + option.type);
+      case "group":
+        resolveTypeGroup(option, inputOpts);
+        break;
+
+      case "proxy":
+        if (!hop(inputOpts, option.name)) {
+          break;
+        }
+        proxiesToResolve.push(option);
+        break;
+
+      default:
+        throw new TypeError("Option type not supported - " + option.type);
     }
   }
 
@@ -108,16 +108,16 @@ function resolveOptions(optionTree, inputOpts = {}) {
     for (let j = 0; j < proxy.to.length; j++) {
       const option = proxy.to[j];
       switch (option.type) {
-      case "option":
-        resolveTypeProxyToOption(proxy, option, inputOpts);
-        break;
+        case "option":
+          resolveTypeProxyToOption(proxy, option, inputOpts);
+          break;
 
-      case "group":
-      case "proxy":
-        throw new Error(`proxy option cannot proxy to group/proxy. ${proxy.name} proxied to ${option.name}`);
+        case "group":
+        case "proxy":
+          throw new Error(`proxy option cannot proxy to group/proxy. ${proxy.name} proxied to ${option.name}`);
 
-      default:
-        throw new Error("Unsupported option type ${option.name}");
+        default:
+          throw new Error("Unsupported option type ${option.name}");
       }
     }
   }
@@ -171,10 +171,10 @@ function resolveTypeGroup(option, inputOpts) {
       .reduce((acc, cur) => {
         let value;
         switch (option.defaultValue) {
-        case "all": value = true; break;
-        case "some": value = cur.defaultValue; break;
-        case "none": value = false; break;
-        default: throw new Error(`Unsupported defaultValue - ${option.defaultValue} for option ${option.name}`);
+          case "all": value = true; break;
+          case "some": value = cur.defaultValue; break;
+          case "none": value = false; break;
+          default: throw new Error(`Unsupported defaultValue - ${option.defaultValue} for option ${option.name}`);
         }
         return Object.assign({}, acc, {
           [cur.name]: value,

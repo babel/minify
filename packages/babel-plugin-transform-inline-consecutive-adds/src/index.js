@@ -183,7 +183,7 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        const [name,,] = topLevel;
+        const [name] = topLevel;
         const references = getIdAndFunctionReferences(name, varDecl.parentPath);
         if (references === false) {
           return;
