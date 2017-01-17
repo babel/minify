@@ -29,12 +29,12 @@
     ]
   },
   "devDependencies": {
-    "babel-core": "^6.18.2",
+    "babel-core": "^6.21.0",
     "babel-eslint": "^7.1.1",
     "babel-jest": "^18.0.0",
-    "babel-plugin-transform-es2015-block-scoping": "^6.18.0",
+    "babel-plugin-transform-es2015-block-scoping": "^6.21.0",
     "babel-preset-env": "^1.1.4",
-    "babel-traverse": "^6.18.0",
+    "babel-traverse": "^6.20.0",
     "bytes": "^2.1.0",
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",
