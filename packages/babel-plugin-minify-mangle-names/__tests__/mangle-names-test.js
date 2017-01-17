@@ -490,7 +490,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should not mangle vars in scope with eval" , () => {
+  it("should not mangle vars in scope with eval", () => {
     const source = unpad(`
       function foo() {
         var inScopeOuter = 1;
@@ -1026,5 +1026,43 @@ describe("mangle-names", () => {
     `);
     const expected = source;
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should mangle topLevel when topLevel option is true", () => {
+    const source = unpad(`
+      function foo() {
+        if (FOO_ENV === "production") {
+          HELLO_WORLD.call();
+        }
+      }
+      const FOO_ENV = "production";
+      var HELLO_WORLD = function bar() {
+        new AbstractClass({
+          [FOO_ENV]: "foo",
+          a: foo(HELLO_WORLD)
+        });
+      };
+      class AbstractClass {}
+      foo();
+    `);
+
+    const expected = unpad(`
+      function a() {
+        if (b === "production") {
+          c.call();
+        }
+      }
+      const b = "production";
+      var c = function e() {
+        new d({
+          [b]: "foo",
+          a: a(c)
+        });
+      };
+      class d {}
+      a();
+    `);
+
+    expect(transform(source, { topLevel: true })).toBe(expected);
   });
 });

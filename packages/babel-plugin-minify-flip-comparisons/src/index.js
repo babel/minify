@@ -36,10 +36,10 @@ module.exports = function({ types: t }) {
           node.right = left;
           let operator;
           switch (node.operator) {
-          case ">": operator = "<"; break;
-          case "<": operator = ">"; break;
-          case ">=": operator = "<="; break;
-          case "<=": operator = ">="; break;
+            case ">": operator = "<"; break;
+            case "<": operator = ">"; break;
+            case ">=": operator = "<="; break;
+            case "<=": operator = ">="; break;
           }
           node.operator = operator;
           return;
