@@ -1,6 +1,6 @@
 {
   "name": "babili",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babili",
@@ -15,7 +15,7 @@
     "babel-preset"
   ],
   "dependencies": {
-    "babel-preset-babili": "^0.0.9",
+    "babel-preset-babili": "^0.0.10",
     "babel-cli": "^6.10.1"
   },
   "devDependencies": {}

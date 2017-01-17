@@ -6,7 +6,7 @@ module.exports = function({ types: t }) {
     visitor: {
       MemberExpression(path) {
         if (path.get("object").matchesPattern("process.env")) {
-          let key = path.toComputedKey();
+          const key = path.toComputedKey();
           if (t.isStringLiteral(key)) {
             path.replaceWith(t.valueToNode(process.env[key.value]));
           }
