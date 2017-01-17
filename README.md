@@ -176,10 +176,11 @@ Add to your `.babelrc`'s plugins array.
 Backbone.js v1.2.3:
 ```
            raw     raw win gzip   gzip win parse time run
-babili     21.72kB 222%    7.27kB 170%     2ms        859ms
-uglify     21.79kB 221%    7.29kB 169%     3ms        314ms
-closure    21.67kB 223%    7.37kB 167%     2ms        1635ms
-closure js 24.01kB 191%    8.04kB 144%     2ms        4189ms
+uglify              21.68kB 222%    7.26kB 170%     2ms        231ms
+closure             21.57kB 223%    7.33kB 168%     2ms        1230ms
+babili (best speed) 21.81kB 220%    7.44kB 163%     2ms        747ms
+babili (best size)  21.81kB 220%    7.44kB 163%     2ms        600ms
+closure js          23.9kB  192%    8kB    145%     2ms        2128ms
 ```
 
 Run with: `./scripts/benchmark.js backbone@1.2.3`
@@ -187,10 +188,11 @@ Run with: `./scripts/benchmark.js backbone@1.2.3`
 React v0.14.3:
 ```
           raw      raw win gzip    gzip win parse time run
-closure    171.46kB 265%    52.97kB 168%     14ms       4131ms
-uglify     176.36kB 255%    53.13kB 167%     12ms       1654ms
-babili     176.59kB 255%    53.23kB 166%     15ms       4641ms
-closure js 173.95kB 260%    53.53kB 165%     11ms       13792ms
+closure             171.46kB 265%    52.97kB 168%     13ms       2637ms
+uglify              176.36kB 255%    53.13kB 167%     11ms       1148ms
+babili (best speed) 176.67kB 255%    55.1kB  157%     12ms       4139ms
+babili (best size)  176.67kB 255%    55.1kB  157%     15ms       3683ms
+closure js          312.64kB 100%    70.86kB 100%     14ms       1363ms
 ```
 
 Run with: `./scripts/benchmark.js react@0.14.3 react/dist/react.js`
@@ -198,10 +200,11 @@ Run with: `./scripts/benchmark.js react@0.14.3 react/dist/react.js`
 jQuery v1.11.3:
 ```
            raw      raw win gzip    gzip win parse time run
-uglify     94.27kB 218%    32.78kB 158%     11ms       1394ms
-babili     94.6kB  217%    32.86kB 157%     16ms       5348ms
-closure    94.23kB 218%    33.38kB 153%     12ms       3152ms
-closure js 95.64kB 213%    33.78kB 150%     10ms       14145ms
+uglify              94.27kB  195%    32.78kB 153%     8ms        850ms
+closure             94.14kB  195%    33.38kB 148%     10ms       1905ms
+closure js          95.64kB  190%    33.78kB 146%     7ms        6934ms
+babili (best speed) 102.78kB 170%    35.32kB 135%     8ms        4563ms
+babili (best size)  102.78kB 170%    35.32kB 135%     7ms        4261ms
 ```
 
 Run with: `./scripts/benchmark.js jquery@1.11.3`
@@ -209,10 +212,11 @@ Run with: `./scripts/benchmark.js jquery@1.11.3`
 Three.js:
 ```
            raw      raw win gzip     gzip win parse time run
-closure    472.57kB 107%    122.22kB 61%      29ms       4100ms
-uglify     478.79kB 104%    122.53kB 61%      28ms       3648ms
-closure js 480.11kB 104%    123.44kB 60%      28ms       64889ms
-babili     507.96kB 93%     127.85kB 54%      33ms       9282ms
+closure             472.57kB 107%    122.22kB 61%      34ms       4767ms
+uglify              478.79kB 104%    122.53kB 61%      34ms       2781ms
+closure js          480.11kB 104%    123.44kB 60%      32ms       65423ms
+babili (best speed) 506.99kB 93%     128.22kB 54%      39ms       13503ms
+babili (best size)  506.99kB 93%     128.22kB 54%      32ms       12605ms
 ```
 
 Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
@@ -221,7 +225,7 @@ Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
 
 Babili is best at targeting latest browsers ([with full ES6+ support](https://kangax.github.io/compat-table/es6/)) but can also be used with the usual Babel es2015 preset to transpile down the code first.
 
-Babili requires Babel 6.14+
+Babili requires Babel 6.20+
 
 ## Team
 
