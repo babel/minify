@@ -17,13 +17,7 @@ const tests = [
   //   test: "grunt test",
   //   success: "872 passing",
   // },
-  // {
-  //   dir: "html-minifier",
-  //   files: "src/htmlminifier.js",
-  //   build: "npm install && grunt dist",
-  //   test: "grunt qunit",
-  //   success: "0 failed",
-  // },
+
   // {
   //   dir: "stylelint",
   //   files: "lib/**/*.js",
@@ -45,6 +39,21 @@ const tests = [
   //   success: "Test Suites: 264 passed, 264 total",
   // },
   // {
+  //   dir: "react",
+  //   files: "build/react.js",
+  //   build: "npm install && npm run build",
+  //   test: "npm test",
+  // },
+
+  // PASS
+  // {
+  //   dir: "draft-js",
+  //   files: "dist/Draft.js",
+  //   build: "npm cache clean && npm install",
+  //   test: "npm test",
+  //   verbose: false
+  // },
+  // {
   //   dir: "immutable-js",
   //   files: "dist/immutable.js",
   //   build: "npm install && npm run build",
@@ -56,18 +65,12 @@ const tests = [
   //   },
   // },
   // {
-  //   dir: "react",
-  //   files: "build/react.js",
-  //   build: "npm install && npm run build",
-  //   test: "npm test",
+  //   dir: "html-minifier",
+  //   files: "src/htmlminifier.js",
+  //   build: "npm install && grunt dist",
+  //   test: "grunt qunit",
+  //   success: "0 failed",
   // },
-  {
-    dir: "draft-js",
-    files: "dist/Draft.js",
-    build: "npm cache clean && npm install",
-    test: "npm test",
-    verbose: false
-  }
 ];
 
 (function tick(test) {
