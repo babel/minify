@@ -33,14 +33,12 @@
   * [#335](https://github.com/babel/babili/pull/335) Add fb package and an option to bench local file. ([@kangax](https://github.com/kangax))
   * [#148](https://github.com/babel/babili/pull/148) Improve benchmarks accuracy. ([@kangax](https://github.com/kangax))
   * [#272](https://github.com/babel/babili/pull/272) Add plugin contribution. ([@boopathi](https://github.com/boopathi))
-* `babel-helper-evaluate-path`, `babel-helper-flip-expressions`, `babel-helper-is-void-0`, `babel-helper-remove-or-void`, `babel-helper-to-multiple-sequence-expressions`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-empty-function`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-replace`, `babel-plugin-minify-simplify`, `babel-plugin-minify-type-constructors`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-minify-booleans`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-regexp-constructors`, `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`, `babel-preset-babili`, `babili`
   * [#319](https://github.com/babel/babili/pull/319) Remove dollar from sh snippets. ([@xtuc](https://github.com/xtuc))
 * `babel-preset-babili`, `babili`
   * [#291](https://github.com/babel/babili/pull/291) Update versions. ([@boopathi](https://github.com/boopathi))
 
 #### Chore
-* `babel-helper-flip-expressions`, `babel-helper-to-multiple-sequence-expressions`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-simplify`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-preset-babili`
-  * [#376](https://github.com/babel/babili/pull/376) devDeps: eslint-config-babel v5.0.0. ([@kaicataldo](https://github.com/kaicataldo))
+* [#376](https://github.com/babel/babili/pull/376) devDeps: eslint-config-babel v5.0.0. ([@kaicataldo](https://github.com/kaicataldo))
 
 #### Committers: 10
 - Arnaud Marant ([amarant](https://github.com/amarant))
