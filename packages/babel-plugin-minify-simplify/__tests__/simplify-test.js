@@ -34,6 +34,7 @@ jest.autoMockOff();
 
 const babel = require("babel-core");
 const plugin = require("../src/index");
+const comparisonPlugin = require("../../babel-plugin-transform-simplify-comparison-operators/src");
 const unpad = require("../../../utils/unpad");
 
 function transform(code) {
@@ -2636,7 +2637,7 @@ describe("simplify-plugin", () => {
       return babel.transform(code,  {
         plugins: [
           plugin,
-          'transform-simplify-comparison-operators'
+          comparisonPlugin
         ],
       }).code;
     }
