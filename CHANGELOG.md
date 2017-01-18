@@ -1,5 +1,25 @@
 ## Babili v0.0.10: Changelog for 2017-01-18
 
+ - babel-helper-flip-expressions@0.0.2
+ - babel-helper-to-multiple-sequence-expressions@0.0.3
+ - babel-plugin-minify-dead-code-elimination@0.1.2
+ - babel-plugin-minify-flip-comparisons@0.0.2
+ - babel-plugin-minify-guarded-expressions@0.0.4
+ - babel-plugin-minify-mangle-names@0.0.6
+ - babel-plugin-minify-simplify@0.0.6
+ - babel-plugin-minify-type-constructors@0.0.3
+ - babel-plugin-transform-inline-consecutive-adds@0.0.2
+ - babel-plugin-transform-inline-environment-variables@0.0.2
+ - babel-plugin-transform-member-expression-literals@6.8.1
+ - babel-plugin-transform-merge-sibling-variables@6.8.1
+ - babel-plugin-transform-node-env-inline@0.0.2
+ - babel-plugin-transform-property-literals@6.8.1
+ - babel-plugin-transform-regexp-constructors@0.0.5
+ - babel-plugin-transform-remove-undefined@0.0.4
+ - babel-plugin-transform-simplify-comparison-operators@6.8.1
+ - babel-preset-babili@0.0.10
+ - babili@0.0.10
+
 #### :rocket: New Feature
 * `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-mangle-names`, `babel-preset-babili`
   * [#311](https://github.com/babel/babili/pull/311) add keepClassName as separate options (Closes [#298](https://github.com/babel/babili/issues/298)). ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
