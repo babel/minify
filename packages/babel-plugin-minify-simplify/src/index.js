@@ -686,6 +686,12 @@ module.exports = ({ types: t }) => {
           return;
         }
         node.body = statements;
+
+        path.traverse({
+          Identifier: function(path) {
+            path.getTypeAnnotation();
+          }
+        });
       },
 
       BlockStatement: {

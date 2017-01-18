@@ -2617,4 +2617,29 @@ describe("simplify-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix issue#323 with != and !==", () => {
+    const source = unpad(`
+      function foo() {
+        var x, y;
+        y = o[x];
+        foo(y !== undefined);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var x, y;
+        y = o[x], foo(y !== undefined);
+      }
+    `);
+    function transform(code) {
+      return babel.transform(code,  {
+        plugins: [
+          plugin,
+          'transform-simplify-comparison-operators'
+        ],
+      }).code;
+    }
+    expect(transform(source)).toBe(expected);
+  });
 });
