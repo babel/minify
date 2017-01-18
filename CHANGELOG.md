@@ -1,3 +1,59 @@
+## Babili v0.0.10: Changelog for 2017-01-18
+
+#### :rocket: New Feature
+* `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-mangle-names`, `babel-preset-babili`
+  * [#311](https://github.com/babel/babili/pull/311) add keepClassName as separate options (Closes [#298](https://github.com/babel/babili/issues/298)). ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-preset-babili`
+  * [#162](https://github.com/babel/babili/pull/162) Minify Options. ([@boopathi](https://github.com/boopathi))
+
+#### :bug: Bug Fix
+* `babel-preset-babili`
+  * [#325](https://github.com/babel/babili/pull/325) remove comments by default in babel-preset-babili. ([@hzoo](https://github.com/hzoo))
+* `babili`
+  * [#315](https://github.com/babel/babili/pull/315) resolve babili-preset relative to babili-cli. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-merge-sibling-variables`
+  * [#314](https://github.com/babel/babili/pull/314) dont lift declarations when not intialized (Closes [#309](https://github.com/babel/babili/issues/309)). ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-regexp-constructors`
+  * [#304](https://github.com/babel/babili/pull/304) Escape unicode newline in regex optimization. ([@SimonSelg](https://github.com/SimonSelg))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#303](https://github.com/babel/babili/pull/303) Fix dce - recompute path & scope before pass. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`, `babel-preset-babili`
+  * [#292](https://github.com/babel/babili/pull/292) run DCE on program exit (Closes [#289](https://github.com/babel/babili/issues/289)). ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### :memo: Documentation
+* Other
+  * [#348](https://github.com/babel/babili/pull/348) add install, removing #redundancy [skip ci]. ([@hzoo](https://github.com/hzoo))
+* `babel-plugin-minify-simplify`
+  * [#320](https://github.com/babel/babili/pull/320) Tweak simpify README. ([@existentialism](https://github.com/existentialism))
+* `babel-preset-babili`
+  * [#293](https://github.com/babel/babili/pull/293) [skip ci] Add preset options docs. ([@boopathi](https://github.com/boopathi))
+
+#### :house: Internal
+* Other
+  * [#335](https://github.com/babel/babili/pull/335) Add fb package and an option to bench local file. ([@kangax](https://github.com/kangax))
+  * [#148](https://github.com/babel/babili/pull/148) Improve benchmarks accuracy. ([@kangax](https://github.com/kangax))
+  * [#272](https://github.com/babel/babili/pull/272) Add plugin contribution. ([@boopathi](https://github.com/boopathi))
+* `babel-helper-evaluate-path`, `babel-helper-flip-expressions`, `babel-helper-is-void-0`, `babel-helper-remove-or-void`, `babel-helper-to-multiple-sequence-expressions`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-empty-function`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-replace`, `babel-plugin-minify-simplify`, `babel-plugin-minify-type-constructors`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-minify-booleans`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-regexp-constructors`, `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`, `babel-preset-babili`, `babili`
+  * [#319](https://github.com/babel/babili/pull/319) Remove dollar from sh snippets. ([@xtuc](https://github.com/xtuc))
+* `babel-preset-babili`, `babili`
+  * [#291](https://github.com/babel/babili/pull/291) Update versions. ([@boopathi](https://github.com/boopathi))
+
+#### Chore
+* `babel-helper-flip-expressions`, `babel-helper-to-multiple-sequence-expressions`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-simplify`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-preset-babili`
+  * [#376](https://github.com/babel/babili/pull/376) devDeps: eslint-config-babel v5.0.0. ([@kaicataldo](https://github.com/kaicataldo))
+
+#### Committers: 10
+- Arnaud Marant ([amarant](https://github.com/amarant))
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Brian Ng ([existentialism](https://github.com/existentialism))
+- Chris Vaszauskas ([chrisvasz](https://github.com/chrisvasz))
+- Henry Zhu ([hzoo](https://github.com/hzoo))
+- Juriy Zaytsev ([kangax](https://github.com/kangax))
+- Kai Cataldo ([kaicataldo](https://github.com/kaicataldo))
+- Simon Selg ([SimonSelg](https://github.com/SimonSelg))
+- Sven SAULEAU ([xtuc](https://github.com/xtuc))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## Babili v0.0.9: Changelog for 2016-11-21
 
 - babili: 0.0.8 => 0.0.9
