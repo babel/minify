@@ -93,7 +93,16 @@ module.exports = ({ types: t, traverse }) => {
         Scopable(path) {
           const {scope} = path;
 
-          if (!mangler.eval && hasEval(scope)) return;
+          if (!mangler.eval) {
+            if (hasEval(scope)) return;
+
+            // ClassDeclaration has binding in two scopes
+            //   1. The scope in which it is declared
+            //   2. The class's own scope
+            // So, when the scope.1 is an unsafeScope, mangling happens in scope.2
+            // To avoid that, we check if it's a class declaration
+            if (path.isClassDeclaration() && hasEval(path.parentPath.scope)) return;
+          }
 
           if (mangler.visitedScopes.has(scope)) return;
           mangler.visitedScopes.add(scope);
@@ -170,7 +179,11 @@ module.exports = ({ types: t, traverse }) => {
             if (isTopLevel) {
               mangler.rename(mangler.program.scope, oldName, next);
             }
+
             // mark the binding as renamed
+            // this is redundant and exists to work around a bug in babel
+            // ClassDeclarations have binding in two scopes
+            // - https://github.com/babel/babel/issues/5156
             binding.renamed = true;
           }
         }
