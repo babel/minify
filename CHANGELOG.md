@@ -49,13 +49,10 @@
   * [#293](https://github.com/babel/babili/pull/293) [skip ci] Add preset options docs. ([@boopathi](https://github.com/boopathi))
 
 #### :house: Internal
-* Other
-  * [#335](https://github.com/babel/babili/pull/335) Add fb package and an option to bench local file. ([@kangax](https://github.com/kangax))
-  * [#148](https://github.com/babel/babili/pull/148) Improve benchmarks accuracy. ([@kangax](https://github.com/kangax))
-  * [#272](https://github.com/babel/babili/pull/272) Add plugin contribution. ([@boopathi](https://github.com/boopathi))
-  * [#319](https://github.com/babel/babili/pull/319) Remove dollar from sh snippets. ([@xtuc](https://github.com/xtuc))
-* `babel-preset-babili`, `babili`
-  * [#291](https://github.com/babel/babili/pull/291) Update versions. ([@boopathi](https://github.com/boopathi))
+* [#335](https://github.com/babel/babili/pull/335) Add fb package and an option to bench local file. ([@kangax](https://github.com/kangax))
+* [#148](https://github.com/babel/babili/pull/148) Improve benchmarks accuracy. ([@kangax](https://github.com/kangax))
+* [#272](https://github.com/babel/babili/pull/272) Add plugin contribution. ([@boopathi](https://github.com/boopathi))
+* [#319](https://github.com/babel/babili/pull/319) Remove dollar from sh snippets. ([@xtuc](https://github.com/xtuc))
 
 #### Chore
 * [#376](https://github.com/babel/babili/pull/376) devDeps: eslint-config-babel v5.0.0. ([@kaicataldo](https://github.com/kaicataldo))
