@@ -62,7 +62,7 @@ module.exports = ({ types: t, traverse }) => {
       }
 
       if (this.charset.shouldConsider) {
-        let collectVisitor = {
+        const collectVisitor = {
           Identifier(path) {
             const { node } = path;
 
