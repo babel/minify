@@ -1,3 +1,74 @@
+## Babili v0.0.10: Changelog for 2017-01-18
+
+ - babel-helper-flip-expressions@0.0.2
+ - babel-helper-to-multiple-sequence-expressions@0.0.3
+ - babel-plugin-minify-dead-code-elimination@0.1.2
+ - babel-plugin-minify-flip-comparisons@0.0.2
+ - babel-plugin-minify-guarded-expressions@0.0.4
+ - babel-plugin-minify-mangle-names@0.0.6
+ - babel-plugin-minify-simplify@0.0.6
+ - babel-plugin-minify-type-constructors@0.0.3
+ - babel-plugin-transform-inline-consecutive-adds@0.0.2
+ - babel-plugin-transform-inline-environment-variables@0.0.2
+ - babel-plugin-transform-member-expression-literals@6.8.1
+ - babel-plugin-transform-merge-sibling-variables@6.8.1
+ - babel-plugin-transform-node-env-inline@0.0.2
+ - babel-plugin-transform-property-literals@6.8.1
+ - babel-plugin-transform-regexp-constructors@0.0.5
+ - babel-plugin-transform-remove-undefined@0.0.4
+ - babel-plugin-transform-simplify-comparison-operators@6.8.1
+ - babel-preset-babili@0.0.10
+ - babili@0.0.10
+
+#### :rocket: New Feature
+* `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-mangle-names`, `babel-preset-babili`
+  * [#311](https://github.com/babel/babili/pull/311) add keepClassName as separate options (Closes [#298](https://github.com/babel/babili/issues/298)). ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-preset-babili`
+  * [#162](https://github.com/babel/babili/pull/162) Minify Options. ([@boopathi](https://github.com/boopathi))
+
+#### :bug: Bug Fix
+* `babel-preset-babili`
+  * [#325](https://github.com/babel/babili/pull/325) remove comments by default in babel-preset-babili. ([@hzoo](https://github.com/hzoo))
+* `babili`
+  * [#315](https://github.com/babel/babili/pull/315) resolve babili-preset relative to babili-cli. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-merge-sibling-variables`
+  * [#314](https://github.com/babel/babili/pull/314) dont lift declarations when not intialized (Closes [#309](https://github.com/babel/babili/issues/309)). ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-regexp-constructors`
+  * [#304](https://github.com/babel/babili/pull/304) Escape unicode newline in regex optimization. ([@SimonSelg](https://github.com/SimonSelg))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#303](https://github.com/babel/babili/pull/303) Fix dce - recompute path & scope before pass. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`, `babel-preset-babili`
+  * [#292](https://github.com/babel/babili/pull/292) run DCE on program exit (Closes [#289](https://github.com/babel/babili/issues/289)). ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### :memo: Documentation
+* Other
+  * [#348](https://github.com/babel/babili/pull/348) add install, removing #redundancy [skip ci]. ([@hzoo](https://github.com/hzoo))
+* `babel-plugin-minify-simplify`
+  * [#320](https://github.com/babel/babili/pull/320) Tweak simpify README. ([@existentialism](https://github.com/existentialism))
+* `babel-preset-babili`
+  * [#293](https://github.com/babel/babili/pull/293) [skip ci] Add preset options docs. ([@boopathi](https://github.com/boopathi))
+
+#### :house: Internal
+* [#335](https://github.com/babel/babili/pull/335) Add fb package and an option to bench local file. ([@kangax](https://github.com/kangax))
+* [#148](https://github.com/babel/babili/pull/148) Improve benchmarks accuracy. ([@kangax](https://github.com/kangax))
+* [#272](https://github.com/babel/babili/pull/272) Add plugin contribution. ([@boopathi](https://github.com/boopathi))
+* [#319](https://github.com/babel/babili/pull/319) Remove dollar from sh snippets. ([@xtuc](https://github.com/xtuc))
+
+#### Chore
+* [#376](https://github.com/babel/babili/pull/376) devDeps: eslint-config-babel v5.0.0. ([@kaicataldo](https://github.com/kaicataldo))
+
+#### Committers: 10
+- Arnaud Marant ([amarant](https://github.com/amarant))
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Brian Ng ([existentialism](https://github.com/existentialism))
+- Chris Vaszauskas ([chrisvasz](https://github.com/chrisvasz))
+- Henry Zhu ([hzoo](https://github.com/hzoo))
+- Juriy Zaytsev ([kangax](https://github.com/kangax))
+- Kai Cataldo ([kaicataldo](https://github.com/kaicataldo))
+- Simon Selg ([SimonSelg](https://github.com/SimonSelg))
+- Sven SAULEAU ([xtuc](https://github.com/xtuc))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## Babili v0.0.9: Changelog for 2016-11-21
 
 - babili: 0.0.8 => 0.0.9
