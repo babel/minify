@@ -1,6 +1,7 @@
 "use strict";
 
 const some = require("lodash.some");
+const { markEvalScopes, isMarked: isEvalScopesMarked, hasEval } = require("babel-helper-mark-eval-scopes");
 
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
@@ -101,6 +102,10 @@ module.exports = ({ types: t, traverse }) => {
 
       enter(path) {
         if (path.isProgram()) {
+          return;
+        }
+
+        if (hasEval(path.scope)) {
           return;
         }
 
@@ -711,6 +716,10 @@ module.exports = ({ types: t, traverse }) => {
         } = {}) {
           traverse.clearCache();
           path.scope.crawl();
+
+          if (!isEvalScopesMarked(path.scope)) {
+            markEvalScopes(path);
+          }
 
           // We need to run this plugin in isolation.
           path.traverse(main, {
