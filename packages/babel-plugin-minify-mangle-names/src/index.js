@@ -1,4 +1,4 @@
-module.exports = ({ types: t }) => {
+module.exports = ({ types: t, traverse }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
@@ -24,9 +24,15 @@ module.exports = ({ types: t }) => {
     }
 
     run() {
+      this.cleanup();
       this.collect();
       this.charset.sort();
       this.mangle();
+    }
+
+    cleanup() {
+      traverse.clearCache();
+      this.program.scope.crawl();
     }
 
     isBlacklist(name) {
