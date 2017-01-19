@@ -37,8 +37,8 @@ module.exports = ({ types: t, traverse }) => {
         const seen = new Set();
         const declars = [];
         const mutations = [];
-        for (let name in scope.bindings) {
-          let binding = scope.bindings[name];
+        for (const name in scope.bindings) {
+          const binding = scope.bindings[name];
           if (!binding.path.isVariableDeclarator()) {
             continue;
           }
@@ -62,7 +62,7 @@ module.exports = ({ types: t, traverse }) => {
           }
 
           const assignmentSequence = [];
-          for (let declar of declarPath.node.declarations) {
+          for (const declar of declarPath.node.declarations) {
             declars.push(declar);
             if (declar.init) {
               assignmentSequence.push(t.assignmentExpression("=", declar.id, declar.init));
@@ -79,7 +79,7 @@ module.exports = ({ types: t, traverse }) => {
 
         if (declars.length) {
           mutations.forEach((f) => f());
-          for (let statement of node.body.body) {
+          for (const statement of node.body.body) {
             if (t.isVariableDeclaration(statement)) {
               statement.declarations.push(...declars);
               return;
@@ -121,6 +121,8 @@ module.exports = ({ types: t, traverse }) => {
 
           if (param.isIdentifier()) {
             const binding = scope.bindings[param.node.name];
+            if (!binding) continue;
+
             if (binding.referenced) {
               // when the first binding is referenced (right to left)
               // exit without marking anything after this
@@ -151,8 +153,8 @@ module.exports = ({ types: t, traverse }) => {
           break;
         }
 
-        for (let name in scope.bindings) {
-          let binding = scope.bindings[name];
+        for (const name in scope.bindings) {
+          const binding = scope.bindings[name];
 
           if (!binding.referenced && binding.kind !== "module") {
             if (binding.kind === "param" && (this.keepFnArgs || !binding[markForRemoval])) {
@@ -220,7 +222,7 @@ module.exports = ({ types: t, traverse }) => {
                 (binding.path.isVariableDeclarator() && binding.path.get("init").isFunction())) {
               const fun = binding.path.isFunctionDeclaration() ? binding.path : binding.path.get("init");
               let allInside = true;
-              for (let ref of binding.referencePaths) {
+              for (const ref of binding.referencePaths) {
                 if (!ref.find((p) => p.node === fun.node)) {
                   allInside = false;
                   break;
@@ -546,7 +548,7 @@ module.exports = ({ types: t, traverse }) => {
             const consequent = cases[i].get("consequent");
 
             for (let j = 0; j < consequent.length; j++) {
-              let _isBreaking = isBreaking(consequent[j], path);
+              const _isBreaking = isBreaking(consequent[j], path);
               if (_isBreaking.bail) {
                 result.bail = true;
                 return result;
@@ -738,7 +740,7 @@ module.exports = ({ types: t, traverse }) => {
       let hasBlockScoped = false;
 
       for (let i = 0; i < node.body.length; i++) {
-        let bodyNode = node.body[i];
+        const bodyNode = node.body[i];
         if (t.isBlockScoped(bodyNode)) {
           hasBlockScoped = true;
         }
@@ -758,10 +760,10 @@ module.exports = ({ types: t, traverse }) => {
   // drops are inits
   // extractVars({ var x = 5, y = x }) => var x, y;
   function extractVars(path) {
-    let declarators = [];
+    const declarators = [];
 
     if (path.isVariableDeclaration({ kind: "var" })) {
-      for (let decl of path.node.declarations) {
+      for (const decl of path.node.declarations) {
         declarators.push(t.variableDeclarator(decl.id));
       }
     } else {
@@ -770,7 +772,7 @@ module.exports = ({ types: t, traverse }) => {
           if (!varPath.isVariableDeclaration({ kind: "var" })) return;
           if (!isSameFunctionScope(varPath, path)) return;
 
-          for (let decl of varPath.node.declarations) {
+          for (const decl of varPath.node.declarations) {
             declarators.push(t.variableDeclarator(decl.id));
           }
         }
@@ -848,7 +850,7 @@ module.exports = ({ types: t, traverse }) => {
           return;
         }
 
-        let index = binding.referencePaths.indexOf(path);
+        const index = binding.referencePaths.indexOf(path);
         if (index === -1) {
           return;
         }

@@ -6,15 +6,16 @@ const {
   hasEval,
 } = require("babel-helper-mark-eval-scopes");
 
-module.exports = ({ types: t }) => {
+module.exports = ({ types: t, traverse }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
     constructor(charset, program, {
       blacklist = {},
       keepFnName = false,
+      eval: _eval = false,
+      topLevel = false,
       keepClassName = false,
-      eval: _eval = false
     } = {}) {
       this.charset = charset;
       this.program = program;
@@ -22,6 +23,7 @@ module.exports = ({ types: t }) => {
       this.keepFnName = keepFnName;
       this.keepClassName = keepClassName;
       this.eval = _eval;
+      this.topLevel = topLevel;
 
       this.unsafeScopes = new Set;
       this.visitedScopes = new Set;
@@ -30,9 +32,15 @@ module.exports = ({ types: t }) => {
     }
 
     run() {
+      this.cleanup();
       this.collect();
       this.charset.sort();
       this.mangle();
+    }
+
+    cleanup() {
+      traverse.clearCache();
+      this.program.scope.crawl();
     }
 
     isBlacklist(name) {
@@ -85,6 +93,13 @@ module.exports = ({ types: t }) => {
           if (mangler.visitedScopes.has(scope)) return;
           mangler.visitedScopes.add(scope);
 
+          function hasOwnBinding(name) {
+            if (scope.parent !== mangler.program.scope) {
+              return scope.hasOwnBinding(name);
+            }
+            return mangler.program.scope.hasOwnBinding(name) || scope.hasOwnBinding(name);
+          }
+
           let i = 0;
           function getNext() {
             return mangler.charset.getIdentifier(i++);
@@ -110,6 +125,7 @@ module.exports = ({ types: t }) => {
           for (let i = 0; i < names.length; i++) {
             const oldName = names[i];
             const binding = bindings[oldName];
+            const isTopLevel = mangler.program.scope.bindings[oldName] === binding;
 
             if (
               // already renamed bindings
@@ -117,9 +133,9 @@ module.exports = ({ types: t }) => {
               // arguments
               || oldName === "arguments"
               // globals
-              || mangler.program.scope.bindings[oldName] === binding
+              || (mangler.topLevel ? false : isTopLevel)
               // other scope bindings
-              || !scope.hasOwnBinding(oldName)
+              || !hasOwnBinding(oldName)
               // labels
               || binding.path.isLabeledStatement()
               // blacklisted
@@ -146,6 +162,9 @@ module.exports = ({ types: t }) => {
             // re-enable this - check above
             // resetNext();
             mangler.rename(scope, oldName, next);
+            if (isTopLevel) {
+              mangler.rename(mangler.program.scope, oldName, next);
+            }
             // mark the binding as renamed
             binding.renamed = true;
           }

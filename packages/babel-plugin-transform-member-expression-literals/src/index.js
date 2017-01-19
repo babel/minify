@@ -7,7 +7,7 @@ module.exports = function({ types: t }) {
       // foo['bar'] -> foo.bar
       MemberExpression: {
         exit({ node }) {
-          let prop = node.property;
+          const prop = node.property;
           if (!node.computed || !t.isStringLiteral(prop)) {
             return;
           }
