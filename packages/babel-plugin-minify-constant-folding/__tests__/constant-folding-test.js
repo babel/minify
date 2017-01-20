@@ -60,4 +60,15 @@ describe("constant-folding-plugin", () => {
     `);
     expect(transform(source)).toBe(source);
   });
+
+  it("should handle script escape", () => {
+    const source = unpad(`
+      "</" + "script"
+    `);
+
+    const expected = unpad(`
+      "<\\\\/script";
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
