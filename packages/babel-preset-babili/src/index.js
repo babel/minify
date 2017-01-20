@@ -107,28 +107,12 @@ function preset(context, _opts = {}) {
 
   const plugins = generate(optionsTree, opts);
 
-  // comments
-  let comments = /@preserve|@licen(s|c)e/;
-  if (Object.prototype.hasOwnProperty.call(opts, "comments")) {
-    comments = opts.comments;
-  }
-
   return {
     minified: true,
-    shouldPrintComment(contents) {
-      return _shouldPrintComment(contents, comments);
-    },
+    comments: false,
     presets: [
       { plugins }
     ],
     passPerPreset: true,
   };
-}
-
-function _shouldPrintComment(contents, predicate) {
-  switch (typeof predicate) {
-    case "function": return predicate(contents);
-    case "object": return predicate.test(contents);
-    default: return !!predicate;
-  }
 }

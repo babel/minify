@@ -30,7 +30,6 @@ function gulpBabili(babiliOpts = {}, {
 
     const babelOpts = {
       minified: true,
-      compact: true,
       babelrc: false,
       ast: false,
 

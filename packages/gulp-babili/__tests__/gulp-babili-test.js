@@ -122,7 +122,7 @@ describe("gulp-babili", () => {
       });
     });
 
-    it("should remove comments by default except license and preserve", () => {
+    xit("should remove comments by default except license and preserve", () => {
       return new Promise((resolve, reject) => {
         const stream = gulpBabili();
         stream.on("data", function (file) {
@@ -148,7 +148,7 @@ describe("gulp-babili", () => {
       });
     });
 
-    it("should take a custom function", () => {
+    xit("should take a custom function", () => {
       return new Promise((resolve, reject) => {
         const stream = gulpBabili({
           comments(contents) {
