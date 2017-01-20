@@ -85,8 +85,8 @@ function transform({ babel, input, babelOpts }) {
 
 function shouldPrintComment(contents, predicate) {
   switch (typeof predicate) {
-  case "function": return predicate(contents);
-  case "object": return predicate.test(contents);
-  default: return !!predicate;
+    case "function": return predicate(contents);
+    case "object": return predicate.test(contents);
+    default: return !!predicate;
   }
 }
