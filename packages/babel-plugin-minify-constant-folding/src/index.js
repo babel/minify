@@ -113,9 +113,9 @@ module.exports = ({ types: t, traverse }) => {
           }
 
           // https://github.com/babel/babili/issues/382
-          if (typeof res.value === 'string' &&
-              res.value.indexOf('</script') > -1) {
-            res.value = res.value.replace(/<\/script/g, '<\\/script');
+          if (typeof res.value === "string" &&
+              res.value.indexOf("</script") > -1) {
+            res.value = res.value.replace(/<\/script/g, "<\\/script");
           }
 
           const node = t.valueToNode(res.value);
