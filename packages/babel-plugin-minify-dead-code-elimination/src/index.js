@@ -419,71 +419,6 @@ module.exports = ({ types: t, traverse }) => {
       }
     },
 
-    IfStatement: {
-      exit(path) {
-        const consequent = path.get("consequent");
-        const alternate = path.get("alternate");
-        const test = path.get("test");
-
-        const evaluateTest = test.evaluateTruthy();
-
-        // we can check if a test will be truthy 100% and if so then we can inline
-        // the consequent and completely ignore the alternate
-        //
-        //   if (true) { foo; } -> { foo; }
-        //   if ("foo") { foo; } -> { foo; }
-        //
-        if (evaluateTest === true) {
-          path.replaceWithMultiple(
-            [...toStatements(consequent), ...extractVars(alternate)]
-          );
-          return;
-        }
-
-        // we can check if a test will be falsy 100% and if so we can inline the
-        // alternate if there is one and completely remove the consequent
-        //
-        //   if ("") { bar; } else { foo; } -> { foo; }
-        //   if ("") { bar; } ->
-        //
-        if (evaluateTest === false) {
-          if (alternate.node) {
-            path.replaceWithMultiple(
-              [...toStatements(alternate), ...extractVars(consequent)]
-            );
-            return;
-          } else {
-            path.replaceWithMultiple(extractVars(consequent));
-          }
-        }
-
-        // remove alternate blocks that are empty
-        //
-        //   if (foo) { foo; } else {} -> if (foo) { foo; }
-        //
-        if (alternate.isBlockStatement() && !alternate.node.body.length) {
-          alternate.remove();
-          // For if-statements babel-traverse replaces with an empty block
-          path.node.alternate = null;
-        }
-
-        // if the consequent block is empty turn alternate blocks into a consequent
-        // and flip the test
-        //
-        //   if (foo) {} else { bar; } -> if (!foo) { bar; }
-        //
-        if (consequent.isBlockStatement() && !consequent.node.body.length &&
-            alternate.isBlockStatement() && alternate.node.body.length
-        ) {
-          consequent.replaceWith(alternate.node);
-          alternate.remove();
-          // For if-statements babel-traverse replaces with an empty block
-          path.node.alternate = null;
-          test.replaceWith(t.unaryExpression("!", test.node, true));
-        }
-      },
-    },
-
     SwitchStatement: {
       exit(path) {
         const evaluated = path.get("discriminant").evaluate();
@@ -699,6 +634,72 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-dead-code-elimination",
     visitor: {
+      IfStatement: {
+        exit(path) {
+          const consequent = path.get("consequent");
+          const alternate = path.get("alternate");
+          const test = path.get("test");
+
+          const isPure = test.isPure();
+
+          const evaluateTest = test.evaluateTruthy();
+
+          // we can check if a test will be truthy 100% and if so then we can inline
+          // the consequent and completely ignore the alternate
+          //
+          //   if (true) { foo; } -> { foo; }
+          //   if ("foo") { foo; } -> { foo; }
+          //
+          if (isPure && evaluateTest === true) {
+            path.replaceWithMultiple(
+              [...toStatements(consequent), ...extractVars(alternate)]
+            );
+            return;
+          }
+
+          // we can check if a test will be falsy 100% and if so we can inline the
+          // alternate if there is one and completely remove the consequent
+          //
+          //   if ("") { bar; } else { foo; } -> { foo; }
+          //   if ("") { bar; } ->
+          //
+          if (isPure && evaluateTest === false) {
+            if (alternate.node) {
+              path.replaceWithMultiple(
+                [...toStatements(alternate), ...extractVars(consequent)]
+              );
+              return;
+            } else {
+              path.replaceWithMultiple(extractVars(consequent));
+            }
+          }
+
+          // remove alternate blocks that are empty
+          //
+          //   if (foo) { foo; } else {} -> if (foo) { foo; }
+          //
+          if (alternate.isBlockStatement() && !alternate.node.body.length) {
+            alternate.remove();
+            // For if-statements babel-traverse replaces with an empty block
+            path.node.alternate = null;
+          }
+
+          // if the consequent block is empty turn alternate blocks into a consequent
+          // and flip the test
+          //
+          //   if (foo) {} else { bar; } -> if (!foo) { bar; }
+          //
+          if (consequent.isBlockStatement() && !consequent.node.body.length &&
+              alternate.isBlockStatement() && alternate.node.body.length
+          ) {
+            consequent.replaceWith(alternate.node);
+            alternate.remove();
+            // For if-statements babel-traverse replaces with an empty block
+            path.node.alternate = null;
+            test.replaceWith(t.unaryExpression("!", test.node, true));
+          }
+        },
+      },
       EmptyStatement(path) {
         if (path.parentPath.isBlockStatement() || path.parentPath.isProgram()) {
           path.remove();
