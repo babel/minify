@@ -37,9 +37,9 @@ const plugin = require("../src/index");
 const comparisonPlugin = require("../../babel-plugin-transform-simplify-comparison-operators/src");
 const unpad = require("../../../utils/unpad");
 
-function transform(code) {
+function transform(code, options) {
   return babel.transform(code,  {
-    plugins: [plugin],
+    plugins: [ [plugin, options] ],
   }).code;
 }
 
@@ -2642,5 +2642,20 @@ describe("simplify-plugin", () => {
       }).code;
     }
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should convert call expressions with single string param to tagged templates", () => {
+    const source = unpad(`
+      foo("bar");
+      bar.baz("", "");
+      bar(a);
+      baz(5);
+      baz.foo.bar(4)("foo");
+      baz("bar", "")(5);
+      (() => {})("bar");
+      quux(foo(\`as\${d}f\`));
+    `);
+    const expected = "foo`bar`, bar.baz(\"\", \"\"), bar(a), baz(5), baz.foo.bar(4)`foo`, baz(\"bar\", \"\")(5), (() => {})`bar`, quux(foo(`as${ d }f`));";
+    expect(transform(source, { callsToTags: true })).toBe(expected);
   });
 });
