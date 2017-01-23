@@ -80,6 +80,24 @@ module.exports = function() {
   return {
     name: "transform-remove-undefined",
     visitor: {
+      SequenceExpression(path) {
+        const expressions = path.get("expressions");
+
+        for (let i = 0; i < expressions.length; i++) {
+          const expr = expressions[i];
+          if (!isPureAndUndefined(expr)) continue;
+
+          // last value
+          if (i === expressions.length - 1) {
+            if (path.parentPath.isExpressionStatement()) {
+              expr.remove();
+            }
+          } else {
+            expr.remove();
+          }
+        }
+      },
+
       ReturnStatement(path) {
         if (path.node.argument !== null) {
           if (isPureAndUndefined(path.get("argument"))) {
