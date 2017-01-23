@@ -1,4 +1,12 @@
-module.exports = ({ types: t }) => {
+"use strict";
+
+const {
+  markEvalScopes,
+  isMarked: isEvalScopesMarked,
+  hasEval,
+} = require("babel-helper-mark-eval-scopes");
+
+module.exports = ({ types: t, traverse }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
@@ -24,9 +32,15 @@ module.exports = ({ types: t }) => {
     }
 
     run() {
+      this.cleanup();
       this.collect();
       this.charset.sort();
       this.mangle();
+    }
+
+    cleanup() {
+      traverse.clearCache();
+      this.program.scope.crawl();
     }
 
     isBlacklist(name) {
@@ -43,39 +57,28 @@ module.exports = ({ types: t }) => {
     collect() {
       const mangler = this;
 
-      const collectVisitor = {
-        // capture direct evals
-        CallExpression(path) {
-          const callee = path.get("callee");
-
-          if (callee.isIdentifier()
-            && callee.node.name === "eval"
-            && !callee.scope.getBinding("eval")
-          ) {
-            mangler.markUnsafeScopes(path.scope);
-          }
-        }
-      };
-
-      if (this.charset.shouldConsider) {
-        // charset considerations
-        collectVisitor.Identifier = function Identifier(path) {
-          const { node } = path;
-
-          if ((path.parentPath.isMemberExpression({ property: node })) ||
-              (path.parentPath.isObjectProperty({ key: node }))
-          ) {
-            mangler.charset.consider(node.name);
-          }
-        };
-
-        // charset considerations
-        collectVisitor.Literal = function Literal({ node }) {
-          mangler.charset.consider(String(node.value));
-        };
+      if (!isEvalScopesMarked(mangler.program.scope)) {
+        markEvalScopes(mangler.program);
       }
 
-      this.program.traverse(collectVisitor);
+      if (this.charset.shouldConsider) {
+        const collectVisitor = {
+          Identifier(path) {
+            const { node } = path;
+
+            if ((path.parentPath.isMemberExpression({ property: node })) ||
+                (path.parentPath.isObjectProperty({ key: node }))
+            ) {
+              mangler.charset.consider(node.name);
+            }
+          },
+          Literal({ node }) {
+            mangler.charset.consider(String(node.value));
+          }
+        };
+
+        mangler.program.traverse(collectVisitor);
+      }
     }
 
     mangle() {
@@ -85,7 +88,7 @@ module.exports = ({ types: t }) => {
         Scopable(path) {
           const {scope} = path;
 
-          if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
+          if (!mangler.eval && hasEval(scope)) return;
 
           if (mangler.visitedScopes.has(scope)) return;
           mangler.visitedScopes.add(scope);

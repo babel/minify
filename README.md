@@ -29,7 +29,7 @@
 ## Requirements
 
 - node >= 4
-- babel-core >= 6.19.0
+- babel >= 6.20.0
 
 ## Why
 
@@ -224,8 +224,6 @@ Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
 ## Browser support
 
 Babili is best at targeting latest browsers ([with full ES6+ support](https://kangax.github.io/compat-table/es6/)) but can also be used with the usual Babel es2015 preset to transpile down the code first.
-
-Babili requires Babel 6.20+
 
 ## Team
 

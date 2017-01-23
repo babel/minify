@@ -171,4 +171,36 @@ describe("transform-remove-undefined-plugin", () => {
       }`);
     expect(transform(source)).toBe(source);
   });
+
+  it("should remove from sequence expressions", () => {
+    const source = unpad(`
+      a = b, void 0, b = c, d.e.f(), void 0, hello.world();
+    `);
+    const expected = unpad(`
+      a = b, b = c, d.e.f(), hello.world();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT remove last undefined from sequence expressions", () => {
+    const source = unpad(`
+      if (foo.bar(), void 0) {
+        foo.baz();
+      }
+      function bar() {
+        return a.b(), void 0;
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should remove last undefined from sequence expressions if safe", () => {
+    const source = unpad(`
+      a = b, void 0, b = c, d.e.f(), void 0, hello.world(), void 0;
+    `);
+    const expected = unpad(`
+      a = b, b = c, d.e.f(), hello.world();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

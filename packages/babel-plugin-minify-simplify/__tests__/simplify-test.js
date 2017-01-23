@@ -34,6 +34,7 @@ jest.autoMockOff();
 
 const babel = require("babel-core");
 const plugin = require("../src/index");
+const comparisonPlugin = require("../../babel-plugin-transform-simplify-comparison-operators/src");
 const unpad = require("../../../utils/unpad");
 
 function transform(code) {
@@ -2615,6 +2616,31 @@ describe("simplify-plugin", () => {
         x || bar(a);
       }
     `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should fix issue#323 with != and !==", () => {
+    const source = unpad(`
+      function foo() {
+        var x, y;
+        y = o[x];
+        foo(y !== undefined);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var x, y;
+        y = o[x], foo(y !== undefined);
+      }
+    `);
+    function transform(code) {
+      return babel.transform(code,  {
+        plugins: [
+          plugin,
+          comparisonPlugin
+        ],
+      }).code;
+    }
     expect(transform(source)).toBe(expected);
   });
 });
