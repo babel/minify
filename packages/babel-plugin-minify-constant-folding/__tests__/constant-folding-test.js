@@ -60,4 +60,37 @@ describe("constant-folding-plugin", () => {
     `);
     expect(transform(source)).toBe(source);
   });
+
+  it("should handle script escape", () => {
+    const source = unpad(`
+      "</" + "script"
+    `);
+
+    const expected = unpad(`
+      "<\\\\/script";
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle style escape", () => {
+    const source = unpad(`
+      "</" + "style"
+    `);
+
+    const expected = unpad(`
+      "<\\\\/style";
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle html comment escape", () => {
+    const source = unpad(`
+      "<!" + "--"
+    `);
+
+    const expected = unpad(`
+      "\\\\x3C!--";
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
