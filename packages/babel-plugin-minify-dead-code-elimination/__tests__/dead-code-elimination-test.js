@@ -2421,4 +2421,43 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should impure expressions in confidently evaluated if statements", () => {
+    const source = unpad(`
+      if (a.b(), true) {
+        foo();
+      }
+    `);
+    const expected = unpad(`
+      a.b();
+
+      foo();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should extract all necessary things from if statements", () => {
+    const source = unpad(`
+      if (a.b(), false) {
+        var foo = foo1;
+        foo();
+      } else if (b.c(), true) {
+        var bar = bar1;
+        bar();
+      } else {
+        var baz = baz1;
+        baz();
+      }
+    `);
+    const expected = unpad(`
+      a.b();
+      b.c();
+
+      var bar = bar1;
+      bar();
+      var baz;
+      var foo;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });

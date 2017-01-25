@@ -61,4 +61,18 @@ describe("preset", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix issue#385 - impure if statements with Sequence and DCE", () => {
+    const source = unpad(`
+      a = b;
+      c = d;
+      if (false) {
+        const x = y
+      }
+    `);
+    const expected = unpad(`
+      a = b, c = d;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
