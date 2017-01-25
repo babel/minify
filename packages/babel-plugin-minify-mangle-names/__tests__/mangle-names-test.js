@@ -1065,4 +1065,42 @@ describe("mangle-names", () => {
 
     expect(transform(source, { topLevel: true })).toBe(expected);
   });
+
+  it("should fix #326, #369 - destructuring", () => {
+    const source = unpad(`
+      // issue#326
+      function a() {
+        let foo, bar, baz;
+        ({foo, bar, baz} = {});
+        return {foo, bar, baz};
+      }
+      // issue#369
+      function decodeMessage(message){
+        let namespace;
+        let name;
+        let value = null;
+
+        [, namespace, name, value] = message.split(',') || [];
+        console.log(name);
+      }
+    `);
+    const expected = unpad(`
+      // issue#326
+      function a() {
+        let b, c, d;
+        ({ foo: b, bar: c, baz: d } = {});
+        return { foo: b, bar: c, baz: d };
+      }
+      // issue#369
+      function decodeMessage(b) {
+        let c;
+        let d;
+        let e = null;
+
+        [, c, d, e] = b.split(\',\') || [];
+        console.log(d);
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
