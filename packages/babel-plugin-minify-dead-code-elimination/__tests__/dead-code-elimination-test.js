@@ -2421,4 +2421,13 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should deopt impure expressions in if statements", () => {
+    const source = unpad(`
+      if (a.b(), true) {
+        foo();
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
 });
