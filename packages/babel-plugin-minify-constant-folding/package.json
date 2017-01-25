@@ -12,7 +12,8 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-evaluate-path": "^0.0.3"
+    "babel-helper-evaluate-path": "^0.0.3",
+    "jsesc": "^2.4.0"
   },
   "devDependencies": {}
 }
