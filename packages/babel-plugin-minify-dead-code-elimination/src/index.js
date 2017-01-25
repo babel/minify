@@ -640,9 +640,16 @@ module.exports = ({ types: t, traverse }) => {
           const alternate = path.get("alternate");
           const test = path.get("test");
 
+          const evalResult = test.evaluate();
           const isPure = test.isPure();
 
-          const evaluateTest = test.evaluateTruthy();
+          const replacements = [];
+
+          if (evalResult.confident && !isPure && test.isSequenceExpression()) {
+            replacements.push(
+              t.expressionStatement(extractSequenceImpure(test))
+            );
+          }
 
           // we can check if a test will be truthy 100% and if so then we can inline
           // the consequent and completely ignore the alternate
@@ -650,10 +657,10 @@ module.exports = ({ types: t, traverse }) => {
           //   if (true) { foo; } -> { foo; }
           //   if ("foo") { foo; } -> { foo; }
           //
-          if (isPure && evaluateTest === true) {
-            path.replaceWithMultiple(
-              [...toStatements(consequent), ...extractVars(alternate)]
-            );
+          if (evalResult.confident && evalResult.value) {
+            path.replaceWithMultiple([
+              ...replacements, ...toStatements(consequent), ...extractVars(alternate)
+            ]);
             return;
           }
 
@@ -663,14 +670,16 @@ module.exports = ({ types: t, traverse }) => {
           //   if ("") { bar; } else { foo; } -> { foo; }
           //   if ("") { bar; } ->
           //
-          if (isPure && evaluateTest === false) {
+          if (evalResult.confident && !evalResult.value) {
             if (alternate.node) {
-              path.replaceWithMultiple(
-                [...toStatements(alternate), ...extractVars(consequent)]
-              );
+              path.replaceWithMultiple([
+                ...replacements, ...toStatements(alternate), ...extractVars(consequent)
+              ]);
               return;
             } else {
-              path.replaceWithMultiple(extractVars(consequent));
+              path.replaceWithMultiple([
+                ...replacements, ...extractVars(consequent)
+              ]);
             }
           }
 
@@ -700,11 +709,13 @@ module.exports = ({ types: t, traverse }) => {
           }
         },
       },
+
       EmptyStatement(path) {
         if (path.parentPath.isBlockStatement() || path.parentPath.isProgram()) {
           path.remove();
         }
       },
+
       Program: {
         exit(path, {
           opts: {
@@ -1025,5 +1036,16 @@ module.exports = ({ types: t, traverse }) => {
       }
     } while (parent = parent.parentPath);
     return false;
+  }
+
+  function extractSequenceImpure(seq) {
+    const expressions = seq.get("expressions");
+    const result = [];
+    for (let i = 0; i < expressions.length; i++) {
+      if (!expressions[i].isPure()) {
+        result.push(expressions[i].node);
+      }
+    }
+    return t.sequenceExpression(result);
   }
 };
