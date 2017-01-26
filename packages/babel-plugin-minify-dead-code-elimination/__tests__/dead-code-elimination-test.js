@@ -2460,4 +2460,22 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not remove vars after return statement", () => {
+
+    const source = unpad(`
+      function f() {
+        return x;
+        var x = 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function f() {
+        return undefined;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

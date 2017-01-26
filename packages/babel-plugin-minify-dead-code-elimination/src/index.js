@@ -3,6 +3,15 @@
 const some = require("lodash.some");
 const { markEvalScopes, isMarked: isEvalScopesMarked, hasEval } = require("babel-helper-mark-eval-scopes");
 
+function forEachPrevSibling(path, callback) {
+  const parentPath = path.parentPath;
+  let key = parentPath.key;
+
+  while ((path = parentPath.getSibling(--key)).type) {
+    callback(path);
+  }
+}
+
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
   const shouldRevisit = Symbol("shouldRevisit");
@@ -238,10 +247,25 @@ module.exports = ({ types: t, traverse }) => {
             }
 
             if (binding.references === 1 && binding.kind !== "param" && binding.kind !== "module" && binding.constant) {
+
               let replacement = binding.path.node;
               let replacementPath = binding.path;
+              let isAfterReturn = false;
+
               if (t.isVariableDeclarator(replacement)) {
-                replacement = replacement.init;
+
+                forEachPrevSibling(replacementPath, (path) => {
+                  if (t.isReturnStatement(path)) {
+                    isAfterReturn = true;
+                  }
+                });
+
+                // simulate hoisting by replacing value
+                // with undefined if declaration is after return
+                replacement = isAfterReturn
+                  ? t.identifier("undefined")
+                  : replacement.init;
+
                 // Bail out for ArrayPattern and ObjectPattern
                 // TODO: maybe a more intelligent approach instead of simply bailing out
                 if (!replacementPath.get("id").isIdentifier()) {
@@ -358,7 +382,7 @@ module.exports = ({ types: t, traverse }) => {
         return;
       }
 
-      // Not last in it's block? (See BlockStatement visitor)
+      // Not last in its block? (See BlockStatement visitor)
       if (path.container.length - 1 !== path.key &&
           !canExistAfterCompletion(path.getSibling(path.key + 1)) &&
           path.parentPath.isBlockStatement()
