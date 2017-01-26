@@ -277,7 +277,7 @@ module.exports = ({ types: t, traverse }) => {
                 continue;
               }
 
-              if (!scope.isPure(replacement, true)) {
+              if (!scope.isPure(replacement, true) && !isAfterReturn) {
                 continue;
               }
 

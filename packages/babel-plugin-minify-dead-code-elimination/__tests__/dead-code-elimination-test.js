@@ -2478,4 +2478,29 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not remove vars after return statement #2", () => {
+
+    const source = unpad(`
+      var x = 0;
+      function f1(){
+        function f2(){
+          return x;
+        };
+        return f2();
+        var x = 1;
+      }
+    `);
+
+    const expected = unpad(`
+      var x = 0;
+      function f1() {
+        return function () {
+          return undefined;
+        }();
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });
