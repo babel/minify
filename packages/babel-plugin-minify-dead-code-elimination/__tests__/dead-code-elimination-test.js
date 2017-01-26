@@ -2503,4 +2503,22 @@ describe("dce-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not remove vars after return statement #3", () => {
+
+    const source = unpad(`
+      function foo() {
+        bar = x;
+        var x = 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        bar = undefined;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
 });

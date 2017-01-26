@@ -3,11 +3,20 @@
 const some = require("lodash.some");
 const { markEvalScopes, isMarked: isEvalScopesMarked, hasEval } = require("babel-helper-mark-eval-scopes");
 
-function forEachPrevSibling(path, callback) {
+function prevSiblings(path) {
   const parentPath = path.parentPath;
+  const siblings = [];
+
   let key = parentPath.key;
 
   while ((path = parentPath.getSibling(--key)).type) {
+    siblings.push(path);
+  }
+  return siblings;
+}
+
+function forEachAncestor(path, callback) {
+  while (path = path.parentPath) {
     callback(path);
   }
 }
@@ -250,19 +259,27 @@ module.exports = ({ types: t, traverse }) => {
 
               let replacement = binding.path.node;
               let replacementPath = binding.path;
-              let isAfterReturn = false;
+              let isReferencedBefore = false;
+
+              if (binding.referencePaths.length > 1) {
+                throw new Error("Expected only one reference");
+              }
+              const refPath = binding.referencePaths[0];
 
               if (t.isVariableDeclarator(replacement)) {
 
-                forEachPrevSibling(replacementPath, (path) => {
-                  if (t.isReturnStatement(path)) {
-                    isAfterReturn = true;
+                const _prevSiblings = prevSiblings(replacementPath);
+
+                // traverse ancestors of a reference checking if it's before declaration
+                forEachAncestor(refPath, (ancestor) => {
+                  if (_prevSiblings.includes(ancestor)) {
+                    isReferencedBefore = true;
                   }
                 });
 
                 // simulate hoisting by replacing value
                 // with undefined if declaration is after return
-                replacement = isAfterReturn
+                replacement = isReferencedBefore
                   ? t.identifier("undefined")
                   : replacement.init;
 
@@ -273,20 +290,16 @@ module.exports = ({ types: t, traverse }) => {
                 }
                 replacementPath = replacementPath.get("init");
               }
+
               if (!replacement) {
                 continue;
               }
 
-              if (!scope.isPure(replacement, true) && !isAfterReturn) {
+              if (!scope.isPure(replacement, true) && !isReferencedBefore) {
                 continue;
               }
 
-              if (binding.referencePaths.length > 1) {
-                throw new Error("Expected only one reference");
-              }
-
               let bail = false;
-              const refPath = binding.referencePaths[0];
 
               if (replacementPath.isIdentifier()) {
                 bail = refPath.scope.getBinding(replacement.name) !== scope.getBinding(replacement.name);
