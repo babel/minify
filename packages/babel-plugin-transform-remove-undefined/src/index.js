@@ -1,10 +1,15 @@
 "use strict";
 
-function isPureAndUndefined(rval) {
-  if (rval.isIdentifier() &&
-    rval.node.name === "undefined") {
+function isPureAndUndefined(rval, scope = { hasBinding: () => false }) {
+
+  if (rval.isIdentifier() && rval.node.name === "undefined") {
+    // deopt right away if undefined is a local binding
+    if (scope.hasBinding(rval.node.name, true /* no globals */)) {
+      return false;
+    }
     return true;
   }
+
   if (!rval.isPure()) {
     return false;
   }
@@ -85,7 +90,7 @@ module.exports = function() {
 
         for (let i = 0; i < expressions.length; i++) {
           const expr = expressions[i];
-          if (!isPureAndUndefined(expr)) continue;
+          if (!isPureAndUndefined(expr, path.scope)) continue;
 
           // last value
           if (i === expressions.length - 1) {
@@ -100,7 +105,7 @@ module.exports = function() {
 
       ReturnStatement(path) {
         if (path.node.argument !== null) {
-          if (isPureAndUndefined(path.get("argument"))) {
+          if (isPureAndUndefined(path.get("argument"), path.scope)) {
             path.node.argument = null;
           }
         }

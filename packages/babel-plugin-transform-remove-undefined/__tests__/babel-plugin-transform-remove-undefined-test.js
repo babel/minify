@@ -203,4 +203,13 @@ describe("transform-remove-undefined-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should remove not remove local undefined", () => {
+    const source = unpad(`
+      function foo(undefined) {
+        a = b, undefined;
+        return undefined;
+      }`);
+    expect(transform(source)).toBe(source);
+  });
 });
