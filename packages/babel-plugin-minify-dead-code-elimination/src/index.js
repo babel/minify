@@ -278,7 +278,7 @@ module.exports = ({ types: t, traverse }) => {
                 });
 
                 // simulate hoisting by replacing value
-                // with undefined if declaration is after return
+                // with undefined if declaration is after reference
                 replacement = isReferencedBefore
                   ? t.unaryExpression("void", t.numericLiteral(0), true)
                   : replacement.init;
