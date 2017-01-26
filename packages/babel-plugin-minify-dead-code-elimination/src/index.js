@@ -280,7 +280,7 @@ module.exports = ({ types: t, traverse }) => {
                 // simulate hoisting by replacing value
                 // with undefined if declaration is after return
                 replacement = isReferencedBefore
-                  ? t.identifier("undefined")
+                  ? t.unaryExpression("void", t.numericLiteral(0), true)
                   : replacement.init;
 
                 // Bail out for ArrayPattern and ObjectPattern

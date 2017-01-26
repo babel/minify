@@ -2472,7 +2472,7 @@ describe("dce-plugin", () => {
 
     const expected = unpad(`
       function f() {
-        return undefined;
+        return void 0;
       }
     `);
 
@@ -2496,7 +2496,7 @@ describe("dce-plugin", () => {
       var x = 0;
       function f1() {
         return function () {
-          return undefined;
+          return void 0;
         }();
       }
     `);
@@ -2515,7 +2515,7 @@ describe("dce-plugin", () => {
 
     const expected = unpad(`
       function foo() {
-        bar = undefined;
+        bar = void 0;
       }
     `);
 
