@@ -272,7 +272,7 @@ module.exports = ({ types: t, traverse }) => {
 
                 // traverse ancestors of a reference checking if it's before declaration
                 forEachAncestor(refPath, (ancestor) => {
-                  if (_prevSiblings.includes(ancestor)) {
+                  if (_prevSiblings.indexOf(ancestor) > -1) {
                     isReferencedBefore = true;
                   }
                 });
