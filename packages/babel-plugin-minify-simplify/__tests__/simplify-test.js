@@ -1676,6 +1676,33 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should not remove last break statement if it contains a label", () => {
+    const source = unpad(`
+      loop: while (foo) {
+        switch (bar) {
+          case 47:
+            break;
+        }
+        switch (baz) {
+          default:
+            break loop;
+        }
+      }
+    `);
+    const expected = unpad(`
+      loop: for (; foo;) {
+        switch (bar) {
+          case 47:
+        }
+        switch (baz) {
+          default:
+            break loop;
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should convert consequents in switch into sequence expressions", () => {
     const source = unpad(`
       function bar() {

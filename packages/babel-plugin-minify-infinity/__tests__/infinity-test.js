@@ -46,4 +46,49 @@ describe("boolean-plugin", () => {
 
     expect(transform(source)).toBe(expected);
   });
+
+  it("should not convert infinity if its a assignment expression", () => {
+    const source = unpad(`
+      Infinity = 1;
+    `);
+
+    const expected = unpad(`
+      Infinity = 1;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not convert infinity when its destructed", () => {
+    const source = unpad(`
+      ({ Infinity } = 1);
+      [Infinity] = foo;
+      [...Infinity] = foo;
+    `);
+
+    const expected = unpad(`
+      ({ Infinity } = 1);
+      [Infinity] = foo;
+      [...Infinity] = foo;
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not convert infinity when as a function params", () => {
+    const source = unpad(`
+      function a(Infinity) {}
+      function a(...Infinity) {}
+      function a({ Infinity }) {}
+    `);
+
+    const expected = unpad(`
+      function a(Infinity) {}
+      function a(...Infinity) {}
+      function a({ Infinity }) {}
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
 });

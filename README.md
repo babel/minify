@@ -191,5 +191,6 @@ Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
 
 [![Amjad Masad](https://avatars.githubusercontent.com/u/587518?s=96)](https://github.com/amasad) | [![Boopathi Rajaa](https://avatars.githubusercontent.com/u/294474?s=96)](https://github.com/boopathi) | [![Juriy Zaytsev](https://avatars.githubusercontent.com/u/383?s=96)](https://github.com/kangax) | [![Henry Zhu](https://avatars.githubusercontent.com/u/588473?s=96)](https://github.com/hzoo)
 ---|---|---|---|---|
-Amjad Masad [@amasad](https://github.com/amasad) | Boopathi Rajaa [@boopathi](https://github.com/boopathi) | Juriy Zaytsev [@kangax](https://github.com/kangax) | Henry Zhu [@hzoo](https://github.com/hzoo)
+Amjad Masad | Boopathi Rajaa | Juriy Zaytsev | Henry Zhu |
+[@amasad](https://github.com/amasad) | [@boopathi](https://github.com/boopathi) | [@kangax](https://github.com/kangax) | [@hzoo](https://github.com/hzoo)
 [@amasad](https://twitter.com/amasad) | [@heisenbugger](https://twitter.com/heisenbugger) | [@kangax](https://twitter.com/kangax) | [@left_pad](https://twitter.com/left_pad)

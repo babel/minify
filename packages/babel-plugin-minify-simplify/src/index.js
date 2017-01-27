@@ -1175,11 +1175,9 @@ module.exports = ({ types: t }) => {
             }
 
             const potentialBreak = lastCase.get("consequent")[lastCase.node.consequent.length - 1];
-            if (!t.isBreakStatement(potentialBreak)) {
-              return;
+            if (t.isBreakStatement(potentialBreak) && potentialBreak.node.label === null) {
+              potentialBreak.remove();
             }
-
-            potentialBreak.remove();
           },
 
           createPrevExpressionEater("switch"),
