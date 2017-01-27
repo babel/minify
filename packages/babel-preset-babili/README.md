@@ -56,7 +56,7 @@ require("babel-core").transform("code", {
 
 ## Options
 
-All options are **enabled** by default **except** the ones with explicit mention - `(Default: false)`
+All options are **enabled** by default **except** the ones with an explicit mention - `(Default: false)`
 
 Three types of options:
 
@@ -97,10 +97,10 @@ The following options have 1-1 mapping with a plugin,
 {
   "presets": [["babili", {
     "mangle": {
-      "blacklist": [
-        "ParserError",
-        "NetworkError"
-      ]
+      "blacklist": {
+        "ParserError": true,
+        "NetworkError": false
+      }
     }
   }]]
 }
