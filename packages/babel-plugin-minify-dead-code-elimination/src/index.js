@@ -277,6 +277,13 @@ module.exports = ({ types: t, traverse }) => {
                   }
                 });
 
+                // deopt if reference is in different scope than binding
+                // since we don't know if it's sync or async execition
+                // (i.e. whether value has been assigned to a reference or not)
+                if (isReferencedBefore && refPath.scope !== binding.scope) {
+                  continue;
+                }
+
                 // simulate hoisting by replacing value
                 // with undefined if declaration is after reference
                 replacement = isReferencedBefore

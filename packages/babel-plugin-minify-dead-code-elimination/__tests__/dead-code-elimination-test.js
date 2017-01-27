@@ -2496,8 +2496,9 @@ describe("dce-plugin", () => {
       var x = 0;
       function f1() {
         return function () {
-          return void 0;
+          return x;
         }();
+        var x = 1;
       }
     `);
 
