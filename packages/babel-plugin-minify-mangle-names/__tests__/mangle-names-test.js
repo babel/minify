@@ -425,19 +425,21 @@ describe("mangle-names", () => {
 
   it("should handle global name", () => {
     const source = unpad(`
-      function foo() {
+      function Foo() {
+        var foo = 3;
         var bar = 1;
         var baz = 2;
       }
     `);
 
     const expected = unpad(`
-      function foo() {
-        var bar = 1;
-        var a = 2;
+      function Foo() {
+        var foo = 3;
+        var a = 1;
+        var b = 2;
       }
     `);
-    expect(transform(source, { blacklist: {foo: true, bar: true }})).toBe(expected);
+    expect(transform(source, { blacklist: {foo: true, bar: false }})).toBe(expected);
   });
 
   it("should handle deeply nested paths with no bindings", () => {

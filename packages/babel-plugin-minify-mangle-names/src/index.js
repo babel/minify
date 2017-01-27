@@ -44,7 +44,7 @@ module.exports = ({ types: t, traverse }) => {
     }
 
     isBlacklist(name) {
-      return hop.call(this.blacklist, name);
+      return hop.call(this.blacklist, name) && this.blacklist[name];
     }
 
     markUnsafeScopes(scope) {
