@@ -3,6 +3,24 @@
 const some = require("lodash.some");
 const { markEvalScopes, isMarked: isEvalScopesMarked, hasEval } = require("babel-helper-mark-eval-scopes");
 
+function prevSiblings(path) {
+  const parentPath = path.parentPath;
+  const siblings = [];
+
+  let key = parentPath.key;
+
+  while ((path = parentPath.getSibling(--key)).type) {
+    siblings.push(path);
+  }
+  return siblings;
+}
+
+function forEachAncestor(path, callback) {
+  while (path = path.parentPath) {
+    callback(path);
+  }
+}
+
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
   const shouldRevisit = Symbol("shouldRevisit");
@@ -238,10 +256,40 @@ module.exports = ({ types: t, traverse }) => {
             }
 
             if (binding.references === 1 && binding.kind !== "param" && binding.kind !== "module" && binding.constant) {
+
               let replacement = binding.path.node;
               let replacementPath = binding.path;
+              let isReferencedBefore = false;
+
+              if (binding.referencePaths.length > 1) {
+                throw new Error("Expected only one reference");
+              }
+              const refPath = binding.referencePaths[0];
+
               if (t.isVariableDeclarator(replacement)) {
-                replacement = replacement.init;
+
+                const _prevSiblings = prevSiblings(replacementPath);
+
+                // traverse ancestors of a reference checking if it's before declaration
+                forEachAncestor(refPath, (ancestor) => {
+                  if (_prevSiblings.indexOf(ancestor) > -1) {
+                    isReferencedBefore = true;
+                  }
+                });
+
+                // deopt if reference is in different scope than binding
+                // since we don't know if it's sync or async execition
+                // (i.e. whether value has been assigned to a reference or not)
+                if (isReferencedBefore && refPath.scope !== binding.scope) {
+                  continue;
+                }
+
+                // simulate hoisting by replacing value
+                // with undefined if declaration is after reference
+                replacement = isReferencedBefore
+                  ? t.unaryExpression("void", t.numericLiteral(0), true)
+                  : replacement.init;
+
                 // Bail out for ArrayPattern and ObjectPattern
                 // TODO: maybe a more intelligent approach instead of simply bailing out
                 if (!replacementPath.get("id").isIdentifier()) {
@@ -249,20 +297,16 @@ module.exports = ({ types: t, traverse }) => {
                 }
                 replacementPath = replacementPath.get("init");
               }
+
               if (!replacement) {
                 continue;
               }
 
-              if (!scope.isPure(replacement, true)) {
+              if (!scope.isPure(replacement, true) && !isReferencedBefore) {
                 continue;
               }
 
-              if (binding.referencePaths.length > 1) {
-                throw new Error("Expected only one reference");
-              }
-
               let bail = false;
-              const refPath = binding.referencePaths[0];
 
               if (replacementPath.isIdentifier()) {
                 bail = refPath.scope.getBinding(replacement.name) !== scope.getBinding(replacement.name);
@@ -358,7 +402,7 @@ module.exports = ({ types: t, traverse }) => {
         return;
       }
 
-      // Not last in it's block? (See BlockStatement visitor)
+      // Not last in its block? (See BlockStatement visitor)
       if (path.container.length - 1 !== path.key &&
           !canExistAfterCompletion(path.getSibling(path.key + 1)) &&
           path.parentPath.isBlockStatement()
