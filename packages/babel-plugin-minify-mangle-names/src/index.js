@@ -6,6 +6,8 @@ const {
   hasEval,
 } = require("babel-helper-mark-eval-scopes");
 
+const PATH_RENAME_MARKER = Symbol("PATH_RENAME_MARKER");
+
 module.exports = ({ types: t, traverse }) => {
   const hop = Object.prototype.hasOwnProperty;
 
@@ -181,7 +183,16 @@ module.exports = ({ types: t, traverse }) => {
       const binding = scope.getBinding(oldName);
 
       // rename at the declaration level
-      binding.identifier.name = newName;
+      const bindingPaths = binding.path.getBindingIdentifierPaths();
+
+      Object
+        .keys(bindingPaths)
+        .map((b) => {
+          if (b === oldName && !bindingPaths[b][PATH_RENAME_MARKER]) {
+            bindingPaths[b].replaceWith(t.identifier(newName));
+            bindingPaths[b][PATH_RENAME_MARKER] = true;
+          }
+        });
 
       const {bindings} = scope;
       bindings[newName] = binding;
@@ -192,11 +203,14 @@ module.exports = ({ types: t, traverse }) => {
       for (let i = 0; i < violations.length; i++) {
         if (violations[i].isLabeledStatement()) continue;
 
-        const bindings = violations[i].getBindingIdentifiers();
+        const bindings = violations[i].getBindingIdentifierPaths();
         Object
           .keys(bindings)
           .map((b) => {
-            bindings[b].name = newName;
+            if (b === oldName && !bindings[b][PATH_RENAME_MARKER]) {
+              bindings[b].replaceWith(t.identifier(newName));
+              bindings[b][PATH_RENAME_MARKER] = true;
+            }
           });
       }
 
@@ -204,6 +218,8 @@ module.exports = ({ types: t, traverse }) => {
       const refs = binding.referencePaths;
       for (let i = 0; i < refs.length; i++) {
         const path = refs[i];
+        if (path[PATH_RENAME_MARKER]) continue;
+
         const {node} = path;
         if (!path.isIdentifier()) {
           // Ideally, this should not happen
@@ -216,7 +232,7 @@ module.exports = ({ types: t, traverse }) => {
           // replacement in dce from `x` to `!x` gives referencePath as `!x`
           path.traverse({
             ReferencedIdentifier(refPath) {
-              if (refPath.node.name === oldName && refPath.scope === scope) {
+              if (refPath.node.name === oldName && refPath.scope === scope && !refPath[PATH_RENAME_MARKER]) {
                 refPath.node.name = newName;
               }
             }
