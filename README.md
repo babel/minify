@@ -88,6 +88,8 @@ Equivalent to:
 babel src -d lib --presets=babili --no-babelrc
 ```
 
+Note that, because the `babili` command uses the default preset with `no-babelrc`, you cannot set any non-default options in the preset's plugins with this command. To do this, you can use the `babel` command with the options set in a `.babelrc`. See the preset docs for more information on how to do this.
+
 ## [Babel preset](http://babeljs.io/docs/plugins/#presets)
 
 | Package | Version | Dependencies |
