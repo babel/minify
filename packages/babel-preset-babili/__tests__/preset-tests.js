@@ -75,4 +75,23 @@ describe("preset", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix issue#402 - lifting var decl & DCE", () => {
+    const source = unpad(`
+      function a() {
+        if (0) {
+          for (var i;;) {
+            var something = 5;
+          }
+        }
+      }
+      a();
+    `);
+    const expected = unpad(`
+      function a() {}
+      a();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
 });

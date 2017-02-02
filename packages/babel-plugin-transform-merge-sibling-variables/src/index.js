@@ -24,9 +24,7 @@ module.exports = function({ types: t }) {
         return;
       }
 
-      init.node.declarations = init.node.declarations.concat(
-        firstNode.id
-      );
+      init.pushContainer("declarations", t.variableDeclarator(firstNode.id));
 
       body[0].replaceWith(t.assignmentExpression(
         "=",
