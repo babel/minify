@@ -46,6 +46,9 @@ module.exports = ({ types: t, traverse }) => {
     }
 
     isBlacklist(name) {
+      if (Array.isArray(this.blacklist)) {
+        return this.blacklist.indexOf(name) !== -1;
+      }
       return hop.call(this.blacklist, name) && this.blacklist[name];
     }
 
