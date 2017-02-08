@@ -16,14 +16,11 @@
   * [#388](https://github.com/babel/babili/pull/388) Remove undef from seqExpr - (Closes [#373](https://github.com/babel/babili/issues/373)). ([@boopathi](https://github.com/boopathi))
 * `babel-helper-mark-eval-scopes`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-mangle-names`
   * [#371](https://github.com/babel/babili/pull/371) Add mark eval scopes helper and deopt DCE fn unused params. ([@boopathi](https://github.com/boopathi))
+  * [f83b06c4](https://github.com/babel/babili/commit/f83b06c4c5) Do not remove undefined if it's a local var. ([@kangax](https://github.com/kangax))
 
 #### :memo: Documentation
 * Other
   * [#401](https://github.com/babel/babili/pull/401) Readme: plugin options cannot be set in babili cmd. ([@probins](https://github.com/probins))
-
-#### :house: Internal
-* Other
-  * [#356](https://github.com/babel/babili/pull/356) Upgrade deps. ([@boopathi](https://github.com/boopathi))
 
 #### Committers: 5
 - Boopathi Rajaa ([boopathi](https://github.com/boopathi))
