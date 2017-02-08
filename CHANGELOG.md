@@ -1,3 +1,37 @@
+## babili@0.0.11 (2017-02-08)
+
+#### :bug: Bug Fix
+* `babel-plugin-transform-merge-sibling-variables`, `babel-preset-babili`
+  * [#403](https://github.com/babel/babili/pull/403) lift the declarations without mutating the node[Closes [#402](https://github.com/babel/babili/issues/402)]. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-minify-mangle-names`
+  * [#390](https://github.com/babel/babili/pull/390) Mark renamed paths in mangler. ([@boopathi](https://github.com/boopathi))
+  * [#381](https://github.com/babel/babili/pull/381) Clear traverse cache and recrawl for mangler. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#391](https://github.com/babel/babili/pull/391) Inline hoisted, post-return declarations properly. ([@kangax](https://github.com/kangax))
+* `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-preset-babili`
+  * [#386](https://github.com/babel/babili/pull/386) DCE: Deopt impure statements in If.test. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-constant-folding`
+  * [#384](https://github.com/babel/babili/pull/384) Escape "</script" when inlining strings. ([@kangax](https://github.com/kangax))
+* `babel-plugin-transform-remove-undefined`
+  * [#388](https://github.com/babel/babili/pull/388) Remove undef from seqExpr - (Closes [#373](https://github.com/babel/babili/issues/373)). ([@boopathi](https://github.com/boopathi))
+* `babel-helper-mark-eval-scopes`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-mangle-names`
+  * [#371](https://github.com/babel/babili/pull/371) Add mark eval scopes helper and deopt DCE fn unused params. ([@boopathi](https://github.com/boopathi))
+
+#### :memo: Documentation
+* Other
+  * [#401](https://github.com/babel/babili/pull/401) Readme: plugin options cannot be set in babili cmd. ([@probins](https://github.com/probins))
+
+#### :house: Internal
+* Other
+  * [#356](https://github.com/babel/babili/pull/356) Upgrade deps. ([@boopathi](https://github.com/boopathi))
+
+#### Committers: 5
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Henry Zhu ([hzoo](https://github.com/hzoo))
+- Juriy Zaytsev ([kangax](https://github.com/kangax))
+- Peter Robins ([probins](https://github.com/probins))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## Babili v0.0.10: Changelog for 2017-01-18
 
  - babel-helper-flip-expressions@0.0.2
