@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-remove-undefined",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "This removes rvals that are equivalent to undefined wherever possible",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-remove-undefined",
