@@ -1471,8 +1471,35 @@ module.exports = ({ types: t }) => {
   function genericEarlyExitTransform(path) {
     const { node } = path;
 
-    const statements = path.container.slice(path.key + 1)
-      .filter((stmt) => !t.isFunctionDeclaration(stmt));
+    const statements = path
+      .parentPath
+      .get(path.listKey)
+      .slice(path.key + 1)
+      .filter((stmt) => !stmt.isFunctionDeclaration());
+
+    // deopt for any block scoped bindings
+    // issue#399
+    const deopt = !statements.every((stmt) => {
+      if (!(
+        stmt.isVariableDeclaration({ kind: "let" })
+        || stmt.isVariableDeclaration({ kind: "const" })
+      )) {
+        return true;
+      }
+      return Object
+        .keys(stmt.getBindingIdentifiers())
+        .map((b) => [
+          ...path.scope.bindings[b].referencePaths,
+          ...path.scope.bindings[b].constantViolations
+        ])
+        .reduce((p, c) => [...p, ...c], [])
+        .every((ref) => ref.isIdentifier() && ref.getFunctionParent().scope === path.scope);
+    });
+
+    if (deopt) {
+      path.visit();
+      return false;
+    }
 
     if (!statements.length) {
       path.replaceWith(t.expressionStatement(node.test));
@@ -1490,14 +1517,14 @@ module.exports = ({ types: t }) => {
       node.test = t.unaryExpression("!", node.test, true);
     }
 
+    path.get("consequent").replaceWith(t.blockStatement(statements.map((stmt) => t.clone(stmt.node))));
+
     let l = statements.length;
     while (l-- > 0) {
-      if (!t.isFunctionDeclaration(statements[l])) {
+      if (!statements[l].isFunctionDeclaration()) {
         path.getSibling(path.key + 1).remove();
       }
     }
-
-    node.consequent = t.blockStatement(statements);
 
     // this should take care of removing the block
     path.visit();
