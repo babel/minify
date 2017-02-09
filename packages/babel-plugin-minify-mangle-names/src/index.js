@@ -186,16 +186,20 @@ module.exports = ({ types: t, traverse }) => {
       const binding = scope.getBinding(oldName);
 
       // rename at the declaration level
-      const bindingPaths = binding.path.getBindingIdentifierPaths();
+      const bindingPaths = binding.path.getBindingIdentifierPaths(true, false);
 
-      Object
-        .keys(bindingPaths)
-        .map((b) => {
-          if (b === oldName && !bindingPaths[b][PATH_RENAME_MARKER]) {
-            bindingPaths[b].replaceWith(t.identifier(newName));
-            bindingPaths[b][PATH_RENAME_MARKER] = true;
+      // we traverse through all bindingPaths because,
+      // there is no binding.identifierPath in babel
+      for (const name in bindingPaths) {
+        if (name !== oldName) continue;
+        for (const idPath of bindingPaths[name]) {
+          if (binding.identifier === idPath.node) {
+            idPath.replaceWith(t.identifier(newName));
+            binding.identifier = idPath.node;
+            idPath[PATH_RENAME_MARKER] = true;
           }
-        });
+        }
+      }
 
       const {bindings} = scope;
       bindings[newName] = binding;
