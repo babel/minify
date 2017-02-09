@@ -22,6 +22,7 @@ const mocks = [
   "babel-plugin-transform-remove-undefined",
   "babel-plugin-transform-simplify-comparison-operators",
   "babel-plugin-transform-undefined-to-void",
+  "babel-plugin-transform-built-ins"
 ];
 
 mocks.forEach((mockName) => {

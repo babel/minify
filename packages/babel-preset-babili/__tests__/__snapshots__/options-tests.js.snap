@@ -18,6 +18,7 @@ Object {
     "babel-plugin-transform-minify-booleans",
     "babel-plugin-transform-undefined-to-void",
     "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-built-ins",
     "babel-plugin-transform-remove-undefined",
   ],
 }
@@ -48,6 +49,7 @@ Object {
     "babel-plugin-transform-minify-booleans",
     "babel-plugin-transform-undefined-to-void",
     "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-built-ins",
     "babel-plugin-transform-remove-undefined",
   ],
 }
@@ -90,6 +92,7 @@ Object {
     "babel-plugin-transform-minify-booleans",
     "babel-plugin-transform-undefined-to-void",
     "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-built-ins",
     "babel-plugin-transform-remove-undefined",
   ],
 }
@@ -142,6 +145,7 @@ Object {
     "babel-plugin-transform-minify-booleans",
     "babel-plugin-transform-undefined-to-void",
     "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-built-ins",
     "babel-plugin-transform-remove-undefined",
   ],
 }
@@ -194,6 +198,7 @@ Object {
     "babel-plugin-transform-minify-booleans",
     "babel-plugin-transform-undefined-to-void",
     "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-built-ins",
     "babel-plugin-transform-remove-undefined",
   ],
 }
@@ -222,6 +227,7 @@ Object {
     "babel-plugin-transform-minify-booleans",
     "babel-plugin-transform-undefined-to-void",
     "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-built-ins",
     "babel-plugin-transform-remove-undefined",
   ],
 }
@@ -264,6 +270,7 @@ Object {
     "babel-plugin-transform-minify-booleans",
     "babel-plugin-transform-undefined-to-void",
     "babel-plugin-transform-regexp-constructors",
+    "babel-plugin-transform-built-ins",
     "babel-plugin-transform-remove-undefined",
   ],
 }
@@ -289,6 +296,7 @@ Array [
   "babel-plugin-transform-minify-booleans",
   "babel-plugin-transform-undefined-to-void",
   "babel-plugin-transform-regexp-constructors",
+  "babel-plugin-transform-built-ins",
   "babel-plugin-transform-remove-undefined",
 ]
 `;
@@ -313,6 +321,7 @@ Array [
   "babel-plugin-transform-minify-booleans",
   "babel-plugin-transform-undefined-to-void",
   "babel-plugin-transform-regexp-constructors",
+  "babel-plugin-transform-built-ins",
   "babel-plugin-transform-remove-undefined",
 ]
 `;
@@ -337,6 +346,7 @@ Array [
   "babel-plugin-transform-minify-booleans",
   "babel-plugin-transform-undefined-to-void",
   "babel-plugin-transform-regexp-constructors",
+  "babel-plugin-transform-built-ins",
   "babel-plugin-transform-remove-undefined",
 ]
 `;

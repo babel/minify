@@ -22,6 +22,7 @@
     "babel-plugin-minify-replace": "^0.0.1",
     "babel-plugin-minify-simplify": "^0.0.7",
     "babel-plugin-minify-type-constructors": "^0.0.3",
+    "babel-plugin-transform-built-ins": "^0.0.1",
     "babel-plugin-transform-inline-consecutive-adds": "^0.0.2",
     "babel-plugin-transform-member-expression-literals": "^6.8.1",
     "babel-plugin-transform-merge-sibling-variables": "^6.8.2",

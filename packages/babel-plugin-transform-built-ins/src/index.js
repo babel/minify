@@ -19,47 +19,62 @@ function isBuiltin(expName) {
 }
 
 module.exports = function({ types: t }) {
-  const builtinsMap = new Map();
 
-  const collectVisitor = {
-    MemberExpression(path) {
-      const { node } = path.get("object");
-      const { node: propertyNode } = path.get("property");
-      const expName = `${node.name}.${propertyNode.name}`;
+  class BuiltInReplacer {
+    constructor(program) {
+      this.program = program;
+      this.pathsToUpdate = new Map;
+    }
 
-      if (isBuiltin(expName)) {
-        if (!builtinsMap.has(expName)) {
-          builtinsMap.set(expName, []);
+    run() {
+      this.collect();
+      this.replace();
+    }
+
+    collect() {
+      const context = this;
+      const collectVisitor =  {
+        MemberExpression(path) {
+          const { node } = path.get("object");
+          const { node: propertyNode } = path.get("property");
+          const expName = `${node.name}.${propertyNode.name}`;
+
+          if (isBuiltin(expName)) {
+            if (!context.pathsToUpdate.has(expName)) {
+              context.pathsToUpdate.set(expName, []);
+            }
+            context.pathsToUpdate.get(expName).push(path);
+          }
         }
-        builtinsMap.get(expName).push(path);
+      };
+      this.program.traverse(collectVisitor);
+    }
+
+    replace() {
+      for (const paths of this.pathsToUpdate.values()) {
+        // Should only transform if there is more than 1 occurence
+        if (paths.length > 1) {
+          const uniqueIdentifier = this.program.scope.generateUidIdentifier();
+          const newNode = t.variableDeclaration("var", [
+            t.variableDeclarator(uniqueIdentifier, paths[0].node)
+          ]);
+
+          for (const path of paths) {
+            path.replaceWith(uniqueIdentifier);
+          }
+          // hoist the created var to top of the program
+          this.program.unshiftContainer("body", newNode);
+        }
       }
     }
-  };
-
-  const replaceBuiltins = (programPath) => {
-    for (const paths of builtinsMap.values()) {
-      // Should only transform if there is more than 1 occurance
-      if (paths.length > 1) {
-        const uniqueIdentifier = programPath.scope.generateUidIdentifier();
-        const newNode = t.variableDeclaration("var", [
-          t.variableDeclarator(uniqueIdentifier, paths[0].node)
-        ]);
-
-        for (const path of paths) {
-          path.replaceWith(uniqueIdentifier);
-        }
-        // hoist the created var to top of the program
-        programPath.unshiftContainer("body", newNode);
-      }
-    }
-  };
+  }
 
   return {
     name: "transform-builtins",
     visitor: {
       Program(path) {
-        path.traverse(collectVisitor);
-        replaceBuiltins(path);
+        const builtInReplacer = new BuiltInReplacer(path);
+        builtInReplacer.run();
       }
     },
   };
