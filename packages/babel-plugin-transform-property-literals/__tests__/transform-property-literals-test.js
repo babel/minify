@@ -50,4 +50,13 @@ describe("transform-property-literals-plugin", () => {
     `);
     expect(transform(source)).toBe(source);
   });
+
+  it("should not transform property keys that contain unicode", () => {
+    const source = unpad(`
+      ({
+        "\u2118": "wp"
+      });
+    `);
+    expect(transform(source)).toBe(source);
+  });
 });
