@@ -547,7 +547,16 @@ module.exports = ({ types: t }) => {
               const ids = Object.keys(prev.getBindingIdentifiers());
 
               idloop: for (let i = 0; i < ids.length; i++) {
-                const refs = prev.scope.bindings[ids[i]].referencePaths;
+                const binding = prev.scope.bindings[ids[i]];
+                // TODO
+                // Temporary Fix
+                // if there is no binding, we assume it is referenced outside
+                // and deopt to avoid bugs
+                if (!binding) {
+                  referencedOutsideLoop = true;
+                  break idloop;
+                }
+                const refs = binding.referencePaths;
                 for (let j = 0; j < refs.length; j++) {
                   if (!isAncestor(path, refs[j])) {
                     referencedOutsideLoop = true;
@@ -1486,14 +1495,23 @@ module.exports = ({ types: t }) => {
       )) {
         return true;
       }
-      return Object
-        .keys(stmt.getBindingIdentifiers())
-        .map((b) => [
-          ...path.scope.bindings[b].referencePaths,
-          ...path.scope.bindings[b].constantViolations
-        ])
-        .reduce((p, c) => [...p, ...c], [])
-        .every((ref) => ref.isIdentifier() && ref.getFunctionParent().scope === path.scope);
+      const ids = Object.keys(stmt.getBindingIdentifiers());
+      for (const id of ids) {
+        const binding = path.scope.getBinding(id);
+        // TODO
+        // Temporary Fix
+        // if there is no binding, we assume it is referenced outside
+        // and deopt to avoid bugs
+        if (!binding) {
+          return false;
+        }
+        const refs = [...binding.referencePaths, ...binding.constantViolations];
+        for (const ref of refs) {
+          if (!ref.isIdentifier()) return false;
+          if (ref.getFunctionParent().scope !== path.scope) return false;
+        }
+      }
+      return true;
     });
 
     if (deopt) {
