@@ -181,7 +181,7 @@ module.exports = ({ types: t, traverse }) => {
             }
 
             // mark the binding as renamed
-            // this is redundant and exists to work around a bug in babel
+            // this is redundant and exists to work around ClassDeclarations
             // ClassDeclarations have binding in two scopes
             // - https://github.com/babel/babel/issues/5156
             binding.renamed = true;
