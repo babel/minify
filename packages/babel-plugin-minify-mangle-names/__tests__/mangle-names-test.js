@@ -1105,4 +1105,28 @@ describe("mangle-names", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should rename binding.identifier - issue#411", () => {
+    const source = unpad(`
+      !function () {
+        function e(e) {
+          foo(e);
+        }
+        return function () {
+          return e();
+        };
+      }();
+    `);
+    const expected = unpad(`
+      !function () {
+        function a(b) {
+          foo(b);
+        }
+        return function () {
+          return a();
+        };
+      }();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
