@@ -37,7 +37,7 @@ describe("remove-console-plugin", () => {
 
     const expected = unpad(`
       function foo() {
-        true;
+        true && void 0;
         blah();
       }
     `);
@@ -51,7 +51,7 @@ describe("remove-console-plugin", () => {
     `);
 
     const expected = unpad(`
-      true;
+      true && void 0;
       blah();
     `);
     expect(transform(source)).toBe(expected);
@@ -88,5 +88,27 @@ describe("remove-console-plugin", () => {
       do {} while (blah);
     `);
     expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should remove console.* assignments to other variables", () => {
+    const source = unpad(`
+      const a = console.log;
+      a();
+      var x = console.log ? console.log('log') : foo();
+      function foo() {
+        if (console.error) {
+          console.error("Errored");
+        }
+      }
+    `);
+    const expected = unpad(`
+      const a = () => {};
+      a();
+      var x = () => {} ? void 0 : foo();
+      function foo() {
+        if (() => {}) {}
+      }
+    `);
+    expect(transform(source)).toBe(expected);
   });
 });
