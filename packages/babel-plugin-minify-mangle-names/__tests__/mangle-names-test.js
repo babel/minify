@@ -1143,9 +1143,9 @@ describe("mangle-names", () => {
 
   it("should fix classDeclaration with unsafe program scope", () => {
     const source = unpad(`
-      eval("");
       class A {}
       class B {}
+      eval("");
     `);
     expect(transform(source, { topLevel: true })).toBe(source);
   });
