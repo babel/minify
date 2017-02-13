@@ -94,6 +94,8 @@ describe("remove-console-plugin", () => {
     const source = unpad(`
       const a = console.log;
       a();
+      const b = console.log.bind(console);
+      b("asdf");
       var x = console.log ? console.log('log') : foo();
       function foo() {
         if (console.error) {
@@ -102,11 +104,13 @@ describe("remove-console-plugin", () => {
       }
     `);
     const expected = unpad(`
-      const a = () => {};
+      const a = function () {};
       a();
-      var x = () => {} ? void 0 : foo();
+      const b = function () {};
+      b("asdf");
+      var x = function () {} ? void 0 : foo();
       function foo() {
-        if (() => {}) {}
+        if (function () {}) {}
       }
     `);
     expect(transform(source)).toBe(expected);
