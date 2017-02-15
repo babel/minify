@@ -1,6 +1,7 @@
 "use strict";
 
 const { methods, properties } = require("./builtins");
+const evaluate = require("babel-helper-evaluate-path");
 
 function isBuiltin(expName) {
   // Look for properties Eg - Number.PI
@@ -33,8 +34,41 @@ module.exports = function({ types: t }) {
 
     collect() {
       const context = this;
-      const collectVisitor =  {
+
+      const methodVisitor =  {
+        CallExpression: {
+          exit(path) {
+            const callee = path.get("callee");
+            if (!t.isMemberExpression(callee)) {
+              return;
+            }
+            const { node } = callee.get("object");
+            const { node: propertyNode } = callee.get("property");
+            const expName = `${node.name}.${propertyNode.name}`;
+
+            if (isBuiltin(expName)) {
+              const result = evaluate(path);
+              // Math.floor(1) --> 1
+              if (result.confident && typeof result.value === "number") {
+                path.replaceWith(t.numericLiteral(result.value));
+              } else {
+                if (!context.pathsToUpdate.has(expName)) {
+                  context.pathsToUpdate.set(expName, []);
+                }
+                context.pathsToUpdate.get(expName).push(callee);
+              }
+            }
+          }
+        }
+      };
+
+      const propertyVisitor = {
         MemberExpression(path) {
+          const { parent } = path;
+          if (t.isCallExpression(parent)) {
+            return;
+          }
+
           const { node } = path.get("object");
           const { node: propertyNode } = path.get("property");
           const expName = `${node.name}.${propertyNode.name}`;
@@ -47,7 +81,9 @@ module.exports = function({ types: t }) {
           }
         }
       };
-      this.program.traverse(collectVisitor);
+
+      this.program.traverse(methodVisitor);
+      this.program.traverse(propertyVisitor);
     }
 
     replace() {

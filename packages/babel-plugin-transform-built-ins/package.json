@@ -12,6 +12,8 @@
   ],
   "author": "Vignesh Shanmugam <vignesh.shanmugam22@gmail.com> (https://vigneshh.in)",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "babel-helper-evaluate-path": "^0.0.3"
+  },
   "devDependencies": {}
 }

@@ -13,11 +13,11 @@ function transform(code) {
 describe("transform-built-ins", () => {
   it("should transform standard built in methods", () => {
     const source = unpad(`
-      Math.max(2, 1) + Math.max(1, 2)
+      Math.max(a, b) + Math.max(b, a)
     `);
     const expected = unpad(`
       var _temp = Math.max;
-      _temp(2, 1) + _temp(1, 2);
+      _temp(a, b) + _temp(b, a);
     `);
     expect(transform(source)).toBe(expected);
   });
@@ -40,40 +40,40 @@ describe("transform-built-ins", () => {
   it("should take no of occurences in to account", () => {
     const source = unpad(`
       function a() {
-        return Math.floor(1) + Math.floor(2) + Math.min(1, 2);
+        return Math.floor(a) + Math.floor(b) + Math.min(a, b);
       }
-      Math.floor(2, 1) + Math.sum(1, 2);
+      Math.floor(a) + Math.max(a, b);
     `);
     const expected = unpad(`
       var _temp = Math.floor;
       function a() {
-        return _temp(1) + _temp(2) + Math.min(1, 2);
+        return _temp(a) + _temp(b) + Math.min(a, b);
       }
-      _temp(2, 1) + Math.sum(1, 2);
+      _temp(a) + Math.max(a, b);
     `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should collect and transform no matter any depth", () => {
     const source = unpad(`
-      Math.max(2, 1) + Math.max(1, 2);
+      Math.max(a, b) + Math.max(a, b);
       function a (){
-        Math.max(2, 1);
+        Math.max(b, a);
         return function b() {
-          const a = Math.floor(1);
-          Math.min(2, 1) * Math.floor(2);
+          const a = Math.floor(c);
+          Math.min(b, a) * Math.floor(b);
         }
       }
     `);
     const expected = unpad(`
       var _temp2 = Math.floor;
       var _temp = Math.max;
-      _temp(2, 1) + _temp(1, 2);
+      _temp(a, b) + _temp(a, b);
       function a() {
-        _temp(2, 1);
+        _temp(b, a);
         return function b() {
-          const a = _temp2(1);
-          Math.min(2, 1) * _temp2(2);
+          const a = _temp2(c);
+          Math.min(b, a) * _temp2(b);
         };
       }
     `);
@@ -85,6 +85,23 @@ describe("transform-built-ins", () => {
       Math.a(2, 1) + Math.a(1, 2);
     `);
     expect(transform(source)).toBe(source);
+  });
+
+  it("should evalaute expressions if applicable and optimize it", () => {
+    const source = unpad(`
+      const a = Math.max(Math.floor(2), 5);
+      let b = 1.8;
+      let x = Math.floor(Math.max(a, b));
+      foo(x);
+    `);
+
+    const expected = unpad(`
+      const a = 5;
+      let b = 1.8;
+      let x = 5;
+      foo(x);
+    `);
+    expect(transform(source)).toBe(expected);
   });
 
 });
