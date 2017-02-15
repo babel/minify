@@ -1,0 +1,76 @@
+exports[`transform-built-ins should collect and transform no matter any depth 1`] = `
+Object {
+  "_source": "Math.max(a, b) + Math.max(a, b);
+function a (){
+  Math.max(b, a);
+  return function b() {
+    const a = Math.floor(c);
+    Math.min(b, a) * Math.floor(b);
+  }
+}",
+  "expected": "var _Mathfloor = Math.floor;
+var _Mathmax = Math.max;
+_Mathmax(a, b) + _Mathmax(a, b);
+function a() {
+  _Mathmax(b, a);
+  return function b() {
+    const a = _Mathfloor(c);
+    Math.min(b, a) * _Mathfloor(b);
+  };
+}",
+}
+`;
+
+exports[`transform-built-ins should evalaute expressions if applicable and optimize it 1`] = `
+Object {
+  "_source": "const a = Math.max(Math.floor(2), 5);
+let b = 1.8;
+let x = Math.floor(Math.max(a, b));
+foo(x);",
+  "expected": "const a = 5;
+let b = 1.8;
+let x = 5;
+foo(x);",
+}
+`;
+
+exports[`transform-built-ins should not transform if its not a built in object 1`] = `
+Object {
+  "_source": "Math.a(2, 1) + Math.a(1, 2);",
+  "expected": "Math.a(2, 1) + Math.a(1, 2);",
+}
+`;
+
+exports[`transform-built-ins should take no of occurences in to account 1`] = `
+Object {
+  "_source": "function a() {
+  return Math.floor(a) + Math.floor(b) + Math.min(a, b);
+}
+Math.floor(a) + Math.max(a, b);",
+  "expected": "var _Mathfloor = Math.floor;
+function a() {
+  return _Mathfloor(a) + _Mathfloor(b) + Math.min(a, b);
+}
+_Mathfloor(a) + Math.max(a, b);",
+}
+`;
+
+exports[`transform-built-ins should transform standard built in methods 1`] = `
+Object {
+  "_source": "Math.max(a, b) + Math.max(b, a)",
+  "expected": "var _Mathmax = Math.max;
+_Mathmax(a, b) + _Mathmax(b, a);",
+}
+`;
+
+exports[`transform-built-ins should transform standard built in properties 1`] = `
+Object {
+  "_source": "function a () {
+  return Math.PI + Math.PI
+}",
+  "expected": "var _MathPI = Math.PI;
+function a() {
+  return _MathPI + _MathPI;
+}",
+}
+`;

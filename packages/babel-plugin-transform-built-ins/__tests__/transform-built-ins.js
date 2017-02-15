@@ -15,11 +15,8 @@ describe("transform-built-ins", () => {
     const source = unpad(`
       Math.max(a, b) + Math.max(b, a)
     `);
-    const expected = unpad(`
-      var _temp = Math.max;
-      _temp(a, b) + _temp(b, a);
-    `);
-    expect(transform(source)).toBe(expected);
+    // Jest arranges in alphabetical order, So keeping it as _source
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
   it("should transform standard built in properties", () => {
@@ -28,13 +25,7 @@ describe("transform-built-ins", () => {
         return Math.PI + Math.PI
       }
     `);
-    const expected = unpad(`
-      var _temp = Math.PI;
-      function a() {
-        return _temp + _temp;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
   it("should take no of occurences in to account", () => {
@@ -44,14 +35,7 @@ describe("transform-built-ins", () => {
       }
       Math.floor(a) + Math.max(a, b);
     `);
-    const expected = unpad(`
-      var _temp = Math.floor;
-      function a() {
-        return _temp(a) + _temp(b) + Math.min(a, b);
-      }
-      _temp(a) + Math.max(a, b);
-    `);
-    expect(transform(source)).toBe(expected);
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
   it("should collect and transform no matter any depth", () => {
@@ -65,26 +49,14 @@ describe("transform-built-ins", () => {
         }
       }
     `);
-    const expected = unpad(`
-      var _temp2 = Math.floor;
-      var _temp = Math.max;
-      _temp(a, b) + _temp(a, b);
-      function a() {
-        _temp(b, a);
-        return function b() {
-          const a = _temp2(c);
-          Math.min(b, a) * _temp2(b);
-        };
-      }
-    `);
-    expect(transform(source)).toBe(expected);
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
   it("should not transform if its not a built in object", () => {
     const source = unpad(`
       Math.a(2, 1) + Math.a(1, 2);
     `);
-    expect(transform(source)).toBe(source);
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
   it("should evalaute expressions if applicable and optimize it", () => {
@@ -94,14 +66,7 @@ describe("transform-built-ins", () => {
       let x = Math.floor(Math.max(a, b));
       foo(x);
     `);
-
-    const expected = unpad(`
-      const a = 5;
-      let b = 1.8;
-      let x = 5;
-      foo(x);
-    `);
-    expect(transform(source)).toBe(expected);
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
 });
