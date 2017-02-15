@@ -7,15 +7,15 @@ Transform Standard built-in Objects
 **In**
 
 ```javascript
-Math.floor(2) + Math.floor(3)
+Math.floor(a) + Math.floor(b)
 ```
 
 **Out**
 
 ```javascript
-var _temp = Math.floor;
+var _Mathfloor = Math.floor;
 
-_temp(2) + _temp(3);
+_Mathfloor(a) + _Mathfloor(b);
 ```
 
 ## Installation
