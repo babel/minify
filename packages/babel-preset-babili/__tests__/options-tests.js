@@ -1,6 +1,7 @@
 jest.autoMockOff();
 
 const mocks = [
+  "babel-plugin-minify-builtins",
   "babel-plugin-minify-constant-folding",
   "babel-plugin-minify-dead-code-elimination",
   "babel-plugin-minify-flip-comparisons",
@@ -21,8 +22,7 @@ const mocks = [
   "babel-plugin-transform-remove-debugger",
   "babel-plugin-transform-remove-undefined",
   "babel-plugin-transform-simplify-comparison-operators",
-  "babel-plugin-transform-undefined-to-void",
-  "babel-plugin-transform-built-ins"
+  "babel-plugin-transform-undefined-to-void"
 ];
 
 mocks.forEach((mockName) => {

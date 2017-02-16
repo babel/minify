@@ -1,9 +1,9 @@
 {
-  "name": "babel-plugin-transform-built-ins",
+  "name": "babel-plugin-minify-builtins",
   "version": "0.0.1",
-  "description": "Transform Standard built-in Objects",
+  "description": "Minify Standard built-in Objects",
   "homepage": "https://github.com/babel/babili#readme",
-  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-built-ins",
+  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-builtins",
   "main": "lib/index.js",
   "bugs": "https://github.com/babel/babili/issues",
   "keywords": [

@@ -1,6 +1,6 @@
-# babel-plugin-transform-built-ins
+# babel-plugin-minify-builtins
 
-Transform Standard built-in Objects
+Minify Standard built-in Objects
 
 ## Example
 
@@ -21,7 +21,7 @@ _Mathfloor(a) + _Mathfloor(b);
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-built-ins
+npm install babel-plugin-minify-builtins
 ```
 
 ## Usage
@@ -32,20 +32,20 @@ npm install babel-plugin-transform-built-ins
 
 ```json
 {
-  "plugins": ["transform-built-ins"]
+  "plugins": ["minify-builtins"]
 }
 ```
 
 ### Via CLI
 
 ```sh
-babel --plugins transform-built-ins script.js
+babel --plugins minify-builtins script.js
 ```
 
 ### Via Node API
 
 ```javascript
 require("babel-core").transform("code", {
-  plugins: ["transform-built-ins"]
+  plugins: ["minify-builtins"]
 });
 ```

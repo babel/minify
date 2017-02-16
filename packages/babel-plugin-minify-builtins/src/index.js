@@ -1,7 +1,10 @@
 "use strict";
 
-const { methods, properties } = require("./builtins");
 const evaluate = require("babel-helper-evaluate-path");
+// Assuming all the static methods from below array are side effect free evaluation
+// except Math.random
+const VALID_CALLEES = ["String", "Number", "Math"];
+const INVALID_METHODS = ["random"];
 
 module.exports = function({ types: t }) {
 
@@ -25,14 +28,15 @@ module.exports = function({ types: t }) {
             return;
           }
 
-          const expName = getExpressionName(path);
-          if (!isComputed(path) && isBuiltin(expName)) {
+          const expName = memberToString(path);
+          if (!isComputed(path) && isBuiltin(path)) {
             if (!context.pathsToUpdate.has(expName)) {
               context.pathsToUpdate.set(expName, []);
             }
             context.pathsToUpdate.get(expName).push(path);
           }
         },
+
         CallExpression: {
           exit(path) {
             const callee = path.get("callee");
@@ -40,10 +44,10 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            const expName = getExpressionName(callee);
+            const expName = memberToString(callee);
             // computed property should be not optimized
             // Math[max]() -> Math.max()
-            if (!isComputed(callee) && isBuiltin(expName)) {
+            if (!isComputed(callee) && isBuiltin(callee)) {
               const result = evaluate(path);
               // deopt when we have side effecty evaluate-able arguments
               // Math.max(foo(), 1) --> untouched
@@ -66,12 +70,10 @@ module.exports = function({ types: t }) {
     }
 
     replace() {
-      for (const paths of this.pathsToUpdate.values()) {
+      for (const [ expName, paths ] of this.pathsToUpdate) {
         // Should only transform if there is more than 1 occurence
         if (paths.length > 1) {
-          const uniqueIdentifier = this.program.scope.generateUidIdentifier(
-            memberToString(paths[0])
-          );
+          const uniqueIdentifier = this.program.scope.generateUidIdentifier(expName);
           const newNode = t.variableDeclaration("var", [
             t.variableDeclarator(uniqueIdentifier, paths[0].node)
           ]);
@@ -87,7 +89,7 @@ module.exports = function({ types: t }) {
   }
 
   return {
-    name: "transform-builtins",
+    name: "minify-builtins",
     visitor: {
       Program(path) {
         const builtInReplacer = new BuiltInReplacer(path);
@@ -97,7 +99,7 @@ module.exports = function({ types: t }) {
   };
 
   function memberToString(memberExpr) {
-    const {object, property} = memberExpr.node;
+    const { object, property } = memberExpr.node;
     let result = "";
 
     if (t.isIdentifier(object)) result += object.name;
@@ -106,6 +108,18 @@ module.exports = function({ types: t }) {
 
     return result;
   }
+
+  function isBuiltin(memberExpr) {
+    const { object, property } = memberExpr.node;
+
+    if (t.isIdentifier(object) && t.isIdentifier(property)
+      && VALID_CALLEES.includes(object.name)
+      && !INVALID_METHODS.includes(property.name)) {
+      return true;
+    }
+    return false;
+  }
+
 };
 
 function hasPureArgs(path) {
@@ -121,26 +135,4 @@ function hasPureArgs(path) {
 function isComputed(path) {
   const { node } = path;
   return node.computed;
-}
-
-function isBuiltin(expName) {
-  // Look for properties Eg - Number.PI
-  for (const property of properties) {
-    if (property === expName) {
-      return true;
-    }
-  }
-  // Look for Methods eg - Number.isNaN()
-  for (const method of methods) {
-    if (method === expName) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function getExpressionName(path) {
-  const { node } = path.get("object");
-  const { node: propertyNode } = path.get("property");
-  return `${node.name}.${propertyNode.name}`;
 }

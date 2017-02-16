@@ -10,8 +10,8 @@ function transform(code) {
   }).code;
 }
 
-describe("transform-built-ins", () => {
-  it("should transform standard built in methods", () => {
+describe("minify-builtins", () => {
+  it("should minify standard built in methods", () => {
     const source = unpad(`
       Math.max(a, b) + Math.max(b, a)
     `);
@@ -19,7 +19,7 @@ describe("transform-built-ins", () => {
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
-  it("should transform standard built in properties", () => {
+  it("should minify standard built in properties", () => {
     const source = unpad(`
       function a () {
         return Math.PI + Math.PI
@@ -38,7 +38,7 @@ describe("transform-built-ins", () => {
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
-  it("should collect and transform no matter any depth", () => {
+  it("should collect and minify no matter any depth", () => {
     const source = unpad(`
       Math.max(a, b) + Math.max(a, b);
       function a (){
@@ -48,13 +48,6 @@ describe("transform-built-ins", () => {
           Math.min(b, a) * Math.floor(b);
         }
       }
-    `);
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
-  });
-
-  it("should not transform if its not a built in object", () => {
-    const source = unpad(`
-      Math.a(2, 1) + Math.a(1, 2);
     `);
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
@@ -76,7 +69,7 @@ describe("transform-built-ins", () => {
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
-  it("should not transform for computed properties", () => {
+  it("should not minify for computed properties", () => {
     const source = unpad(`
       let max = "floor";
       Math[max](1.5);
