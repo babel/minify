@@ -13,7 +13,12 @@ function transform(code) {
 describe("minify-builtins", () => {
   it("should minify standard built in methods", () => {
     const source = unpad(`
-      Math.max(a, b) + Math.max(b, a)
+      Math.max(a, b) + Math.max(b, a);
+      function c() {
+        let a = 10;
+        const d = Number.isNaN(a);
+        return d && Number.isFinite(a);
+      }
     `);
     // Jest arranges in alphabetical order, So keeping it as _source
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
@@ -21,8 +26,9 @@ describe("minify-builtins", () => {
 
   it("should minify standard built in properties", () => {
     const source = unpad(`
+      Number.NAN + Number.NAN;
       function a () {
-        return Math.PI + Math.PI
+        return Math.PI + Math.PI + Number.EPSILON + Number.NAN;
       }
     `);
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();

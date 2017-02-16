@@ -52,9 +52,8 @@ module.exports = function({ types: t }) {
               // deopt when we have side effecty evaluate-able arguments
               // Math.max(foo(), 1) --> untouched
               // Math.floor(1) --> 1
-              if (result.confident && hasPureArgs(path)
-                && typeof result.value === "number") {
-                path.replaceWith(t.numericLiteral(result.value));
+              if (result.confident && hasPureArgs(path)) {
+                path.replaceWith(t.valueToNode(result.value));
               } else {
                 if (!context.pathsToUpdate.has(expName)) {
                   context.pathsToUpdate.set(expName, []);
