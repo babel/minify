@@ -1129,4 +1129,24 @@ describe("mangle-names", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix issue#365 - classDeclaration with unsafe parent scope", () => {
+    const source = unpad(`
+      function foo() {
+        eval("");
+        class A {}
+        class B {}
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should fix classDeclaration with unsafe program scope", () => {
+    const source = unpad(`
+      class A {}
+      class B {}
+      eval("");
+    `);
+    expect(transform(source, { topLevel: true })).toBe(source);
+  });
 });

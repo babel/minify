@@ -86,100 +86,91 @@ module.exports = ({ types: t, traverse }) => {
       }
     }
 
+    mangleScope(scope) {
+      const mangler = this;
+
+      if (!mangler.eval && hasEval(scope)) return;
+
+      if (mangler.visitedScopes.has(scope)) return;
+      mangler.visitedScopes.add(scope);
+
+      let i = 0;
+      function getNext() {
+        return mangler.charset.getIdentifier(i++);
+      }
+
+      // This is useful when we have vars of single character
+      // => var a, ...z, A, ...Z, $, _;
+      // to
+      // => var aa, a, b ,c;
+      // instead of
+      // => var aa, ab, ...;
+      // TODO:
+      // Re-enable after enabling this feature
+      // This doesn't work right now as we are concentrating
+      // on performance improvements
+      // function resetNext() {
+      //   i = 0;
+      // }
+
+      const bindings = scope.getAllBindings();
+      const names = Object.keys(bindings);
+
+      for (let i = 0; i < names.length; i++) {
+        const oldName = names[i];
+        const binding = bindings[oldName];
+
+        if (
+          // arguments
+          oldName === "arguments"
+          // other scope bindings
+          || !scope.hasOwnBinding(oldName)
+          // labels
+          || binding.path.isLabeledStatement()
+          // ClassDeclaration has binding in two scopes
+          //   1. The scope in which it is declared
+          //   2. The class's own scope
+          // - https://github.com/babel/babel/issues/5156
+          || (binding.path.isClassDeclaration() && binding.path === scope.path)
+          // blacklisted
+          || mangler.isBlacklist(oldName)
+          // function names
+          || (mangler.keepFnName ? isFunction(binding.path) : false)
+          // class names
+          || (mangler.keepClassName ? isClass(binding.path) : false)
+        ) {
+          continue;
+        }
+
+        let next;
+        do {
+          next = getNext();
+        } while (
+          !t.isValidIdentifier(next)
+          || hop.call(bindings, next)
+          || scope.hasGlobal(next)
+          || scope.hasReference(next)
+        );
+
+        // TODO:
+        // re-enable this - check above
+        // resetNext();
+        mangler.rename(scope, oldName, next);
+      }
+    }
+
     mangle() {
       const mangler = this;
 
+      if (mangler.topLevel) {
+        mangler.mangleScope(mangler.program.scope);
+      }
+
       this.program.traverse({
         Scopable(path) {
-          const {scope} = path;
-
-          if (!mangler.eval && hasEval(scope)) return;
-
-          if (mangler.visitedScopes.has(scope)) return;
-          mangler.visitedScopes.add(scope);
-
-          function hasOwnBinding(name) {
-            if (scope.parent !== mangler.program.scope) {
-              return scope.hasOwnBinding(name);
-            }
-            return mangler.program.scope.hasOwnBinding(name) || scope.hasOwnBinding(name);
-          }
-
-          let i = 0;
-          function getNext() {
-            return mangler.charset.getIdentifier(i++);
-          }
-
-          // This is useful when we have vars of single character
-          // => var a, ...z, A, ...Z, $, _;
-          // to
-          // => var aa, a, b ,c;
-          // instead of
-          // => var aa, ab, ...;
-          // TODO:
-          // Re-enable after enabling this feature
-          // This doesn't work right now as we are concentrating
-          // on performance improvements
-          // function resetNext() {
-          //   i = 0;
-          // }
-
-          const bindings = scope.getAllBindings();
-          const names = Object.keys(bindings);
-
-          for (let i = 0; i < names.length; i++) {
-            const oldName = names[i];
-            const binding = bindings[oldName];
-            const isTopLevel = mangler.program.scope.bindings[oldName] === binding;
-
-            if (
-              // already renamed bindings
-              binding.renamed
-              // arguments
-              || oldName === "arguments"
-              // globals
-              || (mangler.topLevel ? false : isTopLevel)
-              // other scope bindings
-              || !hasOwnBinding(oldName)
-              // labels
-              || binding.path.isLabeledStatement()
-              // blacklisted
-              || mangler.isBlacklist(oldName)
-              // function names
-              || (mangler.keepFnName ? isFunction(binding.path) : false)
-              // class names
-              || (mangler.keepClassName ? isClass(binding.path) : false)
-            ) {
-              continue;
-            }
-
-            let next;
-            do {
-              next = getNext();
-            } while (
-              !t.isValidIdentifier(next)
-              || hop.call(bindings, next)
-              || scope.hasGlobal(next)
-              || scope.hasReference(next)
-            );
-
-            // TODO:
-            // re-enable this - check above
-            // resetNext();
-            mangler.rename(scope, oldName, next);
-            if (isTopLevel) {
-              mangler.rename(mangler.program.scope, oldName, next);
-            }
-            // mark the binding as renamed
-            binding.renamed = true;
-          }
+          mangler.mangleScope(path.scope);
         }
       });
-
-      // TODO:
-      // re-enable
-      // check above
-      // this.updateReferences();
     }
 
     rename(scope, oldName, newName) {
