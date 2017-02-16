@@ -26,6 +26,7 @@ const PLUGINS = [
   ["simplifyComparisons", require("babel-plugin-transform-simplify-comparison-operators"), true],
   ["typeConstructors",    require("babel-plugin-minify-type-constructors"),                true],
   ["undefinedToVoid",     require("babel-plugin-transform-undefined-to-void"),             true],
+  ["builtIns",            require("babel-plugin-minify-builtins"),                         true],
 ];
 
 module.exports = preset;
@@ -66,6 +67,7 @@ function preset(context, _opts = {}) {
       optionsMap.numericLiterals,
       optionsMap.replace,
       optionsMap.simplify,
+      optionsMap.builtIns,
 
       group("properties", [
         optionsMap.consecutiveAdds,
