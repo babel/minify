@@ -112,8 +112,8 @@ module.exports = function({ types: t }) {
     const { object, property } = memberExpr.node;
 
     if (t.isIdentifier(object) && t.isIdentifier(property)
-      && VALID_CALLEES.includes(object.name)
-      && !INVALID_METHODS.includes(property.name)) {
+      && VALID_CALLEES.indexOf(object.name) >= 0
+      && INVALID_METHODS.indexOf(property.name) < 0) {
       return true;
     }
     return false;

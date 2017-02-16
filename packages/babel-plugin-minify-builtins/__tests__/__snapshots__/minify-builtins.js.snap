@@ -67,10 +67,12 @@ function a() {
 }
 `;
 
-exports[`minify-builtins should not evaluate if its has side effecty arguments 1`] = `
+exports[`minify-builtins should not evaluate if its side effecty 1`] = `
 Object {
-  "_source": "Math.max(foo(), 1);",
-  "expected": "Math.max(foo(), 1);",
+  "_source": "Math.max(foo(), 1);
+Math.random();",
+  "expected": "Math.max(foo(), 1);
+Math.random();",
 }
 `;
 

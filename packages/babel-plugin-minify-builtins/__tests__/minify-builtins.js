@@ -68,9 +68,10 @@ describe("minify-builtins", () => {
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
-  it("should not evaluate if its has side effecty arguments", () => {
+  it("should not evaluate if its side effecty", () => {
     const source = unpad(`
       Math.max(foo(), 1);
+      Math.random();
     `);
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
