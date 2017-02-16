@@ -69,4 +69,19 @@ describe("transform-built-ins", () => {
     expect({_source: source, expected: transform(source)}).toMatchSnapshot();
   });
 
+  it("should not evaluate if its has side effecty arguments", () => {
+    const source = unpad(`
+      Math.max(foo(), 1);
+    `);
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+  });
+
+  it("should not transform for computed properties", () => {
+    const source = unpad(`
+      let max = "floor";
+      Math[max](1.5);
+    `);
+    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+  });
+
 });

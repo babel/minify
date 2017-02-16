@@ -34,6 +34,22 @@ foo(x);",
 }
 `;
 
+exports[`transform-built-ins should not evaluate if its has side effecty arguments 1`] = `
+Object {
+  "_source": "Math.max(foo(), 1);",
+  "expected": "Math.max(foo(), 1);",
+}
+`;
+
+exports[`transform-built-ins should not transform for computed properties 1`] = `
+Object {
+  "_source": "let max = \"floor\";
+Math[max](1.5);",
+  "expected": "let max = \"floor\";
+Math[max](1.5);",
+}
+`;
+
 exports[`transform-built-ins should not transform if its not a built in object 1`] = `
 Object {
   "_source": "Math.a(2, 1) + Math.a(1, 2);",

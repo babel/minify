@@ -3,8 +3,6 @@
 const { methods, properties } = require("./builtins");
 const evaluate = require("babel-helper-evaluate-path");
 
-
-
 module.exports = function({ types: t }) {
 
   class BuiltInReplacer {
@@ -28,7 +26,7 @@ module.exports = function({ types: t }) {
           }
 
           const expName = getExpressionName(path);
-          if (isBuiltin(expName)) {
+          if (!isComputed(path) && isBuiltin(expName)) {
             if (!context.pathsToUpdate.has(expName)) {
               context.pathsToUpdate.set(expName, []);
             }
@@ -43,10 +41,15 @@ module.exports = function({ types: t }) {
             }
 
             const expName = getExpressionName(callee);
-            if (isBuiltin(expName)) {
+            // computed property should be not optimized
+            // Math[max]() -> Math.max()
+            if (!isComputed(callee) && isBuiltin(expName)) {
               const result = evaluate(path);
+              // deopt when we have side effecty evaluate-able arguments
+              // Math.max(foo(), 1) --> untouched
               // Math.floor(1) --> 1
-              if (result.confident && typeof result.value === "number") {
+              if (result.confident && hasPureArgs(path)
+                && typeof result.value === "number") {
                 path.replaceWith(t.numericLiteral(result.value));
               } else {
                 if (!context.pathsToUpdate.has(expName)) {
@@ -104,6 +107,21 @@ module.exports = function({ types: t }) {
     return result;
   }
 };
+
+function hasPureArgs(path) {
+  const args = path.get("arguments");
+  for (const arg of args) {
+    if (!arg.isPure()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isComputed(path) {
+  const { node } = path;
+  return node.computed;
+}
 
 function isBuiltin(expName) {
   // Look for properties Eg - Number.PI

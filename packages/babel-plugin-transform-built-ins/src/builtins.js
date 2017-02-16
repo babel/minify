@@ -75,5 +75,3 @@ module.exports = {
     "Math.random"
   ]
 };
-
-
