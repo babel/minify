@@ -28,8 +28,9 @@ module.exports = function({ types: t }) {
             return;
           }
 
-          const expName = memberToString(path);
           if (!isComputed(path) && isBuiltin(path)) {
+            const expName = memberToString(path.node);
+
             if (!context.pathsToUpdate.has(expName)) {
               context.pathsToUpdate.set(expName, []);
             }
@@ -44,7 +45,6 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            const expName = memberToString(callee);
             // computed property should be not optimized
             // Math[max]() -> Math.max()
             if (!isComputed(callee) && isBuiltin(callee)) {
@@ -55,6 +55,8 @@ module.exports = function({ types: t }) {
               if (result.confident && hasPureArgs(path)) {
                 path.replaceWith(t.valueToNode(result.value));
               } else {
+                const expName = memberToString(callee.node);
+
                 if (!context.pathsToUpdate.has(expName)) {
                   context.pathsToUpdate.set(expName, []);
                 }
@@ -98,7 +100,7 @@ module.exports = function({ types: t }) {
   };
 
   function memberToString(memberExpr) {
-    const { object, property } = memberExpr.node;
+    const { object, property } = memberExpr;
     let result = "";
 
     if (t.isIdentifier(object)) result += object.name;
