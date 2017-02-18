@@ -1,7 +1,7 @@
 "use strict";
 
 const some = require("lodash.some");
-const { markEvalScopes, isMarked: isEvalScopesMarked, hasEval } = require("babel-helper-mark-eval-scopes");
+const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
 
 function prevSiblings(path) {
   const parentPath = path.parentPath;
@@ -773,9 +773,7 @@ module.exports = ({ types: t, traverse }) => {
           traverse.clearCache();
           path.scope.crawl();
 
-          if (!isEvalScopesMarked(path.scope)) {
-            markEvalScopes(path);
-          }
+          markEvalScopes(path);
 
           // We need to run this plugin in isolation.
           path.traverse(main, {
