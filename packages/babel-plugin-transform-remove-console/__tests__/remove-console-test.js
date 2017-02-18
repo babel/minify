@@ -89,4 +89,15 @@ describe("remove-console-plugin", () => {
     `);
     expect(transform(source).trim()).toBe(expected);
   });
+
+  it("ternary", () => {
+    const source = unpad(`
+      var foo = console.log ? console.log('lol') : someOtherFn;
+    `);
+
+    const expected = unpad(`
+      var foo = console.log ? () => {} : someOtherFn;
+    `);
+    expect(transform(source).trim()).toBe(expected);
+  });
 });
