@@ -33,7 +33,15 @@ module.exports = function({ types: t }) {
   };
 
   function isConsole(memberExpr) {
-    return memberExpr.get("object").isIdentifier({ name: "console" });
+    const object = memberExpr.get("object");
+    if (object.isIdentifier({ name: "console" })) return true;
+
+    const property = memberExpr.get("property");
+    return object.get("object").isIdentifier({ name: "console" })
+      && (
+        property.isIdentifier({ name: "call" })
+        || property.isIdentifier({ name: "apply" })
+      );
   }
 
   function isConsoleBind(memberExpr) {

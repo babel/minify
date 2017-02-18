@@ -102,6 +102,8 @@ describe("remove-console-plugin", () => {
           console.error("Errored");
         }
       }
+      console.log.call(console, "foo");
+      console.log.apply(null, {});
     `);
     const expected = unpad(`
       const a = function () {};
