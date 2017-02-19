@@ -23,8 +23,7 @@ module.exports = function({ types: t }) {
       },
       MemberExpression: {
         exit(path) {
-          if (!isConsole(path)) return;
-          if (!path.parentPath.isMemberExpression()) {
+          if (isConsole(path) && !path.parentPath.isMemberExpression()) {
             path.replaceWith(createNoop());
           }
         }
