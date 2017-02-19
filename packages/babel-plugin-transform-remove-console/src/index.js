@@ -31,12 +31,19 @@ module.exports = function({ types: t }) {
     },
   };
 
+  function isGlobalConsoleId(id) {
+    const name = "console";
+    return id.isIdentifier({ name })
+      && !id.scope.getBinding(name)
+      && id.scope.hasGlobal(name);
+  }
+
   function isConsole(memberExpr) {
     const object = memberExpr.get("object");
-    if (object.isIdentifier({ name: "console" })) return true;
+    if (isGlobalConsoleId(object)) return true;
 
     const property = memberExpr.get("property");
-    return object.get("object").isIdentifier({ name: "console" })
+    return isGlobalConsoleId(object.get("object"))
       && (
         property.isIdentifier({ name: "call" })
         || property.isIdentifier({ name: "apply" })
@@ -46,7 +53,7 @@ module.exports = function({ types: t }) {
   function isConsoleBind(memberExpr) {
     const object = memberExpr.get("object");
     return object.isMemberExpression()
-      && object.get("object").isIdentifier({ name: "console" })
+      && isGlobalConsoleId(object.get("object"))
       && memberExpr.get("property").isIdentifier({ name: "bind" });
   }
 
