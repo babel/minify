@@ -571,13 +571,15 @@ module.exports = ({ types: t, traverse }) => {
     WhileStatement(path) {
       const test = path.get("test");
       const result = test.evaluate();
-      if (result.confident && !result.value) {
+      if (result.confident && test.isPure() && !result.value) {
         path.remove();
       }
     },
 
     ForStatement(path) {
       const test = path.get("test");
+      if (!test.isPure()) return;
+
       const result = test.evaluate();
       if (result.confident) {
         if (result.value) {
@@ -591,8 +593,23 @@ module.exports = ({ types: t, traverse }) => {
     DoWhileStatement(path) {
       const test = path.get("test");
       const result = test.evaluate();
-      if (result.confident && !result.value) {
-        path.replaceWith(path.get("body").node);
+      if (result.confident && test.isPure() && !result.value) {
+        const body = path.get("body");
+
+        if (body.isBlockStatement()) {
+          const stmts = body.get("body");
+          for (const stmt of stmts) {
+            const _isBreaking = isBreaking(stmt, path);
+            if (_isBreaking.bail || _isBreaking.break) return;
+          }
+          path.replaceWith(body.node);
+        } else if (body.isBreakStatement()) {
+          const _isBreaking = isBreaking(body, path);
+          if (_isBreaking.bail) return;
+          if (_isBreaking.break) path.remove();
+        } else {
+          path.replaceWith(body.node);
+        }
       }
     },
 
