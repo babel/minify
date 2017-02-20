@@ -24,11 +24,15 @@ module.exports = function({ types: t }) {
       MemberExpression: {
         exit(path) {
           if (isConsole(path) && !path.parentPath.isMemberExpression()) {
-            path.replaceWith(createNoop());
+            if (path.parentPath.isAssignmentExpression() && path.parentKey === "left") {
+              path.parentPath.get("right").replaceWith(createNoop());
+            } else {
+              path.replaceWith(createNoop());
+            }
           }
         }
       }
-    },
+    }
   };
 
   function isGlobalConsoleId(id) {

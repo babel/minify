@@ -134,4 +134,24 @@ describe("remove-console-plugin", () => {
     `);
     expect(transform(source)).toBe(source);
   });
+
+  it("should convert assigments to no-op", () => {
+    const source = unpad(`
+      function foo() {
+        console.foo = function foo() {
+          console.log("foo");
+        };
+        console.error = myConsoleError;
+        console.foo();
+        console.error("asdf");
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        console.foo = function () {};
+        console.error = function () {};
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
