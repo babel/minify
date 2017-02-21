@@ -68,6 +68,16 @@ When you use babili in your project and you find that there is a bug that appear
 8. [Report it 🙂](https://github.com/babel/babili/issues/new)
 9. You're awesome. Thanks!
 
+#### Syntax Errors
+
+If you get a syntax error at compile time, then it could be a few things:
+
+1. The parser itself doesn't handle the syntax being used (a [babylon](https://github.com/babel/babylon) bug).
+2. The code is actually invalid syntax.
+3. You didn't turn on the relevant Babel plugin for that syntax (if experimental).
+
+If the syntax error is at run time, then it means the outputted code is incorrect and and is a bug in the code generator, [babel-generator](https://github.com/babel/babel/tree/master/packages/babel-generator).
+
 #### Mangler bugs
 
 This should be the easy one. If there is an error thrown in your code which you can see it in the console,
