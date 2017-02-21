@@ -58,6 +58,20 @@ $ ./scripts/plugin-timing.js file.js
 
 In your project, if you find that there is a bug that appears ONLY when you use Babili, it's most likely that there is a bug in Babili and you should definitely report it. Here are some guidelines that might help you drill down the issue. If it doesn't help you, you can of course create a minimal repro project with the bug and report it.
 
+#### Compile time Errors
+
+If you get a syntax error at compile time, then it could be a few things:
+
+1. The parser itself doesn't handle the syntax being used (a [babylon](https://github.com/babel/babylon) bug).
+2. The code is actually invalid syntax.
+3. You didn't turn on the relevant Babel plugin for that syntax (if experimental).
+
+If the syntax error is at run time, then it means the outputted code is incorrect and and is a bug in the code generator, [babel-generator](https://github.com/babel/babel/tree/master/packages/babel-generator).
+
+#### Runtime errors
+
+When you run your minified code in the browser,
+
 1. If there is an error in the console, as a first step, look around the code block where the error happens, and the code block of a few steps up in the stack.
 2. Try to predict what caused the error and try relating it to some of the plugin names in the [packages/](packages) directory. The major ones (that do a lot of transformations) are - mangle, deadcode-elimination and simplify.
 3. Every plugin that Babili uses has an option in preset to toggle it on/off - [preset-options](packages/babel-preset-babili#options)
@@ -68,17 +82,7 @@ In your project, if you find that there is a bug that appears ONLY when you use 
 8. [Report it 🙂](https://github.com/babel/babili/issues/new)
 9. You're awesome. Thanks!
 
-#### Syntax Errors
-
-If you get a syntax error at compile time, then it could be a few things:
-
-1. The parser itself doesn't handle the syntax being used (a [babylon](https://github.com/babel/babylon) bug).
-2. The code is actually invalid syntax.
-3. You didn't turn on the relevant Babel plugin for that syntax (if experimental).
-
-If the syntax error is at run time, then it means the outputted code is incorrect and and is a bug in the code generator, [babel-generator](https://github.com/babel/babel/tree/master/packages/babel-generator).
-
-#### Mangler bugs
+##### Mangler bugs
 
 This should be the easy one. If there is an error thrown in your code which you can see it in the console,
 
