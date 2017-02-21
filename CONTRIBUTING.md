@@ -75,7 +75,7 @@ When you run your minified code in the browser,
 1. If there is an error in the console, as a first step, look around the code block where the error happens, and the code block of a few steps up in the stack.
 2. Try to predict what caused the error and try relating it to some of the plugin names in the [packages/](packages) directory. The major ones (that do a lot of transformations) are - mangle, deadcode-elimination and simplify.
 3. Every plugin that Babili uses has an option in preset to toggle it on/off - [preset-options](packages/babel-preset-babili#options)
-4. Once you suspect a few of the transformations that you think likely caused that bug, try toggling that from the preset. As a good practice, if you think it's NOT a mangler bug, turn OFF mangling and you should see the unmangled variable names to debug easier.
+4. Once you suspect a few transformations, try toggling that from the preset. As a good practice, if you think it's NOT a mangler bug, turn OFF mangling and you should see the unmangled variable names to debug easier.
 5. Sometimes it might NOT be a bug with one plugin but a combination of plugins. Again, deadcode and simplify are the major ones. You can start suspecting them first.
 6. Sometimes it might because of the [unsafe transformations](packages/babel-preset-babili#option-groups). Some of them are grouped into a single option named `unsafe`. This option can help you identify it sooner if the bug is in one these plugins.
 7. Produce a minimal repro of the same issue - the function block containing the bug should be enough to help reproduce the bug.
@@ -84,14 +84,13 @@ When you run your minified code in the browser,
 
 ##### Mangler bugs
 
-This should be the easy one. If there is an error thrown in your code which you can see it in the console,
+This should be the easy one. If there is an error thrown in the console,
 
 1. Just open the devtools and look at the variable that's mismatched (Usually it is the one that's in the Error message. If you have try..catch, add breakpoints in the try block and get the variable name that's faulty).
-2. In current Babili, there is no variable reuse (Fix in [#284](https://github.com/babel/babili/pull/284)). So, every variable that you see is declared ONLY ONCE. So it should be pretty easy to find that one declaration in your code.
-3. Now, it boils down to finding that variable(or variables) which caused this error.
-4. Usually, the containing function mapped to your original source code should help you reproduce the same error.
-5. [Report it 🙂](https://github.com/babel/babili/issues/new)
-6. You're awesome. Thanks!
+2. In current Babili, there is no variable reuse (Fix in [#284](https://github.com/babel/babili/pull/284)). So, every variable that you see is declared ONLY ONCE (except `var`s which can be declared mutiple times, but all those will still be in one function block). So it should be pretty easy to find that one declaration in your code.
+3. Usually, the containing function should help you reproduce the same error.
+4. [Report it 🙂](https://github.com/babel/babili/issues/new)
+5. You're awesome. Thanks!
 
 ### Releasing
 
