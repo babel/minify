@@ -2,8 +2,7 @@
 
 function createRegExpLiteral(args, prettify, t) {
   const evaluatedArgs = args.map((a) => a.evaluate());
-  if (!evaluatedArgs.every((a) => a.confident === true &&
-      typeof a.value === "string")) {
+  if (!evaluatedArgs.every((a) => a.confident && typeof a.value === "string")) {
     return;
   }
   let pattern = (evaluatedArgs.length >= 1 &&
