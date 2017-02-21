@@ -86,7 +86,7 @@ When you run your minified code in the browser,
 
 This should be the easy one. If there is an error thrown in the console,
 
-1. Just open the devtools and look at the variable that's mismatched (Usually it is the one that's in the Error message. If you have try..catch, add breakpoints in the try block and get the variable name that's faulty).
+1. In the devtools find the variable that's mismatched (Usually it is the one that's in the Error message. If you have try..catch, add breakpoints in the try block and get the variable name that's faulty).
 2. In current Babili, there is no variable reuse (Fix in [#284](https://github.com/babel/babili/pull/284)). So, every variable that you see is declared ONLY ONCE (except `var`s which can be declared mutiple times, but all those will still be in one function block). So it should be pretty easy to find that one declaration in your code.
 3. Usually, the containing function should help you reproduce the same error.
 4. [Report it 🙂](https://github.com/babel/babili/issues/new)
