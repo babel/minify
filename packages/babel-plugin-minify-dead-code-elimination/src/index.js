@@ -601,12 +601,17 @@ module.exports = ({ types: t, traverse }) => {
           for (const stmt of stmts) {
             const _isBreaking = isBreaking(stmt, path);
             if (_isBreaking.bail || _isBreaking.break) return;
+            const _isContinuing = isContinuing(stmt, path);
+            if (_isContinuing.bail || isContinuing.continue) return;
           }
           path.replaceWith(body.node);
         } else if (body.isBreakStatement()) {
           const _isBreaking = isBreaking(body, path);
           if (_isBreaking.bail) return;
           if (_isBreaking.break) path.remove();
+
+        } else if (body.isContinueStatement()) {
+          return;
         } else {
           path.replaceWith(body.node);
         }
@@ -963,40 +968,59 @@ module.exports = ({ types: t, traverse }) => {
     return path1.scope.getFunctionParent() === path2.scope.getFunctionParent();
   }
 
-  // tells if a "stmt" is a break statement that would break the "path"
   function isBreaking(stmt, path) {
-    if (stmt.isBreakStatement()) {
-      return _isBreaking(stmt, path);
+    return isControlTransfer(stmt, path, "break");
+  }
+
+  function isContinuing(stmt, path) {
+    return isControlTransfer(stmt, path, "continue");
+  }
+
+  // tells if a "stmt" is a break/continue statement
+  function isControlTransfer(stmt, path, control = "break") {
+    const {
+      [control]: type
+    } = {
+      break: "BreakStatement",
+      continue: "ContinueStatement"
+    };
+    if (!type) {
+      throw new Error("Can only handle break and continue statements");
+    }
+    const checker = `is${type}`;
+
+    if (stmt[checker]()) {
+      return _isControlTransfer(stmt, path);
     }
 
-    let isBroken = false;
+    let isTransferred = false;
     let result = {
-      break: false,
+      [control]: false,
       bail: false
     };
 
     stmt.traverse({
-      BreakStatement(breakPath) {
-        // if we already detected a break statement,
-        if (isBroken) return;
+      [type](cPath) {
+        // if we already detected a break/continue statement,
+        if (isTransferred) return;
 
-        result = _isBreaking(breakPath, path);
+        result = _isControlTransfer(cPath, path);
 
-        if (result.bail || result.break) {
-          isBroken = true;
+        if (result.bail || result[control]) {
+          isTransferred = true;
         }
       }
     });
 
     return result;
 
-    function _isBreaking(breakPath, path) {
-      const label = breakPath.get("label");
+    function _isControlTransfer(cPath, path) {
+      const label = cPath.get("label");
 
       if (label.node !== null) {
         // labels are fn scoped and not accessible by inner functions
         // path is the switch statement
-        if (!isSameFunctionScope(path, breakPath)) {
+        if (!isSameFunctionScope(path, cPath)) {
           // we don't have to worry about this break statement
           return {
             break: false,
@@ -1017,29 +1041,29 @@ module.exports = ({ types: t, traverse }) => {
 
         return {
           bail: _isAncestor,
-          break: _isAncestor
+          [control]: _isAncestor
         };
       }
 
       // set the flag that it is indeed breaking
-      let isBreak = true;
+      let isCTransfer = true;
 
       // this flag is to capture
       // switch(0) { case 0: while(1) if (x) break; }
-      let possibleRunTimeBreak = false;
+      let possibleRunTimeControlTransfer = false;
 
       // and compute if it's breaking the correct thing
-      let parent = breakPath.parentPath;
+      let parent = cPath.parentPath;
 
       while (parent !== stmt.parentPath) {
         // loops and nested switch cases
         if (parent.isLoop() || parent.isSwitchCase()) {
           // invalidate all the possible runtime breaks captured
           // while (1) { if (x) break; }
-          possibleRunTimeBreak = false;
+          possibleRunTimeControlTransfer = false;
 
           // and set that it's not breaking our switch statement
-          isBreak = false;
+          isCTransfer = false;
           break;
         }
         //
@@ -1058,14 +1082,14 @@ module.exports = ({ types: t, traverse }) => {
         // IfStatement if it was a compile time determined
         //
         if (parent.isIfStatement()) {
-          possibleRunTimeBreak = true;
+          possibleRunTimeControlTransfer = true;
         }
         parent = parent.parentPath;
       }
 
       return {
-        break: possibleRunTimeBreak || isBreak,
-        bail: possibleRunTimeBreak
+        [control]: possibleRunTimeControlTransfer || isCTransfer,
+        bail: possibleRunTimeControlTransfer
       };
     }
   }
