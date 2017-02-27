@@ -21,7 +21,7 @@ describe("minify-builtins", () => {
       }
     `);
     // Jest arranges in alphabetical order, So keeping it as _source
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should minify standard built in properties", () => {
@@ -31,7 +31,7 @@ describe("minify-builtins", () => {
         return Math.PI + Math.PI + Number.EPSILON + Number.NAN;
       }
     `);
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should take no of occurences in to account", () => {
@@ -41,7 +41,7 @@ describe("minify-builtins", () => {
       }
       Math.floor(a) + Math.max(a, b);
     `);
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should collect and minify no matter any depth", () => {
@@ -55,7 +55,7 @@ describe("minify-builtins", () => {
         }
       }
     `);
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should evalaute expressions if applicable and optimize it", () => {
@@ -65,7 +65,7 @@ describe("minify-builtins", () => {
       let x = Math.floor(Math.max(a, b));
       foo(x);
     `);
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should not evaluate if its side effecty", () => {
@@ -73,7 +73,7 @@ describe("minify-builtins", () => {
       Math.max(foo(), 1);
       Math.random();
     `);
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should not minify for computed properties", () => {
@@ -81,7 +81,7 @@ describe("minify-builtins", () => {
       let max = "floor";
       Math[max](1.5);
     `);
-    expect({_source: source, expected: transform(source)}).toMatchSnapshot();
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
 });

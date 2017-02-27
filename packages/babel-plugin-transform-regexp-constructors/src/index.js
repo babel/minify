@@ -27,7 +27,7 @@ function createRegExpLiteral(args, prettify, t) {
 }
 
 function maybeReplaceWithRegExpLiteral(path, t) {
-  if (!t.isIdentifier(path.node.callee, {name: "RegExp"})) {
+  if (!t.isIdentifier(path.node.callee, { name: "RegExp" })) {
     return;
   }
   const regExpLiteral = createRegExpLiteral(path.get("arguments"), true, t);

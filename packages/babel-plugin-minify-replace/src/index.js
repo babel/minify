@@ -55,7 +55,7 @@ module.exports = ({ types: t }) => {
         }
 
         const map = Object.create(null);
-        this.opts.replacements.forEach(({identifierName, replacement, member}) => {
+        this.opts.replacements.forEach(({ identifierName, replacement, member }) => {
           if (path.scope.globals[identifierName]) {
             // Convert to a node, we only allow identifiers and literals as replacements
             if (!replacement.type.match(/literal|identifier/i)) {

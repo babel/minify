@@ -192,7 +192,7 @@ module.exports = ({ types: t, traverse }) => {
         }
       }
 
-      const {bindings} = scope;
+      const { bindings } = scope;
       bindings[newName] = binding;
       delete bindings[oldName];
 
@@ -218,7 +218,7 @@ module.exports = ({ types: t, traverse }) => {
         const path = refs[i];
         if (path[PATH_RENAME_MARKER]) continue;
 
-        const {node} = path;
+        const { node } = path;
         if (!path.isIdentifier()) {
           // Ideally, this should not happen
           // it happens in these places now -
@@ -324,7 +324,7 @@ function isClass(path) {
 }
 
 function isLabelIdentifier(path) {
-  const {node} = path;
+  const { node } = path;
   return path.parentPath.isLabeledStatement({ label: node })
     || path.parentPath.isBreakStatement({ label: node })
     || path.parentPath.isContinueStatement({ label: node });

@@ -811,7 +811,7 @@ module.exports = ({ types: t, traverse }) => {
   };
 
   function toStatements(path) {
-    const {node} = path;
+    const { node } = path;
     if (path.isBlockStatement()) {
       let hasBlockScoped = false;
 

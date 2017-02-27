@@ -249,7 +249,7 @@ describe("type-constructors-plugin", () => {
         })();
       `);
       const expected = source;
-      expect(transform(source, {[names[i]]: false})).toBe(expected);
+      expect(transform(source, { [names[i]]: false })).toBe(expected);
     }
   });
 

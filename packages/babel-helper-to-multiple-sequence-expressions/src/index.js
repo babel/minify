@@ -7,7 +7,7 @@ module.exports = function(t) {
     do {
       const res = convert(statements);
       bailed = res.bailed;
-      const {seq, bailedAtIndex} = res;
+      const { seq, bailedAtIndex } = res;
       if (seq) {
         retStatements.push(t.expressionStatement(seq));
       }

@@ -439,7 +439,7 @@ describe("mangle-names", () => {
         var b = 2;
       }
     `);
-    expect(transform(source, { blacklist: {foo: true, bar: false }})).toBe(expected);
+    expect(transform(source, { blacklist: { foo: true, bar: false } })).toBe(expected);
   });
 
   it("should handle deeply nested paths with no bindings", () => {
@@ -785,7 +785,7 @@ describe("mangle-names", () => {
         b();
       })();
     `);
-    expect(transform(source, {keepFnName: true})).toBe(expected);
+    expect(transform(source, { keepFnName: true })).toBe(expected);
   });
 
   it("should NOT mangle classes when keepClassName is true", () => {
@@ -811,7 +811,7 @@ describe("mangle-names", () => {
         a();
       })();
     `);
-    expect(transform(source, {keepClassName: true})).toBe(expected);
+    expect(transform(source, { keepClassName: true })).toBe(expected);
   });
 
   it("should mangle variable re-declaration / K violations", () => {

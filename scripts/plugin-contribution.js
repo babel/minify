@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const {transform} = require("babel-core");
+const { transform } = require("babel-core");
 const Table = require("cli-table");
 const zlib = require("zlib");
 const chalk = require("chalk");
@@ -37,7 +37,7 @@ function run(inputFile) {
   const plugins = getPlugins();
   let current = 1;
 
-  plugins.forEach(({name, plugin}) => {
+  plugins.forEach(({ name, plugin }) => {
     process.stdout.write(`Plugin ${current++}/${plugins.length}\r`);
 
     const output = transform(baseOutput, {

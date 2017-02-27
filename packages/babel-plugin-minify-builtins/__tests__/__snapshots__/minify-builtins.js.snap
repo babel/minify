@@ -1,3 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`minify-builtins should collect and minify no matter any depth 1`] = `
 Object {
   "_source": "Math.max(a, b) + Math.max(a, b);
@@ -78,9 +80,9 @@ Math.random();",
 
 exports[`minify-builtins should not minify for computed properties 1`] = `
 Object {
-  "_source": "let max = \"floor\";
+  "_source": "let max = \\"floor\\";
 Math[max](1.5);",
-  "expected": "let max = \"floor\";
+  "expected": "let max = \\"floor\\";
 Math[max](1.5);",
 }
 `;

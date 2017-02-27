@@ -1,5 +1,5 @@
 const isPlainObject = require("lodash.isplainobject");
-const {group, option, proxy, generate} = require("./options-manager");
+const { group, option, proxy, generate } = require("./options-manager");
 
 // the flat plugin map
 // This is to prevent dynamic requires - require('babel-plugin-' + name);
