@@ -1625,12 +1625,14 @@ describe("simplify-plugin", () => {
       }
     `);
 
+    // TODO:
+    // Fix indenting
     const expected = unpad(`
       function x() {
         if (bar) {
-          var x = foo;
-          if (foo && y) throw y;
-        }
+            var x = foo;
+            if (foo && y) throw y;
+          }
       }
     `);
 
@@ -2566,6 +2568,8 @@ describe("simplify-plugin", () => {
         }
       }
     `);
+    // TODO:
+    // Fix indenting
     const expected = unpad(`
       function foo() {
         function bar() {
@@ -2573,8 +2577,8 @@ describe("simplify-plugin", () => {
         }
 
         if (bar(), !x) {
-          const { a } = b;
-        }
+            const { a } = b;
+          }
       }
     `);
     expect(transform(source)).toBe(expected);

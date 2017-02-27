@@ -547,7 +547,16 @@ module.exports = ({ types: t }) => {
               const ids = Object.keys(prev.getBindingIdentifiers());
 
               idloop: for (let i = 0; i < ids.length; i++) {
-                const refs = prev.scope.bindings[ids[i]].referencePaths;
+                const binding = prev.scope.bindings[ids[i]];
+                // TODO
+                // Temporary Fix
+                // if there is no binding, we assume it is referenced outside
+                // and deopt to avoid bugs
+                if (!binding) {
+                  referencedOutsideLoop = true;
+                  break idloop;
+                }
+                const refs = binding.referencePaths;
                 for (let j = 0; j < refs.length; j++) {
                   if (!isAncestor(path, refs[j])) {
                     referencedOutsideLoop = true;
@@ -1471,8 +1480,44 @@ module.exports = ({ types: t }) => {
   function genericEarlyExitTransform(path) {
     const { node } = path;
 
-    const statements = path.container.slice(path.key + 1)
-      .filter((stmt) => !t.isFunctionDeclaration(stmt));
+    const statements = path
+      .parentPath
+      .get(path.listKey)
+      .slice(path.key + 1)
+      .filter((stmt) => !stmt.isFunctionDeclaration());
+
+    // deopt for any block scoped bindings
+    // issue#399
+    const deopt = !statements.every((stmt) => {
+      if (!(
+        stmt.isVariableDeclaration({ kind: "let" })
+        || stmt.isVariableDeclaration({ kind: "const" })
+      )) {
+        return true;
+      }
+      const ids = Object.keys(stmt.getBindingIdentifiers());
+      for (const id of ids) {
+        const binding = path.scope.getBinding(id);
+        // TODO
+        // Temporary Fix
+        // if there is no binding, we assume it is referenced outside
+        // and deopt to avoid bugs
+        if (!binding) {
+          return false;
+        }
+        const refs = [...binding.referencePaths, ...binding.constantViolations];
+        for (const ref of refs) {
+          if (!ref.isIdentifier()) return false;
+          if (ref.getFunctionParent().scope !== path.scope) return false;
+        }
+      }
+      return true;
+    });
+
+    if (deopt) {
+      path.visit();
+      return false;
+    }
 
     if (!statements.length) {
       path.replaceWith(t.expressionStatement(node.test));
@@ -1490,14 +1535,14 @@ module.exports = ({ types: t }) => {
       node.test = t.unaryExpression("!", node.test, true);
     }
 
+    path.get("consequent").replaceWith(t.blockStatement(statements.map((stmt) => t.clone(stmt.node))));
+
     let l = statements.length;
     while (l-- > 0) {
-      if (!t.isFunctionDeclaration(statements[l])) {
+      if (!statements[l].isFunctionDeclaration()) {
         path.getSibling(path.key + 1).remove();
       }
     }
-
-    node.consequent = t.blockStatement(statements);
 
     // this should take care of removing the block
     path.visit();
