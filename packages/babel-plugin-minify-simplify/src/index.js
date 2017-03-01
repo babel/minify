@@ -1211,11 +1211,7 @@ module.exports = ({ types: t }) => {
               }
 
               if (!switchCase.consequent.length) {
-                if (fallThru.length) {
-                  fallThru.push(switchCase.test);
-                } else {
-                  fallThru = [switchCase.test];
-                }
+                fallThru.push(switchCase.test);
                 continue;
               }
 
@@ -1309,11 +1305,7 @@ module.exports = ({ types: t }) => {
               }
 
               if (!switchCase.consequent.length) {
-                if (fallThru.length) {
-                  fallThru.push(switchCase.test);
-                } else {
-                  fallThru = [switchCase.test];
-                }
+                fallThru.push(switchCase.test);
                 continue;
               }
 
