@@ -21,7 +21,7 @@ module.exports = ({ types: t, traverse }) => {
     } = {}) {
       this.charset = charset;
       this.program = program;
-      this.blacklist = blacklist;
+      this.blacklist = toObject(blacklist);
       this.keepFnName = keepFnName;
       this.keepClassName = keepClassName;
       this.eval = _eval;
@@ -46,9 +46,6 @@ module.exports = ({ types: t, traverse }) => {
     }
 
     isBlacklist(name) {
-      if (Array.isArray(this.blacklist)) {
-        return this.blacklist.indexOf(name) !== -1;
-      }
       return hop.call(this.blacklist, name) && this.blacklist[name];
     }
 
@@ -309,6 +306,19 @@ class Charset {
     } while (num > 0);
     return ret;
   }
+}
+
+// convert value to object
+function toObject(value) {
+  if (!Array.isArray(value)) {
+    return value;
+  }
+
+  const map = {};
+  for (let i = 0; i < value.length; i++) {
+    map[value[i]] = true;
+  }
+  return map;
 }
 
 // for keepFnName
