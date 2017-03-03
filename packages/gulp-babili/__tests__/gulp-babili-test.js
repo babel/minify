@@ -189,5 +189,5 @@ describe("gulp-babili", () => {
         contents: new Buffer(source)
       }));
     });
-  })
+  });
 });
