@@ -1797,6 +1797,31 @@ describe("simplify-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should ignore statement after return", () => {
+    const source = unpad(`
+      function bar(foo) {
+        switch (foo) {
+          case 'foo':
+            console.log('foo')
+            return 1;
+            console.log('bar')
+          case 'bar':
+            return 2;
+          default:
+            return 3;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function bar(foo) {
+        return foo === 'foo' ? (console.log('foo'), 1) : foo === 'bar' ? 2 : 3;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
   it("should convert switch statements with next return as default to returns", () => {
     const source = unpad(`
       function bar() {
