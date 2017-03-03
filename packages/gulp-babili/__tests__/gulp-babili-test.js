@@ -164,4 +164,30 @@ describe("gulp-babili", () => {
       });
     });
   });
+
+  it("removes comments while converting multiple statements to seq expressions", () => {
+    return new Promise((resolve, reject) => {
+      const stream = gulpBabili({});
+
+      const source = unpad(`
+        foo();
+        // will be removed
+        bar();
+        // will be removed
+        baz();
+      `);
+      const expected = "foo(),bar(),baz();";
+
+      stream.on("data", function (file) {
+        expect(file.contents.toString()).toBe(expected);
+        resolve();
+      });
+      stream.on("error", reject);
+
+      stream.write(new gutil.File({
+        path: "options.js",
+        contents: new Buffer(source)
+      }));
+    });
+  })
 });
