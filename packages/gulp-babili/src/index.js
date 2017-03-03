@@ -4,7 +4,7 @@ const gutil = require("gulp-util");
 const applySourceMap = require("vinyl-sourcemaps-apply");
 const babiliPreset = require("babel-preset-babili");
 
-const {PluginError} = gutil;
+const { PluginError } = gutil;
 
 const NAME = "gulp-babili";
 
@@ -13,6 +13,7 @@ module.exports = gulpBabili;
 function gulpBabili(babiliOpts = {}, {
   babel = babelCore,
   babili = babiliPreset,
+  comments = /preserve|licen(s|c)e/
 } = {}) {
   return through2.obj(function (file, enc, callback) {
     if (file.isNull()) {
@@ -40,12 +41,16 @@ function gulpBabili(babiliOpts = {}, {
       sourceMaps: !!file.sourceMap,
       inputSourceMap,
 
+      shouldPrintComment(contents) {
+        return shouldPrintComment(contents, comments);
+      },
+
       /* file */
       filename: file.path,
       filenameRelative: file.relative,
     };
 
-    const {result, success, error} = transform({
+    const { result, success, error } = transform({
       babel,
       input: file.contents.toString(),
       babelOpts
@@ -74,5 +79,13 @@ function transform({ babel, input, babelOpts }) {
       success: false,
       error: e
     };
+  }
+}
+
+function shouldPrintComment(contents, predicate) {
+  switch (typeof predicate) {
+    case "function": return predicate(contents);
+    case "object": return predicate.test(contents);
+    default: return !!predicate;
   }
 }
