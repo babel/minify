@@ -106,11 +106,11 @@ describe("gulp-babili", () => {
        * @license
        * This is a test
        */
-      foo();
+      function foo(){}
       // this is another comment
       bar();
       /* YAC - yet another comment */
-      baz();
+      var a = baz();
     `);
 
     let file;
@@ -122,7 +122,7 @@ describe("gulp-babili", () => {
       });
     });
 
-    xit("should remove comments by default except license and preserve", () => {
+    it("should remove comments by default except license and preserve", () => {
       return new Promise((resolve, reject) => {
         const stream = gulpBabili();
         stream.on("data", function (file) {
@@ -136,7 +136,7 @@ describe("gulp-babili", () => {
 
     it("should remove all comments when false", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({
+        const stream = gulpBabili({}, {
           comments: false
         });
         stream.on("data", () => {
@@ -148,9 +148,9 @@ describe("gulp-babili", () => {
       });
     });
 
-    xit("should take a custom function", () => {
+    it("should take a custom function", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({
+        const stream = gulpBabili({}, {
           comments(contents) {
             return contents.indexOf("YAC") !== -1;
           }
