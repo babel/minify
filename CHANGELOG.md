@@ -1,3 +1,62 @@
+## babili@0.0.12 (2017-03-03)
+
+- babel-helper-mark-eval-scopes@0.0.3
+- babel-helper-to-multiple-sequence-expressions@0.0.4
+- babel-plugin-minify-builtins@0.0.2
+- babel-plugin-minify-dead-code-elimination@0.1.4
+- babel-plugin-minify-mangle-names@0.0.8
+- babel-plugin-minify-replace@0.0.4
+- babel-plugin-minify-simplify@0.0.8
+- babel-plugin-minify-type-constructors@0.0.4
+- babel-plugin-transform-regexp-constructors@0.0.6
+- babel-plugin-transform-remove-console@6.8.1
+- babel-plugin-transform-remove-debugger@6.8.1
+- babel-preset-babili@0.0.12
+- babili@0.0.12
+- gulp-babili@0.0.2
+
+#### :boom: Breaking Change
+* `babel-plugin-minify-empty-function`
+  * [#444](https://github.com/babel/babili/pull/444) Remove minify-empty-function. ([@boopathi](https://github.com/boopathi))
+
+#### :rocket: New Feature
+* `gulp-babili`
+  * [#318](https://github.com/babel/babili/pull/318) Gulp babili. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-builtins`, `babel-preset-babili`
+  * [#410](https://github.com/babel/babili/pull/410) Implement minify-builtins plugin. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-dead-code-elimination`
+  * [#433](https://github.com/babel/babili/pull/433) Deopt do..while stmts with break. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#408](https://github.com/babel/babili/pull/408) if_return - deopt when ref loses scope. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`
+  * [#421](https://github.com/babel/babili/pull/421) Fix remove console.* statements. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-mangle-names`
+  * [#383](https://github.com/babel/babili/pull/383) Handle ClassDeclaration binding. ([@boopathi](https://github.com/boopathi))
+  * [#414](https://github.com/babel/babili/pull/414) Fix mangler binding rename issue with duplicate names. ([@boopathi](https://github.com/boopathi))
+
+#### :nail_care: Polish
+* `babel-plugin-minify-mangle-names`
+  * [#446](https://github.com/babel/babili/pull/446) Minor optimization for handling blacklisted names. ([@hzlmn](https://github.com/hzlmn))
+* `babel-plugin-transform-regexp-constructors`
+  * [#438](https://github.com/babel/babili/pull/438) Remove redundant `=== true` from conditional. ([@josephfrazier](https://github.com/josephfrazier))
+
+#### :memo: Documentation
+* Other
+  * [#437](https://github.com/babel/babili/pull/437) Add Debugging guidelines [skip ci]. ([@boopathi](https://github.com/boopathi))
+
+#### Chore
+* `babili`
+  * [#441](https://github.com/babel/babili/pull/441) chore(package): add description to babili package. ([@Haroenv](https://github.com/Haroenv))
+
+#### Committers: 5
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Haroen Viaene ([Haroenv](https://github.com/Haroenv))
+- Joseph Frazier ([josephfrazier](https://github.com/josephfrazier))
+- Oleh Kuchuk ([hzlmn](https://github.com/hzlmn))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babili@0.0.11 (2017-02-08)
 
 #### :bug: Bug Fix
