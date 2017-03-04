@@ -1,7 +1,7 @@
 {
   "name": "babili",
-  "version": "0.0.8",
-  "description": "",
+  "version": "0.0.12",
+  "description": "✂️ An ES6+ aware minifier based on the Babel toolchain (beta)",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babili",
   "bugs": "https://github.com/babel/babili/issues",
@@ -15,7 +15,7 @@
     "babel-preset"
   ],
   "dependencies": {
-    "babel-preset-babili": "^0.0.8",
+    "babel-preset-babili": "^0.0.12",
     "babel-cli": "^6.10.1"
   },
   "devDependencies": {}

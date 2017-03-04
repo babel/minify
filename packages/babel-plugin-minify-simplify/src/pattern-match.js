@@ -1,9 +1,11 @@
+const LEAF_NODE = Symbol("LEAF_NODE");
+
 module.exports = class PatternMatch {
   constructor(patterns) {
     this.decisionTree = this.makeDecisionTree(patterns);
   }
   handle(input, isMatch) {
-    let result = this.match(input, isMatch);
+    const result = this.match(input, isMatch);
 
     if (!result.match) {
       throw new Error("No Match Found for " + input.toString());
@@ -30,7 +32,7 @@ module.exports = class PatternMatch {
       let matchedKey = NO_MATCH;
 
       // because map doesn't support custom key equal function
-      for (let key of current.keys()) {
+      for (const key of current.keys()) {
         if (isMatch(key, input[i])) {
           matchedKey = key;
           result.keys.push(matchedKey);
@@ -42,19 +44,23 @@ module.exports = class PatternMatch {
         current = current.get(matchedKey);
 
         if (i === input.length - 1) {
-          result.match = true;
-          result.value = current;
+          if (current.has(LEAF_NODE)) {
+            result.match = true;
+            result.value = current.get(LEAF_NODE);
+          }
           break;
         }
+      } else {
+        break;
       }
     }
     return result;
   }
   makeDecisionTree(patterns) {
     // order of keys in a Map is the order of insertion
-    let root = new Map;
+    const root = new Map;
 
-    for (let pattern of patterns) {
+    for (const pattern of patterns) {
       make(root, pattern);
     }
 
@@ -66,10 +72,17 @@ module.exports = class PatternMatch {
       }
 
       if (pattern.length === 2) {
-        // here we don't handle duplicates
-        // this pattern would have already been matched
-        if (!parent.has(pattern[0])) {
-          parent.set(pattern[0], pattern[1]);
+        if (parent.has(pattern[0])) {
+          const pattern0 = parent.get(pattern[0]);
+          if (!pattern0.has(LEAF_NODE)) {
+            pattern0.set(LEAF_NODE, pattern[1]);
+          }
+          // here we don't handle duplicates
+          // this pattern would have already been matched
+        } else {
+          parent.set(pattern[0], new Map([
+            [LEAF_NODE, pattern[1]]
+          ]));
         }
 
         return parent;

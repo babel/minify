@@ -2,12 +2,12 @@
 
 module.exports = function(t) {
   return function toMultipleSequenceExpressions(statements) {
-    let retStatements = [];
+    const retStatements = [];
     let bailed;
     do {
-      let res = convert(statements);
+      const res = convert(statements);
       bailed = res.bailed;
-      let {seq, bailedAtIndex} = res;
+      const { seq, bailedAtIndex } = res;
       if (seq) {
         retStatements.push(t.expressionStatement(seq));
       }
@@ -25,10 +25,10 @@ module.exports = function(t) {
     return retStatements;
 
     function convert(nodes) {
-      let exprs = [];
+      const exprs = [];
 
       for (let i = 0; i < nodes.length; i++) {
-        let bail = () => {
+        const bail = () => {
           let seq;
           if (exprs.length === 1) {
             seq = exprs[0];
@@ -43,7 +43,7 @@ module.exports = function(t) {
           };
         };
 
-        let node = nodes[i];
+        const node = nodes[i];
         if (t.isExpression(node)) {
           exprs.push(node);
         } else if (t.isExpressionStatement(node)) {

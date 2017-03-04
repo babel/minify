@@ -37,7 +37,7 @@ describe("remove-console-plugin", () => {
 
     const expected = unpad(`
       function foo() {
-        true;
+        true && void 0;
         blah();
       }
     `);
@@ -51,7 +51,7 @@ describe("remove-console-plugin", () => {
     `);
 
     const expected = unpad(`
-      true;
+      true && void 0;
       blah();
     `);
     expect(transform(source)).toBe(expected);
@@ -88,5 +88,70 @@ describe("remove-console-plugin", () => {
       do {} while (blah);
     `);
     expect(transform(source).trim()).toBe(expected);
+  });
+
+  it("should remove console.* assignments to other variables", () => {
+    const source = unpad(`
+      const a = console.log;
+      a();
+      const b = console.log.bind(console);
+      b("asdf");
+      var x = console.log ? console.log('log') : foo();
+      function foo() {
+        if (console.error) {
+          console.error("Errored");
+        }
+      }
+      console.log.call(console, "foo");
+      console.log.apply(null, {});
+    `);
+    const expected = unpad(`
+      const a = function () {};
+      a();
+      const b = function () {};
+      b("asdf");
+      var x = function () {} ? void 0 : foo();
+      function foo() {
+        if (function () {}) {}
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT remove local bindings of name console", () => {
+    const source = unpad(`
+      function foo(console) {
+        console.foo("hi");
+        const bar = console.foo.bind(console);
+      }
+      function bar(a) {
+        const { console } = a;
+        a.b = console => console.bar("bar");
+        if (console.foo.call(console, "bar")) {
+          return;
+        }
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should convert assigments to no-op", () => {
+    const source = unpad(`
+      function foo() {
+        console.foo = function foo() {
+          console.log("foo");
+        };
+        console.error = myConsoleError;
+        console.foo();
+        console.error("asdf");
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        console.foo = function () {};
+        console.error = function () {};
+      }
+    `);
+    expect(transform(source)).toBe(expected);
   });
 });

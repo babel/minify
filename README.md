@@ -7,24 +7,29 @@
 <p align="center">
   <a href="https://travis-ci.org/babel/babili"><img alt="Travis Status" src="https://travis-ci.org/babel/babili.svg?branch=master"></a>
   <a href="https://slack.babeljs.io/"><img alt="Slack Status" src="https://slack.babeljs.io/badge.svg"></a>
+  <a href="https://www.npmjs.com/package/babel-preset-babili"><img alt="NPM Downloads" src="https://img.shields.io/npm/dm/babel-preset-babili.svg"></a>
 </p>
-
-- NOTE: We are in a [feature freeze](https://github.com/babel/babili/issues/71) as we're trying to hammer out all the bugs to get to beta release. The best way to contribute is to test, report bugs, and add test cases.
 
 - Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
 
-- babili is consumable via API, CLI, or babel preset.
+- Babili is consumable via API, CLI, or Babel preset.
 
 - Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false&lineWrap=false&presets=react%2Cstage-2&code=%2F%2F%20Example%20ES2015%20Code%0Aclass%20Mangler%20%7B%0A%20%20constructor(program)%20%7B%0A%20%20%20%20this.program%20%3D%20program%3B%0A%20%20%7D%0A%7D%0Anew%20Mangler()%3B%20%2F%2F%20without%20this%20it%20would%20just%20output%20nothing%20since%20Mangler%20isn%27t%20used)
 
 ## Table of Contents
 
+- [Requirements](#requirements)
 - [Why](#why)
 - [CLI](#cli)
 - [Babel Preset](#babel-preset)
 - [Individual Plugins](#individual-plugins)
 - [Benchmarks](#benchmarks)
 - [Team](#team)
+
+## Requirements
+
+- node >= 4
+- babel >= 6.20.0
 
 ## Why
 
@@ -65,12 +70,25 @@ class a{constructor(b){this.program=b}}new a;
 
 This is simple wrapper around the regular `babel-cli` and thus takes in the same [cli options](http://babeljs.io/docs/usage/cli/#options) as running babel on its own. You can use this if you don't already use babel or want to run it standalone.
 
+### Install
+
+```sh
+npm install babili --save-dev
+```
+
 ### Usage
 
-`babili src -d lib`
+```sh
+babili src -d lib
+```
 
 Equivalent to:
-`babel src -d lib --presets=babili --no-babelrc`
+
+```sh
+babel src -d lib --presets=babili --no-babelrc
+```
+
+Note that, because the `babili` command uses the default preset with `no-babelrc`, you cannot set any non-default options in the preset's plugins with this command. To do this, you can use the `babel` command with the options set in a `.babelrc`. See the preset docs for more information on how to do this.
 
 ## [Babel preset](http://babeljs.io/docs/plugins/#presets)
 
@@ -78,7 +96,11 @@ Equivalent to:
 |--------|-------|------------|
 | [`babel-preset-babili`](/packages/babel-preset-babili) | [![npm](https://img.shields.io/npm/v/babel-preset-babili.svg?maxAge=86400)](https://www.npmjs.com/package/babel-preset-babili) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-preset-babili)](https://david-dm.org/babel/babili?path=packages/babel-preset-babili) |
 
-It's a Babel preset (like `babel-preset-es2015`).
+### Install
+
+```sh
+npm install babel-preset-babili --save-dev
+```
 
 ### Usage
 
@@ -141,7 +163,6 @@ Add to your `.babelrc`'s plugins array.
 
 | Package | Version | Dependencies |
 |--------|-------|------------|
-| [`babel-plugin-minify-empty-function`](/packages/babel-plugin-minify-empty-function) | [![npm](https://img.shields.io/npm/v/babel-plugin-minify-empty-function.svg?maxAge=86400)](https://www.npmjs.com/package/babel-plugin-minify-empty-function) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-plugin-minify-empty-function)](https://david-dm.org/babel/babili?path=packages/babel-plugin-minify-empty-function) |
 | [`babel-plugin-transform-inline-environment-variables`](/packages/babel-plugin-transform-inline-environment-variables) | [![npm](https://img.shields.io/npm/v/babel-plugin-transform-inline-environment-variables.svg?maxAge=86400)](https://www.npmjs.com/package/babel-plugin-transform-inline-environment-variables) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-plugin-transform-inline-environment-variables)](https://david-dm.org/babel/babili?path=packages/babel-plugin-transform-inline-environment-variables) |
 | [`babel-plugin-transform-node-env-inline`](/packages/babel-plugin-transform-node-env-inline) | [![npm](https://img.shields.io/npm/v/babel-plugin-transform-node-env-inline.svg?maxAge=86400)](https://www.npmjs.com/package/babel-plugin-transform-node-env-inline) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-plugin-transform-node-env-inline)](https://david-dm.org/babel/babili?path=packages/babel-plugin-transform-node-env-inline) |
 | [`babel-plugin-transform-remove-console`](/packages/babel-plugin-transform-remove-console) | [![npm](https://img.shields.io/npm/v/babel-plugin-transform-remove-console.svg?maxAge=86400)](https://www.npmjs.com/package/babel-plugin-transform-remove-console) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-plugin-transform-remove-console)](https://david-dm.org/babel/babili?path=packages/babel-plugin-transform-remove-console) |
@@ -149,43 +170,61 @@ Add to your `.babelrc`'s plugins array.
 
 ## Benchmarks
 > Bootstrap: `npm run bootstrap`
+> Build: `npm run build`
 
-> Build:  `npm run build`
+> Running the benchmarks: `./scripts/benchmark.js <package>[@version] [relative-path/file.js]` - defaults to the package's main file if no file provided.
 
-> Running the benchmarks: `./scripts/benchmark.js file.js`
-
-Backbone.js:
+Backbone.js v1.2.3:
 ```
            raw     raw win gzip   gzip win parse time run
-uglify     21.79kB 221%    7.29kB 169%     2ms        320ms
-closure    21.67kB 223%    7.37kB 167%     2ms        1408ms
-babili     21.86kB 220%    7.46kB 163%     2ms        740ms
-closure js 24.01kB 191%    8.04kB 144%     2ms        3493ms
+uglify              21.68kB 222%    7.26kB 170%     2ms        231ms
+closure             21.57kB 223%    7.33kB 168%     2ms        1230ms
+babili (best speed) 21.81kB 220%    7.44kB 163%     2ms        747ms
+babili (best size)  21.81kB 220%    7.44kB 163%     2ms        600ms
+closure js          23.9kB  192%    8kB    145%     2ms        2128ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/backbone.js`
+Run with: `./scripts/benchmark.js backbone@1.2.3`
 
-React:
+React v0.14.3:
 ```
           raw      raw win gzip    gzip win parse time run
-closure    171.46kB 265%    52.97kB 168%     13ms       2349ms
-uglify     176.36kB 255%    53.13kB 167%     12ms       1889ms
-closure js 173.95kB 260%    53.53kB 165%     12ms       12301ms
-babili     178.06kB 252%    55.28kB 156%     14ms       3282ms
+closure             171.46kB 265%    52.97kB 168%     13ms       2637ms
+uglify              176.36kB 255%    53.13kB 167%     11ms       1148ms
+babili (best speed) 176.67kB 255%    55.1kB  157%     12ms       4139ms
+babili (best size)  176.67kB 255%    55.1kB  157%     15ms       3683ms
+closure js          312.64kB 100%    70.86kB 100%     14ms       1363ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/react.js`
+Run with: `./scripts/benchmark.js react@0.14.3 react/dist/react.js`
 
-jQuery:
+jQuery v1.11.3:
 ```
            raw      raw win gzip    gzip win parse time run
-uglify     94.27kB 218%    32.78kB 158%     8ms        1265ms
-closure    94.23kB 218%    33.38kB 153%     10ms       2047ms
-closure js 95.64kB 213%    33.78kB 150%     8ms        9980ms
-babili     102.8kB 191%    35.26kB 140%     14ms       3786ms
+uglify              94.27kB  195%    32.78kB 153%     8ms        850ms
+closure             94.14kB  195%    33.38kB 148%     10ms       1905ms
+closure js          95.64kB  190%    33.78kB 146%     7ms        6934ms
+babili (best speed) 102.78kB 170%    35.32kB 135%     8ms        4563ms
+babili (best size)  102.78kB 170%    35.32kB 135%     7ms        4261ms
 ```
 
-Run with: `./scripts/benchmark.js ./scripts/fixtures/jquery.js`
+Run with: `./scripts/benchmark.js jquery@1.11.3`
+
+Three.js:
+```
+           raw      raw win gzip     gzip win parse time run
+closure             472.57kB 107%    122.22kB 61%      34ms       4767ms
+uglify              478.79kB 104%    122.53kB 61%      34ms       2781ms
+closure js          480.11kB 104%    123.44kB 60%      32ms       65423ms
+babili (best speed) 506.99kB 93%     128.22kB 54%      39ms       13503ms
+babili (best size)  506.99kB 93%     128.22kB 54%      32ms       12605ms
+```
+
+Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
+
+## Browser support
+
+Babili is best at targeting latest browsers ([with full ES6+ support](https://kangax.github.io/compat-table/es6/)) but can also be used with the usual Babel es2015 preset to transpile down the code first.
 
 ## Team
 

@@ -3,5 +3,5 @@
 ## Installation
 
 ```sh
-$ npm install babel-helper-is-void-0
+npm install babel-helper-is-void-0
 ```

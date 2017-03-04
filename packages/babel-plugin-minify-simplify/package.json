@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-simplify",
-  "version": "0.0.4",
+  "version": "0.0.8",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-simplify",
@@ -12,9 +12,9 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-flip-expressions": "^0.0.1",
+    "babel-helper-flip-expressions": "^0.0.2",
     "babel-helper-is-nodes-equiv": "^0.0.1",
-    "babel-helper-to-multiple-sequence-expressions": "^0.0.2"
+    "babel-helper-to-multiple-sequence-expressions": "^0.0.4"
   },
   "devDependencies": {}
 }

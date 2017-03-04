@@ -1,0 +1,16 @@
+{
+  "name": "babel-plugin-transform-inline-consecutive-adds",
+  "version": "0.0.2",
+  "description": "This plugin inlines consecutive property assignments, array pushes, etc.",
+  "homepage": "https://github.com/babel/babili#readme",
+  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-inline-consecutive-adds",
+  "bugs": "https://github.com/babel/babili/issues",
+  "author": "shinew",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

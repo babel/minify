@@ -6,7 +6,7 @@ const unpad = require("../../../utils/unpad");
 function transform(code, replacements) {
   return babel.transform(code,  {
     plugins: [
-      [require("../src/index"), {replacements}],
+      [require("../src/index"), { replacements }],
     ],
   }).code;
 }

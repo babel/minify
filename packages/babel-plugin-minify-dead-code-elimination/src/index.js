@@ -1,6 +1,25 @@
 "use strict";
 
 const some = require("lodash.some");
+const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
+
+function prevSiblings(path) {
+  const parentPath = path.parentPath;
+  const siblings = [];
+
+  let key = parentPath.key;
+
+  while ((path = parentPath.getSibling(--key)).type) {
+    siblings.push(path);
+  }
+  return siblings;
+}
+
+function forEachAncestor(path, callback) {
+  while (path = path.parentPath) {
+    callback(path);
+  }
+}
 
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
@@ -36,8 +55,8 @@ module.exports = ({ types: t, traverse }) => {
         const seen = new Set();
         const declars = [];
         const mutations = [];
-        for (let name in scope.bindings) {
-          let binding = scope.bindings[name];
+        for (const name in scope.bindings) {
+          const binding = scope.bindings[name];
           if (!binding.path.isVariableDeclarator()) {
             continue;
           }
@@ -61,7 +80,7 @@ module.exports = ({ types: t, traverse }) => {
           }
 
           const assignmentSequence = [];
-          for (let declar of declarPath.node.declarations) {
+          for (const declar of declarPath.node.declarations) {
             declars.push(declar);
             if (declar.init) {
               assignmentSequence.push(t.assignmentExpression("=", declar.id, declar.init));
@@ -78,7 +97,7 @@ module.exports = ({ types: t, traverse }) => {
 
         if (declars.length) {
           mutations.forEach((f) => f());
-          for (let statement of node.body.body) {
+          for (const statement of node.body.body) {
             if (t.isVariableDeclaration(statement)) {
               statement.declarations.push(...declars);
               return;
@@ -104,17 +123,24 @@ module.exports = ({ types: t, traverse }) => {
           return;
         }
 
+        if (hasEval(path.scope)) {
+          return;
+        }
+
         const { scope } = path;
 
         // if the scope is created by a function, we obtain its
         // parameter list
-        const paramsList = path.isFunction() ? path.get("params") : [];
+        const canRemoveParams = path.isFunction() && path.node.kind !== "set";
+        const paramsList = canRemoveParams ? path.get("params") : [];
 
         for (let i = paramsList.length - 1; i >= 0; i--) {
           const param = paramsList[i];
 
           if (param.isIdentifier()) {
             const binding = scope.bindings[param.node.name];
+            if (!binding) continue;
+
             if (binding.referenced) {
               // when the first binding is referenced (right to left)
               // exit without marking anything after this
@@ -145,8 +171,8 @@ module.exports = ({ types: t, traverse }) => {
           break;
         }
 
-        for (let name in scope.bindings) {
-          let binding = scope.bindings[name];
+        for (const name in scope.bindings) {
+          const binding = scope.bindings[name];
 
           if (!binding.referenced && binding.kind !== "module") {
             if (binding.kind === "param" && (this.keepFnArgs || !binding[markForRemoval])) {
@@ -214,7 +240,7 @@ module.exports = ({ types: t, traverse }) => {
                 (binding.path.isVariableDeclarator() && binding.path.get("init").isFunction())) {
               const fun = binding.path.isFunctionDeclaration() ? binding.path : binding.path.get("init");
               let allInside = true;
-              for (let ref of binding.referencePaths) {
+              for (const ref of binding.referencePaths) {
                 if (!ref.find((p) => p.node === fun.node)) {
                   allInside = false;
                   break;
@@ -230,10 +256,40 @@ module.exports = ({ types: t, traverse }) => {
             }
 
             if (binding.references === 1 && binding.kind !== "param" && binding.kind !== "module" && binding.constant) {
+
               let replacement = binding.path.node;
               let replacementPath = binding.path;
+              let isReferencedBefore = false;
+
+              if (binding.referencePaths.length > 1) {
+                throw new Error("Expected only one reference");
+              }
+              const refPath = binding.referencePaths[0];
+
               if (t.isVariableDeclarator(replacement)) {
-                replacement = replacement.init;
+
+                const _prevSiblings = prevSiblings(replacementPath);
+
+                // traverse ancestors of a reference checking if it's before declaration
+                forEachAncestor(refPath, (ancestor) => {
+                  if (_prevSiblings.indexOf(ancestor) > -1) {
+                    isReferencedBefore = true;
+                  }
+                });
+
+                // deopt if reference is in different scope than binding
+                // since we don't know if it's sync or async execition
+                // (i.e. whether value has been assigned to a reference or not)
+                if (isReferencedBefore && refPath.scope !== binding.scope) {
+                  continue;
+                }
+
+                // simulate hoisting by replacing value
+                // with undefined if declaration is after reference
+                replacement = isReferencedBefore
+                  ? t.unaryExpression("void", t.numericLiteral(0), true)
+                  : replacement.init;
+
                 // Bail out for ArrayPattern and ObjectPattern
                 // TODO: maybe a more intelligent approach instead of simply bailing out
                 if (!replacementPath.get("id").isIdentifier()) {
@@ -241,20 +297,16 @@ module.exports = ({ types: t, traverse }) => {
                 }
                 replacementPath = replacementPath.get("init");
               }
+
               if (!replacement) {
                 continue;
               }
 
-              if (!scope.isPure(replacement, true)) {
+              if (!scope.isPure(replacement, true) && !isReferencedBefore) {
                 continue;
               }
 
-              if (binding.referencePaths.length > 1) {
-                throw new Error("Expected only one reference");
-              }
-
               let bail = false;
-              const refPath = binding.referencePaths[0];
 
               if (replacementPath.isIdentifier()) {
                 bail = refPath.scope.getBinding(replacement.name) !== scope.getBinding(replacement.name);
@@ -350,7 +402,7 @@ module.exports = ({ types: t, traverse }) => {
         return;
       }
 
-      // Not last in it's block? (See BlockStatement visitor)
+      // Not last in its block? (See BlockStatement visitor)
       if (path.container.length - 1 !== path.key &&
           !canExistAfterCompletion(path.getSibling(path.key + 1)) &&
           path.parentPath.isBlockStatement()
@@ -371,6 +423,12 @@ module.exports = ({ types: t, traverse }) => {
       let noNext = true;
       let parentPath = path.parentPath;
       while (parentPath && !parentPath.isFunction() && noNext) {
+        // https://github.com/babel/babili/issues/265
+        if (hasLoopParent(parentPath)) {
+          noNext = false;
+          break;
+        }
+
         const nextPath = parentPath.getSibling(parentPath.key + 1);
         if (nextPath.node) {
           if (nextPath.isReturnStatement()) {
@@ -403,71 +461,6 @@ module.exports = ({ types: t, traverse }) => {
       } else if (evaluateTest === false) {
         path.replaceWith(node.alternate);
       }
-    },
-
-    IfStatement: {
-      exit(path) {
-        const consequent = path.get("consequent");
-        const alternate = path.get("alternate");
-        const test = path.get("test");
-
-        const evaluateTest = test.evaluateTruthy();
-
-        // we can check if a test will be truthy 100% and if so then we can inline
-        // the consequent and completely ignore the alternate
-        //
-        //   if (true) { foo; } -> { foo; }
-        //   if ("foo") { foo; } -> { foo; }
-        //
-        if (evaluateTest === true) {
-          path.replaceWithMultiple(
-            [...toStatements(consequent), ...extractVars(alternate)]
-          );
-          return;
-        }
-
-        // we can check if a test will be falsy 100% and if so we can inline the
-        // alternate if there is one and completely remove the consequent
-        //
-        //   if ("") { bar; } else { foo; } -> { foo; }
-        //   if ("") { bar; } ->
-        //
-        if (evaluateTest === false) {
-          if (alternate.node) {
-            path.replaceWithMultiple(
-              [...toStatements(alternate), ...extractVars(consequent)]
-            );
-            return;
-          } else {
-            path.replaceWithMultiple(extractVars(consequent));
-          }
-        }
-
-        // remove alternate blocks that are empty
-        //
-        //   if (foo) { foo; } else {} -> if (foo) { foo; }
-        //
-        if (alternate.isBlockStatement() && !alternate.node.body.length) {
-          alternate.remove();
-          // For if-statements babel-traverse replaces with an empty block
-          path.node.alternate = null;
-        }
-
-        // if the consequent block is empty turn alternate blocks into a consequent
-        // and flip the test
-        //
-        //   if (foo) {} else { bar; } -> if (!foo) { bar; }
-        //
-        if (consequent.isBlockStatement() && !consequent.node.body.length &&
-            alternate.isBlockStatement() && alternate.node.body.length
-        ) {
-          consequent.replaceWith(alternate.node);
-          alternate.remove();
-          // For if-statements babel-traverse replaces with an empty block
-          path.node.alternate = null;
-          test.replaceWith(t.unaryExpression("!", test.node, true));
-        }
-      },
     },
 
     SwitchStatement: {
@@ -534,7 +527,7 @@ module.exports = ({ types: t, traverse }) => {
             const consequent = cases[i].get("consequent");
 
             for (let j = 0; j < consequent.length; j++) {
-              let _isBreaking = isBreaking(consequent[j], path);
+              const _isBreaking = isBreaking(consequent[j], path);
               if (_isBreaking.bail) {
                 result.bail = true;
                 return result;
@@ -578,13 +571,15 @@ module.exports = ({ types: t, traverse }) => {
     WhileStatement(path) {
       const test = path.get("test");
       const result = test.evaluate();
-      if (result.confident && !result.value) {
+      if (result.confident && test.isPure() && !result.value) {
         path.remove();
       }
     },
 
     ForStatement(path) {
       const test = path.get("test");
+      if (!test.isPure()) return;
+
       const result = test.evaluate();
       if (result.confident) {
         if (result.value) {
@@ -598,8 +593,28 @@ module.exports = ({ types: t, traverse }) => {
     DoWhileStatement(path) {
       const test = path.get("test");
       const result = test.evaluate();
-      if (result.confident && !result.value) {
-        path.replaceWith(path.get("body").node);
+      if (result.confident && test.isPure() && !result.value) {
+        const body = path.get("body");
+
+        if (body.isBlockStatement()) {
+          const stmts = body.get("body");
+          for (const stmt of stmts) {
+            const _isBreaking = isBreaking(stmt, path);
+            if (_isBreaking.bail || _isBreaking.break) return;
+            const _isContinuing = isContinuing(stmt, path);
+            if (_isContinuing.bail || isContinuing.continue) return;
+          }
+          path.replaceWith(body.node);
+        } else if (body.isBreakStatement()) {
+          const _isBreaking = isBreaking(body, path);
+          if (_isBreaking.bail) return;
+          if (_isBreaking.break) path.remove();
+
+        } else if (body.isContinueStatement()) {
+          return;
+        } else {
+          path.replaceWith(body.node);
+        }
       }
     },
 
@@ -629,8 +644,15 @@ module.exports = ({ types: t, traverse }) => {
 
     // Remove named function expression name. While this is dangerous as it changes
     // `function.name` all minifiers do it and hence became a standard.
-    "FunctionExpression|ClassExpression"(path) {
+    "FunctionExpression"(path) {
       if (!this.keepFnName) {
+        removeUnreferencedId(path);
+      }
+    },
+
+    // remove class names
+    "ClassExpression"(path) {
+      if (!this.keepClassName) {
         removeUnreferencedId(path);
       }
     },
@@ -678,32 +700,123 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-dead-code-elimination",
     visitor: {
-      Program(path, {
-        opts: {
-          // set defaults
-          optimizeRawSize = false,
-          keepFnName = false,
-          keepFnArgs = false,
-        } = {}
-      } = {}) {
-        // We need to run this plugin in isolation.
-        path.traverse(main, {
-          functionToBindings: new Map(),
-          optimizeRawSize,
-          keepFnName,
-          keepFnArgs,
-        });
+      IfStatement: {
+        exit(path) {
+          const consequent = path.get("consequent");
+          const alternate = path.get("alternate");
+          const test = path.get("test");
+
+          const evalResult = test.evaluate();
+          const isPure = test.isPure();
+
+          const replacements = [];
+
+          if (evalResult.confident && !isPure && test.isSequenceExpression()) {
+            replacements.push(
+              t.expressionStatement(extractSequenceImpure(test))
+            );
+          }
+
+          // we can check if a test will be truthy 100% and if so then we can inline
+          // the consequent and completely ignore the alternate
+          //
+          //   if (true) { foo; } -> { foo; }
+          //   if ("foo") { foo; } -> { foo; }
+          //
+          if (evalResult.confident && evalResult.value) {
+            path.replaceWithMultiple([
+              ...replacements, ...toStatements(consequent), ...extractVars(alternate)
+            ]);
+            return;
+          }
+
+          // we can check if a test will be falsy 100% and if so we can inline the
+          // alternate if there is one and completely remove the consequent
+          //
+          //   if ("") { bar; } else { foo; } -> { foo; }
+          //   if ("") { bar; } ->
+          //
+          if (evalResult.confident && !evalResult.value) {
+            if (alternate.node) {
+              path.replaceWithMultiple([
+                ...replacements, ...toStatements(alternate), ...extractVars(consequent)
+              ]);
+              return;
+            } else {
+              path.replaceWithMultiple([
+                ...replacements, ...extractVars(consequent)
+              ]);
+            }
+          }
+
+          // remove alternate blocks that are empty
+          //
+          //   if (foo) { foo; } else {} -> if (foo) { foo; }
+          //
+          if (alternate.isBlockStatement() && !alternate.node.body.length) {
+            alternate.remove();
+            // For if-statements babel-traverse replaces with an empty block
+            path.node.alternate = null;
+          }
+
+          // if the consequent block is empty turn alternate blocks into a consequent
+          // and flip the test
+          //
+          //   if (foo) {} else { bar; } -> if (!foo) { bar; }
+          //
+          if (consequent.isBlockStatement() && !consequent.node.body.length &&
+              alternate.isBlockStatement() && alternate.node.body.length
+          ) {
+            consequent.replaceWith(alternate.node);
+            alternate.remove();
+            // For if-statements babel-traverse replaces with an empty block
+            path.node.alternate = null;
+            test.replaceWith(t.unaryExpression("!", test.node, true));
+          }
+        },
+      },
+
+      EmptyStatement(path) {
+        if (path.parentPath.isBlockStatement() || path.parentPath.isProgram()) {
+          path.remove();
+        }
+      },
+
+      Program: {
+        exit(path, {
+          opts: {
+            // set defaults
+            optimizeRawSize = false,
+            keepFnName = false,
+            keepClassName = false,
+            keepFnArgs = false,
+          } = {}
+        } = {}) {
+          traverse.clearCache();
+          path.scope.crawl();
+
+          markEvalScopes(path);
+
+          // We need to run this plugin in isolation.
+          path.traverse(main, {
+            functionToBindings: new Map(),
+            optimizeRawSize,
+            keepFnName,
+            keepClassName,
+            keepFnArgs,
+          });
+        }
       },
     },
   };
 
   function toStatements(path) {
-    const {node} = path;
+    const { node } = path;
     if (path.isBlockStatement()) {
       let hasBlockScoped = false;
 
       for (let i = 0; i < node.body.length; i++) {
-        let bodyNode = node.body[i];
+        const bodyNode = node.body[i];
         if (t.isBlockScoped(bodyNode)) {
           hasBlockScoped = true;
         }
@@ -723,10 +836,10 @@ module.exports = ({ types: t, traverse }) => {
   // drops are inits
   // extractVars({ var x = 5, y = x }) => var x, y;
   function extractVars(path) {
-    let declarators = [];
+    const declarators = [];
 
     if (path.isVariableDeclaration({ kind: "var" })) {
-      for (let decl of path.node.declarations) {
+      for (const decl of path.node.declarations) {
         declarators.push(t.variableDeclarator(decl.id));
       }
     } else {
@@ -735,7 +848,7 @@ module.exports = ({ types: t, traverse }) => {
           if (!varPath.isVariableDeclaration({ kind: "var" })) return;
           if (!isSameFunctionScope(varPath, path)) return;
 
-          for (let decl of varPath.node.declarations) {
+          for (const decl of varPath.node.declarations) {
             declarators.push(t.variableDeclarator(decl.id));
           }
         }
@@ -813,7 +926,7 @@ module.exports = ({ types: t, traverse }) => {
           return;
         }
 
-        let index = binding.referencePaths.indexOf(path);
+        const index = binding.referencePaths.indexOf(path);
         if (index === -1) {
           return;
         }
@@ -840,7 +953,7 @@ module.exports = ({ types: t, traverse }) => {
     const binding = scope.getBinding(id.name);
 
     // Check if shadowed or is not referenced.
-    if (binding.path.node !== node || !binding.referenced) {
+    if (binding && (binding.path.node !== node || !binding.referenced)) {
       node.id = null;
     }
   }
@@ -855,40 +968,59 @@ module.exports = ({ types: t, traverse }) => {
     return path1.scope.getFunctionParent() === path2.scope.getFunctionParent();
   }
 
-  // tells if a "stmt" is a break statement that would break the "path"
   function isBreaking(stmt, path) {
-    if (stmt.isBreakStatement()) {
-      return _isBreaking(stmt, path);
+    return isControlTransfer(stmt, path, "break");
+  }
+
+  function isContinuing(stmt, path) {
+    return isControlTransfer(stmt, path, "continue");
+  }
+
+  // tells if a "stmt" is a break/continue statement
+  function isControlTransfer(stmt, path, control = "break") {
+    const {
+      [control]: type
+    } = {
+      break: "BreakStatement",
+      continue: "ContinueStatement"
+    };
+    if (!type) {
+      throw new Error("Can only handle break and continue statements");
+    }
+    const checker = `is${type}`;
+
+    if (stmt[checker]()) {
+      return _isControlTransfer(stmt, path);
     }
 
-    let isBroken = false;
+    let isTransferred = false;
     let result = {
-      break: false,
+      [control]: false,
       bail: false
     };
 
     stmt.traverse({
-      BreakStatement(breakPath) {
-        // if we already detected a break statement,
-        if (isBroken) return;
+      [type](cPath) {
+        // if we already detected a break/continue statement,
+        if (isTransferred) return;
 
-        result = _isBreaking(breakPath, path);
+        result = _isControlTransfer(cPath, path);
 
-        if (result.bail || result.break) {
-          isBroken = true;
+        if (result.bail || result[control]) {
+          isTransferred = true;
         }
       }
     });
 
     return result;
 
-    function _isBreaking(breakPath, path) {
-      const label = breakPath.get("label");
+    function _isControlTransfer(cPath, path) {
+      const label = cPath.get("label");
 
       if (label.node !== null) {
         // labels are fn scoped and not accessible by inner functions
         // path is the switch statement
-        if (!isSameFunctionScope(path, breakPath)) {
+        if (!isSameFunctionScope(path, cPath)) {
           // we don't have to worry about this break statement
           return {
             break: false,
@@ -909,29 +1041,29 @@ module.exports = ({ types: t, traverse }) => {
 
         return {
           bail: _isAncestor,
-          break: _isAncestor
+          [control]: _isAncestor
         };
       }
 
       // set the flag that it is indeed breaking
-      let isBreak = true;
+      let isCTransfer = true;
 
       // this flag is to capture
       // switch(0) { case 0: while(1) if (x) break; }
-      let possibleRunTimeBreak = false;
+      let possibleRunTimeControlTransfer = false;
 
       // and compute if it's breaking the correct thing
-      let parent = breakPath.parentPath;
+      let parent = cPath.parentPath;
 
       while (parent !== stmt.parentPath) {
         // loops and nested switch cases
         if (parent.isLoop() || parent.isSwitchCase()) {
           // invalidate all the possible runtime breaks captured
           // while (1) { if (x) break; }
-          possibleRunTimeBreak = false;
+          possibleRunTimeControlTransfer = false;
 
           // and set that it's not breaking our switch statement
-          isBreak = false;
+          isCTransfer = false;
           break;
         }
         //
@@ -950,14 +1082,14 @@ module.exports = ({ types: t, traverse }) => {
         // IfStatement if it was a compile time determined
         //
         if (parent.isIfStatement()) {
-          possibleRunTimeBreak = true;
+          possibleRunTimeControlTransfer = true;
         }
         parent = parent.parentPath;
       }
 
       return {
-        break: possibleRunTimeBreak || isBreak,
-        bail: possibleRunTimeBreak
+        [control]: possibleRunTimeControlTransfer || isCTransfer,
+        bail: possibleRunTimeControlTransfer
       };
     }
   }
@@ -977,5 +1109,26 @@ module.exports = ({ types: t, traverse }) => {
       }
     } while (path = path.parentPath);
     return null;
+  }
+
+  function hasLoopParent(path) {
+    let parent = path;
+    do {
+      if (parent.isLoop()) {
+        return true;
+      }
+    } while (parent = parent.parentPath);
+    return false;
+  }
+
+  function extractSequenceImpure(seq) {
+    const expressions = seq.get("expressions");
+    const result = [];
+    for (let i = 0; i < expressions.length; i++) {
+      if (!expressions[i].isPure()) {
+        result.push(expressions[i].node);
+      }
+    }
+    return t.sequenceExpression(result);
   }
 };

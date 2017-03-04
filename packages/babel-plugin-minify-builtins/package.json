@@ -1,0 +1,19 @@
+{
+  "name": "babel-plugin-minify-builtins",
+  "version": "0.0.2",
+  "description": "Minify Standard built-in Objects",
+  "homepage": "https://github.com/babel/babili#readme",
+  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-builtins",
+  "main": "lib/index.js",
+  "bugs": "https://github.com/babel/babili/issues",
+  "keywords": [
+    "babel-plugin",
+    "transform-built-ins"
+  ],
+  "author": "Vignesh Shanmugam <vignesh.shanmugam22@gmail.com> (https://vigneshh.in)",
+  "license": "MIT",
+  "dependencies": {
+    "babel-helper-evaluate-path": "^0.0.3"
+  },
+  "devDependencies": {}
+}

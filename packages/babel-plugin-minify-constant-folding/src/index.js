@@ -1,6 +1,7 @@
 "use strict";
 
 const evaluate = require("babel-helper-evaluate-path");
+const jsesc = require("jsesc");
 
 module.exports = ({ types: t, traverse }) => {
   const seen = Symbol("seen");
@@ -110,6 +111,13 @@ module.exports = ({ types: t, traverse }) => {
               path.replaceWith(node);
               return;
             }
+          }
+
+          // https://github.com/babel/babili/issues/382
+          if (typeof res.value === "string") {
+            res.value = jsesc(res.value, {
+              isScriptContext: true
+            });
           }
 
           const node = t.valueToNode(res.value);

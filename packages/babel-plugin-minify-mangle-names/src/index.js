@@ -1,17 +1,31 @@
-module.exports = ({ types: t }) => {
+"use strict";
+
+const {
+  markEvalScopes,
+  isMarked: isEvalScopesMarked,
+  hasEval,
+} = require("babel-helper-mark-eval-scopes");
+
+const PATH_RENAME_MARKER = Symbol("PATH_RENAME_MARKER");
+
+module.exports = ({ types: t, traverse }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
     constructor(charset, program, {
       blacklist = {},
       keepFnName = false,
-      eval: _eval = false
+      eval: _eval = false,
+      topLevel = false,
+      keepClassName = false,
     } = {}) {
       this.charset = charset;
       this.program = program;
-      this.blacklist = blacklist;
+      this.blacklist = toObject(blacklist);
       this.keepFnName = keepFnName;
+      this.keepClassName = keepClassName;
       this.eval = _eval;
+      this.topLevel = topLevel;
 
       this.unsafeScopes = new Set;
       this.visitedScopes = new Set;
@@ -20,13 +34,19 @@ module.exports = ({ types: t }) => {
     }
 
     run() {
+      this.cleanup();
       this.collect();
       this.charset.sort();
       this.mangle();
     }
 
+    cleanup() {
+      traverse.clearCache();
+      this.program.scope.crawl();
+    }
+
     isBlacklist(name) {
-      return hop.call(this.blacklist, name);
+      return hop.call(this.blacklist, name) && this.blacklist[name];
     }
 
     markUnsafeScopes(scope) {
@@ -39,131 +59,137 @@ module.exports = ({ types: t }) => {
     collect() {
       const mangler = this;
 
-      const collectVisitor = {
-        // capture direct evals
-        CallExpression(path) {
-          const callee = path.get("callee");
-
-          if (callee.isIdentifier()
-            && callee.node.name === "eval"
-            && !callee.scope.getBinding("eval")
-          ) {
-            mangler.markUnsafeScopes(path.scope);
-          }
-        }
-      };
-
-      if (this.charset.shouldConsider) {
-        // charset considerations
-        collectVisitor.Identifier = function Identifier(path) {
-          const { node } = path;
-
-          if ((path.parentPath.isMemberExpression({ property: node })) ||
-              (path.parentPath.isObjectProperty({ key: node }))
-          ) {
-            mangler.charset.consider(node.name);
-          }
-        };
-
-        // charset considerations
-        collectVisitor.Literal = function Literal({ node }) {
-          mangler.charset.consider(String(node.value));
-        };
+      if (!isEvalScopesMarked(mangler.program.scope)) {
+        markEvalScopes(mangler.program);
       }
 
-      this.program.traverse(collectVisitor);
+      if (this.charset.shouldConsider) {
+        const collectVisitor = {
+          Identifier(path) {
+            const { node } = path;
+
+            if ((path.parentPath.isMemberExpression({ property: node })) ||
+                (path.parentPath.isObjectProperty({ key: node }))
+            ) {
+              mangler.charset.consider(node.name);
+            }
+          },
+          Literal({ node }) {
+            mangler.charset.consider(String(node.value));
+          }
+        };
+
+        mangler.program.traverse(collectVisitor);
+      }
+    }
+
+    mangleScope(scope) {
+      const mangler = this;
+
+      if (!mangler.eval && hasEval(scope)) return;
+
+      if (mangler.visitedScopes.has(scope)) return;
+      mangler.visitedScopes.add(scope);
+
+      let i = 0;
+      function getNext() {
+        return mangler.charset.getIdentifier(i++);
+      }
+
+      // This is useful when we have vars of single character
+      // => var a, ...z, A, ...Z, $, _;
+      // to
+      // => var aa, a, b ,c;
+      // instead of
+      // => var aa, ab, ...;
+      // TODO:
+      // Re-enable after enabling this feature
+      // This doesn't work right now as we are concentrating
+      // on performance improvements
+      // function resetNext() {
+      //   i = 0;
+      // }
+
+      const bindings = scope.getAllBindings();
+      const names = Object.keys(bindings);
+
+      for (let i = 0; i < names.length; i++) {
+        const oldName = names[i];
+        const binding = bindings[oldName];
+
+        if (
+          // arguments
+          oldName === "arguments"
+          // other scope bindings
+          || !scope.hasOwnBinding(oldName)
+          // labels
+          || binding.path.isLabeledStatement()
+          // ClassDeclaration has binding in two scopes
+          //   1. The scope in which it is declared
+          //   2. The class's own scope
+          // - https://github.com/babel/babel/issues/5156
+          || (binding.path.isClassDeclaration() && binding.path === scope.path)
+          // blacklisted
+          || mangler.isBlacklist(oldName)
+          // function names
+          || (mangler.keepFnName ? isFunction(binding.path) : false)
+          // class names
+          || (mangler.keepClassName ? isClass(binding.path) : false)
+        ) {
+          continue;
+        }
+
+        let next;
+        do {
+          next = getNext();
+        } while (
+          !t.isValidIdentifier(next)
+          || hop.call(bindings, next)
+          || scope.hasGlobal(next)
+          || scope.hasReference(next)
+        );
+
+        // TODO:
+        // re-enable this - check above
+        // resetNext();
+        mangler.rename(scope, oldName, next);
+      }
     }
 
     mangle() {
       const mangler = this;
 
+      if (mangler.topLevel) {
+        mangler.mangleScope(mangler.program.scope);
+      }
+
       this.program.traverse({
         Scopable(path) {
-          const {scope} = path;
-
-          if (!mangler.eval && mangler.unsafeScopes.has(scope)) return;
-
-          if (mangler.visitedScopes.has(scope)) return;
-          mangler.visitedScopes.add(scope);
-
-          let i = 0;
-          function getNext() {
-            return mangler.charset.getIdentifier(i++);
-          }
-
-          // This is useful when we have vars of single character
-          // => var a, ...z, A, ...Z, $, _;
-          // to
-          // => var aa, a, b ,c;
-          // instead of
-          // => var aa, ab, ...;
-          // TODO:
-          // Re-enable after enabling this feature
-          // This doesn't work right now as we are concentrating
-          // on performance improvements
-          // function resetNext() {
-          //   i = 0;
-          // }
-
-          const bindings = scope.getAllBindings();
-          const names = Object.keys(bindings);
-
-          for (let i = 0; i < names.length; i++) {
-            const oldName = names[i];
-            const binding = bindings[oldName];
-
-            if (
-              // already renamed bindings
-              binding.renamed
-              // arguments
-              || oldName === "arguments"
-              // globals
-              || mangler.program.scope.bindings[oldName] === binding
-              // other scope bindings
-              || !scope.hasOwnBinding(oldName)
-              // labels
-              || binding.path.isLabeledStatement()
-              // blacklisted
-              || mangler.isBlacklist(oldName)
-              // function names
-              || (mangler.keepFnName ? isFunction(binding.path) : false)
-            ) {
-              continue;
-            }
-
-            let next;
-            do {
-              next = getNext();
-            } while (
-              !t.isValidIdentifier(next)
-              || hop.call(bindings, next)
-              || scope.hasGlobal(next)
-              || scope.hasReference(next)
-            );
-
-            // TODO:
-            // re-enable this - check above
-            // resetNext();
-            mangler.rename(scope, oldName, next);
-            // mark the binding as renamed
-            binding.renamed = true;
-          }
+          mangler.mangleScope(path.scope);
         }
       });
-
-      // TODO:
-      // re-enable
-      // check above
-      // this.updateReferences();
     }
 
     rename(scope, oldName, newName) {
       const binding = scope.getBinding(oldName);
 
       // rename at the declaration level
-      binding.identifier.name = newName;
+      const bindingPaths = binding.path.getBindingIdentifierPaths(true, false);
 
-      const {bindings} = scope;
+      // we traverse through all bindingPaths because,
+      // there is no binding.identifierPath in babel
+      for (const name in bindingPaths) {
+        if (name !== oldName) continue;
+        for (const idPath of bindingPaths[name]) {
+          if (binding.identifier === idPath.node) {
+            idPath.replaceWith(t.identifier(newName));
+            binding.identifier = idPath.node;
+            idPath[PATH_RENAME_MARKER] = true;
+          }
+        }
+      }
+
+      const { bindings } = scope;
       bindings[newName] = binding;
       delete bindings[oldName];
 
@@ -172,11 +198,14 @@ module.exports = ({ types: t }) => {
       for (let i = 0; i < violations.length; i++) {
         if (violations[i].isLabeledStatement()) continue;
 
-        const bindings = violations[i].getBindingIdentifiers();
+        const bindings = violations[i].getBindingIdentifierPaths();
         Object
           .keys(bindings)
           .map((b) => {
-            bindings[b].name = newName;
+            if (b === oldName && !bindings[b][PATH_RENAME_MARKER]) {
+              bindings[b].replaceWith(t.identifier(newName));
+              bindings[b][PATH_RENAME_MARKER] = true;
+            }
           });
       }
 
@@ -184,7 +213,9 @@ module.exports = ({ types: t }) => {
       const refs = binding.referencePaths;
       for (let i = 0; i < refs.length; i++) {
         const path = refs[i];
-        const {node} = path;
+        if (path[PATH_RENAME_MARKER]) continue;
+
+        const { node } = path;
         if (!path.isIdentifier()) {
           // Ideally, this should not happen
           // it happens in these places now -
@@ -196,7 +227,7 @@ module.exports = ({ types: t }) => {
           // replacement in dce from `x` to `!x` gives referencePath as `!x`
           path.traverse({
             ReferencedIdentifier(refPath) {
-              if (refPath.node.name === oldName && refPath.scope === scope) {
+              if (refPath.node.name === oldName && refPath.scope === scope && !refPath[PATH_RENAME_MARKER]) {
                 refPath.node.name = newName;
               }
             }
@@ -277,16 +308,33 @@ class Charset {
   }
 }
 
+// convert value to object
+function toObject(value) {
+  if (!Array.isArray(value)) {
+    return value;
+  }
+
+  const map = {};
+  for (let i = 0; i < value.length; i++) {
+    map[value[i]] = true;
+  }
+  return map;
+}
+
 // for keepFnName
 function isFunction(path) {
   return path.isFunctionExpression()
-    || path.isFunctionDeclaration()
-    || path.isClassExpression()
+    || path.isFunctionDeclaration();
+}
+
+// for keepClassName
+function isClass(path) {
+  return path.isClassExpression()
     || path.isClassDeclaration();
 }
 
 function isLabelIdentifier(path) {
-  const {node} = path;
+  const { node } = path;
   return path.parentPath.isLabeledStatement({ label: node })
     || path.parentPath.isBreakStatement({ label: node })
     || path.parentPath.isContinueStatement({ label: node });

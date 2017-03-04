@@ -1,0 +1,17 @@
+{
+  "name": "babel-helper-mark-eval-scopes",
+  "version": "0.0.3",
+  "description": "Mark scopes for deopt which contain a direct eval call",
+  "homepage": "https://github.com/babel/babili#readme",
+  "repository": "https://github.com/babel/babili/tree/master/packages/babel-helper-mark-eval-scopes",
+  "bugs": "https://github.com/babel/babili/issues",
+  "author": "boopathi",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "babel-plugin",
+    "babili"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

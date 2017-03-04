@@ -25,7 +25,7 @@ if (null !== bar) {
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-flip-comparisons
+npm install babel-plugin-minify-flip-comparisons
 ```
 
 ## Usage
@@ -43,7 +43,7 @@ $ npm install babel-plugin-minify-flip-comparisons
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-flip-comparisons script.js
+babel --plugins minify-flip-comparisons script.js
 ```
 
 ### Via Node API

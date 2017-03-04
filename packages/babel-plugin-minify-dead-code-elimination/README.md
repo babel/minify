@@ -12,8 +12,10 @@ function bar() { var x = f(); }
 function baz() {
   var x = 1;
   console.log(x);
+  function unused() {
+    return 5;
+  }
 }
-foo(0 && bar());
 ```
 
 **Out**
@@ -24,13 +26,12 @@ function bar() { f(); }
 function baz() {
   console.log(1);
 }
-foo(0);
 ```
 
 ## Installation
 
 ```sh
-$ npm install babel-plugin-minify-dead-code-elimination
+npm install babel-plugin-minify-dead-code-elimination
 ```
 
 ## Usage
@@ -54,7 +55,7 @@ $ npm install babel-plugin-minify-dead-code-elimination
 ### Via CLI
 
 ```sh
-$ babel --plugins minify-dead-code-elimination script.js
+babel --plugins minify-dead-code-elimination script.js
 ```
 
 ### Via Node API
@@ -69,3 +70,4 @@ require("babel-core").transform("code", {
 
 + `keepFnName` - prevent plugin from removing function name. Useful for code depending on `fn.name`
 + `keepFnArgs` - prevent plugin from removing function args. Useful for code depending on `fn.length`
++ `keepClassName` - prevent mangler from altering class names.

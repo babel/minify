@@ -2,11 +2,19 @@ jest.autoMockOff();
 
 const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
+const deadcode = require("../src/index");
+const simplify = require("../../babel-plugin-minify-simplify/src/index");
 
 function transform(code, options, babelOpts) {
   return babel.transform(code,  Object.assign({}, {
-    plugins: [[require("../src/index"), options]],
+    plugins: [[deadcode, options]],
   }, babelOpts)).code.trim();
+}
+
+function transformWithSimplify(code) {
+  return babel.transform(code, {
+    plugins: [deadcode, simplify]
+  }).code;
 }
 
 describe("dce-plugin", () => {
@@ -82,7 +90,7 @@ describe("dce-plugin", () => {
     const source = unpad(`
       function foo(p) {
         return 1;
-      };
+      }
       function bar(q) {
         return q + 1;
       }
@@ -467,7 +475,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should remove redundant returns" , () => {
+  it("should remove redundant returns", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -487,7 +495,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should remove redundant returns part 2" , () => {
+  it("should remove redundant returns part 2", () => {
     const source = unpad(`
       function foo() {
         y();
@@ -503,7 +511,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should remove redundant returns (complex)" , () => {
+  it("should remove redundant returns (complex)", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -528,7 +536,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should keep needed returns" , () => {
+  it("should keep needed returns", () => {
     const source = unpad(`
       function foo() {
         if (a) {
@@ -627,7 +635,7 @@ describe("dce-plugin", () => {
     expect(transform(source).trim()).toBe(expected);
   });
 
-  it("should handle orphaned + redundant returns" , () => {
+  it("should handle orphaned + redundant returns", () => {
     const source = unpad(`
       var x = true;
       function foo() {
@@ -1284,12 +1292,12 @@ describe("dce-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should preserve fn/class names when keepFnName is true", () => {
+  it("should preserve fn names when keepFnName is true", () => {
     const source = unpad(`
       (function () {
         function A() {}
         exports.A = A;
-        var B = class B {};
+        var B = function B() {};
         exports.B = B;
         onClick(function C() {});
       })();
@@ -1298,11 +1306,32 @@ describe("dce-plugin", () => {
       (function () {
         exports.A = function A() {};
 
-        exports.B = class B {};
+        exports.B = function B() {};
         onClick(function C() {});
       })();
     `);
     expect(transform(source, { keepFnName: true })).toBe(expected);
+  });
+
+  it("should preserve class names when keepClassName is true", () => {
+    const source = unpad(`
+      (function () {
+        class A {}
+        exports.A = A;
+        var B = class B {};
+        exports.B = B;
+        class AA {} new AA()
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        exports.A = class A {};
+
+        exports.B = class B {};
+        new class AA {}();
+      })();
+    `);
+    expect(transform(source, { keepClassName: true })).toBe(expected);
   });
 
   // NCE = Named Class Expressions
@@ -2192,5 +2221,458 @@ describe("dce-plugin", () => {
         plugins: ["asyncGenerators"]
       }
     })).toBe(expected);
+  });
+  it("should remove empty statements when children of block", () => {
+    const source = unpad(`
+      (function () {
+        function foo() {};
+        function bar() {};
+        function baz() {};
+        function ban() {};
+        function quux() {};
+        function cake() {};
+      })();
+    `);
+    const expected = unpad(`
+      (function () {})();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should NOT remove fn params for setters", () => {
+    const source = unpad(`
+      function foo() {
+        var x = {
+          set a(b) {}
+        };
+        class A {
+          set c(d) {
+            x.a = 5;
+          }
+        }
+        return new A();
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  // https://github.com/babel/babili/issues/265
+  it("should not remove return void 0; statement if inside a loop", () => {
+    const source = unpad(`
+      function getParentConditionalPath(path) {
+        let parentPath;
+        while (parentPath = path.parentPath) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
+            if (path.key === "test") {
+              return;
+            } else {
+              return parentPath;
+            }
+          } else {
+            path = parentPath;
+          }
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(source);
+  });
+
+  // https://github.com/babel/babili/issues/265
+  it("should integrate with simplify plugin changing scopes", () => {
+    const source = unpad(`
+      function getParentConditionalPath(path) {
+        let parentPath;
+        while (parentPath = path.parentPath) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
+            if (path.key === "test") {
+              return;
+            } else {
+              return parentPath;
+            }
+          } else {
+            path = parentPath;
+          }
+        }
+      }
+    `);
+    const expected = unpad(`
+      function getParentConditionalPath(path) {
+        for (let parentPath; parentPath = path.parentPath;) {
+          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) return path.key === "test" ? void 0 : parentPath;
+          path = parentPath;
+        }
+      }
+    `);
+    expect(transformWithSimplify(source)).toBe(expected);
+  });
+
+  it("should not remove params from functions containing direct eval", () => {
+    const source = unpad(`
+      function a(b, c, d) {
+        eval(";");
+        return b;
+      }
+      function b(c, d, e) {
+        (1, eval)(";");
+        return c;
+      }
+    `);
+
+    const expected = unpad(`
+      function a(b, c, d) {
+        eval(";");
+        return b;
+      }
+      function b(c) {
+        (1, eval)(";");
+        return c;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove params/vars from functions containing direct eval", () => {
+    const source = unpad(`
+      function foo(bar, baz) {
+        function foox(a, b, c) {
+          x.then((data, unused) => {
+            let unused1;
+            eval(data);
+            foox1();
+            {
+              var unused2;
+            }
+          });
+
+          function foox1(unused) {
+            console.log("foox1");
+          }
+        }
+        function fooy(unused1, unused2) {
+          console.log("fooy");
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo(bar, baz) {
+        function foox(a, b, c) {
+          x.then((data, unused) => {
+            let unused1;
+            eval(data);
+            foox1();
+            {
+              var unused2;
+            }
+          });
+
+          function foox1() {
+            console.log("foox1");
+          }
+        }
+        function fooy() {
+          console.log("fooy");
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not optimize/remove vars from functions containing direct eval", () => {
+    const source = unpad(`
+      function foo() {
+        bar();
+
+        var x = 5;
+        return x;
+
+        function bar() {
+          eval(";");
+          return 5;
+        }
+
+        function baz() {
+          let x = 10;
+          return x;
+        }
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        bar();
+
+        var x = 5;
+        return x;
+
+        function bar() {
+          eval(";");
+          return 5;
+        }
+
+        function baz() {
+          return 10;
+        }
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should impure expressions in confidently evaluated if statements", () => {
+    const source = unpad(`
+      if (a.b(), true) {
+        foo();
+      }
+    `);
+    const expected = unpad(`
+      a.b();
+
+      foo();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should extract all necessary things from if statements", () => {
+    const source = unpad(`
+      if (a.b(), false) {
+        var foo = foo1;
+        foo();
+      } else if (b.c(), true) {
+        var bar = bar1;
+        bar();
+      } else {
+        var baz = baz1;
+        baz();
+      }
+    `);
+    const expected = unpad(`
+      a.b();
+      b.c();
+
+      var bar = bar1;
+      bar();
+      var baz;
+      var foo;
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove vars after return statement", () => {
+
+    const source = unpad(`
+      function f() {
+        return x;
+        var x = 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function f() {
+        return void 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove vars after return statement #2", () => {
+
+    const source = unpad(`
+      var x = 0;
+      function f1(){
+        function f2(){
+          return x;
+        };
+        return f2();
+        var x = 1;
+      }
+    `);
+
+    const expected = unpad(`
+      var x = 0;
+      function f1() {
+        return function () {
+          return x;
+        }();
+        var x = 1;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should not remove vars after return statement #3", () => {
+
+    const source = unpad(`
+      function foo() {
+        bar = x;
+        var x = 1;
+      }
+    `);
+
+    const expected = unpad(`
+      function foo() {
+        bar = void 0;
+      }
+    `);
+
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should deopt for impure tests", () => {
+    const source = unpad(`
+      function foo() {
+        do {
+          bar();
+        } while ((bar(), false));
+        for (; bar(), false;) {
+          bar();
+        }
+        while (bar(), false) {
+          bar();
+        }
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should handle confident do..while with break statements", () => {
+    const source = unpad(`
+      function foo() {
+        do {
+          if (x) break;
+        } while (false);
+
+        do break; while (false);
+
+        bar0: do break; while (false);
+
+        bar1: do break bar1; while (false);
+
+        bar2: do {
+          if (y) break;
+        } while (false);
+
+        bar3: do {
+          if (y) break bar3;
+        } while (false);
+
+        bar4: do {
+          while (baz()) {
+            if (x) break;
+          }
+        } while (false);
+
+        bar5: do {
+          while (baz()) {
+            if (x) break bar5;
+          }
+        } while (false);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        do {
+          if (x) break;
+        } while (false);
+
+        bar1: do break bar1; while (false);
+
+        bar2: do {
+          if (y) break;
+        } while (false);
+
+        bar3: do {
+          if (y) break bar3;
+        } while (false);
+
+        bar4: {
+          while (baz()) {
+            if (x) break;
+          }
+        }
+
+        bar5: do {
+          while (baz()) {
+            if (x) break bar5;
+          }
+        } while (false);
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should handle confident do..while with continue statements", () => {
+    const source = unpad(`
+      function foo() {
+        do {
+          if (x) continue;
+        } while (false);
+
+        do continue; while (false);
+
+        bar0: do continue; while (false);
+
+        bar1: do continue bar1; while (false);
+
+        bar2: do {
+          if (y) continue;
+        } while (false);
+
+        bar3: do {
+          if (y) continue bar3;
+        } while (false);
+
+        bar4: do {
+          while (baz()) {
+            if (x) continue;
+          }
+        } while (false);
+
+        bar5: do {
+          while (baz()) {
+            if (x) continue bar5;
+          }
+        } while (false);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        do {
+          if (x) continue;
+        } while (false);
+
+        do continue; while (false);
+
+        bar0: do continue; while (false);
+
+        bar1: do continue bar1; while (false);
+
+        bar2: do {
+          if (y) continue;
+        } while (false);
+
+        bar3: do {
+          if (y) continue bar3;
+        } while (false);
+
+        bar4: {
+          while (baz()) {
+            if (x) continue;
+          }
+        }
+
+        bar5: do {
+          while (baz()) {
+            if (x) continue bar5;
+          }
+        } while (false);
+      }
+    `);
+    expect(transform(source)).toBe(expected);
   });
 });
