@@ -18,8 +18,8 @@ describe("transform-property-literals-plugin", () => {
   });
   
   it("should convert computed object method names with a string", () => {
-    const source = "var x = { ['foo'](){} };";
-    const expected = "var x = { 'foo'(){} };";
+    const source = "var x = { ['foo']() {} };";
+    const expected = "var x = { foo() {} };";
     expect(transform(source)).toBe(expected);
   });
   
