@@ -10,3 +10,8 @@ exports[`gulp-babili comments should remove comments by default except license a
 `;
 
 exports[`gulp-babili comments should take a custom function 1`] = `"function foo(){}bar();/* YAC - yet another comment */var a=baz();"`;
+
+exports[`gulp-babili should remove comments while doing DCE and simplify 1`] = `
+"var a=function(){(function(){foo(),bar(),baz();// comments should be optimized away
+})()};"
+`;

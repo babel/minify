@@ -165,21 +165,39 @@ describe("gulp-babili", () => {
     });
   });
 
-  it("removes comments while converting multiple statements to seq expressions", () => {
+  it("should remove comments while doing DCE and simplify", () => {
     return new Promise((resolve, reject) => {
-      const stream = gulpBabili({});
+      const stream = gulpBabili({}, {
+        comments(contents) {
+          return contents.indexOf("optimized") !== -1;
+        }
+      });
 
       const source = unpad(`
-        foo();
-        // will be removed
-        bar();
-        // will be removed
-        baz();
+        /**
+         * @license
+         * throw away
+         */
+        var a = function(){
+          // Hell yeah
+          function test(){
+            // comments should be optimized away
+            const flag = true;
+            if (flag) {
+              // comments
+              foo();
+            }
+            // remove this also
+            bar();
+            // should remove this as well
+            baz();
+          }
+          test();
+        }
       `);
-      const expected = "foo(),bar(),baz();";
 
       stream.on("data", function (file) {
-        expect(file.contents.toString()).toBe(expected);
+        expect(file.contents.toString()).toMatchSnapshot();
         resolve();
       });
       stream.on("error", reject);
