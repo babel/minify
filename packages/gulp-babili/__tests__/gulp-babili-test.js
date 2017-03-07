@@ -106,11 +106,11 @@ describe("gulp-babili", () => {
        * @license
        * This is a test
        */
-      foo();
+      function foo(){}
       // this is another comment
       bar();
       /* YAC - yet another comment */
-      baz();
+      var a = baz();
     `);
 
     let file;
@@ -122,7 +122,7 @@ describe("gulp-babili", () => {
       });
     });
 
-    xit("should remove comments by default except license and preserve", () => {
+    it("should remove comments by default except license and preserve", () => {
       return new Promise((resolve, reject) => {
         const stream = gulpBabili();
         stream.on("data", function (file) {
@@ -136,7 +136,7 @@ describe("gulp-babili", () => {
 
     it("should remove all comments when false", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({
+        const stream = gulpBabili({}, {
           comments: false
         });
         stream.on("data", () => {
@@ -148,9 +148,9 @@ describe("gulp-babili", () => {
       });
     });
 
-    xit("should take a custom function", () => {
+    it("should take a custom function", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({
+        const stream = gulpBabili({}, {
           comments(contents) {
             return contents.indexOf("YAC") !== -1;
           }
@@ -162,6 +162,50 @@ describe("gulp-babili", () => {
         stream.on("error", reject);
         stream.write(file);
       });
+    });
+  });
+
+  it("should remove comments while doing DCE and simplify", () => {
+    return new Promise((resolve, reject) => {
+      const stream = gulpBabili({}, {
+        comments(contents) {
+          return contents.indexOf("optimized") !== -1;
+        }
+      });
+
+      const source = unpad(`
+        /**
+         * @license
+         * throw away
+         */
+        var a = function(){
+          // Hell yeah
+          function test(){
+            // comments should be optimized away
+            const flag = true;
+            if (flag) {
+              // comments
+              foo();
+            }
+            // remove this also
+            bar();
+            // should remove this as well
+            baz();
+          }
+          test();
+        }
+      `);
+
+      stream.on("data", function (file) {
+        expect(file.contents.toString()).toMatchSnapshot();
+        resolve();
+      });
+      stream.on("error", reject);
+
+      stream.write(new gutil.File({
+        path: "options.js",
+        contents: new Buffer(source)
+      }));
     });
   });
 });
