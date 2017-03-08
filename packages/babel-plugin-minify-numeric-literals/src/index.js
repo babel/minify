@@ -29,7 +29,7 @@ module.exports = function({ types: t }) {
       NumericLiteral(path) {
         if (!path.node.extra) return;
 
-        const exponential = toExp(path.node.value)
+        const exponential = toExp(path.node.value);
 
         if (path.node.extra.raw.length > exponential.length) {
           const literal = t.numericLiteral(path.node.value);
