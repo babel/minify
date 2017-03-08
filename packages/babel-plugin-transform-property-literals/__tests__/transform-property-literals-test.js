@@ -23,6 +23,16 @@ describe("transform-property-literals-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should not strip necessaary quotes for numeric like things", () => {
+    const source = unpad(`
+      var data = {
+        "00": 1,
+        "01": 2
+      };
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
   it("should not transform invalid identifiers", () => {
     const source = unpad(`
       ({

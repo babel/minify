@@ -13,8 +13,11 @@ module.exports = function({ types: t }) {
           }
 
           if (prop.value.match(/^\d+$/)) {
-            node.property = t.numericLiteral(parseInt(prop.value, 10));
-            node.computed = false;
+            const newProp = parseInt(prop.value, 10);
+            if (newProp.toString() === prop.value) {
+              node.property = t.numericLiteral(newProp);
+              node.computed = false;
+            }
           } else if (t.isValidIdentifier(prop.value)) {
             node.property = t.identifier(prop.value);
             node.computed = false;

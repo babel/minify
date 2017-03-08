@@ -23,6 +23,11 @@ describe("transform-member-expressions-literals-plugin", () => {
     expect(transform(source)).toBe(expected);
   });
 
+  it("should not strip necessaary quotes for numeric like things", () => {
+    const source = "data['00'] = 5;";
+    expect(transform(source)).toBe(source);
+  });
+
   it("should not transform invalid identifiers", () => {
     const source = unpad(`
       foo["default"];
