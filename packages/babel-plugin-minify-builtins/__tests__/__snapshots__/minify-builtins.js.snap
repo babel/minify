@@ -10,12 +10,13 @@ function a (){
     Math.min(b, a) * Math.floor(b);
   }
 }",
-  "expected": "var _Mathfloor = Math.floor;
-var _Mathmax = Math.max;
+  "expected": "var _Mathmax = Math.max;
 _Mathmax(a, b) + _Mathmax(a, b);
 function a() {
   _Mathmax(b, a);
   return function b() {
+    var _Mathfloor = Math.floor;
+
     const a = _Mathfloor(c);
     Math.min(b, a) * _Mathfloor(b);
   };
@@ -60,10 +61,11 @@ Object {
 function a () {
   return Math.PI + Math.PI + Number.EPSILON + Number.NAN;
 }",
-  "expected": "var _MathPI = Math.PI;
-var _NumberNAN = Number.NAN;
+  "expected": "var _NumberNAN = Number.NAN;
 _NumberNAN + _NumberNAN;
 function a() {
+  var _MathPI = Math.PI;
+
   return _MathPI + _MathPI + Number.EPSILON + _NumberNAN;
 }",
 }

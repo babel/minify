@@ -83,8 +83,9 @@ module.exports = function({ types: t }) {
           for (const path of paths) {
             path.replaceWith(uniqueIdentifier);
           }
-          // hoist the created var to top of the program
-          this.program.unshiftContainer("body", newNode);
+          // hoist the created var to the top of the block/program
+          const path = getPath(this.program, paths[0], paths[paths.length - 1]);
+          path.unshiftContainer("body", newNode);
         }
       }
     }
@@ -125,6 +126,26 @@ module.exports = function({ types: t }) {
     return false;
   }
 };
+
+// decides the best path to insert the newly created identifier
+function getPath(program, firstPath, lastPath) {
+  let resultPath = program;
+  // check if occurence of member exp ex - Max.max() is before the
+  // block statement container
+  const { start: nodeStart } = firstPath.parent;
+  const { end: nodeEnd } = lastPath.parent;
+
+  program.traverse({
+    BlockStatement(path) {
+      const { start, end } = path.node;
+      if (start < nodeStart && end > nodeEnd ) {
+        resultPath = path;
+        return;
+      }
+    }
+  });
+  return resultPath;
+}
 
 function hasPureArgs(path) {
   const args = path.get("arguments");
