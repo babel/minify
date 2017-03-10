@@ -4,18 +4,19 @@
   "author": "amasad",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "changelog": "lerna-changelog",
-    "clean": "lerna clean",
-    "publish": "git pull origin master --rebase && npm run build && npm test && lerna publish",
-    "publish-internal": "git pull origin master --rebase && npm run build && NPM_DIST_TAG=internal ./node_modules/.bin/lerna publish --skip-git",
-    "updated": "lerna updated",
-    "lint": "eslint packages/*/src packages/*/__tests__ scripts/*.js",
-    "fix": "eslint packages/*/src packages/*/__tests__ scripts/*.js --fix",
-    "test": "jest",
     "build": "gulp build",
-    "watch": "gulp watch",
-    "ci": "npm run lint && npm run bootstrap && npm run cov && codecov -f coverage/coverage-final.json",
-    "cov": "jest --coverage"
+    "changelog": "lerna-changelog",
+    "ci": "npm run lint && npm run bootstrap && npm run coverage",
+    "clean": "lerna clean",
+    "coverage-ci": "codecov -f coverage/coverage-final.json",
+    "coverage": "jest --coverage",
+    "fix": "eslint packages/*/src packages/*/__tests__ scripts/*.js --fix",
+    "lint": "eslint packages/*/src packages/*/__tests__ scripts/*.js",
+    "publish-internal": "git pull origin master --rebase && npm run build && NPM_DIST_TAG=internal ./node_modules/.bin/lerna publish --skip-git",
+    "publish": "git pull origin master --rebase && npm run build && npm test && lerna publish",
+    "test": "jest",
+    "updated": "lerna updated",
+    "watch": "gulp watch"
   },
   "jest": {
     "transform": {

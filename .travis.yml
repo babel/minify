@@ -23,3 +23,5 @@ matrix:
   include:
     - node_js: "node"
       env: LINT=true
+
+after_success: npm run coverage-ci
