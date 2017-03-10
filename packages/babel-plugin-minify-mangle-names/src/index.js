@@ -247,19 +247,21 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-mangle-names",
     visitor: {
-      Program(path) {
-        // If the source code is small then we're going to assume that the user
-        // is running on this on single files before bundling. Therefore we
-        // need to achieve as much determinisim and we will not do any frequency
-        // sorting on the character set. Currently the number is pretty arbitrary.
-        const shouldConsiderSource = path.getSource().length > 70000;
+      Program: {
+        exit(path) {
+          // If the source code is small then we're going to assume that the user
+          // is running on this on single files before bundling. Therefore we
+          // need to achieve as much determinisim and we will not do any frequency
+          // sorting on the character set. Currently the number is pretty arbitrary.
+          const shouldConsiderSource = path.getSource().length > 70000;
 
-        const charset = new Charset(shouldConsiderSource);
+          const charset = new Charset(shouldConsiderSource);
 
-        const mangler = new Mangler(charset, path, this.opts);
-        mangler.run();
-      }
-    }
+          const mangler = new Mangler(charset, path, this.opts);
+          mangler.run();
+        }
+      },
+    },
   };
 };
 
