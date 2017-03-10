@@ -84,7 +84,7 @@ module.exports = function({ types: t }) {
             path.replaceWith(uniqueIdentifier);
           }
           // hoist the created var to the top of the block/program
-          const path = getPath(this.program, paths[0], paths[paths.length - 1]);
+          const path = getPath(paths[0], paths[paths.length - 1]);
           path.unshiftContainer("body", newNode);
         }
       }
@@ -128,23 +128,26 @@ module.exports = function({ types: t }) {
 };
 
 // decides the best path to insert the newly created identifier
-function getPath(program, firstPath, lastPath) {
-  let resultPath = program;
-  // check if occurence of member exp ex - Max.max() is before the
-  // block statement container
-  const { start: nodeStart } = firstPath.parent;
-  const { end: nodeEnd } = lastPath.parent;
+function getPath(firstPath, lastPath) {
+  let resultPath;
+  // check if occurence of member exp ex - Max.max() is outside of the
+  // function declaration
+  const firstParent = firstPath.getFunctionParent();
+  const lastParent = lastPath.getFunctionParent();
+  const { node: { start : firstStart } } = firstParent;
+  const { node: { start : lastStart } } = lastParent;
 
-  program.traverse({
-    BlockStatement(path) {
-      const { start, end } = path.node;
-      if (start < nodeStart && end > nodeEnd ) {
-        resultPath = path;
-        return;
-      }
-    }
-  });
-  return resultPath;
+  if (firstStart < lastStart) {
+    resultPath = firstParent;
+  } else {
+    resultPath = lastParent;
+  }
+
+  if (resultPath.isProgram()) {
+    return resultPath;
+  }
+  // return the block statment if its not program
+  return resultPath.get("body");
 }
 
 function hasPureArgs(path) {
