@@ -14,7 +14,8 @@
     "test": "jest",
     "build": "gulp build",
     "watch": "gulp watch",
-    "ci": "npm run lint && npm run bootstrap && jest"
+    "ci": "npm run lint && npm run bootstrap && jest --coverage && codecov -f coverage/coverage-final.json",
+    "cov": "jest --coverage"
   },
   "jest": {
     "transform": {
@@ -26,7 +27,8 @@
     ],
     "transformIgnorePatterns": [
       "/node_modules/"
-    ]
+    ],
+    "coverageDirectory": "./coverage/"
   },
   "devDependencies": {
     "babel-core": "^6.23.1",
@@ -39,6 +41,7 @@
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",
     "closure-compiler": "^0.2.12",
+    "codecov": "^1.0.1",
     "commander": "^2.9.0",
     "eslint": "^3.16.1",
     "eslint-config-babel": "^6.0.0",
