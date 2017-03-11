@@ -22,10 +22,16 @@ $ npm run watch
 
 to have Babel build itself then incrementally build files on change.
 
-To run tests:
+To run all tests:
 
 ```sh
 $ npm test
+```
+
+or run tests for a specific package:
+
+```sh
+$  npm test packages/babel-preset-babili
 ```
 
 To run lint:
