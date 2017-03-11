@@ -84,7 +84,7 @@ module.exports = function({ types: t }) {
             path.replaceWith(uniqueIdentifier);
           }
           // hoist the created var to the top of the block/program
-          const path = getPath(paths[0], paths[paths.length - 1]);
+          const path = getLeastCommonFunctionPath(paths[0], paths[paths.length - 1]);
           path.unshiftContainer("body", newNode);
         }
       }
@@ -127,20 +127,25 @@ module.exports = function({ types: t }) {
   }
 };
 
-// decides the best path to insert the newly created identifier
-function getPath(firstPath, lastPath) {
+function getLeastCommonFunctionPath(firstPath, lastPath) {
   let resultPath;
-  // check if occurence of member exp ex - Max.max() is outside of the
-  // function declaration
   const firstParent = firstPath.getFunctionParent();
   const lastParent = lastPath.getFunctionParent();
+
   const { node: { start : firstStart } } = firstParent;
   const { node: { start : lastStart } } = lastParent;
 
+  // Early optimization that avoids the situation when firstPath
+  // is too deep in the tree and lastPath is one level deep and vice versa
   if (firstStart < lastStart) {
     resultPath = firstParent;
   } else {
     resultPath = lastParent;
+  }
+  // Traverse bottom up till it finds the common ancestor
+  while (!(firstPath.isDescendant(resultPath) &&
+    lastPath.isDescendant(resultPath))) {
+    resultPath = resultPath.getFunctionParent();
   }
 
   if (resultPath.isProgram()) {

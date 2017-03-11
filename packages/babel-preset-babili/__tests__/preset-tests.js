@@ -114,25 +114,21 @@ describe("preset", () => {
 
   it("should fix issue#425 - mangles the alaises from builtins transform", () => {
     const source = unpad(`
-      function foo (){
-        const d = Math.max(b, a);
-        return function b() {
-          const a = Math.floor(c);
-          Math.max(b, a) * Math.floor(b);
+      function a (){
+        const d = Math.max(foo, bar);
+        function b() {
+          Math.max(foo, bar) * Math.floor(baz);
+        }
+        function c() {
+          Math.max(foo, bar) * Math.floor(baz);
         }
       }
     `);
     const expected = unpad(`
-      function foo() {
-        var d = Math.max;
-        d(b, a);
-
-        return function e() {
-          var f = Math.floor;
-
-          const g = f(c);
-          d(e, g) * f(e);
-        };
+      function a() {
+        var b = Math.floor,
+            c = Math.max;
+        c(foo, bar);
       }
     `);
     expect(transform(source)).toBe(expected);
