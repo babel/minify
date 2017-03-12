@@ -38,5 +38,10 @@ describe("numeric-literals", () => {
     expected = "[6662000080, 66620000.8];";
 
     expect(transform(source)).toBe(expected);
+
+    source = "[11000, 66.00000, 6600000, 1.5e-3];";
+    expected = "[11e3, 66, 66e5, 15e-4];";
+
+    expect(transform(source)).toBe(expected);
   });
 });
