@@ -39,6 +39,7 @@
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",
     "closure-compiler": "^0.2.12",
+    "commander": "^2.9.0",
     "eslint": "^3.16.1",
     "eslint-config-babel": "^6.0.0",
     "eslint-plugin-flowtype": "^2.29.2",
@@ -50,6 +51,7 @@
     "jest-cli": "^19.0.2",
     "lerna": "2.0.0-beta.38",
     "lerna-changelog": "^0.3.0",
+    "markdown-table": "^1.1.0",
     "request": "^2.80.0",
     "through2": "^2.0.1",
     "uglify-js": "^2.8.5"
