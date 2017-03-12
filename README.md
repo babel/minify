@@ -170,58 +170,66 @@ Add to your `.babelrc`'s plugins array.
 | [`babel-plugin-transform-remove-debugger`](/packages/babel-plugin-transform-remove-debugger) | [![npm](https://img.shields.io/npm/v/babel-plugin-transform-remove-debugger.svg?maxAge=86400)](https://www.npmjs.com/package/babel-plugin-transform-remove-debugger) | [![Dependency Status](https://david-dm.org/babel/babili.svg?path=packages/babel-plugin-transform-remove-debugger)](https://david-dm.org/babel/babili?path=packages/babel-plugin-transform-remove-debugger) |
 
 ## Benchmarks
+
 > Bootstrap: `npm run bootstrap`
+
 > Build: `npm run build`
 
-> Running the benchmarks: `./scripts/benchmark.js <package>[@version] [relative-path/file.js]` - defaults to the package's main file if no file provided.
+> Running the benchmarks: `./scripts/benchmark.js [file...]` - defaults to a few packages fetched from unpkg.com and is defined in benchmark.js.
 
-Backbone.js v1.2.3:
-```
-           raw     raw win gzip   gzip win parse time run
-uglify              21.68kB 222%    7.26kB 170%     2ms        231ms
-closure             21.57kB 223%    7.33kB 168%     2ms        1230ms
-babili (best speed) 21.81kB 220%    7.44kB 163%     2ms        747ms
-babili (best size)  21.81kB 220%    7.44kB 163%     2ms        600ms
-closure js          23.9kB  192%    8kB    145%     2ms        2128ms
-```
+> Note: All Input sources are ES5.
 
-Run with: `./scripts/benchmark.js backbone@1.2.3`
+Benchmark Results for react.js:
 
-React v0.14.3:
-```
-          raw      raw win gzip    gzip win parse time run
-closure             171.46kB 265%    52.97kB 168%     13ms       2637ms
-uglify              176.36kB 255%    53.13kB 167%     11ms       1148ms
-babili (best speed) 176.67kB 255%    55.1kB  157%     12ms       4139ms
-babili (best size)  176.67kB 255%    55.1kB  157%     15ms       3683ms
-closure js          312.64kB 100%    70.86kB 100%     14ms       1363ms
-```
+Input Size: 124.7kB
 
-Run with: `./scripts/benchmark.js react@0.14.3 react/dist/react.js`
+Input Size (gzip): 29.82kB
 
-jQuery v1.11.3:
-```
-           raw      raw win gzip    gzip win parse time run
-uglify              94.27kB  195%    32.78kB 153%     8ms        850ms
-closure             94.14kB  195%    33.38kB 148%     10ms       1905ms
-closure js          95.64kB  190%    33.78kB 146%     7ms        6934ms
-babili (best speed) 102.78kB 170%    35.32kB 135%     8ms        4563ms
-babili (best size)  102.78kB 170%    35.32kB 135%     7ms        4261ms
-```
+| minifier              | output raw  | raw win | gzip output | gzip win | parse time (ms) | minify time (ms) |
+| --------------------- | ----------- | ------- | ----------- | -------- | --------------- | ---------------- |
+| **babili**            | 36.13kB     | 71%     | 12.6kB      | 58%      | 3.14            | 1995.80          |
+| **uglify**            | **35.73kB** | **71%** | **11.96kB** | **60%**  | **2.28**        | **770.76**       |
+| **closureCompiler**   | 34.77kB     | 72%     | 11.96kB     | 60%      | 2.62            | 3940.01          |
+| **closureCompilerJs** | 65.41kB     | 48%     | 15.83kB     | 47%      | 2.96            | 1049.21          |
 
-Run with: `./scripts/benchmark.js jquery@1.11.3`
+Benchmark Results for vue.js:
 
-Three.js:
-```
-           raw      raw win gzip     gzip win parse time run
-closure             472.57kB 107%    122.22kB 61%      34ms       4767ms
-uglify              478.79kB 104%    122.53kB 61%      34ms       2781ms
-closure js          480.11kB 104%    123.44kB 60%      32ms       65423ms
-babili (best speed) 506.99kB 93%     128.22kB 54%      39ms       13503ms
-babili (best size)  506.99kB 93%     128.22kB 54%      32ms       12605ms
-```
+Input Size: 234.23kB
 
-Run with: `./scripts/benchmark.js three@0.82.1 three/build/three.js`
+Input Size (gzip): 64.53kB
+
+| minifier              | output raw  | raw win | gzip output | gzip win | parse time (ms) | minify time (ms) |
+| --------------------- | ----------- | ------- | ----------- | -------- | --------------- | ---------------- |
+| **babili**            | 96.41kB     | 59%     | 34.55kB     | 46%      | 8.01            | 6754.26          |
+| **uglify**            | 88.9kB      | 62%     | 32.77kB     | 49%      | 7.17            | 1696.36          |
+| **closureCompiler**   | **86.94kB** | **63%** | **32.75kB** | **49%**  | **6.70**        | **7625.19**      |
+| **closureCompilerJs** | 90.09kB     | 62%     | 33.67kB     | 48%      | 6.48            | 11422.21         |
+
+Benchmark Results for lodash.js:
+
+Input Size: 526.94kB
+
+Input Size (gzip): 93.91kB
+
+| minifier              | output raw  | raw win | gzip output | gzip win | parse time (ms) | minify time (ms) |
+| --------------------- | ----------- | ------- | ----------- | -------- | --------------- | ---------------- |
+| **babili**            | 76.07kB     | 86%     | 25.42kB     | 73%      | 7.93            | 5923.21          |
+| **uglify**            | 70.25kB     | 87%     | 24.48kB     | 74%      | 6.31            | 1533.58          |
+| **closureCompiler**   | **70.68kB** | **87%** | **24.11kB** | **74%**  | **7.74**        | **7455.41**      |
+| **closureCompilerJs** | 73.11kB     | 86%     | 24.82kB     | 74%      | 7.94            | 8276.89          |
+
+Benchmark Results for three.js:
+
+Input Size: 1002.36kB
+
+Input Size (gzip): 199.96kB
+
+| minifier              | output raw   | raw win | gzip output  | gzip win | parse time (ms) | minify time (ms) |
+| --------------------- | ------------ | ------- | ------------ | -------- | --------------- | ---------------- |
+| **babili**            | 526.27kB     | 47%     | 130.08kB     | 35%      | 34.22           | 17339.80         |
+| **uglify**            | **496.16kB** | **51%** | **123.99kB** | **38%**  | **30.37**       | **5524.94**      |
+| **closureCompiler**   | 491.56kB     | 51%     | 124.93kB     | 38%      | 33.72           | 13765.79         |
+| **closureCompilerJs** | 499.81kB     | 50%     | 126.02kB     | 37%      | 35.50           | 98327.82         |
 
 ## Browser support
 

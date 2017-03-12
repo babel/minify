@@ -19,12 +19,10 @@ const compile  = require("google-closure-compiler-js").compile;
 
 const ASSETS_DIR = path.join(__dirname, "benchmark_cache");
 const DEFAULT_ASSETS = {
-  "react.js"       : "https://unpkg.com/react/dist/react.js",
-  "vue.js"         : "https://unpkg.com/vue/dist/vue.js",
-  "jquery.js"      : "https://unpkg.com/jquery/dist/jquery.js",
-  "jquery.flot.js" : "https://unpkg.com/flot/jquery.flot.js",
-  "lodash.js"      : "https://unpkg.com/lodash/lodash.js",
-  "three.js"       : "https://unpkg.com/three/build/three.js",
+  "react.js"       : "https://unpkg.com/react/dist/react.js", // 120 kb
+  "vue.js"         : "https://unpkg.com/vue/dist/vue.js", // 230 kb
+  "lodash.js"      : "https://unpkg.com/lodash/lodash.js", // 500kb
+  "three.js"       : "https://unpkg.com/three/build/three.js", // 1000kb
 };
 
 let DEBUG = true;
@@ -46,7 +44,7 @@ class Benchmark {
     return this.results;
   }
   runFile(filename) {
-    if (DEBUG) console.log(`Benchmark - ${filename}`);
+    if (DEBUG) console.error(`Benchmark - ${filename}`);
 
     const code = this.getFile(filename);
     const gzipped = zlib.gzipSync(code);
@@ -79,7 +77,7 @@ class Benchmark {
     return result;
   }
   test(fn, arg, warmup = true) { // eslint-disable-line
-    if (DEBUG) console.log(`Running ${fn.name}`);
+    if (DEBUG) console.error(`Running ${fn.name}`);
 
     // warm up
     // if (warmup) fn.call(null, arg);
@@ -200,7 +198,9 @@ class Printer {
   }
   printHead(data) {
     console.log(`\nBenchmark Results for ${path.basename(data.filename)}:`);
+    this.target === "MD" && console.log("");
     console.log(`Input Size: ${bytes(data.input.length)}`);
+    this.target === "MD" && console.log("");
     console.log(`Input Size (gzip): ${bytes(data.gzipped.length)}\n`);
   }
   getRows(result) {
@@ -244,7 +244,7 @@ class AssetsManager {
     return path.join(this.cacheDir, filename);
   }
   updateCache() {
-    if (DEBUG) console.log("Updating Cache...");
+    if (DEBUG) console.error("Updating Cache...");
     const files = Object.keys(this.assets);
 
     return Promise.all(
@@ -258,7 +258,7 @@ class AssetsManager {
     ).then(() => files.map((filename) => this.filePath(filename)));
   }
   download(url, dest) {
-    if (DEBUG) console.log(`Downloading ${url}`);
+    if (DEBUG) console.error(`Downloading ${url}`);
 
     return new Promise((resolve, reject) => {
       const file = fs.createWriteStream(dest);
@@ -272,7 +272,7 @@ class AssetsManager {
 
       file.on("finish", () => file.close(resolve));
     }).then(() => {
-      if (DEBUG) console.log(`Download Complete ${url}`);
+      if (DEBUG) console.error(`Download Complete ${url}`);
     });
   }
 }
@@ -310,7 +310,7 @@ function run() {
 
   prepare.then((files) => {
     const benchmark = new Benchmark(files);
-    if (DEBUG) console.log("Running Benchmarks...");
+    if (DEBUG) console.error("Running Benchmarks...");
 
     if (program.copy) {
       benchmark.run();
