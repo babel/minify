@@ -51,6 +51,8 @@
     "jest-cli": "^19.0.2",
     "lerna": "2.0.0-beta.38",
     "lerna-changelog": "^0.3.0",
+    "markdown-table": "^1.1.0",
+    "request": "^2.80.0",
     "through2": "^2.0.1",
     "uglify-js": "^2.8.5"
   }
