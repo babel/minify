@@ -92,6 +92,10 @@ function preset(context, _opts = {}) {
       proxy("keepClassName", [
         optionsMap.mangle,
         optionsMap.deadcode
+      ]),
+
+      proxy("ecmaVersion", [
+        optionsMap.simplify
       ])
     ],
     "some"

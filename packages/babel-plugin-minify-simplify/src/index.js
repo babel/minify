@@ -117,6 +117,37 @@ module.exports = ({ types: t }) => {
         }*/
       // },
 
+      CallExpression: {
+        enter: [
+          // Converts
+          // foo("bar") -> foo`bar`
+          function CallExprToTaggedTemplate(path, {
+            opts: {
+              ecmaVersion = 2015,
+              callsToTags = false
+            }
+          }) {
+            if (ecmaVersion < 2015 || !callsToTags) return;
+
+            const args = path.get("arguments");
+
+            if (args.length !== 1) return;
+            if (!args[0].isStringLiteral()) return;
+
+            const callee = path.get("callee");
+
+            path.replaceWith(
+              t.taggedTemplateExpression(
+                callee.node,
+                t.templateLiteral(
+                  [ t.templateElement({ raw: args[0].node.value }, true) ], []
+                )
+              )
+            );
+          }
+        ]
+      },
+
       UnaryExpression: {
         enter: [
 
