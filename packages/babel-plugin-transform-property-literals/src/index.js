@@ -24,6 +24,29 @@ module.exports = function({ types: t }) {
           }
         },
       },
+	  
+	  // ['foo']() {} -> foo() {}
+	  ClassMethod: {
+        exit({ node }) {
+          const key = node.key;
+		  
+          if (t.isStringLiteral(key) && t.isValidIdentifier(key.value)) {
+            node.key = t.identifier(key.value);
+            node.computed = false;
+          }
+        },
+      },
+	  
+	  ObjectMethod: {
+        exit({ node }) {
+          const key = node.key;
+		  
+          if (t.isStringLiteral(key) && t.isValidIdentifier(key.value)) {
+            node.key = t.identifier(key.value);
+            node.computed = false;
+          }
+        },
+      }
     },
   };
 };
