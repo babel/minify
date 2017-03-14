@@ -14,9 +14,7 @@ node_js:
 
 script:
 - 'if [ -n "${LINT-}" ]; then npm run lint ; fi'
-- npm run bootstrap
-- npm run build
-- npm run test
+- npm run test-ci
 
 matrix:
   fast_finish: true
