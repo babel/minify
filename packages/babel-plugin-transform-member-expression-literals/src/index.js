@@ -22,8 +22,8 @@ module.exports = function({ types: t }) {
             node.property = t.identifier(prop.value);
             node.computed = false;
           }
-        },
-      },
-    },
+        }
+      }
+    }
   };
 };

@@ -3,26 +3,26 @@
 
 Error.stackTraceLimit = Infinity;
 
-const uglify   = require("uglify-js");
-const MDTable  = require("markdown-table");
+const uglify = require("uglify-js");
+const MDTable = require("markdown-table");
 const CLITable = require("cli-table");
-const child    = require("child_process");
-const bytes    = require("bytes");
-const chalk    = require("chalk");
-const babel    = require("babel-core");
-const zlib     = require("zlib");
-const fs       = require("fs");
-const path     = require("path");
-const request  = require("request");
-const program  = require("commander");
-const compile  = require("google-closure-compiler-js").compile;
+const child = require("child_process");
+const bytes = require("bytes");
+const chalk = require("chalk");
+const babel = require("babel-core");
+const zlib = require("zlib");
+const fs = require("fs");
+const path = require("path");
+const request = require("request");
+const program = require("commander");
+const compile = require("google-closure-compiler-js").compile;
 
 const ASSETS_DIR = path.join(__dirname, "benchmark_cache");
 const DEFAULT_ASSETS = {
-  "react.js"       : "https://unpkg.com/react/dist/react.js", // 120 kb
-  "vue.js"         : "https://unpkg.com/vue/dist/vue.js", // 230 kb
-  "lodash.js"      : "https://unpkg.com/lodash/lodash.js", // 500kb
-  "three.js"       : "https://unpkg.com/three/build/three.js", // 1000kb
+  "react.js": "https://unpkg.com/react/dist/react.js", // 120 kb
+  "vue.js": "https://unpkg.com/vue/dist/vue.js", // 230 kb
+  "lodash.js": "https://unpkg.com/lodash/lodash.js", // 500kb
+  "three.js": "https://unpkg.com/three/build/three.js" // 1000kb
 };
 
 let DEBUG = true;
@@ -33,14 +33,14 @@ class Benchmark {
     this.results = [];
   }
   runAndPrint(target) {
-    this.files.forEach((file) => {
+    this.files.forEach(file => {
       const result = this.runFile(file);
       const printer = new Printer(result, target);
       printer.print();
     });
   }
   run() {
-    this.files.forEach((file) => this.runFile(file));
+    this.files.forEach(file => this.runFile(file));
     return this.results;
   }
   runFile(filename) {
@@ -57,12 +57,12 @@ class Benchmark {
         this.test(this.babili, code),
         this.test(this.uglify, code),
         this.test(this.closureCompiler, filename, false),
-        this.test(this.closureCompilerJs, code),
+        this.test(this.closureCompilerJs, code)
       ]
     };
 
-    const min = Math.min(...result.items.map((item) => item.gzipped.length));
-    const max = Math.max(...result.items.map((item) => item.gzipped.length));
+    const min = Math.min(...result.items.map(item => item.gzipped.length));
+    const max = Math.max(...result.items.map(item => item.gzipped.length));
 
     for (const item of result.items) {
       if (item.gzipped.length === min) {
@@ -76,11 +76,12 @@ class Benchmark {
     this.results.push(result);
     return result;
   }
-  test(fn, arg, warmup = true) { // eslint-disable-line
+  test(fn, arg, warmup = false) {
+    // eslint-disable-line
     if (DEBUG) console.error(`Running ${fn.name}`);
 
     // warm up
-    // if (warmup) fn.call(null, arg);
+    if (warmup) fn.call(null, arg);
 
     const start = process.hrtime();
     const output = fn.call(null, arg);
@@ -101,24 +102,28 @@ class Benchmark {
     return babel.transform(code, {
       sourceType: "script",
       presets: [require("../packages/babel-preset-babili")],
-      comments: false,
+      comments: false
     }).code;
   }
   uglify(code) {
     return uglify.minify(code, {
-      fromString: true,
+      fromString: true
     }).code;
   }
   closureCompiler(filename) {
-    return child.execSync(
-      "java -jar " + path.join(__dirname, "gcc.jar") +
-      " --language_in=ECMASCRIPT5 --env=CUSTOM --jscomp_off=* --js " + filename
-    ).toString();
+    return child
+      .execSync(
+        "java -jar " +
+          path.join(__dirname, "gcc.jar") +
+          " --language_in=ECMASCRIPT5 --env=CUSTOM --jscomp_off=* --js " +
+          filename
+      )
+      .toString();
   }
   closureCompilerJs(code) {
     const flags = {
       jsCode: [{ src: code }],
-      env: "CUSTOM",
+      env: "CUSTOM"
     };
     const out = compile(flags);
     return out.compiledCode;
@@ -143,9 +148,7 @@ class Printer {
     // TERM | MD
     target = target.toUpperCase();
     if (["TERM", "MD"].indexOf(target) < 0)
-      throw new Error(
-        `Invalid Target specified to printer. Got ${target}. Expected TERM|MD`
-      );
+      throw new Error(`Invalid Target specified to printer. Got ${target}. Expected TERM|MD`);
     this.target = target;
 
     this.header = [
@@ -164,17 +167,26 @@ class Printer {
         const tableProps = {
           head: this.header,
           chars: {
-            top: "", "top-left": "", "top-mid": "", "top-right": "",
-            left: "", "left-mid": "",
-            mid: "", "mid-mid": "",
-            right: "", "right-mid": "",
-            bottom: "", "bottom-left": "", "bottom-mid": "", "bottom-right": "",
+            top: "",
+            "top-left": "",
+            "top-mid": "",
+            "top-right": "",
+            left: "",
+            "left-mid": "",
+            mid: "",
+            "mid-mid": "",
+            right: "",
+            "right-mid": "",
+            bottom: "",
+            "bottom-left": "",
+            "bottom-mid": "",
+            "bottom-right": "",
             middle: " | "
           },
           style: {
             "padding-left": 0,
             "padding-right": 0,
-            head: ["bold"],
+            head: ["bold"]
           }
         };
         const clitable = new CLITable(tableProps);
@@ -186,10 +198,7 @@ class Printer {
 
         break;
       case "MD":
-        const mdtable = [
-          this.header,
-          ...this.getRows(this.result)
-        ];
+        const mdtable = [this.header, ...this.getRows(this.result)];
         this.printHead(this.result);
         console.log(MDTable(mdtable));
 
@@ -204,14 +213,13 @@ class Printer {
     console.log(`Input Size (gzip): ${bytes(data.gzipped.length)}\n`);
   }
   getRows(result) {
-    return result.items
-      .map((item) => this.getColumns(item, result)
-        .map((col, i) => {
-          if (!i) return this.bold(col);
-          if (item.isMin) return this.green(col);
-          if (item.isMax) return this.red(col);
-          return col;
-        }));
+    return result.items.map(item =>
+      this.getColumns(item, result).map((col, i) => {
+        if (!i) return this.bold(col);
+        if (item.isMin) return this.green(col);
+        if (item.isMax) return this.red(col);
+        return col;
+      }));
   }
   bold(col) {
     return this.target === "MD" ? `**${col}**` : chalk.bold(col);
@@ -226,7 +234,7 @@ class Printer {
     return [
       item.name,
       bytes(item.output.length),
-      Math.round(100 - 100 * item.output.length / res.input.length ) + "%",
+      Math.round(100 - 100 * item.output.length / res.input.length) + "%",
       bytes(item.gzipped.length),
       Math.round(100 - 100 * item.gzipped.length / res.gzipped.length) + "%",
       item.parseTime.toFixed(2),
@@ -249,13 +257,9 @@ class AssetsManager {
 
     return Promise.all(
       files
-        .filter((filename) => !pathExists(this.filePath(filename)))
-        .map(
-          (filename) => this.download(
-            this.assets[filename], this.filePath(filename)
-          )
-        )
-    ).then(() => files.map((filename) => this.filePath(filename)));
+        .filter(filename => !pathExists(this.filePath(filename)))
+        .map(filename => this.download(this.assets[filename], this.filePath(filename)))
+    ).then(() => files.map(filename => this.filePath(filename)));
   }
   download(url, dest) {
     if (DEBUG) console.error(`Downloading ${url}`);
@@ -263,12 +267,10 @@ class AssetsManager {
     return new Promise((resolve, reject) => {
       const file = fs.createWriteStream(dest);
 
-      request(url)
-        .pipe(file)
-        .on("error", (err) => {
-          fs.unlink(dest);
-          reject(err);
-        });
+      request(url).pipe(file).on("error", err => {
+        fs.unlink(dest);
+        reject(err);
+      });
 
       file.on("finish", () => file.close(resolve));
     }).then(() => {
@@ -292,13 +294,13 @@ function run() {
   program
     .usage("[options] <file ...>")
     .arguments("[file...]")
-    .action((_files) => files = _files)
+    .action(_files => files = _files)
     .option("-q, --quiet", "Quiet mode. Show only results. Don't show progress")
     .option("-t, --target [target]", "Output target (TERM|MD)")
     .option(
       "-c, --copy [copymode]",
       "[boolean] Copy mode. Gather results before printing",
-      (copy) => copy === "1" || copy.toLowerCase() === "true"
+      copy => copy === "1" || copy.toLowerCase() === "true"
     )
     .parse(process.argv);
 
@@ -308,22 +310,24 @@ function run() {
     ? Promise.resolve(files)
     : new AssetsManager(DEFAULT_ASSETS, ASSETS_DIR).updateCache();
 
-  prepare.then((files) => {
-    const benchmark = new Benchmark(files);
-    if (DEBUG) console.error("Running Benchmarks...");
+  prepare
+    .then(files => {
+      const benchmark = new Benchmark(files);
+      if (DEBUG) console.error("Running Benchmarks...");
 
-    if (program.copy) {
-      benchmark.run();
-      for (const result of benchmark.results) {
-        new Printer(result, program.target).print();
+      if (program.copy) {
+        benchmark.run();
+        for (const result of benchmark.results) {
+          new Printer(result, program.target).print();
+        }
+      } else {
+        benchmark.runAndPrint(program.target);
       }
-    } else {
-      benchmark.runAndPrint(program.target);
-    }
-  }).catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+    })
+    .catch(e => {
+      console.error(e);
+      process.exit(1);
+    });
 }
 
 run();

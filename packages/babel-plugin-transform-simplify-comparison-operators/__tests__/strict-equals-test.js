@@ -5,8 +5,8 @@ const plugin = require("../src/index");
 const unpad = require("../../../utils/unpad");
 
 function transform(code) {
-  return babel.transform(code,  {
-    plugins: [plugin],
+  return babel.transform(code, {
+    plugins: [plugin]
   }).code;
 }
 
@@ -24,48 +24,60 @@ describe("simplify-comparison-operators-plugin", () => {
   });
 
   it("should comparison operations 2", () => {
-    const source = unpad(`
+    const source = unpad(
+      `
       var x = null;
       x === null;
-    `);
-    const expected = unpad(`
+    `
+    );
+    const expected = unpad(
+      `
       var x = null;
       x == null;
-    `);
+    `
+    );
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not simplify comparison", () => {
-    const source = unpad(`
+    const source = unpad(
+      `
       var x;
       x === null;
-    `);
-    const expected = unpad(`
+    `
+    );
+    const expected = unpad(
+      `
       var x;
       x === null;
-    `);
+    `
+    );
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not simplify comparison 2", () => {
-    const source = unpad(`
+    const source = unpad(
+      `
       var x;
       if (wow) x = foo();
       x === null;
-    `);
-    const expected = unpad(`
+    `
+    );
+    const expected = unpad(
+      `
       var x;
       if (wow) x = foo();
       x === null;
-    `);
+    `
+    );
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not simplify comparison if already simplified", function() {
-    const source = "typeof 1 == \"number\";";
+    const source = 'typeof 1 == "number";';
     expect(transform(source)).toBe(source);
   });
 

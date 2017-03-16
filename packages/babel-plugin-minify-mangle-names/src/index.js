@@ -3,7 +3,7 @@
 const {
   markEvalScopes,
   isMarked: isEvalScopesMarked,
-  hasEval,
+  hasEval
 } = require("babel-helper-mark-eval-scopes");
 
 const PATH_RENAME_MARKER = Symbol("PATH_RENAME_MARKER");
@@ -12,13 +12,17 @@ module.exports = ({ types: t, traverse }) => {
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
-    constructor(charset, program, {
-      blacklist = {},
-      keepFnName = false,
-      eval: _eval = false,
-      topLevel = false,
-      keepClassName = false,
-    } = {}) {
+    constructor(
+      charset,
+      program,
+      {
+        blacklist = {},
+        keepFnName = false,
+        eval: _eval = false,
+        topLevel = false,
+        keepClassName = false
+      } = {}
+    ) {
       this.charset = charset;
       this.program = program;
       this.blacklist = toObject(blacklist);
@@ -27,10 +31,10 @@ module.exports = ({ types: t, traverse }) => {
       this.eval = _eval;
       this.topLevel = topLevel;
 
-      this.unsafeScopes = new Set;
-      this.visitedScopes = new Set;
+      this.unsafeScopes = new Set();
+      this.visitedScopes = new Set();
 
-      this.referencesToUpdate = new Map;
+      this.referencesToUpdate = new Map();
     }
 
     run() {
@@ -53,7 +57,7 @@ module.exports = ({ types: t, traverse }) => {
       let evalScope = scope;
       do {
         this.unsafeScopes.add(evalScope);
-      } while (evalScope = evalScope.parent);
+      } while ((evalScope = evalScope.parent));
     }
 
     collect() {
@@ -68,8 +72,8 @@ module.exports = ({ types: t, traverse }) => {
           Identifier(path) {
             const { node } = path;
 
-            if ((path.parentPath.isMemberExpression({ property: node })) ||
-                (path.parentPath.isObjectProperty({ key: node }))
+            if (
+              path.parentPath.isMemberExpression({ property: node }) || path.parentPath.isObjectProperty({ key: node })
             ) {
               mangler.charset.consider(node.name);
             }
@@ -119,22 +123,22 @@ module.exports = ({ types: t, traverse }) => {
 
         if (
           // arguments
-          oldName === "arguments"
+          oldName === "arguments" ||
           // other scope bindings
-          || !scope.hasOwnBinding(oldName)
+          !scope.hasOwnBinding(oldName) ||
           // labels
-          || binding.path.isLabeledStatement()
+          binding.path.isLabeledStatement() ||
           // ClassDeclaration has binding in two scopes
           //   1. The scope in which it is declared
           //   2. The class's own scope
           // - https://github.com/babel/babel/issues/5156
-          || (binding.path.isClassDeclaration() && binding.path === scope.path)
+          (binding.path.isClassDeclaration() && binding.path === scope.path) ||
           // blacklisted
-          || mangler.isBlacklist(oldName)
+          mangler.isBlacklist(oldName) ||
           // function names
-          || (mangler.keepFnName ? isFunction(binding.path) : false)
+          (mangler.keepFnName ? isFunction(binding.path) : false) ||
           // class names
-          || (mangler.keepClassName ? isClass(binding.path) : false)
+          (mangler.keepClassName ? isClass(binding.path) : false)
         ) {
           continue;
         }
@@ -142,12 +146,10 @@ module.exports = ({ types: t, traverse }) => {
         let next;
         do {
           next = getNext();
-        } while (
-          !t.isValidIdentifier(next)
-          || hop.call(bindings, next)
-          || scope.hasGlobal(next)
-          || scope.hasReference(next)
-        );
+        } while (!t.isValidIdentifier(next) ||
+          hop.call(bindings, next) ||
+          scope.hasGlobal(next) ||
+          scope.hasReference(next));
 
         // TODO:
         // re-enable this - check above
@@ -199,14 +201,12 @@ module.exports = ({ types: t, traverse }) => {
         if (violations[i].isLabeledStatement()) continue;
 
         const bindings = violations[i].getBindingIdentifierPaths();
-        Object
-          .keys(bindings)
-          .map((b) => {
-            if (b === oldName && !bindings[b][PATH_RENAME_MARKER]) {
-              bindings[b].replaceWith(t.identifier(newName));
-              bindings[b][PATH_RENAME_MARKER] = true;
-            }
-          });
+        Object.keys(bindings).map(b => {
+          if (b === oldName && !bindings[b][PATH_RENAME_MARKER]) {
+            bindings[b].replaceWith(t.identifier(newName));
+            bindings[b][PATH_RENAME_MARKER] = true;
+          }
+        });
       }
 
       // update all referenced places
@@ -253,20 +253,21 @@ module.exports = ({ types: t, traverse }) => {
 
         const mangler = new Mangler(charset, path, this.opts);
         mangler.run();
-      },
-    },
+      }
+    }
   };
 };
 
-const CHARSET = ("abcdefghijklmnopqrstuvwxyz" +
-                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
+const CHARSET = ("abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
 
 class Charset {
   constructor(shouldConsider) {
     this.shouldConsider = shouldConsider;
     this.chars = CHARSET.slice();
     this.frequency = {};
-    this.chars.forEach((c) => { this.frequency[c] = 0; });
+    this.chars.forEach(c => {
+      this.frequency[c] = 0;
+    });
     this.finalized = false;
   }
 
@@ -275,7 +276,7 @@ class Charset {
       return;
     }
 
-    str.split("").forEach((c) => {
+    str.split("").forEach(c => {
       if (this.frequency[c] != null) {
         this.frequency[c]++;
       }
@@ -284,9 +285,7 @@ class Charset {
 
   sort() {
     if (this.shouldConsider) {
-      this.chars = this.chars.sort(
-        (a, b) => this.frequency[b] - this.frequency[a]
-      );
+      this.chars = this.chars.sort((a, b) => this.frequency[b] - this.frequency[a]);
     }
 
     this.finalized = true;
@@ -323,19 +322,17 @@ function toObject(value) {
 
 // for keepFnName
 function isFunction(path) {
-  return path.isFunctionExpression()
-    || path.isFunctionDeclaration();
+  return path.isFunctionExpression() || path.isFunctionDeclaration();
 }
 
 // for keepClassName
 function isClass(path) {
-  return path.isClassExpression()
-    || path.isClassDeclaration();
+  return path.isClassExpression() || path.isClassDeclaration();
 }
 
 function isLabelIdentifier(path) {
   const { node } = path;
-  return path.parentPath.isLabeledStatement({ label: node })
-    || path.parentPath.isBreakStatement({ label: node })
-    || path.parentPath.isContinueStatement({ label: node });
+  return path.parentPath.isLabeledStatement({ label: node }) ||
+    path.parentPath.isBreakStatement({ label: node }) ||
+    path.parentPath.isContinueStatement({ label: node });
 }

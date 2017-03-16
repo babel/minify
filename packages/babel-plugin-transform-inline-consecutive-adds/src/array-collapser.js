@@ -12,7 +12,7 @@ class ArrayCollapser extends Collapser {
   }
 
   getExpressionChecker(objName, checkReference) {
-    return (expr) => {
+    return expr => {
       // checks expr is of form:
       // foo.push(rval1, ...nrvals)
 
@@ -23,11 +23,7 @@ class ArrayCollapser extends Collapser {
       }
 
       const obj = callee.get("object"), prop = callee.get("property");
-      if (!obj.isIdentifier() ||
-          obj.node.name !== objName ||
-          !prop.isIdentifier() ||
-          prop.node.name !== "push"
-      ) {
+      if (!obj.isIdentifier() || obj.node.name !== objName || !prop.isIdentifier() || prop.node.name !== "push") {
         return false;
       }
 
@@ -44,7 +40,7 @@ class ArrayCollapser extends Collapser {
   }
 
   addSuccessfully(t, args, init) {
-    args.map((a) => init.elements.push(a));
+    args.map(a => init.elements.push(a));
     return true;
   }
 }

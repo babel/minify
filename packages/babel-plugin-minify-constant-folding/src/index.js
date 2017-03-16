@@ -9,7 +9,6 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-constant-folding",
     visitor: {
-
       // Evaluate string expressions that are next to each other
       // but are not actually a binary expression.
       // "a" + b + "c" + "d" -> "a" + b + "cd"
@@ -40,8 +39,8 @@ module.exports = ({ types: t, traverse }) => {
         }
 
         const value = literal.key === "right"
-                                    ? relevant.node.value + literal.node.value
-                                    : literal.node.value + relevant.node.value;
+          ? relevant.node.value + literal.node.value
+          : literal.node.value + relevant.node.value;
 
         relevant.replaceWith(t.stringLiteral(value));
         path.replaceWith(bin.node);
@@ -89,9 +88,7 @@ module.exports = ({ types: t, traverse }) => {
         }
 
         // void 0 is used for undefined.
-        if (t.isUnaryExpression(node, { operator: "void" }) &&
-          t.isNumericLiteral(node.argument, { value: 0 })
-        ) {
+        if (t.isUnaryExpression(node, { operator: "void" }) && t.isNumericLiteral(node.argument, { value: 0 })) {
           return;
         }
 
@@ -124,7 +121,7 @@ module.exports = ({ types: t, traverse }) => {
           node[seen] = true;
           path.replaceWith(node);
         }
-      },
-    },
+      }
+    }
   };
 };

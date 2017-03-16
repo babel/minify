@@ -4,10 +4,8 @@ const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
 
 function transform(code, replacements) {
-  return babel.transform(code,  {
-    plugins: [
-      [require("../src/index"), { replacements }],
-    ],
+  return babel.transform(code, {
+    plugins: [[require("../src/index"), { replacements }]]
   }).code;
 }
 
@@ -18,28 +16,32 @@ describe("replace-plugin", () => {
         identifierName: "__DEV__",
         replacement: {
           type: "numericLiteral",
-          value: 0,
-        },
-      },
+          value: 0
+        }
+      }
     ];
 
-    const source = unpad(`
+    const source = unpad(
+      `
       if (__DEV__) {
         foo();
       }
       if (!__DEV__) {
         foo();
       }
-    `);
+    `
+    );
 
-    const expected = unpad(`
+    const expected = unpad(
+      `
       if (0) {
         foo();
       }
       if (!0) {
         foo();
       }
-    `);
+    `
+    );
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -50,28 +52,32 @@ describe("replace-plugin", () => {
         identifierName: "__DEV__",
         replacement: {
           type: "numericLiteral",
-          value: 0,
-        },
-      },
+          value: 0
+        }
+      }
     ];
 
-    const source = unpad(`
+    const source = unpad(
+      `
       if (__DEV__) {
         foo();
       }
       if (a.__DEV__) {
         foo();
       }
-    `);
+    `
+    );
 
-    const expected = unpad(`
+    const expected = unpad(
+      `
       if (0) {
         foo();
       }
       if (a.__DEV__) {
         foo();
       }
-    `);
+    `
+    );
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -82,22 +88,26 @@ describe("replace-plugin", () => {
         identifierName: "__DEV__",
         replacement: {
           type: "booleanLiteral",
-          value: true,
-        },
-      },
+          value: true
+        }
+      }
     ];
 
-    const source = unpad(`
+    const source = unpad(
+      `
       if (__DEV__) {
         foo();
       }
-    `);
+    `
+    );
 
-    const expected = unpad(`
+    const expected = unpad(
+      `
       if (true) {
         foo();
       }
-    `);
+    `
+    );
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -109,20 +119,24 @@ describe("replace-plugin", () => {
         member: "log",
         replacement: {
           type: "identifier",
-          value: "emptyFunction",
-        },
-      },
+          value: "emptyFunction"
+        }
+      }
     ];
 
-    const source = unpad(`
+    const source = unpad(
+      `
       console.log('wat');
       (console.log)('wat');
-    `);
+    `
+    );
 
-    const expected = unpad(`
+    const expected = unpad(
+      `
       emptyFunction('wat');
       emptyFunction('wat');
-    `);
+    `
+    );
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -134,30 +148,34 @@ describe("replace-plugin", () => {
         member: "log",
         replacement: {
           type: "identifier",
-          value: "emptyFunction",
-        },
+          value: "emptyFunction"
+        }
       },
       {
         identifierName: "console",
         member: "error",
         replacement: {
           type: "identifier",
-          value: "emptyFunction",
-        },
-      },
+          value: "emptyFunction"
+        }
+      }
     ];
 
-    const source = unpad(`
+    const source = unpad(
+      `
       console.log('wat');
       (console.log)('wat');
       console.error('wat');
-    `);
+    `
+    );
 
-    const expected = unpad(`
+    const expected = unpad(
+      `
       emptyFunction('wat');
       emptyFunction('wat');
       emptyFunction('wat');
-    `);
+    `
+    );
 
     expect(transform(source, replacements)).toBe(expected);
   });

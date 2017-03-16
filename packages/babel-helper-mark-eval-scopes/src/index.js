@@ -7,17 +7,17 @@ module.exports = {
   getEvalScopes,
   markEvalScopes,
   isMarked,
-  hasEval,
+  hasEval
 };
 
 function getEvalScopes(path) {
-  const evalScopes = new Set;
+  const evalScopes = new Set();
 
   function add(scope) {
     let evalScope = scope;
     do {
       evalScopes.add(evalScope);
-    } while (evalScope = evalScope.parent);
+    } while ((evalScope = evalScope.parent));
   }
 
   path.traverse({
@@ -35,7 +35,7 @@ function getEvalScopes(path) {
 
 function markEvalScopes(path, key = EVAL_SCOPE_MARKER) {
   const evalScopes = getEvalScopes(path);
-  [...evalScopes].forEach((scope) => {
+  [...evalScopes].forEach(scope => {
     scope[key] = true;
   });
 }

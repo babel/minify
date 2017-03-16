@@ -10,7 +10,7 @@ module.exports = function({ types: t }) {
         if (path.node.name === "undefined") {
           path.replaceWith(VOID_0);
         }
-      },
-    },
+      }
+    }
   };
 };

@@ -25,7 +25,7 @@ const mocks = [
   "babel-plugin-transform-undefined-to-void"
 ];
 
-mocks.forEach((mockName) => {
+mocks.forEach(mockName => {
   // it's called mockName for jest(babel-jest-plugin) workaround
   jest.mock(mockName, () => mockName);
 });
@@ -102,7 +102,7 @@ describe("preset-options", () => {
       mangle: {
         blacklist: ["baz"],
         keepFnName: false,
-        keepClassName: false,
+        keepClassName: false
       }
     });
   });

@@ -29,7 +29,7 @@ module.exports = function({ types: t }) {
         }
 
         path.replaceWith(INFINITY);
-      },
-    },
+      }
+    }
   };
 };

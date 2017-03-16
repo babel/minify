@@ -11,7 +11,7 @@ module.exports = function({ types: t }) {
             path.replaceWith(t.valueToNode(process.env[key.value]));
           }
         }
-      },
-    },
+      }
+    }
   };
 };

@@ -13,13 +13,13 @@ module.exports = function() {
           return;
         }
 
-        const left  = path.get("left");
+        const left = path.get("left");
         const right = path.get("right");
         const strictMatch = left.baseTypeStrictlyMatches(right);
         if (strictMatch) {
           node.operator = node.operator.slice(0, -1);
         }
-      },
-    },
+      }
+    }
   };
 };

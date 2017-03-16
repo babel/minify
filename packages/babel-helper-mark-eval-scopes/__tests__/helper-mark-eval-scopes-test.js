@@ -9,7 +9,7 @@ function getPath(source) {
   babel.transform(source, {
     babelrc: false,
     plugins: [
-      function ({ traverse }) {
+      function({ traverse }) {
         traverse.clearCache();
         return {
           visitor: {

@@ -30,7 +30,7 @@ module.exports = ({ types: t }) => {
       }
 
       path.replaceWith(options.node);
-    },
+    }
   };
 
   return {
@@ -55,20 +55,22 @@ module.exports = ({ types: t }) => {
         }
 
         const map = Object.create(null);
-        this.opts.replacements.forEach(({ identifierName, replacement, member }) => {
+        this.opts.replacements.forEach(({
+          identifierName,
+          replacement,
+          member
+        }) => {
           if (path.scope.globals[identifierName]) {
             // Convert to a node, we only allow identifiers and literals as replacements
             if (!replacement.type.match(/literal|identifier/i)) {
-              throw new Error(
-                "Only literals and identifier are supported as replacements"
-              );
+              throw new Error("Only literals and identifier are supported as replacements");
             }
 
             const node = t[replacement.type](replacement.value);
             const options = {
               identifierName,
               node,
-              member,
+              member
             };
 
             if (!map[identifierName]) {
@@ -83,7 +85,7 @@ module.exports = ({ types: t }) => {
         });
 
         path.traverse(replaceVisitor, { replacements: map });
-      },
-    },
+      }
+    }
   };
 };

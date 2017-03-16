@@ -5,8 +5,8 @@ const plugin = require("../src/index");
 const unpad = require("../../../utils/unpad");
 
 function transform(code) {
-  return babel.transform(code,  {
-    plugins: [plugin],
+  return babel.transform(code, {
+    plugins: [plugin]
   }).code;
 }
 
@@ -29,10 +29,12 @@ describe("transform-member-expressions-literals-plugin", () => {
   });
 
   it("should not transform invalid identifiers", () => {
-    const source = unpad(`
+    const source = unpad(
+      `
       foo["default"];
       foo["import"];
-    `);
+    `
+    );
     expect(transform(source)).toBe(source);
   });
 

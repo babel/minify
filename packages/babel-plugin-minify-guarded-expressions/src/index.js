@@ -50,15 +50,16 @@ module.exports = function({ types: t }) {
             }
           },
 
-          function (path) {
+          function(path) {
             const { node } = path;
 
             if (flipExpressions.hasSeen(node)) {
               return;
             }
 
-            if (!path.parentPath.isExpressionStatement() &&
-                !(path.parentPath.isSequenceExpression() && path.parentPath.parentPath.isExpressionStatement())
+            if (
+              !path.parentPath.isExpressionStatement() &&
+              !(path.parentPath.isSequenceExpression() && path.parentPath.parentPath.isExpressionStatement())
             ) {
               return;
             }
@@ -69,9 +70,9 @@ module.exports = function({ types: t }) {
               const newNode = flipExpressions.flip(node, true);
               path.replaceWith(newNode);
             }
-          },
-        ],
-      },
-    },
+          }
+        ]
+      }
+    }
   };
 };

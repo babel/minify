@@ -1,27 +1,23 @@
 "use strict";
 
 function createRegExpLiteral(args, prettify, t) {
-  const evaluatedArgs = args.map((a) => a.evaluate());
-  if (!evaluatedArgs.every((a) => a.confident && typeof a.value === "string")) {
+  const evaluatedArgs = args.map(a => a.evaluate());
+  if (!evaluatedArgs.every(a => a.confident && typeof a.value === "string")) {
     return;
   }
-  let pattern = (evaluatedArgs.length >= 1 &&
-                    evaluatedArgs[0].value !== "") ?
-                  evaluatedArgs[0].value :
-                  "(?:)";
-  const flags = evaluatedArgs.length >= 2 ?
-                evaluatedArgs[1].value :
-                "";
+  let pattern = evaluatedArgs.length >= 1 && evaluatedArgs[0].value !== "" ? evaluatedArgs[0].value : "(?:)";
+  const flags = evaluatedArgs.length >= 2 ? evaluatedArgs[1].value : "";
 
   pattern = new RegExp(pattern).source;
   if (prettify) {
-    pattern = pattern.replace(/\n/g, "\\n")
-                     .replace(/\u2028/g, "\\u2028")
-                     .replace(/\u2029/g, "\\u2029")
-                     .replace(/[\b]/g, "[\\b]")
-                     .replace(/\v/g, "\\v")
-                     .replace(/\f/g, "\\f")
-                     .replace(/\r/g, "\\r");
+    pattern = pattern
+      .replace(/\n/g, "\\n")
+      .replace(/\u2028/g, "\\u2028")
+      .replace(/\u2029/g, "\\u2029")
+      .replace(/[\b]/g, "[\\b]")
+      .replace(/\v/g, "\\v")
+      .replace(/\f/g, "\\f")
+      .replace(/\r/g, "\\r");
   }
   return t.regExpLiteral(pattern, flags);
 }
@@ -46,7 +42,7 @@ module.exports = function({ types: t }) {
       CallExpression(path) {
         // equivalent to `new RegExp()` according to §21.2.3
         maybeReplaceWithRegExpLiteral(path, t);
-      },
-    },
+      }
+    }
   };
 };

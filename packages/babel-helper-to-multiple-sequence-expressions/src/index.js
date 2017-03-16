@@ -39,7 +39,7 @@ module.exports = function(t) {
           return {
             seq,
             bailed: true,
-            bailedAtIndex: i,
+            bailedAtIndex: i
           };
         };
 

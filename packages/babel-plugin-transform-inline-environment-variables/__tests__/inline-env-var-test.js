@@ -4,8 +4,8 @@ const babel = require("babel-core");
 const plugin = require("../src/index");
 
 function transform(code) {
-  return babel.transform(code,  {
-    plugins: [plugin],
+  return babel.transform(code, {
+    plugins: [plugin]
   }).code;
 }
 
@@ -15,7 +15,7 @@ describe("inline-env-plugin", () => {
     process.env.NODE_ENV = "development";
 
     const source = "process.env.NODE_ENV";
-    const expected = "\"development\";";
+    const expected = '"development";';
     expect(transform(source)).toBe(expected);
 
     process.env.NODE_ENV = prev;

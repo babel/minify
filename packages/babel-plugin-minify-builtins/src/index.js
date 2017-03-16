@@ -7,11 +7,10 @@ const VALID_CALLEES = ["String", "Number", "Math"];
 const INVALID_METHODS = ["random"];
 
 module.exports = function({ types: t }) {
-
   class BuiltInReplacer {
     constructor(program) {
       this.program = program;
-      this.pathsToUpdate = new Map;
+      this.pathsToUpdate = new Map();
     }
 
     run() {
@@ -22,7 +21,7 @@ module.exports = function({ types: t }) {
     collect() {
       const context = this;
 
-      const collectVisitor =  {
+      const collectVisitor = {
         MemberExpression(path) {
           if (path.parentPath.isCallExpression()) {
             return;
@@ -71,13 +70,11 @@ module.exports = function({ types: t }) {
     }
 
     replace() {
-      for (const [ expName, paths ] of this.pathsToUpdate) {
+      for (const [expName, paths] of this.pathsToUpdate) {
         // Should only transform if there is more than 1 occurence
         if (paths.length > 1) {
           const uniqueIdentifier = this.program.scope.generateUidIdentifier(expName);
-          const newNode = t.variableDeclaration("var", [
-            t.variableDeclarator(uniqueIdentifier, paths[0].node)
-          ]);
+          const newNode = t.variableDeclaration("var", [t.variableDeclarator(uniqueIdentifier, paths[0].node)]);
 
           for (const path of paths) {
             path.replaceWith(uniqueIdentifier);
@@ -96,7 +93,7 @@ module.exports = function({ types: t }) {
         const builtInReplacer = new BuiltInReplacer(path);
         builtInReplacer.run();
       }
-    },
+    }
   };
 
   function memberToString(memberExpr) {
@@ -113,14 +110,16 @@ module.exports = function({ types: t }) {
   function isBuiltin(memberExpr) {
     const { object, property } = memberExpr.node;
 
-    if (t.isIdentifier(object) && t.isIdentifier(property)
-      && VALID_CALLEES.indexOf(object.name) >= 0
-      && INVALID_METHODS.indexOf(property.name) < 0) {
+    if (
+      t.isIdentifier(object) &&
+      t.isIdentifier(property) &&
+      VALID_CALLEES.indexOf(object.name) >= 0 &&
+      INVALID_METHODS.indexOf(property.name) < 0
+    ) {
       return true;
     }
     return false;
   }
-
 };
 
 function hasPureArgs(path) {

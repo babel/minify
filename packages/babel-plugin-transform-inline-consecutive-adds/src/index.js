@@ -4,13 +4,13 @@ const COLLAPSERS = [
   require("./object-collapser"),
   require("./array-collapser"),
   require("./array-property-collapser"),
-  require("./set-collapser"),
-].map((Collapser) => {
+  require("./set-collapser")
+].map(Collapser => {
   return new Collapser();
 });
 
 function getFunctionParent(path, scopeParent) {
-  const parent = path.findParent((p) => p.isFunction());
+  const parent = path.findParent(p => p.isFunction());
   // don"t traverse higher than the function the var is defined in.
   return parent === scopeParent ? null : parent;
 }
@@ -24,7 +24,7 @@ function getFunctionReferences(path, scopeParent, references = new Set()) {
       continue;
     }
 
-    binding.referencePaths.forEach((path) => {
+    binding.referencePaths.forEach(path => {
       if (!references.has(path)) {
         references.add(path);
         getFunctionReferences(path, scopeParent, references);
@@ -41,12 +41,14 @@ function getIdAndFunctionReferences(name, parent) {
     return false;
   }
 
-  const references = binding.referencePaths
-                            .reduce((references, ref) => {
-                              references.add(ref);
-                              getFunctionReferences(ref, parent, references);
-                              return references;
-                            }, new Set());
+  const references = binding.referencePaths.reduce(
+    (references, ref) => {
+      references.add(ref);
+      getFunctionReferences(ref, parent, references);
+      return references;
+    },
+    new Set()
+  );
 
   return Array.from(references);
 }
@@ -96,16 +98,15 @@ function collectExpressions(path, isExprTypeValid) {
   // returns null if found inconsistency, else returns Array<"a>
   if (path.isExpressionStatement()) {
     const exprs = collectExpressions(path.get("expression"), isExprTypeValid);
-    return (exprs !== null) ? exprs : null;
+    return exprs !== null ? exprs : null;
   }
 
   if (path.isSequenceExpression()) {
-    const exprs = path.get("expressions")
-                      .map((p) => collectExpressions(p, isExprTypeValid));
-    if (exprs.some((e) => e === null)) {
+    const exprs = path.get("expressions").map(p => collectExpressions(p, isExprTypeValid));
+    if (exprs.some(e => e === null)) {
       return null;
     } else {
-      return exprs.reduce((s, n) => s.concat(n), []);  // === Array.flatten
+      return exprs.reduce((s, n) => s.concat(n), []); // === Array.flatten
     }
   }
 
@@ -121,7 +122,7 @@ function getContiguousStatementsAndExpressions(body, start, end, isExprTypeValid
   let allExprs = [];
   for (let i = start; i < end; i++) {
     const exprs = collectExpressions(body[i], isExprTypeValid);
-    if (exprs === null || !exprs.every((e) => checkExpr(e))) {
+    if (exprs === null || !exprs.every(e => checkExpr(e))) {
       break;
     }
     statements.push(body[i]);
@@ -132,7 +133,7 @@ function getContiguousStatementsAndExpressions(body, start, end, isExprTypeValid
 
 function getReferenceChecker(references) {
   // returns a function s.t. given an expr, returns true iff expr is an ancestor of a reference
-  return (expr) => references.some((r) => r.isDescendant(expr));
+  return expr => references.some(r => r.isDescendant(expr));
 }
 
 function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
@@ -155,21 +156,28 @@ function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
     return;
   }
 
-  const assignments = exprs.map((e) => collapser.extractAssignment(e));
+  const assignments = exprs.map(e => collapser.extractAssignment(e));
   const oldInit = init.node;
   const newInit = t.cloneDeep(oldInit);
-  if (!assignments.every(
-      (assignment) => collapser.addSuccessfully(t, assignment, newInit))) {
+  if (!assignments.every(assignment => collapser.addSuccessfully(t, assignment, newInit))) {
     return;
   }
 
   // some collapses may increase the size
-  if (!collapser.isSizeSmaller({ newInit, oldInit, varDecl, assignments, statements })) {
+  if (
+    !collapser.isSizeSmaller({
+      newInit,
+      oldInit,
+      varDecl,
+      assignments,
+      statements
+    })
+  ) {
     return;
   }
 
   init.replaceWith(newInit);
-  statements.forEach((s) => s.remove());
+  statements.forEach(s => s.remove());
   return true;
 }
 
@@ -190,10 +198,10 @@ module.exports = function({ types: t }) {
         }
         const checkReference = getReferenceChecker(references);
 
-        if (COLLAPSERS.some((c) => tryUseCollapser(t, c, varDecl, topLevel, checkReference))) {
+        if (COLLAPSERS.some(c => tryUseCollapser(t, c, varDecl, topLevel, checkReference))) {
           return;
         }
-      },
-    },
+      }
+    }
   };
 };

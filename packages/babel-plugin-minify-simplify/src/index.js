@@ -13,7 +13,7 @@ module.exports = ({ types: t }) => {
 
   // Types as symbols for comparisions
   const types = {};
-  t.TYPES.forEach((type) => {
+  t.TYPES.forEach(type => {
     types[type] = Symbol.for(type);
   });
   const isNodeOfType = (node, typeSymbol) => {
@@ -22,21 +22,14 @@ module.exports = ({ types: t }) => {
   };
 
   // small abstractions
-  const not = (node) => t.unaryExpression("!", node);
-  const notnot = (node) => not(not(node));
+  const not = node => t.unaryExpression("!", node);
+  const notnot = node => not(not(node));
   const or = (a, b) => t.logicalExpression("||", a, b);
   const and = (a, b) => t.logicalExpression("&&", a, b);
 
-  const operators = new Set([
-    "+", "-", "*", "%",
-    "<<", ">>", ">>>",
-    "&", "|", "^", "/",
-    "**"
-  ]);
+  const operators = new Set(["+", "-", "*", "%", "<<", ">>", ">>>", "&", "|", "^", "/", "**"]);
 
-  const updateOperators = new Set([
-    "+", "-"
-  ]);
+  const updateOperators = new Set(["+", "-"]);
 
   function areArraysEqual(arr1, arr2) {
     return arr1.every((value, index) => {
@@ -57,9 +50,7 @@ module.exports = ({ types: t }) => {
     // augment identifiers so that they don't match
     // string/number literals
     // but still match against each other
-    return node.name
-      ? node.name + "_"
-      : node.value /* Literal */;
+    return node.name ? node.name + "_" : node.value /* Literal */;
   }
 
   function getPropNames(path) {
@@ -83,8 +74,8 @@ module.exports = ({ types: t }) => {
 
     return propNames;
   }
-  const OP_AND = (input) => input === "&&";
-  const OP_OR = (input) => input === "||";
+  const OP_AND = input => input === "&&";
+  const OP_OR = input => input === "||";
 
   return {
     name: "minify-simplify",
@@ -95,13 +86,13 @@ module.exports = ({ types: t }) => {
             delete path.node[shouldRevisit];
             path.visit();
           }
-        },
+        }
       },
 
       // CallExpression(path) {
-        // const { node } = path;
+      // const { node } = path;
 
-        /* (function() {})() -> !function() {}()
+      /* (function() {})() -> !function() {}()
         There is a bug in babel in printing this. Disabling for now.
         if (t.isFunctionExpression(node.callee) &&
             (t.isExpressionStatement(parent) ||
@@ -119,7 +110,6 @@ module.exports = ({ types: t }) => {
 
       UnaryExpression: {
         enter: [
-
           // Demorgans.
           function(path) {
             const { node } = path;
@@ -178,16 +168,16 @@ module.exports = ({ types: t }) => {
             cond.alternate = t.unaryExpression("!", cond.alternate, true);
             cond.consequent = t.unaryExpression("!", cond.consequent, true);
             path.replaceWith(node.argument);
-          },
-        ],
+          }
+        ]
       },
 
       LogicalExpression: {
         exit(path) {
           // cache of path.evaluate()
-          const evaluateMemo = new Map;
+          const evaluateMemo = new Map();
 
-          const TRUTHY = (input) => {
+          const TRUTHY = input => {
             // !NaN and !undefined are truthy
             // separate check here as they are considered impure by babel
             if (input.isUnaryExpression() && input.get("argument").isIdentifier()) {
@@ -200,7 +190,7 @@ module.exports = ({ types: t }) => {
             return evalResult.confident && input.isPure() && evalResult.value;
           };
 
-          const FALSY = (input) => {
+          const FALSY = input => {
             // NaN and undefined are falsy
             // separate check here as they are considered impure by babel
             if (input.isIdentifier()) {
@@ -221,8 +211,8 @@ module.exports = ({ types: t }) => {
           // [left, operator, right, handler(leftNode, rightNode)]
           const matcher = new PatternMatch([
             [TRUTHY, OP_AND, EX, (l, r) => r],
-            [FALSY, OP_AND, EX, (l) => l],
-            [TRUTHY, OP_OR, EX, (l) => l],
+            [FALSY, OP_AND, EX, l => l],
+            [TRUTHY, OP_OR, EX, l => l],
             [FALSY, OP_OR, EX, (l, r) => r]
           ]);
 
@@ -230,10 +220,7 @@ module.exports = ({ types: t }) => {
           const right = path.get("right");
           const operator = path.node.operator;
 
-          const result = matcher.match(
-            [left, operator, right],
-            isPatternMatchesPath
-          );
+          const result = matcher.match([left, operator, right], isPatternMatchesPath);
 
           if (result.match) {
             // here we are sure that left.evaluate is always confident becuase
@@ -250,7 +237,6 @@ module.exports = ({ types: t }) => {
       },
 
       AssignmentExpression(path) {
-
         const rightExpr = path.get("right");
         const leftExpr = path.get("left");
 
@@ -258,29 +244,30 @@ module.exports = ({ types: t }) => {
           return;
         }
 
-        const canBeUpdateExpression = (
-          rightExpr.get("right").isNumericLiteral() &&
+        const canBeUpdateExpression = rightExpr.get("right").isNumericLiteral() &&
           rightExpr.get("right").node.value === 1 &&
-          updateOperators.has(rightExpr.node.operator));
+          updateOperators.has(rightExpr.node.operator);
 
         if (leftExpr.isMemberExpression()) {
-
           const leftPropNames = getPropNames(leftExpr);
           const rightPropNames = getPropNames(rightExpr.get("left"));
 
-          if (!leftPropNames ||
-              leftPropNames.indexOf(undefined) > -1 ||
-              !rightPropNames ||
-              rightPropNames.indexOf(undefined) > -1 ||
-              !operators.has(rightExpr.node.operator) ||
-              !areArraysEqual(leftPropNames, rightPropNames)) {
+          if (
+            !leftPropNames ||
+            leftPropNames.indexOf(undefined) > -1 ||
+            !rightPropNames ||
+            rightPropNames.indexOf(undefined) > -1 ||
+            !operators.has(rightExpr.node.operator) ||
+            !areArraysEqual(leftPropNames, rightPropNames)
+          ) {
             return;
           }
-        }
-        else {
-          if (!rightExpr.isBinaryExpression() ||
-              !operators.has(rightExpr.node.operator) ||
-              leftExpr.node.name !== rightExpr.node.left.name) {
+        } else {
+          if (
+            !rightExpr.isBinaryExpression() ||
+            !operators.has(rightExpr.node.operator) ||
+            leftExpr.node.name !== rightExpr.node.left.name
+          ) {
             return;
           }
         }
@@ -292,13 +279,14 @@ module.exports = ({ types: t }) => {
           newExpression = t.updateExpression(
             rightExpr.node.operator + rightExpr.node.operator,
             t.clone(leftExpr.node),
-            true /* prefix */);
-        }
-        else {
+            true /* prefix */
+          );
+        } else {
           newExpression = t.assignmentExpression(
             rightExpr.node.operator + "=",
             t.clone(leftExpr.node),
-            t.clone(rightExpr.node.right));
+            t.clone(rightExpr.node.right)
+          );
         }
 
         path.replaceWith(newExpression);
@@ -335,10 +323,10 @@ module.exports = ({ types: t }) => {
             // ===============
             // for each pattern [test, consequent, alternate, handler(expr, cons, alt)]
             const matcher = new PatternMatch([
-              [LE, true, false, (e) => e],
-              [EX, true, false, (e) => notnot(e)],
+              [LE, true, false, e => e],
+              [EX, true, false, e => notnot(e)],
 
-              [EX, false, true, (e) => not(e)],
+              [EX, false, true, e => not(e)],
 
               [LE, true, EX, (e, c, a) => or(e, a)],
               [EX, true, EX, (e, c, a) => or(notnot(e), a)],
@@ -351,10 +339,7 @@ module.exports = ({ types: t }) => {
               [EX, EX, false, (e, c) => and(notnot(e), c)]
             ]);
 
-            const result = matcher.match(
-              [test, consequent, alternate],
-              isPatternMatchesPath
-            );
+            const result = matcher.match([test, consequent, alternate], isPatternMatchesPath);
 
             if (result.match) {
               path.replaceWith(result.value(test.node, consequent.node, alternate.node));
@@ -366,9 +351,7 @@ module.exports = ({ types: t }) => {
           // a ? x = foo : b ? x = bar : x = baz;
           // x = a ? foo : b ? bar : baz;
           function(topPath) {
-            if (!topPath.parentPath.isExpressionStatement() &&
-                !topPath.parentPath.isSequenceExpression()
-            ) {
+            if (!topPath.parentPath.isExpressionStatement() && !topPath.parentPath.isSequenceExpression()) {
               return;
             }
 
@@ -391,8 +374,9 @@ module.exports = ({ types: t }) => {
                 return true;
               }
 
-              if (!path.isAssignmentExpression() ||
-                  !(path.get("left").isIdentifier() || path.get("left").isMemberExpression())
+              if (
+                !path.isAssignmentExpression() ||
+                !(path.get("left").isIdentifier() || path.get("left").isMemberExpression())
               ) {
                 return true;
               }
@@ -404,9 +388,7 @@ module.exports = ({ types: t }) => {
                 return true;
               }
 
-              mutations.push(
-                () => path.replaceWith(path.get("right").node)
-              );
+              mutations.push(() => path.replaceWith(path.get("right").node));
             }
 
             const bail = visit(topPath);
@@ -414,20 +396,14 @@ module.exports = ({ types: t }) => {
               return;
             }
 
-            mutations.forEach((f) => f());
-            topPath.replaceWith(
-              t.assignmentExpression(
-                operator,
-                firstLeft,
-                topPath.node
-              )
-            );
+            mutations.forEach(f => f());
+            topPath.replaceWith(t.assignmentExpression(operator, firstLeft, topPath.node));
           },
 
           // bar ? void 0 : void 0
           // (bar, void 0)
           // TODO: turn this into general equiv check
-          function (path) {
+          function(path) {
             const { node } = path;
             if (isVoid0(node.consequent) && isVoid0(node.alternate)) {
               path.replaceWith(t.sequenceExpression([path.node.test, VOID_0]));
@@ -437,7 +413,7 @@ module.exports = ({ types: t }) => {
           // bar ? void 0 : foo ? void 0 : <etc>
           // bar || foo : void 0
           // TODO: turn this into general equiv check
-          function (path) {
+          function(path) {
             const { node } = path;
 
             if (node[condExprSeen] || !isVoid0(node.consequent)) {
@@ -466,22 +442,18 @@ module.exports = ({ types: t }) => {
               return;
             }
 
-            const test = tests.reduce((expr, curTest) => t.logicalExpression(
-              "||",
-              expr,
-              curTest
-            ));
+            const test = tests.reduce((expr, curTest) => t.logicalExpression("||", expr, curTest));
 
             path.replaceWith(t.conditionalExpression(test, VOID_0, alt));
-          },
-        ],
+          }
+        ]
       },
 
       // concat
       VariableDeclaration: {
         enter: [
           // Put vars with no init at the top.
-          function (path) {
+          function(path) {
             const { node } = path;
 
             if (node.declarations.length < 2) {
@@ -506,8 +478,8 @@ module.exports = ({ types: t }) => {
             } else {
               node.declarations = inits.concat(empty);
             }
-          },
-        ],
+          }
+        ]
       },
 
       Function: {
@@ -520,16 +492,15 @@ module.exports = ({ types: t }) => {
 
           delete path.node[shouldRevisit];
           path.visit();
-        },
+        }
       },
 
       For: {
         enter: earlyContinueTransform,
-        exit: earlyContinueTransform,
+        exit: earlyContinueTransform
       },
 
       ForStatement: {
-
         // Merge previous expressions in the init part of the for.
         enter(path) {
           const { node } = path;
@@ -621,7 +592,7 @@ module.exports = ({ types: t }) => {
           let ifStatement = null;
           let breakAt = null;
           let i = 0;
-          for (let statement; statement = statements[i]; i++) {
+          for (let statement; (statement = statements[i]); i++) {
             if (t.isIfStatement(statement)) {
               if (t.isBreakStatement(statement.consequent, { label: null })) {
                 ifStatement = statement;
@@ -682,12 +653,12 @@ module.exports = ({ types: t }) => {
           } else {
             node.body = t.emptyStatement();
           }
-        },
+        }
       },
 
       Program(path) {
         // An approximation of the resultant gzipped code after minification
-        this.fitsInSlidingWindow = (path.getSource().length / 10) < 33000;
+        this.fitsInSlidingWindow = path.getSource().length / 10 < 33000;
 
         const { node } = path;
         const statements = toMultipleSequenceExpressions(node.body);
@@ -771,7 +742,7 @@ module.exports = ({ types: t }) => {
           }
 
           path.visit();
-        },
+        }
       },
 
       ThrowStatement: createPrevExpressionEater("throw"),
@@ -786,13 +757,11 @@ module.exports = ({ types: t }) => {
           function(path) {
             const { node } = path;
 
-            if (!path.parentPath.parentPath.isFunction() ||
-                path.getSibling(path.key + 1).node
-            ) {
+            if (!path.parentPath.parentPath.isFunction() || path.getSibling(path.key + 1).node) {
               return;
             }
 
-            if (!node.argument)  {
+            if (!node.argument) {
               path.remove();
               return;
             }
@@ -800,15 +769,15 @@ module.exports = ({ types: t }) => {
             if (t.isUnaryExpression(node.argument, { operator: "void" })) {
               path.replaceWith(node.argument.argument);
             }
-          },
-        ],
+          }
+        ]
       },
 
       // turn blocked ifs into single statements
       IfStatement: {
         exit: [
           // Merge nested if statements if possible
-          function ({ node }) {
+          function({ node }) {
             if (!t.isIfStatement(node.consequent)) {
               return;
             }
@@ -825,39 +794,27 @@ module.exports = ({ types: t }) => {
             const { node } = path;
 
             // No alternate, make into a guarded expression
-            if (node.consequent && !node.alternate &&
-                node.consequent.type === "ExpressionStatement"
-            ) {
+            if (node.consequent && !node.alternate && node.consequent.type === "ExpressionStatement") {
               let op = "&&";
               if (t.isUnaryExpression(node.test, { operator: "!" })) {
                 node.test = node.test.argument;
                 op = "||";
               }
 
-              path.replaceWith(
-                t.expressionStatement(
-                  t.logicalExpression(op, node.test, node.consequent.expression)
-                )
-              );
+              path.replaceWith(t.expressionStatement(t.logicalExpression(op, node.test, node.consequent.expression)));
               return;
             }
 
             // Easy, both are expressions, turn into ternary
-            if (t.isExpressionStatement(node.consequent) &&
-                t.isExpressionStatement(node.alternate)
-            ) {
+            if (t.isExpressionStatement(node.consequent) && t.isExpressionStatement(node.alternate)) {
               path.replaceWith(
-                t.conditionalExpression(
-                  node.test, node.consequent.expression, node.alternate.expression
-                )
+                t.conditionalExpression(node.test, node.consequent.expression, node.alternate.expression)
               );
               return;
             }
 
             // Easy: consequent and alternate are return -- conditional.
-            if (t.isReturnStatement(node.consequent)
-              && t.isReturnStatement(node.alternate)
-            ) {
+            if (t.isReturnStatement(node.consequent) && t.isReturnStatement(node.alternate)) {
               if (!node.consequent.argument && !node.alternate.argument) {
                 path.replaceWith(t.expressionStatement(node.test));
                 return;
@@ -878,19 +835,18 @@ module.exports = ({ types: t }) => {
             // There is nothing after this block. And one or both
             // of the consequent and alternate are either expression statment
             // or return statements.
-            if (!path.getSibling(path.key + 1).node && path.parentPath &&
-                path.parentPath.parentPath && path.parentPath.parentPath.isFunction()
+            if (
+              !path.getSibling(path.key + 1).node &&
+              path.parentPath &&
+              path.parentPath.parentPath &&
+              path.parentPath.parentPath.isFunction()
             ) {
               // Only the consequent is a return, void the alternate.
               if (t.isReturnStatement(node.consequent) && t.isExpressionStatement(node.alternate)) {
                 if (!node.consequent.argument) {
-                  path.replaceWith(t.expressionStatement(
-                    t.logicalExpression(
-                      "||",
-                      node.test,
-                      node.alternate.expression
-                    )
-                  ));
+                  path.replaceWith(
+                    t.expressionStatement(t.logicalExpression("||", node.test, node.alternate.expression))
+                  );
                   return;
                 }
 
@@ -909,13 +865,9 @@ module.exports = ({ types: t }) => {
               // Only the alternate is a return, void the consequent.
               if (t.isReturnStatement(node.alternate) && t.isExpressionStatement(node.consequent)) {
                 if (!node.alternate.argument) {
-                  path.replaceWith(t.expressionStatement(
-                    t.logicalExpression(
-                      "&&",
-                      node.test,
-                      node.consequent.expression
-                    )
-                  ));
+                  path.replaceWith(
+                    t.expressionStatement(t.logicalExpression("&&", node.test, node.consequent.expression))
+                  );
                   return;
                 }
 
@@ -941,17 +893,10 @@ module.exports = ({ types: t }) => {
                 // because then we may merge to create a conditional.
                 if (path.getSibling(path.key - 1).isIfStatement()) {
                   path.replaceWith(
-                    t.returnStatement(
-                      t.conditionalExpression(
-                        node.test,
-                        node.consequent.argument || VOID_0,
-                        VOID_0
-                      )
-                    )
+                    t.returnStatement(t.conditionalExpression(node.test, node.consequent.argument || VOID_0, VOID_0))
                   );
                   return;
                 }
-
               }
 
               if (t.isReturnStatement(node.alternate) && !node.consequent) {
@@ -963,13 +908,7 @@ module.exports = ({ types: t }) => {
                 // Same as above.
                 if (path.getSibling(path.key - 1).isIfStatement()) {
                   path.replaceWith(
-                    t.returnStatement(
-                      t.conditionalExpression(
-                        node.test,
-                        node.alternate.argument || VOID_0,
-                        VOID_0
-                      )
-                    )
+                    t.returnStatement(t.conditionalExpression(node.test, node.alternate.argument || VOID_0, VOID_0))
                   );
                   return;
                 }
@@ -995,25 +934,24 @@ module.exports = ({ types: t }) => {
 
             // No alternate but the next statement is a return
             // also turn into a return conditional
-            if (t.isReturnStatement(node.consequent) &&
-              !node.alternate && next.isReturnStatement()
-            ) {
+            if (t.isReturnStatement(node.consequent) && !node.alternate && next.isReturnStatement()) {
               const nextArg = next.node.argument || VOID_0;
               next.remove();
               path.replaceWith(
-                t.returnStatement(
-                  t.conditionalExpression(
-                    node.test, node.consequent.argument || VOID_0, nextArg
-                  )
-                )
+                t.returnStatement(t.conditionalExpression(node.test, node.consequent.argument || VOID_0, nextArg))
               );
               return;
             }
 
             // Next is the last expression, turn into a return while void'ing the exprs
-            if (path.parentPath && path.parentPath.parentPath &&
-                path.parentPath.parentPath.isFunction() && !path.getSibling(path.key + 2).node &&
-                t.isReturnStatement(node.consequent) && !node.alternate && next.isExpressionStatement()
+            if (
+              path.parentPath &&
+              path.parentPath.parentPath &&
+              path.parentPath.parentPath.isFunction() &&
+              !path.getSibling(path.key + 2).node &&
+              t.isReturnStatement(node.consequent) &&
+              !node.alternate &&
+              next.isExpressionStatement()
             ) {
               const nextExpr = next.node.expression;
               next.remove();
@@ -1030,25 +968,18 @@ module.exports = ({ types: t }) => {
                 return;
               }
 
-              path.replaceWith(
-                t.logicalExpression("||", node.test, nextExpr)
-              );
+              path.replaceWith(t.logicalExpression("||", node.test, nextExpr));
               return;
             }
 
-            if (node.consequent && node.alternate &&
-              (t.isReturnStatement(node.consequent) || (
-                t.isBlockStatement(node.consequent)
-                  && t.isReturnStatement(
-                    node.consequent.body[node.consequent.body.length - 1]
-                  )
-              ))
+            if (
+              node.consequent &&
+              node.alternate &&
+              (t.isReturnStatement(node.consequent) ||
+                (t.isBlockStatement(node.consequent) &&
+                  t.isReturnStatement(node.consequent.body[node.consequent.body.length - 1])))
             ) {
-              path.insertAfter(
-                t.isBlockStatement(node.alternate)
-                  ? node.alternate.body
-                  : node.alternate
-              );
+              path.insertAfter(t.isBlockStatement(node.alternate) ? node.alternate.body : node.alternate);
               node.alternate = null;
               return;
             }
@@ -1081,9 +1012,7 @@ module.exports = ({ types: t }) => {
           function(path) {
             const { node } = path;
 
-            if (!path.inList || !path.get("consequent").isBlockStatement() ||
-                node.alternate
-            ) {
+            if (!path.inList || !path.get("consequent").isBlockStatement() || node.alternate) {
               return;
             }
 
@@ -1092,7 +1021,7 @@ module.exports = ({ types: t }) => {
             const exprs = [];
             const statements = node.consequent.body;
 
-            for (let i = 0, statement; statement = statements[i]; i++) {
+            for (let i = 0, statement; (statement = statements[i]); i++) {
               if (t.isExpressionStatement(statement)) {
                 exprs.push(statement.expression);
               } else if (t.isIfStatement(statement)) {
@@ -1123,15 +1052,11 @@ module.exports = ({ types: t }) => {
 
             const replacement = t.logicalExpression("&&", node.test, expr);
 
-            path.replaceWith(t.ifStatement(
-              replacement,
-              ret,
-              null
-            ));
+            path.replaceWith(t.ifStatement(replacement, ret, null));
           },
 
-          createPrevExpressionEater("if"),
-        ],
+          createPrevExpressionEater("if")
+        ]
       },
 
       WhileStatement(path) {
@@ -1139,7 +1064,7 @@ module.exports = ({ types: t }) => {
         path.replaceWith(t.forStatement(null, node.test, null, node.body));
       },
 
-      ForInStatement:createPrevExpressionEater("for-in"),
+      ForInStatement: createPrevExpressionEater("for-in"),
 
       // Flatten sequence expressions.
       SequenceExpression: {
@@ -1162,7 +1087,7 @@ module.exports = ({ types: t }) => {
           }
 
           path.node.expressions = flatten(path.node);
-        },
+        }
       },
 
       SwitchCase(path) {
@@ -1177,7 +1102,6 @@ module.exports = ({ types: t }) => {
 
       SwitchStatement: {
         exit: [
-
           // Convert switch statements with all returns in their cases
           // to return conditional.
           function(path) {
@@ -1227,11 +1151,7 @@ module.exports = ({ types: t }) => {
               let test = t.binaryExpression("===", node.discriminant, switchCase.test);
               if (fallThru.length) {
                 test = fallThru.reduceRight(
-                  (right, test) => t.logicalExpression(
-                    "||",
-                    t.binaryExpression("===", node.discriminant, test),
-                    right
-                  ),
+                  (right, test) => t.logicalExpression("||", t.binaryExpression("===", node.discriminant, test), right),
                   test
                 );
                 fallThru = [];
@@ -1333,11 +1253,7 @@ module.exports = ({ types: t }) => {
               let test = t.binaryExpression("===", node.discriminant, switchCase.test);
               if (fallThru.length) {
                 test = fallThru.reduceRight(
-                  (right, test) => t.logicalExpression(
-                    "||",
-                    t.binaryExpression("===", node.discriminant, test),
-                    right
-                  ),
+                  (right, test) => t.logicalExpression("||", t.binaryExpression("===", node.discriminant, test), right),
                   test
                 );
                 fallThru = [];
@@ -1376,10 +1292,10 @@ module.exports = ({ types: t }) => {
             }
           },
 
-          createPrevExpressionEater("switch"),
-        ],
-      },
-    },
+          createPrevExpressionEater("switch")
+        ]
+      }
+    }
   };
 
   function flipNegation(node) {
@@ -1416,26 +1332,23 @@ module.exports = ({ types: t }) => {
 
   function needsBlock(node, parent) {
     return (t.isFunction(parent) && node === parent.body) ||
-           t.isTryStatement(parent) || t.isCatchClause(parent) ||
-           t.isSwitchStatement(parent) ||
-           (isSingleBlockScopeDeclaration(node) && t.isIfStatement(parent));
+      t.isTryStatement(parent) ||
+      t.isCatchClause(parent) ||
+      t.isSwitchStatement(parent) ||
+      (isSingleBlockScopeDeclaration(node) && t.isIfStatement(parent));
   }
 
   function isSingleBlockScopeDeclaration(block) {
     return t.isBlockStatement(block) &&
       block.body.length === 1 &&
-      (
-        t.isVariableDeclaration(block.body[0], { kind: "let" }) ||
+      (t.isVariableDeclaration(block.body[0], { kind: "let" }) ||
         t.isVariableDeclaration(block.body[0], { kind: "const" }) ||
-        t.isFunctionDeclaration(block.body[0])
-      );
+        t.isFunctionDeclaration(block.body[0]));
   }
 
   function isVoid0(expr) {
-    return expr === VOID_0 || (
-      t.isUnaryExpression(expr, { operator: "void" })  &&
-      t.isNumericLiteral(expr.argument, { value: 0 })
-    );
+    return expr === VOID_0 ||
+      (t.isUnaryExpression(expr, { operator: "void" }) && t.isNumericLiteral(expr.argument, { value: 0 }));
   }
 
   function earlyReturnTransform(path) {
@@ -1447,8 +1360,11 @@ module.exports = ({ types: t }) => {
 
     for (let i = node.body.body.length; i >= 0; i--) {
       const statement = node.body.body[i];
-      if (t.isIfStatement(statement) && !statement.alternate &&
-          t.isReturnStatement(statement.consequent) && !statement.consequent.argument
+      if (
+        t.isIfStatement(statement) &&
+        !statement.alternate &&
+        t.isReturnStatement(statement.consequent) &&
+        !statement.consequent.argument
       ) {
         genericEarlyExitTransform(path.get("body").get("body")[i]);
       }
@@ -1464,8 +1380,11 @@ module.exports = ({ types: t }) => {
 
     for (let i = node.body.body.length; i >= 0; i--) {
       const statement = node.body.body[i];
-      if (t.isIfStatement(statement) && !statement.alternate &&
-          t.isContinueStatement(statement.consequent) && !statement.consequent.label
+      if (
+        t.isIfStatement(statement) &&
+        !statement.alternate &&
+        t.isContinueStatement(statement.consequent) &&
+        !statement.consequent.label
       ) {
         genericEarlyExitTransform(path.get("body").get("body")[i]);
       }
@@ -1480,19 +1399,15 @@ module.exports = ({ types: t }) => {
   function genericEarlyExitTransform(path) {
     const { node } = path;
 
-    const statements = path
-      .parentPath
+    const statements = path.parentPath
       .get(path.listKey)
       .slice(path.key + 1)
-      .filter((stmt) => !stmt.isFunctionDeclaration());
+      .filter(stmt => !stmt.isFunctionDeclaration());
 
     // deopt for any block scoped bindings
     // issue#399
-    const deopt = !statements.every((stmt) => {
-      if (!(
-        stmt.isVariableDeclaration({ kind: "let" })
-        || stmt.isVariableDeclaration({ kind: "const" })
-      )) {
+    const deopt = !statements.every(stmt => {
+      if (!(stmt.isVariableDeclaration({ kind: "let" }) || stmt.isVariableDeclaration({ kind: "const" }))) {
         return true;
       }
       const ids = Object.keys(stmt.getBindingIdentifiers());
@@ -1535,7 +1450,7 @@ module.exports = ({ types: t }) => {
       node.test = t.unaryExpression("!", node.test, true);
     }
 
-    path.get("consequent").replaceWith(t.blockStatement(statements.map((stmt) => t.clone(stmt.node))));
+    path.get("consequent").replaceWith(t.blockStatement(statements.map(stmt => t.clone(stmt.node))));
 
     let l = statements.length;
     while (l-- > 0) {
@@ -1551,11 +1466,19 @@ module.exports = ({ types: t }) => {
   function createPrevExpressionEater(keyword) {
     let key;
     switch (keyword) {
-      case "switch": key = "discriminant"; break;
+      case "switch":
+        key = "discriminant";
+        break;
       case "throw":
-      case "return": key = "argument"; break;
-      case "if": key = "test"; break;
-      case "for-in": key = "right"; break;
+      case "return":
+        key = "argument";
+        break;
+      case "if":
+        key = "test";
+        break;
+      case "for-in":
+        key = "right";
+        break;
     }
 
     return function(path) {
@@ -1621,6 +1544,6 @@ module.exports = ({ types: t }) => {
   // path1 -> path2
   // is path1 an ancestor of path2
   function isAncestor(path1, path2) {
-    return !!path2.findParent((parent) => parent === path1);
+    return !!path2.findParent(parent => parent === path1);
   }
 };
