@@ -16,8 +16,28 @@ describe("transform-property-literals-plugin", () => {
     const expected = "var x = { foo: 'bar' };";
     expect(transform(source)).toBe(expected);
   });
+  
+  it("should convert computed object method names with a string", () => {
+    const source = "var x = { ['foo']() {} };";
+    const expected = "var x = { foo() {} };";
+    expect(transform(source)).toBe(expected);
+  });
+  
+  it("should convert computed class method names with a string", () => {
+	const source = unpad(`
+		class C {
+			['foo']() {}
+		}
+	`);
+	const expected = unpad(`
+		class C {
+			foo() {}
+		}
+	`);
+    expect(transform(source)).toBe(expected);
+  });
 
-  it("should strip unnecessary property literal qoutes for numbers", () => {
+  it("should strip unnecessary property literal quotes for numbers", () => {
     const source = "var x = { '1': 'bar' };";
     const expected = "var x = { 1: 'bar' };";
     expect(transform(source)).toBe(expected);
