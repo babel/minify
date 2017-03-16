@@ -56,14 +56,13 @@ module.exports = function({ types: t }) {
 
             const { node } = path;
 
-            while (true) {
-              const sibling = path.getSibling(path.key + 1);
-              if (!sibling.isVariableDeclaration({ kind: node.kind })) {
-                break;
-              }
+            let sibling = path.getSibling(path.key + 1);
 
+            while (sibling.isVariableDeclaration({ kind: node.kind })) {
               node.declarations = node.declarations.concat(sibling.node.declarations);
               sibling.remove();
+
+              sibling = path.getSibling(path.key + 1);
             }
           },
 

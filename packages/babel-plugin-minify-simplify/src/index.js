@@ -647,7 +647,7 @@ module.exports = ({ types: t }) => {
 
           const rest = [];
 
-          if (breakAt = "consequent") {
+          if (breakAt === "consequent") {
             if (t.isBlockStatement(ifStatement.alternate)) {
               rest.push(...ifStatement.alternate.body);
             } else if (ifStatement.alternate) {
