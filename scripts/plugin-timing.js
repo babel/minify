@@ -96,7 +96,12 @@ function run(file) {
       if (a[1] > b[1]) return -1;
       return 0;
     })
-    .map(arr => [arr[0], arr[1].toFixed(3), arr[2], (arr[1] / arr[2]).toFixed(3)]);
+    .map(arr => [
+      arr[0],
+      arr[1].toFixed(3),
+      arr[2],
+      (arr[1] / arr[2]).toFixed(3)
+    ]);
 
   table.push(...results);
   console.log(table.toString());

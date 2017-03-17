@@ -16,7 +16,11 @@ function getFunctionParent(path, scopeParent) {
 }
 
 function getFunctionReferences(path, scopeParent, references = new Set()) {
-  for (let func = getFunctionParent(path, scopeParent); func; func = getFunctionParent(func, scopeParent)) {
+  for (
+    let func = getFunctionParent(path, scopeParent);
+    func;
+    func = getFunctionParent(func, scopeParent)
+  ) {
     const id = func.node.id;
     const binding = id && func.scope.getBinding(id.name);
 
@@ -102,7 +106,9 @@ function collectExpressions(path, isExprTypeValid) {
   }
 
   if (path.isSequenceExpression()) {
-    const exprs = path.get("expressions").map(p => collectExpressions(p, isExprTypeValid));
+    const exprs = path
+      .get("expressions")
+      .map(p => collectExpressions(p, isExprTypeValid));
     if (exprs.some(e => e === null)) {
       return null;
     } else {
@@ -117,7 +123,13 @@ function collectExpressions(path, isExprTypeValid) {
   return null;
 }
 
-function getContiguousStatementsAndExpressions(body, start, end, isExprTypeValid, checkExpr) {
+function getContiguousStatementsAndExpressions(
+  body,
+  start,
+  end,
+  isExprTypeValid,
+  checkExpr
+) {
   const statements = [];
   let allExprs = [];
   for (let i = start; i < end; i++) {
@@ -159,7 +171,10 @@ function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
   const assignments = exprs.map(e => collapser.extractAssignment(e));
   const oldInit = init.node;
   const newInit = t.cloneDeep(oldInit);
-  if (!assignments.every(assignment => collapser.addSuccessfully(t, assignment, newInit))) {
+  if (
+    !assignments.every(assignment =>
+      collapser.addSuccessfully(t, assignment, newInit))
+  ) {
     return;
   }
 
@@ -198,7 +213,10 @@ module.exports = function({ types: t }) {
         }
         const checkReference = getReferenceChecker(references);
 
-        if (COLLAPSERS.some(c => tryUseCollapser(t, c, varDecl, topLevel, checkReference))) {
+        if (
+          COLLAPSERS.some(c =>
+            tryUseCollapser(t, c, varDecl, topLevel, checkReference))
+        ) {
           return;
         }
       }

@@ -513,7 +513,9 @@ describe("mangle-names", () => {
       }
     `
     );
-    expect(transform(source, { blacklist: { foo: true, bar: false } })).toBe(expected);
+    expect(transform(source, { blacklist: { foo: true, bar: false } })).toBe(
+      expected
+    );
   });
 
   it("should handle deeply nested paths with no bindings", () => {

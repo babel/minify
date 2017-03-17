@@ -5,7 +5,9 @@ function createRegExpLiteral(args, prettify, t) {
   if (!evaluatedArgs.every(a => a.confident && typeof a.value === "string")) {
     return;
   }
-  let pattern = evaluatedArgs.length >= 1 && evaluatedArgs[0].value !== "" ? evaluatedArgs[0].value : "(?:)";
+  let pattern = evaluatedArgs.length >= 1 && evaluatedArgs[0].value !== ""
+    ? evaluatedArgs[0].value
+    : "(?:)";
   const flags = evaluatedArgs.length >= 2 ? evaluatedArgs[1].value : "";
 
   pattern = new RegExp(pattern).source;

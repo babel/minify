@@ -23,7 +23,12 @@ class ArrayCollapser extends Collapser {
       }
 
       const obj = callee.get("object"), prop = callee.get("property");
-      if (!obj.isIdentifier() || obj.node.name !== objName || !prop.isIdentifier() || prop.node.name !== "push") {
+      if (
+        !obj.isIdentifier() ||
+        obj.node.name !== objName ||
+        !prop.isIdentifier() ||
+        prop.node.name !== "push"
+      ) {
         return false;
       }
 

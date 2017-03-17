@@ -24,7 +24,13 @@ module.exports = function({ types: t }) {
 
       init.pushContainer("declarations", t.variableDeclarator(firstNode.id));
 
-      body[0].replaceWith(t.assignmentExpression("=", t.clone(firstNode.id), t.clone(firstNode.init)));
+      body[0].replaceWith(
+        t.assignmentExpression(
+          "=",
+          t.clone(firstNode.id),
+          t.clone(firstNode.init)
+        )
+      );
     }
   }
 
@@ -52,7 +58,9 @@ module.exports = function({ types: t }) {
             let sibling = path.getSibling(path.key + 1);
 
             while (sibling.isVariableDeclaration({ kind: node.kind })) {
-              node.declarations = node.declarations.concat(sibling.node.declarations);
+              node.declarations = node.declarations.concat(
+                sibling.node.declarations
+              );
               sibling.remove();
 
               sibling = path.getSibling(path.key + 1);
@@ -82,7 +90,9 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            init.node.declarations = node.declarations.concat(init.node.declarations);
+            init.node.declarations = node.declarations.concat(
+              init.node.declarations
+            );
             path.remove();
           }
         ]

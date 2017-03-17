@@ -27,7 +27,8 @@ module.exports = function({ types: t }) {
 
         // Commutative operators.
         if (
-          t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 || ["*", "^", "&", "|"].indexOf(node.operator) >= 0
+          t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
+          ["*", "^", "&", "|"].indexOf(node.operator) >= 0
         ) {
           node.left = right;
           node.right = left;

@@ -24,7 +24,11 @@ function getEvalScopes(path) {
     CallExpression(evalPath) {
       const callee = evalPath.get("callee");
 
-      if (callee.isIdentifier() && callee.node.name === "eval" && !callee.scope.getBinding("eval")) {
+      if (
+        callee.isIdentifier() &&
+        callee.node.name === "eval" &&
+        !callee.scope.getBinding("eval")
+      ) {
         add(callee.scope);
       }
     }

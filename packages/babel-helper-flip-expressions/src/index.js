@@ -26,7 +26,10 @@ module.exports = function(t) {
           return;
         }
 
-        if (!(t.isBinaryExpression(node) && t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) > -1)) {
+        if (
+          !(t.isBinaryExpression(node) &&
+            t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) > -1)
+        ) {
           // Binary expressions wouldn't hurut because we know how to flip them
           savings--;
         }
@@ -41,7 +44,9 @@ module.exports = function(t) {
 
       if (resultNotUsed && lastNodeDesc) {
         const { parent, key } = lastNodeDesc;
-        if (parent && key && t.isUnaryExpression(parent[key], { operator: "!" })) {
+        if (
+          parent && key && t.isUnaryExpression(parent[key], { operator: "!" })
+        ) {
           parent[key] = parent[key].argument;
         }
       }

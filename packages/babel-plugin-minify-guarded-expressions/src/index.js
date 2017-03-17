@@ -34,7 +34,11 @@ module.exports = function({ types: t }) {
                 path.replaceWith(node.left);
               } else if (leftTruthy === true && left.isPure()) {
                 path.replaceWith(node.right);
-              } else if (right.evaluateTruthy() === false && right.isPure() && !shouldBail) {
+              } else if (
+                right.evaluateTruthy() === false &&
+                right.isPure() &&
+                !shouldBail
+              ) {
                 path.replaceWith(node.left);
               }
             } else if (node.operator === "||") {
@@ -44,7 +48,11 @@ module.exports = function({ types: t }) {
               } else if (leftTruthy === true) {
                 // Short-circuit
                 path.replaceWith(node.left);
-              } else if (right.evaluateTruthy() === false && right.isPure() && !shouldBail) {
+              } else if (
+                right.evaluateTruthy() === false &&
+                right.isPure() &&
+                !shouldBail
+              ) {
                 path.replaceWith(node.left);
               }
             }
@@ -59,7 +67,8 @@ module.exports = function({ types: t }) {
 
             if (
               !path.parentPath.isExpressionStatement() &&
-              !(path.parentPath.isSequenceExpression() && path.parentPath.parentPath.isExpressionStatement())
+              !(path.parentPath.isSequenceExpression() &&
+                path.parentPath.parentPath.isExpressionStatement())
             ) {
               return;
             }

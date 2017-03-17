@@ -70,25 +70,36 @@ module.exports = ({ types: t, traverse }) => {
           return;
         }
 
-        if (traverse.hasType(node, path.scope, "Identifier", t.FUNCTION_TYPES)) {
+        if (
+          traverse.hasType(node, path.scope, "Identifier", t.FUNCTION_TYPES)
+        ) {
           return;
         }
 
         // -0 maybe compared via dividing and then checking against -Infinity
         // Also -X will always be -X.
-        if (t.isUnaryExpression(node, { operator: "-" }) && t.isNumericLiteral(node.argument)) {
+        if (
+          t.isUnaryExpression(node, { operator: "-" }) &&
+          t.isNumericLiteral(node.argument)
+        ) {
           return;
         }
 
         // We have a transform that converts true/false to !0/!1
-        if (t.isUnaryExpression(node, { operator: "!" }) && t.isNumericLiteral(node.argument)) {
+        if (
+          t.isUnaryExpression(node, { operator: "!" }) &&
+          t.isNumericLiteral(node.argument)
+        ) {
           if (node.argument.value === 0 || node.argument.value === 1) {
             return;
           }
         }
 
         // void 0 is used for undefined.
-        if (t.isUnaryExpression(node, { operator: "void" }) && t.isNumericLiteral(node.argument, { value: 0 })) {
+        if (
+          t.isUnaryExpression(node, { operator: "void" }) &&
+          t.isNumericLiteral(node.argument, { value: 0 })
+        ) {
           return;
         }
 

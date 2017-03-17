@@ -73,8 +73,12 @@ module.exports = function({ types: t }) {
       for (const [expName, paths] of this.pathsToUpdate) {
         // Should only transform if there is more than 1 occurence
         if (paths.length > 1) {
-          const uniqueIdentifier = this.program.scope.generateUidIdentifier(expName);
-          const newNode = t.variableDeclaration("var", [t.variableDeclarator(uniqueIdentifier, paths[0].node)]);
+          const uniqueIdentifier = this.program.scope.generateUidIdentifier(
+            expName
+          );
+          const newNode = t.variableDeclaration("var", [
+            t.variableDeclarator(uniqueIdentifier, paths[0].node)
+          ]);
 
           for (const path of paths) {
             path.replaceWith(uniqueIdentifier);

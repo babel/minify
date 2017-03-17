@@ -29,7 +29,10 @@ class ArrayPropertyCollapser extends Collapser {
 
       const checkIndex = num => Number.isInteger(num) && num >= 0;
 
-      if (!(prop.isNumericLiteral() || prop.isStringLiteral()) || !checkIndex(Number(prop.node.value))) {
+      if (
+        !(prop.isNumericLiteral() || prop.isStringLiteral()) ||
+        !checkIndex(Number(prop.node.value))
+      ) {
         return false;
       }
 
@@ -64,10 +67,16 @@ class ArrayPropertyCollapser extends Collapser {
     // We make an inexact calculation of how much space we save.
     // It's inexact because we don't know how whitespaces will get minimized,
     // and other factors.
-    if (anyUndefined([statements[statements.length - 1].node.end, varDecl.node.end])) {
+    if (
+      anyUndefined([
+        statements[statements.length - 1].node.end,
+        varDecl.node.end
+      ])
+    ) {
       return false;
     }
-    const statementsLength = statements[statements.length - 1].node.end - varDecl.node.end;
+    const statementsLength = statements[statements.length - 1].node.end -
+      varDecl.node.end;
 
     // Approx. formula of the change in `init`'s length =
     // (# commas added) + (size of all the new rvals added), where
@@ -80,7 +89,9 @@ class ArrayPropertyCollapser extends Collapser {
     ) {
       return false;
     }
-    const sizeOfRvals = assignments.map(([, rval]) => rval.node.end - rval.node.start + 1).reduce((a, b) => a + b, 0); // add 1 for space in front // sum
+    const sizeOfRvals = assignments
+      .map(([, rval]) => rval.node.end - rval.node.start + 1)
+      .reduce((a, b) => a + b, 0); // add 1 for space in front // sum
 
     return numCommaAdded + sizeOfRvals < statementsLength;
   }

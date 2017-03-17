@@ -10,7 +10,9 @@ module.exports = function(t) {
     // If we are working with a variable declarator and there is only one then
     // we need to look at the parent.
     if (
-      path.isVariableDeclarator() && path.parent.declarations[0] === path.node && path.parent.declarations.length === 1
+      path.isVariableDeclarator() &&
+      path.parent.declarations[0] === path.node &&
+      path.parent.declarations.length === 1
     ) {
       path = path.parentPath;
     }

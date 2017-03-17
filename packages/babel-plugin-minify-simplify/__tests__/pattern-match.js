@@ -23,7 +23,13 @@ describe("simplify-plugin - pattern-match", () => {
   });
 
   it("should match simple patterns 2", () => {
-    const patterns = [[true, false], [true, true], ["foo", "bar"], [1, 2, 3], ["a", 1, true]];
+    const patterns = [
+      [true, false],
+      [true, true],
+      ["foo", "bar"],
+      [1, 2, 3],
+      ["a", 1, true]
+    ];
     const matcher = new PatternMatch(
       patterns.map(pattern => {
         return [
@@ -70,7 +76,15 @@ describe("simplify-plugin - pattern-match", () => {
       ["bar", matcher]
     ];
 
-    const expected = ["foo", "foo", "foobarbaz", "foobarbaz", "foobarbaz", "baz", "foobar"];
+    const expected = [
+      "foo",
+      "foo",
+      "foobarbaz",
+      "foobarbaz",
+      "foobarbaz",
+      "baz",
+      "foobar"
+    ];
 
     inputs.forEach((input, index) => {
       const result = matcher.match(input, customMatchFunction);
@@ -102,21 +116,35 @@ describe("simplify-plugin - pattern-match", () => {
   });
 
   it("should handle case no match found", () => {
-    const matcher = new PatternMatch([[1, 2, 3], [2, 2, 4, 5], [3, 2, 1, 6], [1, 2, 4, 3], [4, 3, 2, 1]]);
+    const matcher = new PatternMatch([
+      [1, 2, 3],
+      [2, 2, 4, 5],
+      [3, 2, 1, 6],
+      [1, 2, 4, 3],
+      [4, 3, 2, 1]
+    ]);
     const result = matcher.match([1, 2, 5]);
     expect(result.match).toBe(false);
     expect(result.value).toBe(void 0);
   });
 
   it("should match the first found pattern even if it's less specific", () => {
-    const matcher = new PatternMatch([["foo", "bar", "baz"], ["foo", "bar", "baz", true]]);
+    const matcher = new PatternMatch([
+      ["foo", "bar", "baz"],
+      ["foo", "bar", "baz", true]
+    ]);
     const result = matcher.match(["foo", "bar"]);
     expect(result.match).toBe(true);
     expect(result.value).toBe("baz");
   });
 
   it("should match the first found pattern even if it's less specific 2", () => {
-    const matcher = new PatternMatch([[1, 2, 3], [1, 2, 3, 4], [1, 3], [1, 3, 5]]);
+    const matcher = new PatternMatch([
+      [1, 2, 3],
+      [1, 2, 3, 4],
+      [1, 3],
+      [1, 3, 5]
+    ]);
 
     expect(matcher.match([1])).toEqual({
       match: true,

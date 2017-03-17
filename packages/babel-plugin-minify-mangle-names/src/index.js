@@ -73,7 +73,8 @@ module.exports = ({ types: t, traverse }) => {
             const { node } = path;
 
             if (
-              path.parentPath.isMemberExpression({ property: node }) || path.parentPath.isObjectProperty({ key: node })
+              path.parentPath.isMemberExpression({ property: node }) ||
+              path.parentPath.isObjectProperty({ key: node })
             ) {
               mangler.charset.consider(node.name);
             }
@@ -227,7 +228,11 @@ module.exports = ({ types: t, traverse }) => {
           // replacement in dce from `x` to `!x` gives referencePath as `!x`
           path.traverse({
             ReferencedIdentifier(refPath) {
-              if (refPath.node.name === oldName && refPath.scope === scope && !refPath[PATH_RENAME_MARKER]) {
+              if (
+                refPath.node.name === oldName &&
+                refPath.scope === scope &&
+                !refPath[PATH_RENAME_MARKER]
+              ) {
                 refPath.node.name = newName;
               }
             }
@@ -258,7 +263,8 @@ module.exports = ({ types: t, traverse }) => {
   };
 };
 
-const CHARSET = ("abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
+const CHARSET = ("abcdefghijklmnopqrstuvwxyz" +
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
 
 class Charset {
   constructor(shouldConsider) {
@@ -285,7 +291,9 @@ class Charset {
 
   sort() {
     if (this.shouldConsider) {
-      this.chars = this.chars.sort((a, b) => this.frequency[b] - this.frequency[a]);
+      this.chars = this.chars.sort(
+        (a, b) => this.frequency[b] - this.frequency[a]
+      );
     }
 
     this.finalized = true;

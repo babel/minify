@@ -12,7 +12,9 @@ module.exports = class PatternMatch {
     }
 
     if (typeof result.value !== "function") {
-      throw new Error("Expecting a function. Instead got - " + result.value.toString());
+      throw new Error(
+        "Expecting a function. Instead got - " + result.value.toString()
+      );
     }
 
     result.value.call(null, input, result.keys);

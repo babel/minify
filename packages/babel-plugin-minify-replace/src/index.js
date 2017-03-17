@@ -63,7 +63,9 @@ module.exports = ({ types: t }) => {
           if (path.scope.globals[identifierName]) {
             // Convert to a node, we only allow identifiers and literals as replacements
             if (!replacement.type.match(/literal|identifier/i)) {
-              throw new Error("Only literals and identifier are supported as replacements");
+              throw new Error(
+                "Only literals and identifier are supported as replacements"
+              );
             }
 
             const node = t[replacement.type](replacement.value);
@@ -78,7 +80,9 @@ module.exports = ({ types: t }) => {
             }
 
             if (member && map[identifierName][member]) {
-              throw new Error(`Replacement collision ${identifierName}.${member}`);
+              throw new Error(
+                `Replacement collision ${identifierName}.${member}`
+              );
             }
             map[identifierName][member || NO_MEMBER] = options;
           }

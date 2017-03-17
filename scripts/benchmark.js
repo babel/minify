@@ -148,7 +148,9 @@ class Printer {
     // TERM | MD
     target = target.toUpperCase();
     if (["TERM", "MD"].indexOf(target) < 0)
-      throw new Error(`Invalid Target specified to printer. Got ${target}. Expected TERM|MD`);
+      throw new Error(
+        `Invalid Target specified to printer. Got ${target}. Expected TERM|MD`
+      );
     this.target = target;
 
     this.header = [
@@ -258,7 +260,8 @@ class AssetsManager {
     return Promise.all(
       files
         .filter(filename => !pathExists(this.filePath(filename)))
-        .map(filename => this.download(this.assets[filename], this.filePath(filename)))
+        .map(filename =>
+          this.download(this.assets[filename], this.filePath(filename)))
     ).then(() => files.map(filename => this.filePath(filename)));
   }
   download(url, dest) {

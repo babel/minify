@@ -29,7 +29,11 @@ function getFunctionParent(path, scopeParent) {
 }
 
 function getFunctionReferences(path, scopeParent, references = new Set()) {
-  for (let func = getFunctionParent(path, scopeParent); func; func = getFunctionParent(func, scopeParent)) {
+  for (
+    let func = getFunctionParent(path, scopeParent);
+    func;
+    func = getFunctionParent(func, scopeParent)
+  ) {
     const id = func.node.id;
     const binding = id && func.scope.getBinding(id.name);
 
@@ -70,7 +74,11 @@ function hasViolation(declarator, scope, start) {
       }
     }
 
-    for (let loop = getLoopParent(declarator, scopeParent); loop; loop = getLoopParent(loop, scopeParent)) {
+    for (
+      let loop = getLoopParent(declarator, scopeParent);
+      loop;
+      loop = getLoopParent(loop, scopeParent)
+    ) {
       if (loop.node.end === undefined || loop.node.end > violationStart) {
         return true;
       }
@@ -129,7 +137,10 @@ module.exports = function() {
             }
             const scope = path.scope;
             for (const declarator of path.get("declarations")) {
-              if (isPureAndUndefined(declarator.get("init")) && !hasViolation(declarator, scope, start)) {
+              if (
+                isPureAndUndefined(declarator.get("init")) &&
+                !hasViolation(declarator, scope, start)
+              ) {
                 declarator.node.init = null;
               }
             }

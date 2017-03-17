@@ -9,7 +9,8 @@ class SetCollapser extends Collapser {
       init.node.callee.name === "Set" &&
       // other iterables might not be append-able
       (init.node.arguments.length === 0 ||
-        (init.node.arguments.length === 1 && init.get("arguments")[0].isArrayExpression()));
+        (init.node.arguments.length === 1 &&
+          init.get("arguments")[0].isArrayExpression()));
   }
 
   isExpressionTypeValid(expr) {
@@ -28,7 +29,12 @@ class SetCollapser extends Collapser {
       }
 
       const obj = callee.get("object"), prop = callee.get("property");
-      if (!obj.isIdentifier() || obj.node.name !== objName || !prop.isIdentifier() || prop.node.name !== "add") {
+      if (
+        !obj.isIdentifier() ||
+        obj.node.name !== objName ||
+        !prop.isIdentifier() ||
+        prop.node.name !== "add"
+      ) {
         return false;
       }
 

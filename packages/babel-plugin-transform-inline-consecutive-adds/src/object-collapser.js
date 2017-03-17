@@ -28,7 +28,10 @@ class ObjectCollapser extends Collapser {
       if (!prop.isIdentifier() && checkReference(prop)) {
         return false;
       }
-      if (left.node.computed && !(prop.isStringLiteral() || prop.isNumericLiteral())) {
+      if (
+        left.node.computed &&
+        !(prop.isStringLiteral() || prop.isNumericLiteral())
+      ) {
         return false;
       }
 
