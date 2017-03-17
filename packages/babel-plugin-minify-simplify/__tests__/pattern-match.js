@@ -10,11 +10,11 @@ describe("simplify-plugin - pattern-match", () => {
       ["bar", "bar", true],
       [1, true, "foo"],
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
-      ["foo", 1, (a) => a]
+      ["foo", 1, a => a]
     ];
     const matcher = new PatternMatch(patterns);
 
-    patterns.forEach((pattern) => {
+    patterns.forEach(pattern => {
       const input = pattern.slice(0, pattern.length - 1);
       const result = matcher.match(input);
       expect(result.match).toBe(true);
@@ -30,12 +30,17 @@ describe("simplify-plugin - pattern-match", () => {
       [1, 2, 3],
       ["a", 1, true]
     ];
-    const matcher = new PatternMatch(patterns.map((pattern) => {
-      return [...pattern, (pattern1) => {
-        expect(pattern1).toEqual(pattern);
-      }];
-    }));
-    patterns.forEach((pattern) => {
+    const matcher = new PatternMatch(
+      patterns.map(pattern => {
+        return [
+          ...pattern,
+          pattern1 => {
+            expect(pattern1).toEqual(pattern);
+          }
+        ];
+      })
+    );
+    patterns.forEach(pattern => {
       const result = matcher.match(pattern);
       expect(result.match).toBe(true);
       result.value(pattern);
@@ -44,24 +49,21 @@ describe("simplify-plugin - pattern-match", () => {
 
   it("should throw when a pattern contains less than 2 entries", () => {
     expect(() => {
-      new PatternMatch([
-        ["foo", "bar"],
-        ["baz"]
-      ]);
+      new PatternMatch([["foo", "bar"], ["baz"]]);
     }).toThrowError("at least 2 elements required in a pattern");
   });
 
   it("should accept a custom matcher", () => {
-    const BOOL = (a) => typeof a === "boolean";
-    const NUMBER = (a) => typeof a === "number";
-    const STRING = (a) => typeof a === "string";
-    const MATCHER = (a) => a instanceof PatternMatch;
+    const BOOL = a => typeof a === "boolean";
+    const NUMBER = a => typeof a === "number";
+    const STRING = a => typeof a === "string";
+    const MATCHER = a => a instanceof PatternMatch;
 
     const matcher = new PatternMatch([
-      [ BOOL, NUMBER, "foo" ],
-      [ NUMBER, ["foo", "bar", BOOL], "foobarbaz" ],
-      [ BOOL, STRING, NUMBER, "baz" ],
-      [ STRING, MATCHER, "foobar" ]
+      [BOOL, NUMBER, "foo"],
+      [NUMBER, ["foo", "bar", BOOL], "foobarbaz"],
+      [BOOL, STRING, NUMBER, "baz"],
+      [STRING, MATCHER, "foobar"]
     ]);
 
     const inputs = [
@@ -107,10 +109,7 @@ describe("simplify-plugin - pattern-match", () => {
   });
 
   it("should match in order - first match should win", () => {
-    const matcher = new PatternMatch([
-      [1, true, "foo"],
-      [1, true, "bar"]
-    ]);
+    const matcher = new PatternMatch([[1, true, "foo"], [1, true, "bar"]]);
     const result = matcher.match([1, true]);
     expect(result.match).toBe(true);
     expect(result.value).toBe("foo");

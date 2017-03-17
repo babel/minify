@@ -31,16 +31,14 @@ module.exports = {
   group,
   generate,
   resolveOptions,
-  generateResult,
+  generateResult
 };
 
 /**
  * Generate the plugin list from option tree and inputOpts
  */
 function generate(optionTree, inputOpts) {
-  return generateResult(
-    resolveOptions(optionTree, inputOpts)
-  );
+  return generateResult(resolveOptions(optionTree, inputOpts));
 }
 
 /**
@@ -114,7 +112,9 @@ function resolveOptions(optionTree, inputOpts = {}) {
 
         case "group":
         case "proxy":
-          throw new Error(`proxy option cannot proxy to group/proxy. ${proxy.name} proxied to ${option.name}`);
+          throw new Error(
+            `proxy option cannot proxy to group/proxy. ${proxy.name} proxied to ${option.name}`
+          );
 
         default:
           throw new Error("Unsupported option type ${option.name}");
@@ -165,21 +165,32 @@ function resolveTypeGroup(option, inputOpts) {
 
   // option does NOT exist in inputOpts
   if (!hop(inputOpts, option.name)) {
-    const newInputOpts = option
-      .children
-      .filter((opt) => opt.type !== "proxy")
-      .reduce((acc, cur) => {
-        let value;
-        switch (option.defaultValue) {
-          case "all": value = true; break;
-          case "some": value = cur.defaultValue; break;
-          case "none": value = false; break;
-          default: throw new Error(`Unsupported defaultValue - ${option.defaultValue} for option ${option.name}`);
-        }
-        return Object.assign({}, acc, {
-          [cur.name]: value,
-        });
-      }, {});
+    const newInputOpts = option.children
+      .filter(opt => opt.type !== "proxy")
+      .reduce(
+        (acc, cur) => {
+          let value;
+          switch (option.defaultValue) {
+            case "all":
+              value = true;
+              break;
+            case "some":
+              value = cur.defaultValue;
+              break;
+            case "none":
+              value = false;
+              break;
+            default:
+              throw new Error(
+                `Unsupported defaultValue - ${option.defaultValue} for option ${option.name}`
+              );
+          }
+          return Object.assign({}, acc, {
+            [cur.name]: value
+          });
+        },
+        {}
+      );
 
     // recurse
     resolveOptions(option, newInputOpts);
@@ -195,13 +206,16 @@ function resolveTypeGroup(option, inputOpts) {
 
   // else
   // { unsafe: <true | false> }
-  const newInputOpts = option
-    .children
-    .filter((opt) => opt.type !== "proxy")
-    .reduce((acc, cur) => Object.assign({}, acc, {
-      // if the input is truthy, enable all, else disable all
-      [cur.name]: !!inputOpts[option.name]
-    }), {});
+  const newInputOpts = option.children
+    .filter(opt => opt.type !== "proxy")
+    .reduce(
+      (acc, cur) =>
+        Object.assign({}, acc, {
+          // if the input is truthy, enable all, else disable all
+          [cur.name]: !!inputOpts[option.name]
+        }),
+      {}
+    );
   resolveOptions(option, newInputOpts);
 }
 
@@ -210,7 +224,9 @@ function resolveTypeGroup(option, inputOpts) {
  */
 function resolveTypeProxyToOption(proxy, option, inputOpts) {
   if (!option.resolved) {
-    throw new Error("Proxies cannot be applied before the original option is resolved");
+    throw new Error(
+      "Proxies cannot be applied before the original option is resolved"
+    );
   }
 
   // option is disabled
@@ -220,13 +236,16 @@ function resolveTypeProxyToOption(proxy, option, inputOpts) {
 
   // option doesn't contain any option on its own
   if (option.resolvedValue === option.resolvingValue) {
-    option.resolvedValue = [option.resolvedValue, {
-      [proxy.name]: inputOpts[proxy.name]
-    }];
-  }
-
-  // option already has its own set of options to be passed to plugins
-  else if (Array.isArray(option.resolvedValue) && option.resolvedValue.length === 2) {
+    option.resolvedValue = [
+      option.resolvedValue,
+      {
+        [proxy.name]: inputOpts[proxy.name]
+      }
+    ];
+  } else if (
+    Array.isArray(option.resolvedValue) && option.resolvedValue.length === 2
+  ) {
+    // option already has its own set of options to be passed to plugins
     // proxies should not override
     if (!hop(option.resolvedValue[1], proxy.name)) {
       option.resolvedValue = [
@@ -236,10 +255,8 @@ function resolveTypeProxyToOption(proxy, option, inputOpts) {
         })
       ];
     }
-  }
-
-  // plugin is invalid
-  else {
+  } else {
+    // plugin is invalid
     throw new Error(`Invalid resolved value for option ${option.name}`);
   }
 }
@@ -255,7 +272,7 @@ function option(name, resolvingValue, defaultValue = true) {
     type: "option",
     name,
     resolvingValue,
-    defaultValue,
+    defaultValue
   };
 }
 
@@ -266,7 +283,7 @@ function proxy(name, to) {
   return {
     type: "proxy",
     name,
-    to,
+    to
   };
 }
 
@@ -277,8 +294,8 @@ function group(name, children, defaultValue = "some") {
   return {
     type: "group",
     name,
-    children: children.filter((x) => !!x),
-    defaultValue,
+    children: children.filter(x => !!x),
+    defaultValue
   };
 }
 

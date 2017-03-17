@@ -30,7 +30,7 @@ module.exports = ({ types: t }) => {
       }
 
       path.replaceWith(options.node);
-    },
+    }
   };
 
   return {
@@ -55,7 +55,11 @@ module.exports = ({ types: t }) => {
         }
 
         const map = Object.create(null);
-        this.opts.replacements.forEach(({ identifierName, replacement, member }) => {
+        this.opts.replacements.forEach(({
+          identifierName,
+          replacement,
+          member
+        }) => {
           if (path.scope.globals[identifierName]) {
             // Convert to a node, we only allow identifiers and literals as replacements
             if (!replacement.type.match(/literal|identifier/i)) {
@@ -68,7 +72,7 @@ module.exports = ({ types: t }) => {
             const options = {
               identifierName,
               node,
-              member,
+              member
             };
 
             if (!map[identifierName]) {
@@ -76,14 +80,16 @@ module.exports = ({ types: t }) => {
             }
 
             if (member && map[identifierName][member]) {
-              throw new Error(`Replacement collision ${identifierName}.${member}`);
+              throw new Error(
+                `Replacement collision ${identifierName}.${member}`
+              );
             }
             map[identifierName][member || NO_MEMBER] = options;
           }
         });
 
         path.traverse(replaceVisitor, { replacements: map });
-      },
-    },
+      }
+    }
   };
 };

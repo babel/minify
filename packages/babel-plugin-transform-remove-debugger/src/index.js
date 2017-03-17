@@ -6,7 +6,7 @@ module.exports = function() {
     visitor: {
       DebuggerStatement(path) {
         path.remove();
-      },
-    },
+      }
+    }
   };
 };

@@ -12,7 +12,7 @@ class ObjectCollapser extends Collapser {
   }
 
   getExpressionChecker(objName, checkReference) {
-    return (expr) => {
+    return expr => {
       // checks expr is of form:
       // foo.a = rval | foo[a] = rval
 
@@ -28,8 +28,10 @@ class ObjectCollapser extends Collapser {
       if (!prop.isIdentifier() && checkReference(prop)) {
         return false;
       }
-      if (left.node.computed &&
-          !(prop.isStringLiteral() || prop.isNumericLiteral())) {
+      if (
+        left.node.computed &&
+        !(prop.isStringLiteral() || prop.isNumericLiteral())
+      ) {
         return false;
       }
 

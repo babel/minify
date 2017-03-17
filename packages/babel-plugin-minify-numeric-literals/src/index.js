@@ -7,7 +7,8 @@ module.exports = function({ types: t }) {
       NumericLiteral(path) {
         if (!path.node.extra) return;
 
-        const exponential = path.node.value.toExponential()
+        const exponential = path.node.value
+          .toExponential()
           .replace(/\+/g, "")
           .replace(/e0/, "");
 
@@ -20,6 +21,6 @@ module.exports = function({ types: t }) {
           path.replaceWith(literal);
         }
       }
-    },
+    }
   };
 };

@@ -15,16 +15,20 @@ module.exports = function({ types: t }) {
         const { right, left } = node;
 
         // Make sure we have a constant on the right.
-        if (!t.isLiteral(right) && !isVoid0(right) &&
-            !(t.isUnaryExpression(right) && t.isLiteral(right.argument)) &&
-            !t.isObjectExpression(right) && !t.isArrayExpression(right)
+        if (
+          !t.isLiteral(right) &&
+          !isVoid0(right) &&
+          !(t.isUnaryExpression(right) && t.isLiteral(right.argument)) &&
+          !t.isObjectExpression(right) &&
+          !t.isArrayExpression(right)
         ) {
           return;
         }
 
         // Commutative operators.
-        if (t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
-           ["*", "^", "&", "|"].indexOf(node.operator) >= 0
+        if (
+          t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) >= 0 ||
+          ["*", "^", "&", "|"].indexOf(node.operator) >= 0
         ) {
           node.left = right;
           node.right = left;
@@ -36,15 +40,23 @@ module.exports = function({ types: t }) {
           node.right = left;
           let operator;
           switch (node.operator) {
-            case ">": operator = "<"; break;
-            case "<": operator = ">"; break;
-            case ">=": operator = "<="; break;
-            case "<=": operator = ">="; break;
+            case ">":
+              operator = "<";
+              break;
+            case "<":
+              operator = ">";
+              break;
+            case ">=":
+              operator = "<=";
+              break;
+            case "<=":
+              operator = ">=";
+              break;
           }
           node.operator = operator;
           return;
         }
-      },
-    },
+      }
+    }
   };
 };

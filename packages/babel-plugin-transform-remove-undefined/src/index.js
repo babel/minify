@@ -1,7 +1,6 @@
 "use strict";
 
 function isPureAndUndefined(rval, scope = { hasBinding: () => false }) {
-
   if (rval.isIdentifier() && rval.node.name === "undefined") {
     // deopt right away if undefined is a local binding
     if (scope.hasBinding(rval.node.name, true /* no globals */)) {
@@ -18,19 +17,23 @@ function isPureAndUndefined(rval, scope = { hasBinding: () => false }) {
 }
 
 function getLoopParent(path, scopeParent) {
-  const parent = path.findParent((p) => p.isLoop() || p === scopeParent);
+  const parent = path.findParent(p => p.isLoop() || p === scopeParent);
   // don't traverse higher than the function the var is defined in.
   return parent === scopeParent ? null : parent;
 }
 
 function getFunctionParent(path, scopeParent) {
-  const parent = path.findParent((p) => p.isFunction());
+  const parent = path.findParent(p => p.isFunction());
   // don't traverse higher than the function the var is defined in.
   return parent === scopeParent ? null : parent;
 }
 
 function getFunctionReferences(path, scopeParent, references = new Set()) {
-  for (let func = getFunctionParent(path, scopeParent); func; func = getFunctionParent(func, scopeParent)) {
+  for (
+    let func = getFunctionParent(path, scopeParent);
+    func;
+    func = getFunctionParent(func, scopeParent)
+  ) {
     const id = func.node.id;
     const binding = id && func.scope.getBinding(id.name);
 
@@ -38,7 +41,7 @@ function getFunctionReferences(path, scopeParent, references = new Set()) {
       continue;
     }
 
-    binding.referencePaths.forEach((path) => {
+    binding.referencePaths.forEach(path => {
       if (!references.has(path)) {
         references.add(path);
         getFunctionReferences(path, scopeParent, references);
@@ -56,7 +59,7 @@ function hasViolation(declarator, scope, start) {
 
   const scopeParent = declarator.getFunctionParent();
 
-  const violation = binding.constantViolations.some((v) => {
+  const violation = binding.constantViolations.some(v => {
     // return 'true' if we cannot guarantee the violation references
     // the initialized identifier after
     const violationStart = v.node.start;
@@ -71,7 +74,11 @@ function hasViolation(declarator, scope, start) {
       }
     }
 
-    for (let loop = getLoopParent(declarator, scopeParent); loop; loop = getLoopParent(loop, scopeParent)) {
+    for (
+      let loop = getLoopParent(declarator, scopeParent);
+      loop;
+      loop = getLoopParent(loop, scopeParent)
+    ) {
       if (loop.node.end === undefined || loop.node.end > violationStart) {
         return true;
       }
@@ -130,14 +137,16 @@ module.exports = function() {
             }
             const scope = path.scope;
             for (const declarator of path.get("declarations")) {
-              if (isPureAndUndefined(declarator.get("init")) &&
-                !hasViolation(declarator, scope, start)) {
+              if (
+                isPureAndUndefined(declarator.get("init")) &&
+                !hasViolation(declarator, scope, start)
+              ) {
                 declarator.node.init = null;
               }
             }
             break;
         }
-      },
-    },
+      }
+    }
   };
 };

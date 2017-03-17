@@ -4,9 +4,10 @@ function replaceArray(t, path) {
   const { node } = path;
   // arguments is taken :(
   const constructorArgs = path.get("arguments");
-  if (t.isIdentifier(node.callee, { name: "Array" }) &&
-    !path.scope.getBinding("Array")) {
-
+  if (
+    t.isIdentifier(node.callee, { name: "Array" }) &&
+    !path.scope.getBinding("Array")
+  ) {
     if (constructorArgs.length === 0) {
       // Array() -> []
       path.replaceWith(t.arrayExpression([]));
@@ -16,7 +17,9 @@ function replaceArray(t, path) {
 
       if (result.confident) {
         if (typeof result.value === "number") {
-          if (result.value >= 0 && result.value <= 6 && result.value % 1 === 0) {
+          if (
+            result.value >= 0 && result.value <= 6 && result.value % 1 === 0
+          ) {
             // "Array(7)" is shorter than "[,,,,,,,]"
             path.replaceWith(t.arrayExpression(Array(result.value).fill(null)));
           } else {
@@ -59,38 +62,42 @@ function replaceArray(t, path) {
 
 function replaceObject(t, path) {
   const { node } = path;
-  if (t.isIdentifier(node.callee, { name: "Object" }) &&
-    !path.scope.getBinding("Object")) {
-
+  if (
+    t.isIdentifier(node.callee, { name: "Object" }) &&
+    !path.scope.getBinding("Object")
+  ) {
     const isVoid0 = require("babel-helper-is-void-0")(t);
     const arg = node.arguments[0];
-    const binding = arg && t.isIdentifier(arg) && path.scope.getBinding(arg.name);
+    const binding = arg &&
+      t.isIdentifier(arg) &&
+      path.scope.getBinding(arg.name);
 
     // Object() -> {}
     if (node.arguments.length === 0) {
       path.replaceWith(t.objectExpression([]));
 
-    // Object([]) -> []
-    } else if (arg.type === "ArrayExpression" ||
-      t.isFunctionExpression(arg)) {
+      // Object([]) -> []
+    } else if (arg.type === "ArrayExpression" || t.isFunctionExpression(arg)) {
       path.replaceWith(arg);
 
-    // Object(null) -> {}
-    } else if (isVoid0(arg) ||
+      // Object(null) -> {}
+    } else if (
+      isVoid0(arg) ||
       arg.name === "undefined" ||
       arg.type === "NullLiteral" ||
-      arg.type === "ObjectExpression" && arg.properties.length === 0) {
+      (arg.type === "ObjectExpression" && arg.properties.length === 0)
+    ) {
       path.replaceWith(t.objectExpression([]));
 
-    // Object(localFn) -> localFn
+      // Object(localFn) -> localFn
     } else if (binding && binding.path.isFunction()) {
       path.replaceWith(arg);
 
-    // Object({a:b}) -> {a:b}
+      // Object({a:b}) -> {a:b}
     } else if (arg.type === "ObjectExpression") {
       path.replaceWith(arg);
 
-    // new Object(a) -> Object(a)
+      // new Object(a) -> Object(a)
     } else if (node.type === "NewExpression") {
       path.replaceWith(t.callExpression(node.callee, node.arguments));
     }
@@ -98,15 +105,21 @@ function replaceObject(t, path) {
   }
 }
 
-function defaults({
-  boolean = true,
-  number = true,
-  string = true,
-  array = true,
-  object = true
-} = {}) {
+function defaults(
+  {
+    boolean = true,
+    number = true,
+    string = true,
+    array = true,
+    object = true
+  } = {}
+) {
   return {
-    boolean, number, string, array, object
+    boolean,
+    number,
+    string,
+    array,
+    object
   };
 }
 
@@ -123,8 +136,15 @@ module.exports = function({ types: t }) {
           opts.boolean &&
           t.isIdentifier(node.callee, { name: "Boolean" }) &&
           node.arguments.length === 1 &&
-          !path.scope.getBinding("Boolean")) {
-          path.replaceWith(t.unaryExpression("!", t.unaryExpression("!", node.arguments[0], true), true));
+          !path.scope.getBinding("Boolean")
+        ) {
+          path.replaceWith(
+            t.unaryExpression(
+              "!",
+              t.unaryExpression("!", node.arguments[0], true),
+              true
+            )
+          );
           return;
         }
 
@@ -133,7 +153,8 @@ module.exports = function({ types: t }) {
           opts.number &&
           t.isIdentifier(node.callee, { name: "Number" }) &&
           node.arguments.length === 1 &&
-          !path.scope.getBinding("Number")) {
+          !path.scope.getBinding("Number")
+        ) {
           path.replaceWith(t.unaryExpression("+", node.arguments[0], true));
           return;
         }
@@ -143,8 +164,11 @@ module.exports = function({ types: t }) {
           opts.string &&
           t.isIdentifier(node.callee, { name: "String" }) &&
           node.arguments.length === 1 &&
-          !path.scope.getBinding("String")) {
-          path.replaceWith(t.binaryExpression("+", node.arguments[0], t.stringLiteral("")));
+          !path.scope.getBinding("String")
+        ) {
+          path.replaceWith(
+            t.binaryExpression("+", node.arguments[0], t.stringLiteral(""))
+          );
           return;
         }
 
@@ -170,7 +194,7 @@ module.exports = function({ types: t }) {
         if (opts.object && replaceObject(t, path)) {
           return;
         }
-      },
-    },
+      }
+    }
   };
 };

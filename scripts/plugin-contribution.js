@@ -12,22 +12,27 @@ run(process.argv[2]);
 
 function run(inputFile) {
   const input = fs.readFileSync(inputFile).toString();
-  const table = new Table(Object.assign({
-    head: [
-      "name",
-      "output(bytes)",
-      "output gzip(bytes)",
-      "raw compression (%)",
-      "gzip win (%)",
-      "gzip % (%)",
-      "parse time Δ (ms)"
-    ],
-  }, tableStyle()));
+  const table = new Table(
+    Object.assign(
+      {
+        head: [
+          "name",
+          "output(bytes)",
+          "output gzip(bytes)",
+          "raw compression (%)",
+          "gzip win (%)",
+          "gzip % (%)",
+          "parse time Δ (ms)"
+        ]
+      },
+      tableStyle()
+    )
+  );
 
   const baseOutput = transform(input, {
     minified: true,
     compact: true,
-    comments: false,
+    comments: false
   }).code;
 
   const baseGzip = zlib.gzipSync(baseOutput);
@@ -44,7 +49,7 @@ function run(inputFile) {
       plugins: [plugin],
       minified: true,
       compact: true,
-      comments: false,
+      comments: false
     }).code;
 
     const gzippedOutput = zlib.gzipSync(output);
@@ -64,13 +69,14 @@ function run(inputFile) {
       percentage.toFixed(3),
       gzipWin < 0 ? chalk.red(gzipWin.toFixed(3)) : gzipWin.toFixed(3),
       gzipPercentage.toFixed(3),
-      chalk[parseTimeDiff < 0 ? "green" : "red"](parseTimeDiff),
+      chalk[parseTimeDiff < 0 ? "green" : "red"](parseTimeDiff)
     ]);
   });
 
   const wcWin = (1 - len(baseOutput) / len(input)) * 100;
 
-  console.log(`
+  console.log(
+    `
 input: input file with white space and comments removed
 
 input size (bytes)      : ${len(baseOutput)}
@@ -81,14 +87,16 @@ gzip win        : % decrease from gzipInput -> gzipOutput
 gzip %          : % decrease from output -> gzipOutput
 
 Whitespaces and comments win (raw compression): ${wcWin}
-`);
+`
+  );
 
   console.log(table.toString());
 }
 
 function getPlugins() {
-  return fs.readdirSync(path.join(__dirname, "../packages"))
-    .filter((dir) => {
+  return fs
+    .readdirSync(path.join(__dirname, "../packages"))
+    .filter(dir => {
       if (!isDir(path.join(__dirname, "../packages", dir))) return false;
       if (dir.indexOf("babel-plugin-") !== 0) return false;
       try {
@@ -98,7 +106,7 @@ function getPlugins() {
         return false;
       }
     })
-    .map((pluginName) => ({
+    .map(pluginName => ({
       name: pluginName,
       plugin: require(`../packages/${pluginName}`)
     }));
@@ -145,12 +153,12 @@ function tableStyle() {
       "mid-mid": "",
       right: "",
       "right-mid": "",
-      middle: " ",
+      middle: " "
     },
     style: {
       "padding-left": 0,
       "padding-right": 0,
-      head: ["bold"],
+      head: ["bold"]
     }
   };
 }
