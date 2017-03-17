@@ -10,31 +10,34 @@ $ npm run bootstrap
 
 #### Build
 
+To build **once**:
+
 ```sh
 npm run build
 ```
 
-to build **once**
+Or to do an incremental build in watch mode:
 
 ```sh
 npm run watch
 ```
 
-to do incremental builds in watch mode
-
 #### Lint
 
-The project uses [prettier](https://github.com/prettier/prettier) for formatting code and [eslint](https://github.com/eslint/eslint) for other linting.
+This project uses [prettier](https://github.com/prettier/prettier) for formatting code and [eslint](https://github.com/eslint/eslint) for other linting.
+
+To check both:
 
 ```sh
 npm run lint
 ```
 
-will run prettier and eslint to report formatting and linting errors. You can run them individually using -
+You can also run them each individually:
 
-```sh
+ ```sh
 # prettier
 npm run format-check
+
 # eslint
 npm run eslint
 ```
@@ -47,11 +50,12 @@ To fix formatting and auto-fixable eslint errors,
 npm run fix
 ```
 
-You can run them separately using -
+You can also run them each individually:
 
 ```sh
 # prettier
 npm run format
+
 # eslint
 npm run eslint-fix
 ```
