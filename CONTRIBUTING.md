@@ -8,54 +8,86 @@ $ npm install
 $ npm run bootstrap
 ```
 
-Then you can either run:
+#### Build
 
 ```sh
-$ npm run build
+npm run build
 ```
 
-to build Babel **once** or:
+to build **once**
 
 ```sh
-$ npm run watch
+npm run watch
 ```
 
-to have Babel build itself then incrementally build files on change.
+to do incremental builds in watch mode
 
-To run all tests:
+#### Lint
+
+The project uses [prettier](https://github.com/prettier/prettier) for formatting code and [eslint](https://github.com/eslint/eslint) for other linting.
 
 ```sh
-$ npm test
+npm run lint
 ```
 
-or run tests for a specific package:
+will run prettier and eslint to report formatting and linting errors. You can run them individually using -
+
+```sh
+# prettier
+npm run format-check
+# eslint
+npm run eslint
+```
+
+##### Lint Fix
+
+To fix formatting and auto-fixable eslint errors,
+
+```sh
+npm run fix
+```
+
+You can run them separately using -
+
+```sh
+# prettier
+npm run format
+# eslint
+npm run eslint-fix
+```
+
+#### Test
+
+To run all tests,
+
+```sh
+npm test
+```
+
+To run tests for a specific package,
 
 ```sh
 $  npm test packages/babel-preset-babili
 ```
 
-To run lint:
+#### Benchmarks
+
+[benchmark.js](scripts/benchmark.js) compares Babili with [Uglify](https://github.com/mishoo/UglifyJS2), [Closure Compiler](https://github.com/google/closure-compiler) and [Closure Compiler JS](https://github.com/google/closure-compiler-js)
 
 ```sh
-$ npm run lint
+./scripts/benchmark.js [file...]
 ```
 
-To run lint autofixes:
+[plugin-timing.js](scripts/plugin-timing.js) is used to calculate and compare the time spent in each plugin.
 
 ```sh
-$ npm run fix
+./scripts/plugin-timing.js file.js
 ```
 
-To run current benchmarks on a file:
+[plugin-contribution.js](scripts/plugin-contribution.js) calculates how much each plugin of babili contributes to size reduction.
 
 ```sh
-$ ./scripts/benchmark.js [file...]
-```
-
-To run current plugin timing on a file:
-
-```sh
-$ ./scripts/plugin-timing.js file.js
+./scripts/plugin-contribution.js file.js
 ```
 
 ### Debugging
