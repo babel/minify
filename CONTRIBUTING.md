@@ -71,7 +71,7 @@ npm test
 To run tests for a specific package,
 
 ```sh
-$  npm test packages/babel-preset-babili
+npm test packages/babel-preset-babili
 ```
 
 #### Benchmarks
