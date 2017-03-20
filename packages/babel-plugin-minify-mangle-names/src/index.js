@@ -260,8 +260,8 @@ module.exports = ({ types: t, traverse }) => {
           const mangler = new Mangler(charset, path, this.opts);
           mangler.run();
         }
-      },
-    },
+      }
+    }
   };
 };
 

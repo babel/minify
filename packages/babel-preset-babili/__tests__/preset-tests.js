@@ -113,7 +113,8 @@ describe("preset", () => {
   });
 
   it("should fix issue#425 - mangles the alaises from builtins transform", () => {
-    const source = unpad(`
+    const source = unpad(
+      `
       function a (){
         const d = Math.max(foo, bar);
         function b() {
@@ -123,15 +124,17 @@ describe("preset", () => {
           Math.max(foo, bar) * Math.floor(baz);
         }
       }
-    `);
-    const expected = unpad(`
+    `
+    );
+    const expected = unpad(
+      `
       function a() {
         var b = Math.floor,
             c = Math.max;
         c(foo, bar);
       }
-    `);
+    `
+    );
     expect(transform(source)).toBe(expected);
   });
-
 });
