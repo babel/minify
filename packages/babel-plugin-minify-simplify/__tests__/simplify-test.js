@@ -3098,4 +3098,30 @@ describe("simplify-plugin", () => {
     }
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix issue#423 with fallthrough in default case", () => {
+    const source = unpad(
+      `
+      function foo(bar) {
+        switch (bar) {
+          case 'a':
+            return 1;
+          case 'b':
+          default:
+            return 4;
+          case 'c':
+            return 3;
+        }
+      }
+    `
+    );
+    const expected = unpad(
+      `
+      function foo(bar) {
+        return bar === 'a' ? 1 : bar === 'c' ? 3 : 4;
+      }
+    `
+    );
+    expect(transform(source)).toBe(expected);
+  });
 });
