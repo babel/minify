@@ -1273,6 +1273,7 @@ module.exports = ({ types: t }) => {
 
               const cons = switchCase.consequent[0];
 
+              // default case
               if (!switchCase.test) {
                 if (!t.isReturnStatement(cons)) {
                   return;
@@ -1282,11 +1283,7 @@ module.exports = ({ types: t }) => {
               }
 
               if (!switchCase.consequent.length) {
-                if (fallThru.length) {
-                  fallThru.push(switchCase.test);
-                } else {
-                  fallThru = [switchCase.test];
-                }
+                fallThru.push(switchCase.test);
                 continue;
               }
 
@@ -1300,7 +1297,8 @@ module.exports = ({ types: t }) => {
                 node.discriminant,
                 switchCase.test
               );
-              if (fallThru.length) {
+
+              if (fallThru.length && !defaultRet) {
                 test = fallThru.reduceRight(
                   (right, test) =>
                     t.logicalExpression(
@@ -1310,8 +1308,8 @@ module.exports = ({ types: t }) => {
                     ),
                   test
                 );
-                fallThru = [];
               }
+              fallThru = [];
 
               consTestPairs.push([test, cons.argument || VOID_0]);
             }
@@ -1387,11 +1385,7 @@ module.exports = ({ types: t }) => {
               }
 
               if (!switchCase.consequent.length) {
-                if (fallThru.length) {
-                  fallThru.push(switchCase.test);
-                } else {
-                  fallThru = [switchCase.test];
-                }
+                fallThru.push(switchCase.test);
                 continue;
               }
 
@@ -1416,7 +1410,7 @@ module.exports = ({ types: t }) => {
                 node.discriminant,
                 switchCase.test
               );
-              if (fallThru.length) {
+              if (fallThru.length && !defaultExpr) {
                 test = fallThru.reduceRight(
                   (right, test) =>
                     t.logicalExpression(
@@ -1426,8 +1420,8 @@ module.exports = ({ types: t }) => {
                     ),
                   test
                 );
-                fallThru = [];
               }
+              fallThru = [];
 
               exprTestPairs.push([test, cons.expression]);
             }
