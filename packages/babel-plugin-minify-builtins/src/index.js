@@ -10,6 +10,7 @@ module.exports = function({ types: t }) {
   class BuiltInReplacer {
     constructor(program) {
       this.program = program;
+      // map<expr_name, path[]>;
       this.pathsToUpdate = new Map();
     }
 
@@ -27,7 +28,11 @@ module.exports = function({ types: t }) {
             return;
           }
 
-          if (!isComputed(path) && isBuiltin(path)) {
+          if (
+            !isComputed(path) &&
+            isBuiltin(path) &&
+            !path.getFunctionParent().isProgram()
+          ) {
             const expName = memberToString(path.node);
             addToMap(context.pathsToUpdate, expName, path);
           }
@@ -49,7 +54,7 @@ module.exports = function({ types: t }) {
               // Math.floor(1) --> 1
               if (result.confident && hasPureArgs(path)) {
                 path.replaceWith(t.valueToNode(result.value));
-              } else {
+              } else if (!callee.getFunctionParent().isProgram()) {
                 const expName = memberToString(callee.node);
                 addToMap(context.pathsToUpdate, expName, callee);
               }
@@ -68,18 +73,7 @@ module.exports = function({ types: t }) {
           continue;
         }
 
-        // occurences that has program scope are not minified
-        // to avoid leaking identifiers
-        const validPaths = paths.filter(p => {
-          return !p.getFunctionParent().isProgram();
-        });
-
-        // Early exit here as well
-        if (validPaths.length <= 1) {
-          continue;
-        }
-
-        const segmentsMap = getSegmentedSubPaths(expName, validPaths);
+        const segmentsMap = getSegmentedSubPaths(paths);
         for (const [parent, subpaths] of segmentsMap) {
           if (subpaths.length <= 1) {
             continue;
@@ -146,7 +140,7 @@ function addToMap(map, key, value) {
 
 // Creates a segmented map that contains the earliest common Ancestor
 // as the key and array of subpaths that are descendats of the LCA as value
-function getSegmentedSubPaths(expName, paths) {
+function getSegmentedSubPaths(paths) {
   let segments = new Map();
 
   // Get earliest Path in tree where paths intersect
