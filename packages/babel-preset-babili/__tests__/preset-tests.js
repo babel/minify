@@ -111,4 +111,30 @@ describe("preset", () => {
     );
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix issue#425 - mangles the alaises from builtins transform", () => {
+    const source = unpad(
+      `
+      function a (){
+        const d = Math.max(foo, bar);
+        function b() {
+          Math.max(foo, bar) * Math.floor(baz);
+        }
+        function c() {
+          Math.max(foo, bar) * Math.floor(baz);
+        }
+      }
+    `
+    );
+    const expected = unpad(
+      `
+      function a() {
+        var b = Math.floor,
+            c = Math.max;
+        c(foo, bar);
+      }
+    `
+    );
+    expect(transform(source)).toBe(expected);
+  });
 });

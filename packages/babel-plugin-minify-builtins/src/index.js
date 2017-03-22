@@ -10,6 +10,7 @@ module.exports = function({ types: t }) {
   class BuiltInReplacer {
     constructor(program) {
       this.program = program;
+      // map<expr_name, path[]>;
       this.pathsToUpdate = new Map();
     }
 
@@ -27,13 +28,13 @@ module.exports = function({ types: t }) {
             return;
           }
 
-          if (!isComputed(path) && isBuiltin(path)) {
+          if (
+            !isComputed(path) &&
+            isBuiltin(path) &&
+            !path.getFunctionParent().isProgram()
+          ) {
             const expName = memberToString(path.node);
-
-            if (!context.pathsToUpdate.has(expName)) {
-              context.pathsToUpdate.set(expName, []);
-            }
-            context.pathsToUpdate.get(expName).push(path);
+            addToMap(context.pathsToUpdate, expName, path);
           }
         },
 
@@ -53,13 +54,9 @@ module.exports = function({ types: t }) {
               // Math.floor(1) --> 1
               if (result.confident && hasPureArgs(path)) {
                 path.replaceWith(t.valueToNode(result.value));
-              } else {
+              } else if (!callee.getFunctionParent().isProgram()) {
                 const expName = memberToString(callee.node);
-
-                if (!context.pathsToUpdate.has(expName)) {
-                  context.pathsToUpdate.set(expName, []);
-                }
-                context.pathsToUpdate.get(expName).push(callee);
+                addToMap(context.pathsToUpdate, expName, callee);
               }
             }
           }
@@ -71,20 +68,28 @@ module.exports = function({ types: t }) {
 
     replace() {
       for (const [expName, paths] of this.pathsToUpdate) {
-        // Should only transform if there is more than 1 occurence
-        if (paths.length > 1) {
+        // transform only if there is more than 1 occurence
+        if (paths.length <= 1) {
+          continue;
+        }
+
+        const segmentsMap = getSegmentedSubPaths(paths);
+        for (const [parent, subpaths] of segmentsMap) {
+          if (subpaths.length <= 1) {
+            continue;
+          }
           const uniqueIdentifier = this.program.scope.generateUidIdentifier(
             expName
           );
           const newNode = t.variableDeclaration("var", [
-            t.variableDeclarator(uniqueIdentifier, paths[0].node)
+            t.variableDeclarator(uniqueIdentifier, subpaths[0].node)
           ]);
 
-          for (const path of paths) {
+          for (const path of subpaths) {
             path.replaceWith(uniqueIdentifier);
           }
-          // hoist the created var to top of the program
-          this.program.unshiftContainer("body", newNode);
+          // hoist the created var to the top of the function scope
+          parent.get("body").unshiftContainer("body", newNode);
         }
       }
     }
@@ -125,6 +130,43 @@ module.exports = function({ types: t }) {
     return false;
   }
 };
+
+function addToMap(map, key, value) {
+  if (!map.has(key)) {
+    map.set(key, []);
+  }
+  map.get(key).push(value);
+}
+
+// Creates a segmented map that contains the earliest common Ancestor
+// as the key and array of subpaths that are descendats of the LCA as value
+function getSegmentedSubPaths(paths) {
+  let segments = new Map();
+
+  // Get earliest Path in tree where paths intersect
+  paths[
+    0
+  ].getDeepestCommonAncestorFrom(paths, (lastCommon, index, ancestries) => {
+    // we found the LCA
+    if (!lastCommon.isProgram()) {
+      lastCommon = !lastCommon.isFunction()
+        ? lastCommon.getFunctionParent()
+        : lastCommon;
+      segments.set(lastCommon, paths);
+      return;
+    }
+    // Deopt and construct segments otherwise
+    for (const ancestor of ancestries) {
+      const parentPath = ancestor[index + 1];
+      const validDescendants = paths.filter(p => {
+        return p.isDescendant(parentPath);
+      });
+      segments.set(parentPath, validDescendants);
+    }
+  });
+
+  return segments;
+}
 
 function hasPureArgs(path) {
   const args = path.get("arguments");

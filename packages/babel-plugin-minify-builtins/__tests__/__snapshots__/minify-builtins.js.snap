@@ -1,24 +1,72 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`minify-builtins should collect and minify no matter any depth 1`] = `
+exports[`minify-builtins should collect and minify in segments if there is no common ancestor 1`] = `
 Object {
-  "_source": "Math.max(a, b) + Math.max(a, b);
-function a (){
-  Math.max(b, a);
-  return function b() {
-    const a = Math.floor(c);
-    Math.min(b, a) * Math.floor(b);
+  "_source": "function a(){
+  function d(){
+    Math.floor(as, bb);
+  }
+}
+function b(){
+  Math.floor(as, bb);
+  function d(){
+    Math.floor(as, bb);
+  }
+}
+function c(){
+  Math.floor(as, bb);
+  function d(){
+    Math.floor(as, bb);
   }
 }",
-  "expected": "var _Mathfloor = Math.floor;
-var _Mathmax = Math.max;
-_Mathmax(a, b) + _Mathmax(a, b);
-function a() {
-  _Mathmax(b, a);
-  return function b() {
+  "expected": "function a() {
+  function d() {
+    Math.floor(as, bb);
+  }
+}
+function b() {
+  var _Mathfloor = Math.floor;
+
+  _Mathfloor(as, bb);
+  function d() {
+    _Mathfloor(as, bb);
+  }
+}
+function c() {
+  var _Mathfloor2 = Math.floor;
+
+  _Mathfloor2(as, bb);
+  function d() {
+    _Mathfloor2(as, bb);
+  }
+}",
+}
+`;
+
+exports[`minify-builtins should collect and minify no matter any depth 1`] = `
+Object {
+  "_source": "function a (){
+  Math.max(b, a);
+  function b() {
+    const a = Math.floor(c);
+    Math.min(b, a) * Math.floor(b);
+    function c() {
+      Math.floor(c) + Math.min(b, a)
+    }
+  }
+}",
+  "expected": "function a() {
+  Math.max(b, a);
+  function b() {
+    var _Mathmin = Math.min;
+    var _Mathfloor = Math.floor;
+
     const a = _Mathfloor(c);
-    Math.min(b, a) * _Mathfloor(b);
-  };
+    _Mathmin(b, a) * _Mathfloor(b);
+    function c() {
+      _Mathfloor(c) + _Mathmin(b, a);
+    }
+  }
 }",
 }
 `;
@@ -38,17 +86,18 @@ foo(x);",
 
 exports[`minify-builtins should minify standard built in methods 1`] = `
 Object {
-  "_source": "Math.max(a, b) + Math.max(b, a);
-function c() {
+  "_source": "function c() {
   let a = 10;
   const d = Number.isNaN(a);
+  Math.max(a, b) + Math.max(b, a);
   return d && Number.isFinite(a);
 }",
-  "expected": "var _Mathmax = Math.max;
-_Mathmax(a, b) + _Mathmax(b, a);
-function c() {
+  "expected": "function c() {
+  var _Mathmax = Math.max;
+
   let a = 10;
   const d = false;
+  _Mathmax(a, b) + _Mathmax(b, a);
   return d && true;
 }",
 }
@@ -56,14 +105,15 @@ function c() {
 
 exports[`minify-builtins should minify standard built in properties 1`] = `
 Object {
-  "_source": "Number.NAN + Number.NAN;
-function a () {
+  "_source": "function a () {
+  Number.NAN + Number.NAN;
   return Math.PI + Math.PI + Number.EPSILON + Number.NAN;
 }",
-  "expected": "var _MathPI = Math.PI;
-var _NumberNAN = Number.NAN;
-_NumberNAN + _NumberNAN;
-function a() {
+  "expected": "function a() {
+  var _MathPI = Math.PI;
+  var _NumberNAN = Number.NAN;
+
+  _NumberNAN + _NumberNAN;
   return _MathPI + _MathPI + Number.EPSILON + _NumberNAN;
 }",
 }
@@ -90,13 +140,29 @@ Math[max](1.5);",
 exports[`minify-builtins should take no of occurences in to account 1`] = `
 Object {
   "_source": "function a() {
-  return Math.floor(a) + Math.floor(b) + Math.min(a, b);
+  Math.floor(a) + Math.floor(b) + Math.min(a, b);
+}",
+  "expected": "function a() {
+  var _Mathfloor = Math.floor;
+
+  _Mathfloor(a) + _Mathfloor(b) + Math.min(a, b);
+}",
 }
-Math.floor(a) + Math.max(a, b);",
-  "expected": "var _Mathfloor = Math.floor;
+`;
+
+exports[`minify-builtins shouldn't minify builtins in the program scope to avoid leaking 1`] = `
+Object {
+  "_source": "Math.max(c, d)
+function a (){
+  Math.max(b, a) + Math.max(c, d);
+}
+Math.max(e, f)",
+  "expected": "Math.max(c, d);
 function a() {
-  return _Mathfloor(a) + _Mathfloor(b) + Math.min(a, b);
+  var _Mathmax = Math.max;
+
+  _Mathmax(b, a) + _Mathmax(c, d);
 }
-_Mathfloor(a) + Math.max(a, b);",
+Math.max(e, f);",
 }
 `;

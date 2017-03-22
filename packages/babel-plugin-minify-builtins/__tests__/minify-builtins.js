@@ -14,10 +14,10 @@ describe("minify-builtins", () => {
   it("should minify standard built in methods", () => {
     const source = unpad(
       `
-      Math.max(a, b) + Math.max(b, a);
       function c() {
         let a = 10;
         const d = Number.isNaN(a);
+        Math.max(a, b) + Math.max(b, a);
         return d && Number.isFinite(a);
       }
     `
@@ -29,8 +29,8 @@ describe("minify-builtins", () => {
   it("should minify standard built in properties", () => {
     const source = unpad(
       `
-      Number.NAN + Number.NAN;
       function a () {
+        Number.NAN + Number.NAN;
         return Math.PI + Math.PI + Number.EPSILON + Number.NAN;
       }
     `
@@ -42,9 +42,8 @@ describe("minify-builtins", () => {
     const source = unpad(
       `
       function a() {
-        return Math.floor(a) + Math.floor(b) + Math.min(a, b);
+        Math.floor(a) + Math.floor(b) + Math.min(a, b);
       }
-      Math.floor(a) + Math.max(a, b);
     `
     );
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
@@ -53,12 +52,52 @@ describe("minify-builtins", () => {
   it("should collect and minify no matter any depth", () => {
     const source = unpad(
       `
-      Math.max(a, b) + Math.max(a, b);
       function a (){
         Math.max(b, a);
-        return function b() {
+        function b() {
           const a = Math.floor(c);
           Math.min(b, a) * Math.floor(b);
+          function c() {
+            Math.floor(c) + Math.min(b, a)
+          }
+        }
+      }
+    `
+    );
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
+  });
+
+  it("shouldn't minify builtins in the program scope to avoid leaking", () => {
+    const source = unpad(
+      `
+      Math.max(c, d)
+      function a (){
+        Math.max(b, a) + Math.max(c, d);
+      }
+      Math.max(e, f)
+    `
+    );
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
+  });
+
+  it("should collect and minify in segments if there is no common ancestor", () => {
+    const source = unpad(
+      `
+      function a(){
+        function d(){
+          Math.floor(as, bb);
+        }
+      }
+      function b(){
+        Math.floor(as, bb);
+        function d(){
+          Math.floor(as, bb);
+        }
+      }
+      function c(){
+        Math.floor(as, bb);
+        function d(){
+          Math.floor(as, bb);
         }
       }
     `
