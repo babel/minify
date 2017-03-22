@@ -1263,7 +1263,7 @@ module.exports = ({ types: t }) => {
               return;
             }
 
-            let consTestPairs = [];
+            const consTestPairs = [];
             let fallThru = [];
             let defaultRet;
             for (const switchCase of node.cases) {

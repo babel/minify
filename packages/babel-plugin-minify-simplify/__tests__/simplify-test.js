@@ -3124,4 +3124,31 @@ describe("simplify-plugin", () => {
     );
     expect(transform(source)).toBe(expected);
   });
+
+  it("should convert multiple fallthrough in switch to conditional expression", () => {
+    const source = unpad(
+      `
+      function foo(bar) {
+        switch (bar) {
+          case 'a':
+          case 'b':
+            return 1;
+          case 'd':
+          default:
+            return 4;
+          case 'c':
+            return 3;
+        }
+      }
+    `
+    );
+    const expected = unpad(
+      `
+      function foo(bar) {
+        return bar === 'a' || bar === 'b' ? 1 : bar === 'c' ? 3 : 4;
+      }
+    `
+    );
+    expect(transform(source)).toBe(expected);
+  });
 });
