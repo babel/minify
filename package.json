@@ -37,18 +37,18 @@
   },
   "devDependencies": {
     "babel-core": "^6.24.0",
-    "babel-eslint": "^7.1.1",
+    "babel-eslint": "^7.2.1",
     "babel-jest": "^19.0.0",
     "babel-plugin-transform-es2015-block-scoping": "^6.23.0",
     "babel-preset-env": "^1.2.2",
     "babel-traverse": "^6.23.1",
-    "bytes": "^2.1.0",
+    "bytes": "^2.5.0",
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",
     "closure-compiler": "^0.2.12",
-    "codecov": "^2.0.2",
+    "codecov": "^2.1.0",
     "commander": "^2.9.0",
-    "eslint": "^3.17.1",
+    "eslint": "^3.18.0",
     "google-closure-compiler-js": "^20170218.0.0",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-babel": "^6.1.2",
@@ -56,11 +56,11 @@
     "gulp-util": "^3.0.8",
     "jest-cli": "^19.0.2",
     "lerna": "2.0.0-beta.38",
-    "lerna-changelog": "^0.3.0",
+    "lerna-changelog": "^0.4.0",
     "markdown-table": "^1.1.0",
     "prettier": "^0.22.0",
     "request": "^2.81.0",
     "through2": "^2.0.1",
-    "uglify-js": "^2.8.12"
+    "uglify-js": "^2.8.18"
   }
 }
