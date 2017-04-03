@@ -257,6 +257,8 @@ class AssetsManager {
     if (DEBUG) console.error("Updating Cache...");
     const files = Object.keys(this.assets);
 
+    if (!pathExists(this.cacheDir)) fs.mkdirSync(this.cacheDir);
+
     return Promise.all(
       files
         .filter(filename => !pathExists(this.filePath(filename)))
