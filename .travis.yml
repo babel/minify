@@ -3,9 +3,7 @@ git:
   depth: 10
 sudo: false
 language: node_js
-cache:
-  directories:
-  - node_modules
+cache: yarn
 
 node_js:
 - '7'
@@ -13,8 +11,8 @@ node_js:
 - '4'
 
 script:
-- 'if [ -n "${LINT-}" ]; then npm run lint ; fi'
-- npm run test-ci
+- 'if [ -n "${LINT-}" ]; then yarn run lint ; fi'
+- yarn run test-ci
 
 matrix:
   fast_finish: true
@@ -22,4 +20,4 @@ matrix:
     - node_js: "node"
       env: LINT=true
 
-after_success: npm run coverage-ci
+after_success: yarn run coverage-ci
