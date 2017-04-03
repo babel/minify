@@ -3,9 +3,9 @@ jest.autoMockOff();
 const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
 
-function transform(code) {
+function transform(code, opts = {}) {
   return babel.transform(code, {
-    plugins: [require("../src/index")]
+    plugins: [[require("../src/index"), opts]]
   }).code;
 }
 
@@ -83,7 +83,7 @@ describe("constant-folding-plugin", () => {
       "<\\\\/script";
     `
     );
-    expect(transform(source)).toBe(expected);
+    expect(transform(source, { isScriptContext: true })).toBe(expected);
   });
 
   it("should handle style escape", () => {
@@ -98,7 +98,7 @@ describe("constant-folding-plugin", () => {
       "<\\\\/style";
     `
     );
-    expect(transform(source)).toBe(expected);
+    expect(transform(source, { isScriptContext: true })).toBe(expected);
   });
 
   it("should handle html comment escape", () => {
@@ -112,6 +112,20 @@ describe("constant-folding-plugin", () => {
       `
       "\\\\x3C!--";
     `
+    );
+    expect(transform(source, { isScriptContext: true })).toBe(expected);
+  });
+
+  it("should fix #440", () => {
+    const source = unpad(
+      `
+      var x = "'cool'" + "test";
+      `
+    );
+    const expected = unpad(
+      `
+      var x = "'cool'test";
+      `
     );
     expect(transform(source)).toBe(expected);
   });

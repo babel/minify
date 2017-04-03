@@ -55,7 +55,7 @@ module.exports = ({ types: t, traverse }) => {
       },
 
       // TODO: look into evaluating binding too (could result in more code, but gzip?)
-      Expression(path) {
+      Expression(path, { opts: { isScriptContext = false } }) {
         const { node } = path;
 
         if (node[seen]) {
@@ -122,10 +122,8 @@ module.exports = ({ types: t, traverse }) => {
           }
 
           // https://github.com/babel/babili/issues/382
-          if (typeof res.value === "string") {
-            res.value = jsesc(res.value, {
-              isScriptContext: true
-            });
+          if (typeof res.value === "string" && isScriptContext) {
+            res.value = jsesc(res.value, { isScriptContext });
           }
 
           const node = t.valueToNode(res.value);
