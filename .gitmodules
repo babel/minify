@@ -1,21 +1,12 @@
-[submodule "scripts/react"]
-	path = scripts/react
-	url = https://github.com/facebook/react
-[submodule "scripts/immutable-js"]
-	path = scripts/immutable-js
-	url = https://github.com/facebook/immutable-js
-[submodule "scripts/jquery"]
-	path = scripts/jquery
-	url = https://github.com/jquery/jquery
-[submodule "scripts/draft-js"]
-	path = scripts/draft-js
-	url = https://github.com/facebook/draft-js
-[submodule "scripts/html-minifier"]
-	path = scripts/html-minifier
-	url = https://github.com/kangax/html-minifier
-[submodule "scripts/babel"]
-	path = scripts/babel
-	url = https://github.com/babel/babel
-[submodule "scripts/stylelint"]
-	path = scripts/stylelint
-	url = https://github.com/stylelint/stylelint
+[submodule "smoke/assets/immutable-js"]
+	path = smoke/assets/immutable-js
+	url = git@github.com:facebook/immutable-js
+[submodule "smoke/assets/jquery"]
+	path = smoke/assets/jquery
+	url = git@github.com:jquery/jquery
+[submodule "smoke/assets/draft-js"]
+	path = smoke/assets/draft-js
+	url = git@github.com:facebook/draft-js
+[submodule "smoke/assets/html-minifier"]
+	path = smoke/assets/html-minifier
+	url = git@github.com:kangax/html-minifier
