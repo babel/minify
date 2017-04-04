@@ -1,7 +1,6 @@
 "use strict";
 
 const evaluate = require("babel-helper-evaluate-path");
-const jsesc = require("jsesc");
 
 module.exports = ({ types: t, traverse }) => {
   const seen = Symbol("seen");
@@ -55,7 +54,7 @@ module.exports = ({ types: t, traverse }) => {
       },
 
       // TODO: look into evaluating binding too (could result in more code, but gzip?)
-      Expression(path, { opts: { isScriptContext = false } }) {
+      Expression(path) {
         const { node } = path;
 
         if (node[seen]) {
@@ -119,11 +118,6 @@ module.exports = ({ types: t, traverse }) => {
               path.replaceWith(node);
               return;
             }
-          }
-
-          // https://github.com/babel/babili/issues/382
-          if (typeof res.value === "string" && isScriptContext) {
-            res.value = jsesc(res.value, { isScriptContext });
           }
 
           const node = t.valueToNode(res.value);
