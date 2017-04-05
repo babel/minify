@@ -17,7 +17,6 @@ const tests = [
   //   test: "grunt test",
   //   success: "872 passing",
   // },
-
   // {
   //   dir: "stylelint",
   //   files: "lib/**/*.js",
@@ -44,7 +43,6 @@ const tests = [
   //   build: "npm install && npm run build",
   //   test: "npm test",
   // },
-
   // PASS
   // {
   //   dir: "draft-js",
@@ -53,17 +51,18 @@ const tests = [
   //   test: "npm test",
   //   verbose: false
   // },
-  // {
-  //   dir: "immutable-js",
-  //   files: "dist/immutable.js",
-  //   build: "npm install && npm run build",
-  //   test: "npm run testonly",
-  //   babiliOptions: {
-  //     "unsafe": {
-  //       typeConstructors: false,
-  //     },
-  //   },
-  // },
+  {
+    dir: "immutable-js",
+    files: "dist/immutable.js",
+    build: "npm install && npm run build",
+    test: "npm run testonly",
+    verbose: true,
+    babiliOptions: {
+      unsafe: {
+        typeConstructors: false
+      }
+    }
+  }
   // {
   //   dir: "html-minifier",
   //   files: "src/htmlminifier.js",
@@ -74,7 +73,7 @@ const tests = [
 ];
 
 (function tick(test) {
-  smoke(test, () => {
+  smoke(test).then(() => {
     const test = tests.pop();
     test && tick(test);
   });
