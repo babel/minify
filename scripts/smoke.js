@@ -58,6 +58,7 @@ const tests = [
     test: "npm run testonly",
     verbose: true,
     babiliOptions: {
+      keepFnName: true,
       unsafe: {
         typeConstructors: false
       }
