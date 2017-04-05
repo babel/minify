@@ -1,6 +1,64 @@
+const program = require("commander");
 const smoke = require("./smoke-test.js");
 
-const tests = [
+const TESTS = [
+  {
+    dir: "html-minifier",
+    files: "src/htmlminifier.js",
+    build: "npm install && grunt dist",
+    test: "grunt qunit",
+    verbose: true
+  },
+  {
+    dir: "immutable-js",
+    files: "dist/immutable.js",
+    build: "npm install && npm run build",
+    test: "npm run testonly",
+    verbose: true,
+    babiliOptions: {
+      keepFnName: true,
+      unsafe: {
+        typeConstructors: false
+      }
+    }
+  }
+];
+
+function run() {
+  let inputTests = [];
+  program
+    .usage("[options] [inputTests...]")
+    .action(_inputTests => inputTests = _inputTests)
+    .option("-f --force", "Force rebuild")
+    .parse(process.argv);
+
+  console.log("tests to run - ", inputTests);
+
+  const testsToRun = [];
+  for (let test of TESTS) {
+    if (inputTests.indexOf(test.dir) !== -1) {
+      testsToRun.push(test);
+    }
+  }
+
+  if (testsToRun.length < 1) {
+    throw new Error("No Test to run");
+  }
+
+  (function tick(test) {
+    smoke(test).then(() => {
+      const test = testsToRun.pop();
+      test && tick(test);
+    });
+  })(testsToRun.pop());
+}
+
+/**
+ * Run the test
+ */
+run();
+
+const otherTests = [
   // {
   //   dir: "babel",
   //   files: "packages/babel-core/src/helpers/resolve.js",
@@ -51,32 +109,7 @@ const tests = [
   //   test: "npm test",
   //   verbose: false
   // },
-  // {
-  //   dir: "immutable-js",
-  //   files: "dist/immutable.js",
-  //   build: "npm install && npm run build",
-  //   test: "npm run testonly",
-  //   verbose: true,
-  //   babiliOptions: {
-  //     keepFnName: true,
-  //     unsafe: {
-  //       typeConstructors: false
-  //     }
-  //   }
-  // },
-  {
-    dir: "html-minifier",
-    files: "src/htmlminifier.js",
-    build: "npm install && grunt dist",
-    test: "grunt qunit",
-    success: "0 failed",
-    verbose: true
-  }
+  /**
+   * PASSED AND VERIFIED
+   */
 ];
-
-(function tick(test) {
-  smoke(test).then(() => {
-    const test = tests.pop();
-    test && tick(test);
-  });
-})(tests.pop());

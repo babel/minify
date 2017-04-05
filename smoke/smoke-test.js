@@ -82,7 +82,7 @@ class SmokeTest {
     });
   }
   minifyFile(file) {
-    this.log(`Minifying ${file}`);
+    this.log("Minifying", file);
     return readFile(file)
       .then(contents => this.minify(contents.toString()))
       .then(({ code }) => writeFile(file, code));
