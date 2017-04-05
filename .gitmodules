@@ -1,12 +1,12 @@
 [submodule "smoke/assets/immutable-js"]
 	path = smoke/assets/immutable-js
-	url = git@github.com:facebook/immutable-js
+	url = https://github.com/facebook/immutable-js
 [submodule "smoke/assets/jquery"]
 	path = smoke/assets/jquery
-	url = git@github.com:jquery/jquery
+	url = https://github.com/jquery/jquery
 [submodule "smoke/assets/draft-js"]
 	path = smoke/assets/draft-js
-	url = git@github.com:facebook/draft-js
+	url = https://github.com/facebook/draft-js
 [submodule "smoke/assets/html-minifier"]
 	path = smoke/assets/html-minifier
-	url = git@github.com:kangax/html-minifier
+	url = https://github.com/kangax/html-minifier
