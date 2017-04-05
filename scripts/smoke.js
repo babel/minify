@@ -51,26 +51,27 @@ const tests = [
   //   test: "npm test",
   //   verbose: false
   // },
-  {
-    dir: "immutable-js",
-    files: "dist/immutable.js",
-    build: "npm install && npm run build",
-    test: "npm run testonly",
-    verbose: true,
-    babiliOptions: {
-      keepFnName: true,
-      unsafe: {
-        typeConstructors: false
-      }
-    }
-  }
   // {
-  //   dir: "html-minifier",
-  //   files: "src/htmlminifier.js",
-  //   build: "npm install && grunt dist",
-  //   test: "grunt qunit",
-  //   success: "0 failed",
+  //   dir: "immutable-js",
+  //   files: "dist/immutable.js",
+  //   build: "npm install && npm run build",
+  //   test: "npm run testonly",
+  //   verbose: true,
+  //   babiliOptions: {
+  //     keepFnName: true,
+  //     unsafe: {
+  //       typeConstructors: false
+  //     }
+  //   }
   // },
+  {
+    dir: "html-minifier",
+    files: "src/htmlminifier.js",
+    build: "npm install && grunt dist",
+    test: "grunt qunit",
+    success: "0 failed",
+    verbose: true
+  }
 ];
 
 (function tick(test) {

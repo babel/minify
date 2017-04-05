@@ -27,29 +27,39 @@ class SmokeTest {
     // verify required
     required(options, ["dir", "files", "test"]);
 
-    this.path = path.join(__dirname, "../smoke/assets/", this.options.dir);
+    this.path = path.join(SMOKE_ASSETS_DIR, this.options.dir);
 
     this.buildCommand = this.options.build
       ? `cd ${this.path} && ${this.options.build}`
       : null;
 
     this.testCommand = `cd ${this.path} && ${this.options.test}`;
+
+    this.loggedStep = 1;
+  }
+  log(...messages) {
+    console.log(
+      chalk.cyan(`${this.loggedStep++}.`),
+      ...messages.map((m, i) => i === 0 ? chalk.cyan(m) : chalk.bold(m)),
+      "\n"
+    );
   }
   run() {
     return this.build()
       .then(() => this.minifyAll())
       .then(() => this.test())
       .catch(err => {
-        console.log("Errored - ", err);
+        this.log("Errored - ", err);
+        return Promise.reject(err);
       });
   }
   build() {
     if (this.buildCommand === null) {
-      console.log("skipping build");
+      this.log("No BuildCommand found. Skipping Build.");
       return Promise.resolve();
     }
 
-    console.log("building");
+    this.log("Building");
 
     return new Promise((resolve, reject) => {
       const buildProcess = exec(this.buildCommand, err => {
@@ -58,22 +68,21 @@ class SmokeTest {
       });
       if (this.options.verbose) {
         buildProcess.stdout.pipe(process.stdout);
+        buildProcess.stderr.pipe(process.stderr);
       }
     });
   }
   minifyAll() {
-    console.log("minifying all");
     return this.getAllFiles().then(files =>
       Promise.all(files.map(file => this.minifyFile(file))));
   }
   getAllFiles() {
-    console.log("getting glob - all files");
     return globFiles(`${this.path}/${this.options.files}`, {
       ignore: this.options.ignore
     });
   }
   minifyFile(file) {
-    console.log("minifying", file);
+    this.log(`Minifying ${file}`);
     return readFile(file)
       .then(contents => this.minify(contents.toString()))
       .then(({ code }) => writeFile(file, code));
@@ -85,6 +94,7 @@ class SmokeTest {
     });
   }
   test() {
+    this.log("Running Tests");
     return new Promise((resolve, reject) => {
       const testProcess = exec(this.testCommand, err => {
         if (err) return reject(err);
@@ -92,6 +102,7 @@ class SmokeTest {
       });
       if (this.options.verbose) {
         testProcess.stdout.pipe(process.stdout);
+        testProcess.stderr.pipe(process.stderr);
       }
     });
   }
