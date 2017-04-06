@@ -28,7 +28,7 @@ const TESTS = [
   },
   {
     dir: "lodash",
-    files: "dist/lodash.js",
+    files: "lodash.js",
     build: "npm run build:main",
     test: "npm run test:main"
   }

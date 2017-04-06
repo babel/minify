@@ -1,4 +1,6 @@
-const { exec } = require("child_process");
+const {
+  exec
+} = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const babel = require("babel-core");
@@ -23,7 +25,11 @@ const writeFile = promisify(fs.writeFile);
 class SmokeTest {
   constructor(
     options,
-    { skipInstall = false, skipBuild = false, verbose = true }
+    {
+      skipInstall = false,
+      skipBuild = false,
+      verbose = true
+    }
   ) {
     this.options = Object.assign({}, options);
     this.verbose = verbose;
@@ -103,7 +109,9 @@ class SmokeTest {
     this.log("Minifying", file);
     return readFile(file)
       .then(contents => this.minify(contents.toString()))
-      .then(({ code }) => writeFile(file, code));
+      .then(({
+        code
+      }) => writeFile(file, code));
   }
   minify(contents) {
     return babel.transform(contents, {
