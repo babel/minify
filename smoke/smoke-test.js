@@ -1,12 +1,11 @@
-const {
-  exec
-} = require("child_process");
+const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const babel = require("babel-core");
 const chalk = require("chalk");
 const glob = require("glob");
 const babiliPreset = require("../packages/babel-preset-babili");
+const breakMeTransform = require("./break");
 
 const SMOKE_ASSETS_DIR = path.join(__dirname, "../smoke/assets");
 
@@ -55,6 +54,7 @@ class SmokeTest {
 
     this.loggedStep = 1;
   }
+
   log(...messages) {
     console.log(
       chalk.cyan(`${this.loggedStep++}.`),
@@ -62,17 +62,21 @@ class SmokeTest {
       "\n"
     );
   }
+
   run() {
     return this.install()
       .then(() => this.build())
       .then(() => this.minifyAll())
       .then(() => this.test())
       .then(() => this.cleanup())
+      .then(() => this.verifyFailure())
+      .then(() => this.cleanup())
       .catch(err => {
         this.log("Errored - ", err);
         return Promise.reject(err);
       });
   }
+
   install() {
     if (this.skipInstall) {
       this.log("Skipping Install");
@@ -82,6 +86,7 @@ class SmokeTest {
     this.log("Installing Dependencies");
     return this.exec(this.installCommand);
   }
+
   build() {
     if (this.skipBuild) {
       this.log("Skipping Build");
@@ -96,37 +101,68 @@ class SmokeTest {
     this.log("Building");
     return this.exec(this.buildCommand);
   }
+
   minifyAll() {
     return this.getAllFiles().then(files =>
       Promise.all(files.map(file => this.minifyFile(file))));
   }
+
   getAllFiles() {
     return globFiles(`${this.path}/${this.options.files}`, {
       ignore: this.options.ignore
     });
   }
+
   minifyFile(file) {
     this.log("Minifying", file);
     return readFile(file)
       .then(contents => this.minify(contents.toString()))
-      .then(({
-        code
-      }) => writeFile(file, code));
+      .then(({ code }) => writeFile(file, code));
   }
+
   minify(contents) {
     return babel.transform(contents, {
       minified: true,
       presets: [[babiliPreset, this.options.babiliOptions]]
     });
   }
+
   test() {
     this.log("Running Tests");
     return this.exec(this.testCommand);
   }
+
+  verifyFailure() {
+    this.log("Verifying Failure case");
+    return this.getAllFiles()
+      .then(files =>
+        Promise.all(
+          files.map(file =>
+            readFile(file)
+              .then(contents => {
+                this.log("Applying breaking changes to", file);
+                return babel.transform(contents.toString(), {
+                  plugins: [breakMeTransform],
+                  minified: true
+                });
+              })
+              .then(({ code }) => writeFile(file, code)))
+        ))
+      .then(() => this.test())
+      .then(
+        () => Promise.reject(new Error("Verification of Breaking case failed")),
+        err => {
+          this.log("Error Verified -", err.message.toString().split("\n")[0]);
+          return Promise.resolve();
+        }
+      );
+  }
+
   cleanup() {
     this.log("Cleanup");
     return this.exec(this.cleanupCommand);
   }
+
   exec(command) {
     return new Promise((resolve, reject) => {
       const p = exec(command, err => err ? reject(err) : resolve());

@@ -65,10 +65,15 @@ function run() {
       skipInstall: program.skipInstall,
       skipBuild: program.skipBuild,
       verbose: !program.quiet
-    }).then(() => {
-      const test = testsToRun.pop();
-      test && tick(test);
-    });
+    })
+      .then(() => {
+        const test = testsToRun.pop();
+        test && tick(test);
+      })
+      .catch(err => {
+        console.error(err);
+        process.exit(1);
+      });
   })(testsToRun.pop());
 }
 
