@@ -10,6 +10,19 @@ node_js:
 - '6'
 - '4'
 
+# For smoke tests
+# for compiling immutable js
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.9
+
+env:
+  global:
+    - CXX=g++-4.9
+
 before_script:
 - yarn run bootstrap && yarn run build
 
