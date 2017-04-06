@@ -29,8 +29,10 @@ const TESTS = [
   {
     dir: "lodash",
     files: "lodash.js",
-    build: "npm run build:main",
-    test: "npm run test:main"
+    test: "npm run test:main",
+    babiliOptions: {
+      keepFnName: true
+    }
   }
 ];
 
