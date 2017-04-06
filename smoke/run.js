@@ -12,7 +12,7 @@ const TESTS = [
   {
     dir: "immutable-js",
     files: "dist/immutable.js",
-    build: "npm install && npm run build",
+    build: "npm install && npm run build:dist",
     test: "npm run testonly",
     verbose: true,
     babiliOptions: {
@@ -21,6 +21,13 @@ const TESTS = [
         typeConstructors: false
       }
     }
+  },
+  {
+    dir: "jquery",
+    files: "dist/jquery.js",
+    build: "npm run build",
+    test: "grunt test",
+    verbose: true
   }
 ];
 
@@ -67,13 +74,6 @@ const otherTests = [
   //   babelOptions: {
   //     plugins: ["syntax-flow"]
   //   }
-  // },
-  // {
-  //   dir: "jquery",
-  //   files: "dist/jquery.js",
-  //   build: "npm run build",
-  //   test: "grunt test",
-  //   success: "872 passing",
   // },
   // {
   //   dir: "stylelint",
