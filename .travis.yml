@@ -28,5 +28,7 @@ matrix:
       env: SMOKE=jquery SKIPTESTS=true
     - node_js: "node"
       env: SMOKE=immutable-js SKIPTESTS=true
+    - node_js: "node"
+      env: SMOKE=lodash SKIPTESTS=true
 
 after_success: yarn run coverage-ci
