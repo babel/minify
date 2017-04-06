@@ -28,6 +28,13 @@ const TESTS = [
     build: "npm run build",
     test: "grunt test",
     verbose: true
+  },
+  {
+    dir: "lodash",
+    files: "dist/lodash.js",
+    build: "npm install && npm run build:main",
+    test: "npm run test:main",
+    verbose: true
   }
 ];
 

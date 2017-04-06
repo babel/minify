@@ -14,3 +14,8 @@
 	path = smoke/assets/html-minifier
 	url = https://github.com/kangax/html-minifier
 	ignore = dirty
+[submodule "smoke/assets/lodash"]
+	path = smoke/assets/lodash
+	url = https://github.com/lodash/lodash/
+	branch = 4.17.4
+	ignore = dirty
