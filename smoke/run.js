@@ -5,16 +5,14 @@ const TESTS = [
   {
     dir: "html-minifier",
     files: "src/htmlminifier.js",
-    build: "npm install && grunt dist",
-    test: "grunt qunit",
-    verbose: true
+    build: "grunt dist",
+    test: "grunt qunit"
   },
   {
     dir: "immutable-js",
     files: "dist/immutable.js",
-    build: "npm install && npm run build:dist",
+    build: "npm run build:dist",
     test: "npm run testonly",
-    verbose: true,
     babiliOptions: {
       keepFnName: true,
       unsafe: {
@@ -26,15 +24,13 @@ const TESTS = [
     dir: "jquery",
     files: "dist/jquery.js",
     build: "npm run build",
-    test: "grunt test",
-    verbose: true
+    test: "grunt test"
   },
   {
     dir: "lodash",
     files: "dist/lodash.js",
-    build: "npm install && npm run build:main",
-    test: "npm run test:main",
-    verbose: true
+    build: "npm run build:main",
+    test: "npm run test:main"
   }
 ];
 
@@ -43,7 +39,10 @@ function run() {
   program
     .usage("[options] [inputTests...]")
     .action(_inputTests => inputTests = _inputTests)
-    .option("-f --force", "Force rebuild")
+    .option("-i --skip-install", "Skip Install Step")
+    .option("-b --skip-build", "Skip Build step")
+    .option("-c --skip-cleanup", "Skip cleanup step")
+    .option("-q --quiet", "Quiet mode")
     .parse(process.argv);
 
   console.log("tests to run - ", inputTests);
@@ -60,7 +59,11 @@ function run() {
   }
 
   (function tick(test) {
-    smoke(test).then(() => {
+    smoke(test, {
+      skipInstall: program.skipInstall,
+      skipBuild: program.skipBuild,
+      verbose: !program.quiet
+    }).then(() => {
       const test = testsToRun.pop();
       test && tick(test);
     });

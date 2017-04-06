@@ -21,19 +21,31 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
 class SmokeTest {
-  constructor(options) {
+  constructor(
+    options,
+    { skipInstall = false, skipBuild = false, verbose = true }
+  ) {
     this.options = Object.assign({}, options);
+    this.verbose = verbose;
+    this.skipBuild = skipBuild;
+    this.skipInstall = skipInstall;
 
     // verify required
     required(options, ["dir", "files", "test"]);
 
     this.path = path.join(SMOKE_ASSETS_DIR, this.options.dir);
 
+    this.installCommand = this.options.install
+      ? `cd ${this.path} && ${this.options.install}`
+      : `cd ${this.path} && npm install`;
+
     this.buildCommand = this.options.build
       ? `cd ${this.path} && ${this.options.build}`
       : null;
 
     this.testCommand = `cd ${this.path} && ${this.options.test}`;
+
+    this.cleanupCommand = `cd ${this.path} && git reset --hard HEAD`;
 
     this.loggedStep = 1;
   }
@@ -45,32 +57,38 @@ class SmokeTest {
     );
   }
   run() {
-    return this.build()
+    return this.install()
+      .then(() => this.build())
       .then(() => this.minifyAll())
       .then(() => this.test())
+      .then(() => this.cleanup())
       .catch(err => {
         this.log("Errored - ", err);
         return Promise.reject(err);
       });
   }
+  install() {
+    if (this.skipInstall) {
+      this.log("Skipping Install");
+      return Promise.resolve();
+    }
+
+    this.log("Installing Dependencies");
+    return this.exec(this.installCommand);
+  }
   build() {
+    if (this.skipBuild) {
+      this.log("Skipping Build");
+      return Promise.resolve();
+    }
+
     if (this.buildCommand === null) {
       this.log("No BuildCommand found. Skipping Build.");
       return Promise.resolve();
     }
 
     this.log("Building");
-
-    return new Promise((resolve, reject) => {
-      const buildProcess = exec(this.buildCommand, err => {
-        if (err) return reject(err);
-        resolve();
-      });
-      if (this.options.verbose) {
-        buildProcess.stdout.pipe(process.stdout);
-        buildProcess.stderr.pipe(process.stderr);
-      }
-    });
+    return this.exec(this.buildCommand);
   }
   minifyAll() {
     return this.getAllFiles().then(files =>
@@ -95,21 +113,25 @@ class SmokeTest {
   }
   test() {
     this.log("Running Tests");
+    return this.exec(this.testCommand);
+  }
+  cleanup() {
+    this.log("Cleanup");
+    return this.exec(this.cleanupCommand);
+  }
+  exec(command) {
     return new Promise((resolve, reject) => {
-      const testProcess = exec(this.testCommand, err => {
-        if (err) return reject(err);
-        resolve();
-      });
-      if (this.options.verbose) {
-        testProcess.stdout.pipe(process.stdout);
-        testProcess.stderr.pipe(process.stderr);
+      const p = exec(command, err => err ? reject(err) : resolve());
+      if (this.verbose) {
+        p.stdout.pipe(process.stdout);
+        p.stderr.pipe(process.stderr);
       }
     });
   }
 }
 
-module.exports = function smoke(options) {
-  const test = new SmokeTest(options);
+module.exports = function smoke(options, flags) {
+  const test = new SmokeTest(options, flags);
   return test.run();
 };
 
