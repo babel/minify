@@ -148,14 +148,18 @@ class SmokeTest {
               })
               .then(({ code }) => writeFile(file, code)))
         ))
-      .then(() => this.test())
-      .then(
-        () => Promise.reject(new Error("Verification of Breaking case failed")),
-        err => {
-          this.log("Error Verified -", err.message.toString().split("\n")[0]);
-          return Promise.resolve();
-        }
-      );
+      .then(() =>
+        // ensure the test fails
+        this.test().then(
+          () =>
+            // reject if it passes
+            Promise.reject(new Error("Verification of Breaking case failed")),
+          err => {
+            this.log("Error Verified -", err.message.toString().split("\n")[0]);
+            // and resolve if it fails
+            return Promise.resolve();
+          }
+        ));
   }
 
   cleanup() {
