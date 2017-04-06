@@ -10,10 +10,13 @@ node_js:
 - '6'
 - '4'
 
+before_script:
+- yarn run bootstrap && yarn run build
+
 script:
 - if [ -n "${LINT-}" ]; then yarn run lint ; fi
 - if [ -n "${SMOKE-}" ]; then node smoke/run.js $SMOKE; fi
-- if [ -z "${SKIPTESTS-}" ]; then yarn run test-ci; fi
+- if [ -z "${SKIPTESTS-}" ]; then yarn run coverage; fi
 
 matrix:
   include:
