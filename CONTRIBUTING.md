@@ -74,6 +74,49 @@ To run tests for a specific package,
 npm test packages/babel-preset-babili
 ```
 
+#### Smoke Tests
+
+Prepare:
+
+```sh
+git submodule init
+git submodule update
+```
+
+Run:
+
+```sh
+node smoke/run.js [options] [inputTests...]
+```
+
+Usage:
+
+```
+Usage: run [options] [inputTests...]
+
+  Options:
+
+    -h, --help         output usage information
+    -i --skip-install  Skip Install Step
+    -b --skip-build    Skip Build step
+    -c --skip-cleanup  Skip cleanup step
+    -q --quiet         Quiet mode
+```
+
+Example:
+
+To build and test `lodash`,
+
+```sh
+node smoke/run.js lodash
+```
+
+To run smoke test without re-building and re-installing again
+
+```sh
+node smoke/run.js -ib lodash
+```
+
 #### Benchmarks
 
 [benchmark.js](scripts/benchmark.js) compares Babili with [Uglify](https://github.com/mishoo/UglifyJS2), [Closure Compiler](https://github.com/google/closure-compiler) and [Closure Compiler JS](https://github.com/google/closure-compiler-js)
