@@ -10,6 +10,9 @@ case $CIRCLE_NODE_INDEX in
   2)
     node smoke/run.js lodash
   ;;
+  3)
+    echo "Nothing to run"
+  ;;
   *)
     echo "Cannot run outside CircleCI environment"
     exit 1
