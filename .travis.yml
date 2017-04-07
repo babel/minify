@@ -10,14 +10,38 @@ node_js:
 - '6'
 - '4'
 
+# For smoke tests
+# for compiling immutable js
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.9
+
+env:
+  global:
+    - CXX=g++-4.9
+
+before_script:
+- yarn run bootstrap && yarn run build
+
 script:
-- 'if [ -n "${LINT-}" ]; then yarn run lint ; fi'
-- yarn run test-ci
+- if [ -n "${LINT-}" ]; then yarn run lint ; fi
+- if [ -n "${SMOKE-}" ]; then node smoke/run.js $SMOKE; fi
+- if [ -z "${SKIPTESTS-}" ]; then yarn run coverage; fi
 
 matrix:
-  fast_finish: true
   include:
     - node_js: "node"
-      env: LINT=true
+      env: LINT=true SKIPTESTS=true
+    - node_js: "node"
+      env: SMOKE=html-minifier SKIPTESTS=true
+    - node_js: "node"
+      env: SMOKE=jquery SKIPTESTS=true
+    - node_js: "node"
+      env: SMOKE=immutable-js SKIPTESTS=true
+    - node_js: "node"
+      env: SMOKE=lodash SKIPTESTS=true
 
 after_success: yarn run coverage-ci
