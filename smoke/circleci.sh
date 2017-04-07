@@ -5,12 +5,9 @@ case $CIRCLE_NODE_INDEX in
     node smoke/run.js html-minifier
   ;;
   1)
-    node smoke/run.js immutable-js
-  ;;
-  2)
     node smoke/run.js jquery
   ;;
-  3)
+  2)
     node smoke/run.js lodash
   ;;
   *)
