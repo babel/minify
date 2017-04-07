@@ -16,6 +16,6 @@
 	ignore = dirty
 [submodule "smoke/assets/lodash"]
 	path = smoke/assets/lodash
-	url = https://github.com/lodash/lodash/
+	url = https://github.com/lodash/lodash
 	branch = 4.17.4
 	ignore = dirty
