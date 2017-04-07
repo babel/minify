@@ -1,0 +1,25 @@
+---
+
+machine:
+  node:
+    version: "node"
+
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
+
+dependencies:
+  override:
+    - yarn
+
+test:
+  override:
+    - node smoke/run.js:
+        parallel: true
+        files:
+          - html-minifier
+          - immutable-js
+          - jquery
+          - lodash
+
