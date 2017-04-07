@@ -12,6 +12,8 @@ checkout:
 dependencies:
   override:
     - yarn
+  post:
+    - yarn run bootstrap && yarn run build
 
 test:
   override:
