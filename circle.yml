@@ -1,0 +1,23 @@
+---
+
+machine:
+  node:
+    version: "node"
+  environment:
+    PATH: $PATH:./node_modules/.bin
+
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init --recursive
+
+dependencies:
+  override:
+    - yarn
+  post:
+    - yarn run bootstrap && yarn run build
+
+test:
+  override:
+    - ./smoke/circleci.sh:
+        parallel: true

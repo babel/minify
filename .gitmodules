@@ -1,7 +1,3 @@
-[submodule "smoke/assets/immutable-js"]
-	path = smoke/assets/immutable-js
-	url = https://github.com/facebook/immutable-js
-	ignore = dirty
 [submodule "smoke/assets/jquery"]
 	path = smoke/assets/jquery
 	url = https://github.com/jquery/jquery
@@ -16,6 +12,6 @@
 	ignore = dirty
 [submodule "smoke/assets/lodash"]
 	path = smoke/assets/lodash
-	url = https://github.com/lodash/lodash/
+	url = https://github.com/lodash/lodash
 	branch = 4.17.4
 	ignore = dirty
