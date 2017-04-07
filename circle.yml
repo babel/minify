@@ -15,11 +15,5 @@ dependencies:
 
 test:
   override:
-    - node smoke/run.js:
+    - ./smoke/circleci.sh:
         parallel: true
-        files:
-          - smoke/assets/html-minifier
-          - smoke/assets/immutable-js
-          - smoke/assets/jquery
-          - smoke/assets/lodash
-
