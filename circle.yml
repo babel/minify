@@ -7,7 +7,7 @@ machine:
 checkout:
   post:
     - git submodule sync
-    - git submodule update --init
+    - git submodule update --init --recursive
 
 dependencies:
   override:
@@ -18,8 +18,8 @@ test:
     - node smoke/run.js:
         parallel: true
         files:
-          - html-minifier
-          - immutable-js
-          - jquery
-          - lodash
+          - smoke/assets/html-minifier
+          - smoke/assets/immutable-js
+          - smoke/assets/jquery
+          - smoke/assets/lodash
 
