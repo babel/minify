@@ -3,6 +3,8 @@
 machine:
   node:
     version: "node"
+  environment:
+    PATH: $PATH:./node_modules/.bin
 
 checkout:
   post:
