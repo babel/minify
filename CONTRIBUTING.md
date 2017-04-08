@@ -119,19 +119,19 @@ node smoke/run.js -ib lodash
 
 #### Benchmarks
 
-[benchmark.js](scripts/benchmark.js) compares Babili with [Uglify](https://github.com/mishoo/UglifyJS2), [Closure Compiler](https://github.com/google/closure-compiler) and [Closure Compiler JS](https://github.com/google/closure-compiler-js)
+[benchmark.js](https://github.com/babel/babili/blob/master/scripts/benchmark.js) compares Babili with [Uglify](https://github.com/mishoo/UglifyJS2), [Closure Compiler](https://github.com/google/closure-compiler) and [Closure Compiler JS](https://github.com/google/closure-compiler-js)
 
 ```sh
 ./scripts/benchmark.js [file...]
 ```
 
-[plugin-timing.js](scripts/plugin-timing.js) is used to calculate and compare the time spent in each plugin.
+[plugin-timing.js](https://github.com/babel/babili/blob/master/scripts/plugin-timing.js) is used to calculate and compare the time spent in each plugin.
 
 ```sh
 ./scripts/plugin-timing.js file.js
 ```
 
-[plugin-contribution.js](scripts/plugin-contribution.js) calculates how much each plugin of babili contributes to size reduction.
+[plugin-contribution.js](https://github.com/babel/babili/blob/master/scripts/plugin-contribution.js) calculates how much each plugin of babili contributes to size reduction.
 
 ```sh
 ./scripts/plugin-contribution.js file.js
