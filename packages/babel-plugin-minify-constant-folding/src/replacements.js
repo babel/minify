@@ -1,14 +1,14 @@
-const other = Symbol('other');
+const other = Symbol("other");
 
 module.exports = ({ types: t }) => {
-  const undef = t.identifier('undefined');
+  const undef = t.identifier("undefined");
 
   function defaultZero(cb) {
     return function(i = t.numericLiteral(0), ...args) {
       if (t.isNumericLiteral(i)) {
         return cb.call(this, this, i.value, ...args);
       }
-    }
+    };
   }
 
   return {
@@ -18,28 +18,34 @@ module.exports = ({ types: t }) => {
           return t.numericLiteral(this.elements.length);
         },
         [other](i) {
-          if (typeof i === 'number' || i.match(/^\d+$/)) {
+          if (typeof i === "number" || i.match(/^\d+$/)) {
             return this.elements[i] || undef;
           }
         }
       },
       calls: {
         concat(...args) {
-          return t.arrayExpression(this.elements.concat(...args.map(arg => {
-            if (t.isArrayExpression(arg)) return arg.elements;
-            return arg;
-          })));
+          return t.arrayExpression(
+            this.elements.concat(
+              ...args.map(arg => {
+                if (t.isArrayExpression(arg)) return arg.elements;
+                return arg;
+              })
+            )
+          );
         },
-        join(sep = t.stringLiteral(',')) {
+        join(sep = t.stringLiteral(",")) {
           if (!t.isStringLiteral(sep)) return;
           let bad = false;
-          const str = this.elements.map(el => {
-            if (!t.isLiteral(el)) {
-              bad = true;
-              return;
-            }
-            return el.value;
-          }).join(sep.value);
+          const str = this.elements
+            .map(el => {
+              if (!t.isLiteral(el)) {
+                bad = true;
+                return;
+              }
+              return el.value;
+            })
+            .join(sep.value);
           return bad ? undefined : t.stringLiteral(str);
         },
         push(...args) {
@@ -55,7 +61,9 @@ module.exports = ({ types: t }) => {
           if (!t.isNumericLiteral(start) || (end && !t.isNumericLiteral(end))) {
             return;
           }
-          return t.arrayExpression(this.elements.slice(start.value, end && end.value))
+          return t.arrayExpression(
+            this.elements.slice(start.value, end && end.value)
+          );
         },
         pop() {
           return this.elements[this.elements.length - 1] || undef;
@@ -70,9 +78,11 @@ module.exports = ({ types: t }) => {
           if (end) {
             args.unshift(end.value);
           }
-          return t.arrayExpression(this.elements.slice().splice(start.value, ...args));
-        },
-      },
+          return t.arrayExpression(
+            this.elements.slice().splice(start.value, ...args)
+          );
+        }
+      }
     },
     StringLiteral: {
       members: {
@@ -80,7 +90,7 @@ module.exports = ({ types: t }) => {
           return t.numericLiteral(this.value.length);
         },
         [other](i) {
-          if (typeof i === 'number' || i.match(/^\d+$/)) {
+          if (typeof i === "number" || i.match(/^\d+$/)) {
             const ch = this.value[i];
             return ch ? t.stringLiteral(ch) : undef;
           }
@@ -92,18 +102,22 @@ module.exports = ({ types: t }) => {
           if (t.isStringLiteral(sep)) {
             realSep = sep.value;
           }
-          if (t.isIdentifier(sep, { name: 'undefined' })) {
+          if (t.isIdentifier(sep, { name: "undefined" })) {
             realSep = sep;
           }
           if (realSep !== null) {
-            return t.arrayExpression(this.value.split(realSep).map(str => t.stringLiteral(str)));
+            return t.arrayExpression(
+              this.value.split(realSep).map(str => t.stringLiteral(str))
+            );
           }
         },
         charAt: defaultZero(({ value }, i) => t.stringLiteral(value.charAt(i))),
-        charCodeAt: defaultZero(({ value }, i) => t.numericLiteral(value.charCodeAt(i))),
-        codePointAt: defaultZero(({ value }, i) => t.numericLiteral(value.codePointAt(i))),
+        charCodeAt: defaultZero(({ value }, i) =>
+          t.numericLiteral(value.charCodeAt(i))),
+        codePointAt: defaultZero(({ value }, i) =>
+          t.numericLiteral(value.codePointAt(i)))
       }
     }
-  }
+  };
 };
 module.exports.other = other;

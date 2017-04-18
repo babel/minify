@@ -233,12 +233,12 @@ describe("constant-folding-plugin", () => {
       98;
       3;
 
-      ${0xD83D};
-      ${0xDC4D};
-      ${0x1F44D};
-      ${0xDC4D};
+      ${0xd83d};
+      ${0xdc4d};
+      ${0x1f44d};
+      ${0xdc4d};
     `
     );
     expect(transform(source)).toBe(expected);
-  })
+  });
 });

@@ -2,15 +2,15 @@
 
 const evaluate = require("babel-helper-evaluate-path");
 
-const { other } = require('./replacements');
+const { other } = require("./replacements");
 
 function getName(member) {
   if (member.computed) {
     switch (member.property.type) {
-      case 'StringLiteral':
-      case 'NumericLiteral':
+      case "StringLiteral":
+      case "NumericLiteral":
         return member.property.value;
-      case 'TemplateLiteral':
+      case "TemplateLiteral":
         return;
     }
   } else {
@@ -22,8 +22,8 @@ function swap(path, member, handlers, ...args) {
   const key = getName(member);
   if (key === undefined) return;
   let handler = handlers[key];
-  if (typeof handler !== 'function') {
-    if (typeof handlers[other] === 'function') {
+  if (typeof handler !== "function") {
+    if (typeof handlers[other] === "function") {
       handler = handlers[other].bind(member.object, key);
     } else {
       return false;
@@ -38,7 +38,7 @@ function swap(path, member, handlers, ...args) {
 }
 
 module.exports = babel => {
-  const replacements = require('./replacements.js')(babel);
+  const replacements = require("./replacements.js")(babel);
   const seen = Symbol("seen");
   const { types: t, traverse } = babel;
 
