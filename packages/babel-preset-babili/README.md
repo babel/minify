@@ -74,6 +74,7 @@ The following options have 1-1 mapping with a plugin,
 + `numericLiterals` - [babel-plugin-minify-numeric-literals](../../packages/babel-plugin-minify-numeric-literals)
 + `replace` - [babel-plugin-minify-replace](../../packages/babel-plugin-minify-replace)
 + `simplify` - [babel-plugin-minify-simplify](../../packages/babel-plugin-minify-simplify)
++ `builtIns` - [babel-plugin-minify-builtins](../../packages/babel-plugin-minify-builtins)
 + `mergeVars` - [babel-plugin-transform-merge-sibling-variables](../../packages/babel-plugin-transform-merge-sibling-variables)
 + `booleans` - [babel-plugin-transform-minify-booleans](../../packages/babel-plugin-transform-minify-booleans)
 + `regexpConstructors` - [babel-plugin-transform-regexp-constructors](../../packages/babel-plugin-transform-regexp-constructors)
