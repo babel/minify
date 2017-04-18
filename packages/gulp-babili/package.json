@@ -13,7 +13,7 @@
     "babili"
   ],
   "dependencies": {
-    "babel-core": "^6.24.0",
+    "babel-core": "^6.24.1",
     "babel-preset-babili": "^0.0.12",
     "vinyl-sourcemaps-apply": "^0.2.1"
   },
