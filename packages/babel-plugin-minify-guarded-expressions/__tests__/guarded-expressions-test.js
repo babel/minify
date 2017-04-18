@@ -178,4 +178,16 @@ describe("guarded-expressions-plugin", () => {
     );
     expect(transform(source)).toBe(source);
   });
+
+  it("should not minify side effecty member expression checks", () => {
+    let source = unpad(
+      `
+      {
+        var a = {};
+      }
+      var b = a && a[foo];
+    `
+    );
+    expect(transform(source)).toBe(source);
+  });
 });
