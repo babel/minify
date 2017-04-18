@@ -19,25 +19,22 @@ module.exports = ({ types: t }) => {
         },
         [other](i) {
           if (typeof i === 'number' || i.match(/^\d+$/)) {
-            return this.elements[i];
+            return this.elements[i] || undef;
           }
         }
       },
       calls: {
         concat(...args) {
-          let bad = false;
-          this.elements = this.elements.concat(...args.map(arg => {
+          return t.arrayExpression(this.elements.concat(...args.map(arg => {
             if (t.isArrayExpression(arg)) return arg.elements;
             return arg;
-          }));
-          return bad ? undefined : this;
+          })));
         },
         join(sep = t.stringLiteral(',')) {
-          if (this.elements.some(el => el.value === undefined)) return;
           if (!t.isStringLiteral(sep)) return;
           let bad = false;
           const str = this.elements.map(el => {
-            if (!el.type.match(/Literal$/)) {
+            if (!t.isLiteral(el)) {
               bad = true;
               return;
             }

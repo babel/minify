@@ -110,18 +110,16 @@ describe("constant-folding-plugin", () => {
       [1, 2, 3].concat([4, 5, 6]);
       [a, b, c].concat([d, e], f, g, [h]);
       [1, 2, 3]["concat"]([4, 5, 6]);
-      [1, 2, 3][concat]([4, 5, 6]);
       [1, 2, 3].push([4, 5, 6]);
 
       [1, 2, 3].join();
       ["a", "b", "c"].join();
-      [a, "b", "c"].join();
-      ["a", "b", "c"].join(a);
       ["a", "b", "c"].join("@");
 
       [1, 2, 3].length;
       [1, 2, 3][1];
       [1, 2, 3]["1"];
+      [1, 2, 3][4];
 
       [].shift();
       [1, 2, 3].shift();
@@ -139,6 +137,7 @@ describe("constant-folding-plugin", () => {
       [1, 2, 3].reverse();
 
       [1, 2, 3].splice(1);
+      [1, 2, 3, 4].splice(1, 2);
     `
     );
     const expected = unpad(
@@ -146,18 +145,16 @@ describe("constant-folding-plugin", () => {
       [1, 2, 3, 4, 5, 6];
       [a, b, c, d, e, f, g, h];
       [1, 2, 3, 4, 5, 6];
-      [1, 2, 3][concat]([4, 5, 6]);
       4;
 
       "1,2,3";
       "a,b,c";
-      [a, "b", "c"].join();
-      ["a", "b", "c"].join(a);
       "a@b@c";
 
       3;
       2;
       2;
+      undefined;
 
       undefined;
       2;
@@ -175,9 +172,30 @@ describe("constant-folding-plugin", () => {
       [3, 2, 1];
 
       [2, 3];
+      [2, 3];
     `
     );
     expect(transform(source)).toBe(expected);
+  });
+  it("should ignore bad calls to array expression methods", () => {
+    const source = unpad(
+      `
+      [1, 2, 3][concat]([4, 5, 6]);
+      [a, "b", "c"].join();
+      ["a", "b", "c"].join(a);
+      [1, 2, 3].splice("a");
+    `
+    );
+    expect(transform(source)).toBe(source);
+  });
+  it("should ignore bad calls to string expression methods", () => {
+    const source = unpad(
+      `
+      "abc".something;
+      "abc"["something"];
+    `
+    );
+    expect(transform(source)).toBe(source);
   });
   it("should handle String methods on string literals", () => {
     const source = unpad(
@@ -187,9 +205,17 @@ describe("constant-folding-plugin", () => {
       "a,b,c".split();
       "abc"[0];
       "abc"["0"];
+      "abc"[4];
       "abc".charAt();
       "abc".charAt(1);
+      "abc".charCodeAt();
+      "abc".charCodeAt(1);
       "abc".length;
+
+      "\u{1f44d}".charCodeAt();
+      "\u{1f44d}".charCodeAt(1);
+      "\u{1f44d}".codePointAt();
+      "\u{1f44d}".codePointAt(1);
     `
     );
 
@@ -200,9 +226,17 @@ describe("constant-folding-plugin", () => {
       ["a,b,c"];
       "a";
       "a";
+      undefined;
       "a";
       "b";
+      97;
+      98;
       3;
+
+      ${0xD83D};
+      ${0xDC4D};
+      ${0x1F44D};
+      ${0xDC4D};
     `
     );
     expect(transform(source)).toBe(expected);
