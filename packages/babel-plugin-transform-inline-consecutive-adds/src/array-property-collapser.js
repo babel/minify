@@ -75,8 +75,8 @@ class ArrayPropertyCollapser extends Collapser {
     ) {
       return false;
     }
-    const statementsLength = statements[statements.length - 1].node.end -
-      varDecl.node.end;
+    const statementsLength =
+      statements[statements.length - 1].node.end - varDecl.node.end;
 
     // Approx. formula of the change in `init`'s length =
     // (# commas added) + (size of all the new rvals added), where

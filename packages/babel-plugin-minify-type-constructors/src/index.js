@@ -68,9 +68,8 @@ function replaceObject(t, path) {
   ) {
     const isVoid0 = require("babel-helper-is-void-0")(t);
     const arg = node.arguments[0];
-    const binding = arg &&
-      t.isIdentifier(arg) &&
-      path.scope.getBinding(arg.name);
+    const binding =
+      arg && t.isIdentifier(arg) && path.scope.getBinding(arg.name);
 
     // Object() -> {}
     if (node.arguments.length === 0) {

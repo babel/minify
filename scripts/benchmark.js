@@ -221,7 +221,8 @@ class Printer {
         if (item.isMin) return this.green(col);
         if (item.isMax) return this.red(col);
         return col;
-      }));
+      })
+    );
   }
   bold(col) {
     return this.target === "MD" ? `**${col}**` : chalk.bold(col);
@@ -263,7 +264,8 @@ class AssetsManager {
       files
         .filter(filename => !pathExists(this.filePath(filename)))
         .map(filename =>
-          this.download(this.assets[filename], this.filePath(filename)))
+          this.download(this.assets[filename], this.filePath(filename))
+        )
     ).then(() => files.map(filename => this.filePath(filename)));
   }
   download(url, dest) {

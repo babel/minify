@@ -212,7 +212,8 @@ describe("type-constructors-plugin", () => {
       ]
     `
     );
-    const expected = '[Object("undefined"), Object(nulled), Object(0), Object(false), Object(stuff())];';
+    const expected =
+      '[Object("undefined"), Object(nulled), Object(0), Object(false), Object(stuff())];';
     expect(transform(source)).toBe(expected);
   });
 
@@ -228,7 +229,8 @@ describe("type-constructors-plugin", () => {
       ]
     `
     );
-    const expected = '[Object("function"), Object(Symbol), Object(true), Object(1), Object(call({ me: true }))];';
+    const expected =
+      '[Object("function"), Object(Symbol), Object(true), Object(1), Object(call({ me: true }))];';
     expect(transform(source)).toBe(expected);
   });
 

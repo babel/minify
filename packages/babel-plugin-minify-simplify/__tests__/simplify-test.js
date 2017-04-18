@@ -72,7 +72,8 @@ describe("simplify-plugin", () => {
       }
     `
     );
-    const expected = "for (var x = 0; x < 10; x++) console.log(x), console.log(x);";
+    const expected =
+      "for (var x = 0; x < 10; x++) console.log(x), console.log(x);";
 
     expect(transform(source).trim()).toBe(expected);
   });

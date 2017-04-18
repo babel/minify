@@ -232,9 +232,7 @@ module.exports = ({ types: t }) => {
             return evalResult.confident && input.isPure() && !evalResult.value;
           };
 
-          const {
-            Expression: EX
-          } = types;
+          const { Expression: EX } = types;
 
           // Convention:
           // [left, operator, right, handler(leftNode, rightNode)]
@@ -276,9 +274,8 @@ module.exports = ({ types: t }) => {
           return;
         }
 
-        const canBeUpdateExpression = rightExpr
-          .get("right")
-          .isNumericLiteral() &&
+        const canBeUpdateExpression =
+          rightExpr.get("right").isNumericLiteral() &&
           rightExpr.get("right").node.value === 1 &&
           updateOperators.has(rightExpr.node.operator);
 
@@ -351,10 +348,7 @@ module.exports = ({ types: t }) => {
             const consequent = path.get("consequent");
             const alternate = path.get("alternate");
 
-            const {
-              Expression: EX,
-              LogicalExpression: LE
-            } = types;
+            const { Expression: EX, LogicalExpression: LE } = types;
 
             // Convention:
             // ===============
@@ -495,7 +489,8 @@ module.exports = ({ types: t }) => {
             }
 
             const test = tests.reduce((expr, curTest) =>
-              t.logicalExpression("||", expr, curTest));
+              t.logicalExpression("||", expr, curTest)
+            );
 
             path.replaceWith(t.conditionalExpression(test, VOID_0, alt));
           }
@@ -1500,25 +1495,31 @@ module.exports = ({ types: t }) => {
   }
 
   function needsBlock(node, parent) {
-    return (t.isFunction(parent) && node === parent.body) ||
+    return (
+      (t.isFunction(parent) && node === parent.body) ||
       t.isTryStatement(parent) ||
       t.isCatchClause(parent) ||
       t.isSwitchStatement(parent) ||
-      (isSingleBlockScopeDeclaration(node) && t.isIfStatement(parent));
+      (isSingleBlockScopeDeclaration(node) && t.isIfStatement(parent))
+    );
   }
 
   function isSingleBlockScopeDeclaration(block) {
-    return t.isBlockStatement(block) &&
+    return (
+      t.isBlockStatement(block) &&
       block.body.length === 1 &&
       (t.isVariableDeclaration(block.body[0], { kind: "let" }) ||
         t.isVariableDeclaration(block.body[0], { kind: "const" }) ||
-        t.isFunctionDeclaration(block.body[0]));
+        t.isFunctionDeclaration(block.body[0]))
+    );
   }
 
   function isVoid0(expr) {
-    return expr === VOID_0 ||
+    return (
+      expr === VOID_0 ||
       (t.isUnaryExpression(expr, { operator: "void" }) &&
-        t.isNumericLiteral(expr.argument, { value: 0 }));
+        t.isNumericLiteral(expr.argument, { value: 0 }))
+    );
   }
 
   function earlyReturnTransform(path) {

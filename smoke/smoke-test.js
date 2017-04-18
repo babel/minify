@@ -9,13 +9,13 @@ const breakMeTransform = require("./break");
 
 const SMOKE_ASSETS_DIR = path.join(__dirname, "../smoke/assets");
 
-const promisify = fn =>
-  (...args) =>
-    new Promise((resolve, reject) =>
-      fn.apply(null, [
-        ...args,
-        (err, result) => err ? reject(err) : resolve(result)
-      ]));
+const promisify = fn => (...args) =>
+  new Promise((resolve, reject) =>
+    fn.apply(null, [
+      ...args,
+      (err, result) => (err ? reject(err) : resolve(result))
+    ])
+  );
 
 const globFiles = promisify(glob);
 const readFile = promisify(fs.readFile);
@@ -24,11 +24,7 @@ const writeFile = promisify(fs.writeFile);
 class SmokeTest {
   constructor(
     options,
-    {
-      skipInstall = false,
-      skipBuild = false,
-      verbose = true
-    }
+    { skipInstall = false, skipBuild = false, verbose = true }
   ) {
     this.options = Object.assign({}, options);
     this.verbose = verbose;
@@ -58,7 +54,7 @@ class SmokeTest {
   log(...messages) {
     console.log(
       chalk.cyan(`${this.loggedStep++}.`),
-      ...messages.map((m, i) => i === 0 ? chalk.cyan(m) : chalk.bold(m)),
+      ...messages.map((m, i) => (i === 0 ? chalk.cyan(m) : chalk.bold(m))),
       "\n"
     );
   }
@@ -104,7 +100,8 @@ class SmokeTest {
 
   minifyAll() {
     return this.getAllFiles().then(files =>
-      Promise.all(files.map(file => this.minifyFile(file))));
+      Promise.all(files.map(file => this.minifyFile(file)))
+    );
   }
 
   getAllFiles() {
@@ -146,8 +143,10 @@ class SmokeTest {
                   minified: true
                 });
               })
-              .then(({ code }) => writeFile(file, code)))
-        ))
+              .then(({ code }) => writeFile(file, code))
+          )
+        )
+      )
       .then(() =>
         // ensure the test fails
         this.test().then(
@@ -159,7 +158,8 @@ class SmokeTest {
             // and resolve if it fails
             return Promise.resolve();
           }
-        ));
+        )
+      );
   }
 
   cleanup() {
@@ -169,7 +169,7 @@ class SmokeTest {
 
   exec(command) {
     return new Promise((resolve, reject) => {
-      const p = exec(command, err => err ? reject(err) : resolve());
+      const p = exec(command, err => (err ? reject(err) : resolve()));
       if (this.verbose) {
         p.stdout.pipe(process.stdout);
         p.stderr.pipe(process.stderr);

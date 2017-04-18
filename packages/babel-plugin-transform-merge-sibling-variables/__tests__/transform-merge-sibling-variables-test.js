@@ -38,7 +38,8 @@ describe("transform-merge-sibling-variables-plugin", () => {
       for (var x = 0; x < 10; x++) console.log(i + x);
     `
     );
-    const expected = "for (var i = 0, j = 0, x = 0; x < 10; x++) console.log(i + x);";
+    const expected =
+      "for (var i = 0, j = 0, x = 0; x < 10; x++) console.log(i + x);";
 
     expect(transform(source).trim()).toBe(expected);
   });

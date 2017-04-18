@@ -93,7 +93,8 @@ module.exports = ({ types: t, traverse }) => {
 
           if (assignmentSequence.length) {
             mutations.push(() =>
-              declarPath.replaceWith(t.sequenceExpression(assignmentSequence)));
+              declarPath.replaceWith(t.sequenceExpression(assignmentSequence))
+            );
           } else {
             mutations.push(() => removeOrVoid(declarPath));
           }
@@ -330,7 +331,8 @@ module.exports = ({ types: t, traverse }) => {
               let bail = false;
 
               if (replacementPath.isIdentifier()) {
-                bail = refPath.scope.getBinding(replacement.name) !==
+                bail =
+                  refPath.scope.getBinding(replacement.name) !==
                   scope.getBinding(replacement.name);
               } else {
                 replacementPath.traverse({
@@ -342,7 +344,8 @@ module.exports = ({ types: t, traverse }) => {
                     if (bail) {
                       return;
                     }
-                    bail = refPath.scope.getBinding(node.name) !==
+                    bail =
+                      refPath.scope.getBinding(node.name) !==
                       scope.getBinding(node.name);
                   }
                 });
@@ -365,7 +368,8 @@ module.exports = ({ types: t, traverse }) => {
               let mayLoop = false;
               const sharesRoot = refPath.find(({ node }) => {
                 if (!mayLoop) {
-                  mayLoop = t.isWhileStatement(node) ||
+                  mayLoop =
+                    t.isWhileStatement(node) ||
                     t.isFor(node) ||
                     t.isFunction(node);
                 }
@@ -377,8 +381,8 @@ module.exports = ({ types: t, traverse }) => {
                 t.isFunction(n) ||
                 t.isObjectExpression(n) ||
                 t.isArrayExpression(n);
-              const isReplacementObj = isObj(replacement) ||
-                some(replacement, isObj);
+              const isReplacementObj =
+                isObj(replacement) || some(replacement, isObj);
 
               if (!sharesRoot || (isReplacementObj && mayLoop)) {
                 continue;
@@ -1037,9 +1041,7 @@ module.exports = ({ types: t, traverse }) => {
 
   // tells if a "stmt" is a break/continue statement
   function isControlTransfer(stmt, path, control = "break") {
-    const {
-      [control]: type
-    } = {
+    const { [control]: type } = {
       break: "BreakStatement",
       continue: "ContinueStatement"
     };
@@ -1155,8 +1157,10 @@ module.exports = ({ types: t, traverse }) => {
 
   // things that are hoisted
   function canExistAfterCompletion(path) {
-    return path.isFunctionDeclaration() ||
-      path.isVariableDeclaration({ kind: "var" });
+    return (
+      path.isFunctionDeclaration() ||
+      path.isVariableDeclaration({ kind: "var" })
+    );
   }
 
   function getLabel(name, _path) {

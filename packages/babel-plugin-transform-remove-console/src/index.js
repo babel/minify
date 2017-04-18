@@ -40,9 +40,11 @@ module.exports = function({ types: t }) {
 
   function isGlobalConsoleId(id) {
     const name = "console";
-    return id.isIdentifier({ name }) &&
+    return (
+      id.isIdentifier({ name }) &&
       !id.scope.getBinding(name) &&
-      id.scope.hasGlobal(name);
+      id.scope.hasGlobal(name)
+    );
   }
 
   function isConsole(memberExpr) {
@@ -50,16 +52,20 @@ module.exports = function({ types: t }) {
     if (isGlobalConsoleId(object)) return true;
 
     const property = memberExpr.get("property");
-    return isGlobalConsoleId(object.get("object")) &&
+    return (
+      isGlobalConsoleId(object.get("object")) &&
       (property.isIdentifier({ name: "call" }) ||
-        property.isIdentifier({ name: "apply" }));
+        property.isIdentifier({ name: "apply" }))
+    );
   }
 
   function isConsoleBind(memberExpr) {
     const object = memberExpr.get("object");
-    return object.isMemberExpression() &&
+    return (
+      object.isMemberExpression() &&
       isGlobalConsoleId(object.get("object")) &&
-      memberExpr.get("property").isIdentifier({ name: "bind" });
+      memberExpr.get("property").isIdentifier({ name: "bind" })
+    );
   }
 
   function createNoop() {

@@ -167,30 +167,27 @@ function resolveTypeGroup(option, inputOpts) {
   if (!hop(inputOpts, option.name)) {
     const newInputOpts = option.children
       .filter(opt => opt.type !== "proxy")
-      .reduce(
-        (acc, cur) => {
-          let value;
-          switch (option.defaultValue) {
-            case "all":
-              value = true;
-              break;
-            case "some":
-              value = cur.defaultValue;
-              break;
-            case "none":
-              value = false;
-              break;
-            default:
-              throw new Error(
-                `Unsupported defaultValue - ${option.defaultValue} for option ${option.name}`
-              );
-          }
-          return Object.assign({}, acc, {
-            [cur.name]: value
-          });
-        },
-        {}
-      );
+      .reduce((acc, cur) => {
+        let value;
+        switch (option.defaultValue) {
+          case "all":
+            value = true;
+            break;
+          case "some":
+            value = cur.defaultValue;
+            break;
+          case "none":
+            value = false;
+            break;
+          default:
+            throw new Error(
+              `Unsupported defaultValue - ${option.defaultValue} for option ${option.name}`
+            );
+        }
+        return Object.assign({}, acc, {
+          [cur.name]: value
+        });
+      }, {});
 
     // recurse
     resolveOptions(option, newInputOpts);

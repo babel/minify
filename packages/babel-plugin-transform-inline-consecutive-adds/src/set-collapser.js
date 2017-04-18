@@ -4,13 +4,15 @@ const Collapser = require("./collapser");
 
 class SetCollapser extends Collapser {
   isInitTypeValid(init) {
-    return init.isNewExpression() &&
+    return (
+      init.isNewExpression() &&
       init.get("callee").isIdentifier() &&
       init.node.callee.name === "Set" &&
       // other iterables might not be append-able
       (init.node.arguments.length === 0 ||
         (init.node.arguments.length === 1 &&
-          init.get("arguments")[0].isArrayExpression()));
+          init.get("arguments")[0].isArrayExpression()))
+    );
   }
 
   isExpressionTypeValid(expr) {

@@ -66,18 +66,16 @@ function preset(context, _opts = {}) {
   const usedPlugins = new Set();
 
   const optionsMap = PLUGINS.map(plugin =>
-    option(plugin[0], plugin[1], plugin[2])).reduce(
-    (acc, cur) => {
-      Object.defineProperty(acc, cur.name, {
-        get() {
-          usedPlugins.add(cur.name);
-          return cur;
-        }
-      });
-      return acc;
-    },
-    {}
-  );
+    option(plugin[0], plugin[1], plugin[2])
+  ).reduce((acc, cur) => {
+    Object.defineProperty(acc, cur.name, {
+      get() {
+        usedPlugins.add(cur.name);
+        return cur;
+      }
+    });
+    return acc;
+  }, {});
 
   const optionsTree = group(
     "options",

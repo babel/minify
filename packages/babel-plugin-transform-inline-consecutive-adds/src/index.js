@@ -45,14 +45,11 @@ function getIdAndFunctionReferences(name, parent) {
     return false;
   }
 
-  const references = binding.referencePaths.reduce(
-    (references, ref) => {
-      references.add(ref);
-      getFunctionReferences(ref, parent, references);
-      return references;
-    },
-    new Set()
-  );
+  const references = binding.referencePaths.reduce((references, ref) => {
+    references.add(ref);
+    getFunctionReferences(ref, parent, references);
+    return references;
+  }, new Set());
 
   return Array.from(references);
 }
@@ -173,7 +170,8 @@ function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
   const newInit = t.cloneDeep(oldInit);
   if (
     !assignments.every(assignment =>
-      collapser.addSuccessfully(t, assignment, newInit))
+      collapser.addSuccessfully(t, assignment, newInit)
+    )
   ) {
     return;
   }
@@ -215,7 +213,8 @@ module.exports = function({ types: t }) {
 
         if (
           COLLAPSERS.some(c =>
-            tryUseCollapser(t, c, varDecl, topLevel, checkReference))
+            tryUseCollapser(t, c, varDecl, topLevel, checkReference)
+          )
         ) {
           return;
         }
