@@ -103,4 +103,108 @@ describe("constant-folding-plugin", () => {
       `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should handle Array methods on array literals", () => {
+    const source = unpad(
+      `
+      [1, 2, 3].concat([4, 5, 6]);
+      [a, b, c].concat([d, e], f, g, [h]);
+      [1, 2, 3]["concat"]([4, 5, 6]);
+      [1, 2, 3][concat]([4, 5, 6]);
+      [1, 2, 3].push([4, 5, 6]);
+
+      [1, 2, 3].join();
+      ["a", "b", "c"].join();
+      [a, "b", "c"].join();
+      ["a", "b", "c"].join(a);
+      ["a", "b", "c"].join("@");
+
+      [1, 2, 3].length;
+      [1, 2, 3][1];
+      [1, 2, 3]["1"];
+
+      [].shift();
+      [1, 2, 3].shift();
+
+      [1, 2, 3].slice();
+      [1, 2, 3].slice(1);
+      [1, 2, 3].slice(0, 2);
+      [1, 2, 3].slice(0, -1);
+
+      [1, 2, 3].pop();
+      [a, b, c].pop();
+      [].pop();
+
+      [a, b, c].reverse();
+      [1, 2, 3].reverse();
+
+      [1, 2, 3].splice(1);
+    `
+    );
+    const expected = unpad(
+      `
+      [1, 2, 3, 4, 5, 6];
+      [a, b, c, d, e, f, g, h];
+      [1, 2, 3, 4, 5, 6];
+      [1, 2, 3][concat]([4, 5, 6]);
+      4;
+
+      "1,2,3";
+      "a,b,c";
+      [a, "b", "c"].join();
+      ["a", "b", "c"].join(a);
+      "a@b@c";
+
+      3;
+      2;
+      2;
+
+      undefined;
+      2;
+
+      [1, 2, 3];
+      [2, 3];
+      [1, 2];
+      [1, 2, 3].slice(0, -1);
+
+      3;
+      c;
+      undefined;
+
+      [c, b, a];
+      [3, 2, 1];
+
+      [2, 3];
+    `
+    );
+    expect(transform(source)).toBe(expected);
+  });
+  it("should handle String methods on string literals", () => {
+    const source = unpad(
+      `
+      "a,b,c".split(",");
+      "a,b,c".split("");
+      "a,b,c".split();
+      "abc"[0];
+      "abc"["0"];
+      "abc".charAt();
+      "abc".charAt(1);
+      "abc".length;
+    `
+    );
+
+    const expected = unpad(
+      `
+      ["a", "b", "c"];
+      ["a", ",", "b", ",", "c"];
+      ["a,b,c"];
+      "a";
+      "a";
+      "a";
+      "b";
+      3;
+    `
+    );
+    expect(transform(source)).toBe(expected);
+  })
 });
