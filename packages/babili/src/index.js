@@ -1,15 +1,30 @@
-import child from "child_process";
+const babelCore = require("babel-core");
+const babelPresetBabili = require("babel-preset-babili");
 
-const args = [
-  require.resolve("babel-cli/bin/babel.js"),
-  ...process.argv.slice(2),
-  `--presets=${require.resolve("babel-preset-babili")}`,
-  "--no-babelrc"
-];
+module.exports = function babili(
+  input,
+  // Minify options passed to babiliPreset
+  // defaults are handled in preset
+  options = {},
+  // overrides and other options
+  {
+    minified = true,
+    inputSourceMap = null,
+    sourceMaps = false,
 
-const opts = {
-  stdio: "inherit",
-  env: process.env
+    // to override the default babelCore used
+    babel = babelCore,
+
+    // to override the default babiliPreset used
+    babiliPreset = babelPresetBabili
+  } = {}
+) {
+  return babel.transform({
+    babelrc: false,
+    presets: [[babiliPreset, options]],
+    comments: false,
+    inputSourceMap,
+    sourceMaps,
+    minified
+  });
 };
-
-child.spawn(process.execPath, args, opts);

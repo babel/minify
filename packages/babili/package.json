@@ -11,11 +11,11 @@
   "bin": {
     "babili": "./bin/babili.js"
   },
-  "keywords": [
-    "babel-preset"
-  ],
+  "keywords": ["babel-preset"],
   "dependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-preset-babili": "^0.1.4"
-  }
+    "babel-core": "^6.24.1",
+    "babel-preset-babili": "^0.0.12",
+    "yargs-parser": "^5.0.0"
+  },
+  "devDependencies": {}
 }
