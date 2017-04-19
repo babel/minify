@@ -69,21 +69,6 @@ describe("preset-options", () => {
     });
   });
 
-  it("should handle groups - remove entire group", () => {
-    testOpts({
-      unsafe: false
-    });
-  });
-
-  it("should handle individual items in a group of options", () => {
-    testOpts({
-      unsafe: {
-        flipComparisons: false
-      },
-      mangle: false
-    });
-  });
-
   it("should handle options that are delegated to multiple other options", () => {
     testOpts({
       keepFnName: false,
