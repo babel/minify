@@ -52,7 +52,7 @@ function preset(context, _opts = {}) {
   // build a plugins map from the plugin table above
   const pluginsMap = PLUGINS.reduce(
     (acc, [name, plugin, defaultValue]) =>
-      Object.assign({}, acc, {
+      Object.assign(acc, {
         [name]: {
           plugin,
           options: null,
