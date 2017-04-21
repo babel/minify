@@ -20,6 +20,7 @@ const mocks = [
   "babel-plugin-transform-regexp-constructors",
   "babel-plugin-transform-remove-console",
   "babel-plugin-transform-remove-debugger",
+  "babel-plugin-remove-symbol-description",
   "babel-plugin-transform-remove-undefined",
   "babel-plugin-transform-simplify-comparison-operators",
   "babel-plugin-transform-undefined-to-void"
