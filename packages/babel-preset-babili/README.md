@@ -116,10 +116,7 @@ keepClassName       | Passed to [mangle][mangle] & [deadcode][deadcode]
 {
   "presets": [["babili", {
     "mangle": {
-      "blacklist": {
-        "ParserError": true,
-        "NetworkError": false
-      }
+      "blacklist": ["ParserError", "NetworkError"]
     }
   }]]
 }
