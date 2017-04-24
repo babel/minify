@@ -15,7 +15,11 @@
   "dependencies": {
     "babel-core": "^6.24.1",
     "babel-preset-babili": "^0.0.12",
+    "fs-readdir-recursive": "^1.0.0",
+    "output-file-sync": "^2.0.0",
     "yargs-parser": "^5.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "rimraf": "^2.6.1"
+  }
 }

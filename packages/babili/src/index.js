@@ -19,7 +19,7 @@ module.exports = function babili(
     babiliPreset = babelPresetBabili
   } = {}
 ) {
-  return babel.transform({
+  return babel.transform(input, {
     babelrc: false,
     presets: [[babiliPreset, options]],
     comments: false,

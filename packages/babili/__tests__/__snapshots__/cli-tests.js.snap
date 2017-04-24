@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Babili CLI should read from stdin and o/p to stdout 1`] = `"let a=10,b=20;"`;
+
+exports[`Babili CLI should throw if both out-file and out-dir is true 1`] = `"Cannot have out-file and out-dir"`;
+
+exports[`Babili CLI should throw on all invalid options 1`] = `"Invalid Options passed: foo,bar"`;
