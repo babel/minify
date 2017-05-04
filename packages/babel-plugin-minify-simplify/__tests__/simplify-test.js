@@ -3152,4 +3152,32 @@ describe("simplify-plugin", () => {
     );
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix#455 and deopt when scope tree is not updated", () => {
+    const source = unpad(
+      `
+      function foo(param) {
+        if (param === null) return;
+        let thingA = param.a;
+        let thingB = param.b;
+        if (!thingA && !thingB) return;
+        let thingC = param.c;
+      }
+    `
+    );
+    const expected = unpad(
+      `
+      function foo(param) {
+        if (param !== null) {
+            let thingA = param.a;
+            let thingB = param.b;
+            if (thingA || thingB) {
+                let thingC = param.c;
+              }
+          }
+      }
+    `
+    );
+    expect(transform(source)).toBe(expected);
+  });
 });
