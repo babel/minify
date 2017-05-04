@@ -88,6 +88,24 @@ module.exports = ({ types: t, traverse }) => {
       }
     }
 
+    isExportedWithName(binding) {
+      // short circuit
+      if (!this.topLevel) {
+        return false;
+      }
+
+      const refs = binding.referencePaths;
+
+      for (const ref of refs) {
+        if (ref.isExportNamedDeclaration()) {
+          return true;
+        }
+      }
+
+      // default
+      return false;
+    }
+
     mangleScope(scope) {
       const mangler = this;
 
@@ -139,7 +157,9 @@ module.exports = ({ types: t, traverse }) => {
           // function names
           (mangler.keepFnName ? isFunction(binding.path) : false) ||
           // class names
-          (mangler.keepClassName ? isClass(binding.path) : false)
+          (mangler.keepClassName ? isClass(binding.path) : false) ||
+          // named export
+          mangler.isExportedWithName(binding)
         ) {
           continue;
         }
