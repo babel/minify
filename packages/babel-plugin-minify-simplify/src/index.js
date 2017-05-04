@@ -1587,6 +1587,7 @@ module.exports = ({ types: t }) => {
       const ids = Object.keys(stmt.getBindingIdentifiers());
       for (const id of ids) {
         const binding = path.scope.getBinding(id);
+
         // TODO
         // Temporary Fix
         // if there is no binding, we assume it is referenced outside
@@ -1594,12 +1595,24 @@ module.exports = ({ types: t }) => {
         if (!binding) {
           return false;
         }
+
         const refs = [...binding.referencePaths, ...binding.constantViolations];
         for (const ref of refs) {
           if (!ref.isIdentifier()) return false;
-          if (ref.getFunctionParent().scope !== path.scope) return false;
+          const fnParent = ref.getFunctionParent();
+
+          // TODO
+          // Usage of scopes and bindings in simplify plugin results in
+          // undefined bindings because scope changes are not updated in the
+          // scope tree. So, we deopt whenever we encounter one such issue
+          // and not perform the transformation
+          if (!fnParent) {
+            return false;
+          }
+          if (fnParent.scope !== path.scope) return false;
         }
       }
+
       return true;
     });
 
