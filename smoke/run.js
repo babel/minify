@@ -40,7 +40,7 @@ function run() {
   let inputTests = [];
   program
     .usage("[options] [inputTests...]")
-    .action(_inputTests => inputTests = _inputTests)
+    .action(_inputTests => (inputTests = _inputTests))
     .option("-i --skip-install", "Skip Install Step")
     .option("-b --skip-build", "Skip Build step")
     .option("-c --skip-cleanup", "Skip cleanup step")

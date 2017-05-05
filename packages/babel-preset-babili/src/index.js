@@ -91,7 +91,7 @@ function preset(context, _opts = {}) {
     .filter(plugin => plugin.enabled)
     .map(
       plugin =>
-        (plugin.options ? [plugin.plugin, plugin.options] : plugin.plugin)
+        plugin.options ? [plugin.plugin, plugin.options] : plugin.plugin
     );
 
   return {

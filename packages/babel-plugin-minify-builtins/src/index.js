@@ -144,26 +144,27 @@ function getSegmentedSubPaths(paths) {
   let segments = new Map();
 
   // Get earliest Path in tree where paths intersect
-  paths[
-    0
-  ].getDeepestCommonAncestorFrom(paths, (lastCommon, index, ancestries) => {
-    // we found the LCA
-    if (!lastCommon.isProgram()) {
-      lastCommon = !lastCommon.isFunction()
-        ? lastCommon.getFunctionParent()
-        : lastCommon;
-      segments.set(lastCommon, paths);
-      return;
+  paths[0].getDeepestCommonAncestorFrom(
+    paths,
+    (lastCommon, index, ancestries) => {
+      // we found the LCA
+      if (!lastCommon.isProgram()) {
+        lastCommon = !lastCommon.isFunction()
+          ? lastCommon.getFunctionParent()
+          : lastCommon;
+        segments.set(lastCommon, paths);
+        return;
+      }
+      // Deopt and construct segments otherwise
+      for (const ancestor of ancestries) {
+        const parentPath = ancestor[index + 1];
+        const validDescendants = paths.filter(p => {
+          return p.isDescendant(parentPath);
+        });
+        segments.set(parentPath, validDescendants);
+      }
     }
-    // Deopt and construct segments otherwise
-    for (const ancestor of ancestries) {
-      const parentPath = ancestor[index + 1];
-      const validDescendants = paths.filter(p => {
-        return p.isDescendant(parentPath);
-      });
-      segments.set(parentPath, validDescendants);
-    }
-  });
+  );
 
   return segments;
 }
