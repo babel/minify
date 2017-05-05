@@ -1325,4 +1325,45 @@ describe("mangle-names", () => {
     );
     expect(transform(source, { topLevel: true })).toBe(source);
   });
+
+  it("should not mangle named exports - 1", () => {
+    const source = unpad(
+      `
+      export const Foo = foo;
+    `
+    );
+    expect(transform(source, { topLevel: true }, "module")).toBe(source);
+  });
+
+  it("should not mangle named exports - 2", () => {
+    const source = unpad(
+      `
+      const Foo = a;
+      export {Foo};
+    `
+    );
+    const expected = unpad(
+      `
+      const b = a;
+      export { b as Foo };
+    `
+    );
+    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
+  });
+
+  it("should not mangle named exports - 3", () => {
+    const source = unpad(
+      `
+      const Foo = a;
+      export {Foo as Bar};
+    `
+    );
+    const expected = unpad(
+      `
+      const b = a;
+      export { b as Bar };
+    `
+    );
+    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
+  });
 });
