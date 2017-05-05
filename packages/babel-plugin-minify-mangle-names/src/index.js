@@ -167,10 +167,12 @@ module.exports = ({ types: t, traverse }) => {
         let next;
         do {
           next = getNext();
-        } while (!t.isValidIdentifier(next) ||
+        } while (
+          !t.isValidIdentifier(next) ||
           hop.call(bindings, next) ||
           scope.hasGlobal(next) ||
-          scope.hasReference(next));
+          scope.hasReference(next)
+        );
 
         // TODO:
         // re-enable this - check above

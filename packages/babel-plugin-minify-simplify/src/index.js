@@ -203,7 +203,8 @@ module.exports = ({ types: t }) => {
             // !NaN and !undefined are truthy
             // separate check here as they are considered impure by babel
             if (
-              input.isUnaryExpression() && input.get("argument").isIdentifier()
+              input.isUnaryExpression() &&
+              input.get("argument").isIdentifier()
             ) {
               if (
                 input.node.argument.name === "NaN" ||
@@ -222,7 +223,8 @@ module.exports = ({ types: t }) => {
             // separate check here as they are considered impure by babel
             if (input.isIdentifier()) {
               if (
-                input.node.name === "NaN" || input.node.name === "undefined"
+                input.node.name === "NaN" ||
+                input.node.name === "undefined"
               ) {
                 return true;
               }
@@ -757,7 +759,9 @@ module.exports = ({ types: t }) => {
           }
 
           if (
-            statements.length > 1 || needsBlock(node, parent) || node.directives
+            statements.length > 1 ||
+            needsBlock(node, parent) ||
+            node.directives
           ) {
             node.body = statements;
             return;
@@ -1323,7 +1327,8 @@ module.exports = ({ types: t }) => {
                   defaultRet = nextPath.node;
                   nextPath.remove();
                 } else if (
-                  !nextPath.node && path.parentPath.parentPath.isFunction()
+                  !nextPath.node &&
+                  path.parentPath.parentPath.isFunction()
                 ) {
                   // If this is the last statement in a function we just fake a void return.
                   defaultRet = t.returnStatement(VOID_0);

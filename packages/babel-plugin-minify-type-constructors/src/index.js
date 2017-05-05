@@ -18,7 +18,9 @@ function replaceArray(t, path) {
       if (result.confident) {
         if (typeof result.value === "number") {
           if (
-            result.value >= 0 && result.value <= 6 && result.value % 1 === 0
+            result.value >= 0 &&
+            result.value <= 6 &&
+            result.value % 1 === 0
           ) {
             // "Array(7)" is shorter than "[,,,,,,,]"
             path.replaceWith(t.arrayExpression(Array(result.value).fill(null)));

@@ -301,7 +301,7 @@ function run() {
   program
     .usage("[options] <file ...>")
     .arguments("[file...]")
-    .action(_files => files = _files)
+    .action(_files => (files = _files))
     .option("-q, --quiet", "Quiet mode. Show only results. Don't show progress")
     .option("-t, --target [target]", "Output target (TERM|MD)")
     .option(

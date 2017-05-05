@@ -55,38 +55,36 @@ module.exports = ({ types: t }) => {
         }
 
         const map = Object.create(null);
-        this.opts.replacements.forEach(({
-          identifierName,
-          replacement,
-          member
-        }) => {
-          if (path.scope.globals[identifierName]) {
-            // Convert to a node, we only allow identifiers and literals as replacements
-            if (!replacement.type.match(/literal|identifier/i)) {
-              throw new Error(
-                "Only literals and identifier are supported as replacements"
-              );
-            }
+        this.opts.replacements.forEach(
+          ({ identifierName, replacement, member }) => {
+            if (path.scope.globals[identifierName]) {
+              // Convert to a node, we only allow identifiers and literals as replacements
+              if (!replacement.type.match(/literal|identifier/i)) {
+                throw new Error(
+                  "Only literals and identifier are supported as replacements"
+                );
+              }
 
-            const node = t[replacement.type](replacement.value);
-            const options = {
-              identifierName,
-              node,
-              member
-            };
+              const node = t[replacement.type](replacement.value);
+              const options = {
+                identifierName,
+                node,
+                member
+              };
 
-            if (!map[identifierName]) {
-              map[identifierName] = {};
-            }
+              if (!map[identifierName]) {
+                map[identifierName] = {};
+              }
 
-            if (member && map[identifierName][member]) {
-              throw new Error(
-                `Replacement collision ${identifierName}.${member}`
-              );
+              if (member && map[identifierName][member]) {
+                throw new Error(
+                  `Replacement collision ${identifierName}.${member}`
+                );
+              }
+              map[identifierName][member || NO_MEMBER] = options;
             }
-            map[identifierName][member || NO_MEMBER] = options;
           }
-        });
+        );
 
         path.traverse(replaceVisitor, { replacements: map });
       }
