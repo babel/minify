@@ -212,6 +212,16 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     expect(transform(source)).toBe(source);
   });
 
+  it("should not collapse computed properties with circular reference", () => {
+    const source = unpad(
+      `
+      var foo = {};
+      foo.bar = foo;
+    `
+    );
+    expect(transform(source)).toBe(source);
+  });
+
   it("should collapse statements with multiple assignments", () => {
     const source = unpad(
       `
@@ -289,6 +299,16 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     `
     );
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse statements for array-initialized sets with circular reference", () => {
+    const source = unpad(
+      `
+      var foo = new Set([1, 2]);
+      foo.add(foo);
+    `
+    );
+    expect(transform(source)).toBe(source);
   });
 
   it("should collapse array property assignments", () => {
@@ -372,5 +392,15 @@ describe("transform-inline-consecutive-adds-plugin", () => {
     `
     );
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should not collapse array property assignments if it is circular reference", () => {
+    const source = unpad(
+      `
+      var foo = [];
+      foo[2] = foo;
+    `
+    );
+    expect(transform(source)).toBe(source);
   });
 });
