@@ -9,18 +9,6 @@ const TESTS = [
     test: "grunt qunit"
   },
   {
-    dir: "immutable-js",
-    files: "dist/immutable.js",
-    build: "npm run build:dist",
-    test: "npm run testonly",
-    babiliOptions: {
-      keepFnName: true,
-      unsafe: {
-        typeConstructors: false
-      }
-    }
-  },
-  {
     dir: "jquery",
     files: "dist/jquery.js",
     build: "npm run build",
@@ -82,51 +70,59 @@ function run() {
  */
 run();
 
-const otherTests = [
-  // {
-  //   dir: "babel",
-  //   files: "packages/babel-core/src/helpers/resolve.js",
-  //   build: "make bootstrap",
-  //   test: "make test-only",
-  //   babelOptions: {
-  //     plugins: ["syntax-flow"]
-  //   }
-  // },
-  // {
-  //   dir: "stylelint",
-  //   files: "lib/**/*.js",
-  //   ignore: [
-  //     "**/__tests__/**",
-  //     "**/lib/rules/declaration-block-properties-order/index.js",
-  //     "**/lib/rules/declaration-block-no-redundant-longhand-properties/index.js",
-  //     "**/lib/rules/at-rule-empty-line-before/index.js",
-  //     "**/lib/rules/max-empty-lines/index.js",
-  //     "**/lib/rules/block-closing-brace-newline-before/index.js",
-  //     "**/lib/rules/function-calc-no-unspaced-operator/index.js",
-  //     "**/lib/rules/font-weight-notation/index.js",
-  //     "**/lib/rules/max-line-length/index.js",
-  //     "**/lib/rules/selector-class-pattern/index.js",
-  //     "**/lib/rules/declaration-colon-newline-after/index.js",
-  //   ],
-  //   build: "npm install",
-  //   test: "npm run jest",
-  //   success: "Test Suites: 264 passed, 264 total",
-  // },
-  // {
-  //   dir: "react",
-  //   files: "build/react.js",
-  //   build: "npm install && npm run build",
-  //   test: "npm test",
-  // },
-  // PASS
-  // {
-  //   dir: "draft-js",
-  //   files: "dist/Draft.js",
-  //   build: "npm cache clean && npm install",
-  //   test: "npm test",
-  //   verbose: false
-  // },
-  /**
-   * PASSED AND VERIFIED
-   */
-];
+// const otherTests = [
+//   {
+//     dir: "babel",
+//     files: "packages/babel-core/src/helpers/resolve.js",
+//     build: "make bootstrap",
+//     test: "make test-only",
+//     babelOptions: {
+//       plugins: ["syntax-flow"]
+//     }
+//   },
+//   {
+//     dir: "stylelint",
+//     files: "lib/**/*.js",
+//     ignore: [
+//       "**/__tests__/**",
+//       "**/lib/rules/declaration-block-properties-order/index.js",
+//       "**/lib/rules/declaration-block-no-redundant-longhand-properties/index.js",
+//       "**/lib/rules/at-rule-empty-line-before/index.js",
+//       "**/lib/rules/max-empty-lines/index.js",
+//       "**/lib/rules/block-closing-brace-newline-before/index.js",
+//       "**/lib/rules/function-calc-no-unspaced-operator/index.js",
+//       "**/lib/rules/font-weight-notation/index.js",
+//       "**/lib/rules/max-line-length/index.js",
+//       "**/lib/rules/selector-class-pattern/index.js",
+//       "**/lib/rules/declaration-colon-newline-after/index.js",
+//     ],
+//     build: "npm install",
+//     test: "npm run jest",
+//     success: "Test Suites: 264 passed, 264 total",
+//   },
+//   {
+//     dir: "react",
+//     files: "build/react.js",
+//     build: "npm install && npm run build",
+//     test: "npm test",
+//   },
+//   // PASS
+//   {
+//     dir: "immutable-js",
+//     files: "dist/immutable.js",
+//     build: "npm run build:dist",
+//     test: "npm run testonly",
+//     babiliOptions: {
+//       keepFnName: true,
+//       unsafe: {
+//         typeConstructors: false
+//       }
+//     }
+//   },
+//   {
+//     dir: "draft-js",
+//     files: "dist/Draft.js",
+//     build: "npm cache clean && npm install",
+//     test: "npm test"
+//   },
+// ];
