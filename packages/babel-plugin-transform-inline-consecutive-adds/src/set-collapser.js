@@ -44,7 +44,7 @@ class SetCollapser extends Collapser {
       if (args.length !== 1) {
         return false;
       }
-      if (checkReference(args)) {
+      if (checkReference(args[0])) {
         return false;
       }
       return true;

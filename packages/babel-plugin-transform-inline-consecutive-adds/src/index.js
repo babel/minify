@@ -142,7 +142,7 @@ function getContiguousStatementsAndExpressions(
 
 function getReferenceChecker(references) {
   // returns a function s.t. given an expr, returns true iff expr is an ancestor of a reference
-  return expr => references.some(r => r.isDescendant(expr));
+  return expr => references.some(r => r === expr || r.isDescendant(expr));
 }
 
 function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
