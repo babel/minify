@@ -39,7 +39,7 @@ module.exports = function(t) {
           return {
             seq,
             bailed: true,
-            bailedAtIndex: i,
+            bailedAtIndex: i
           };
         };
 
@@ -73,7 +73,9 @@ module.exports = function(t) {
           } else if (!consequent) {
             exprs.push(t.logicalExpression("||", node.test, alternate));
           } else {
-            exprs.push(t.conditionalExpression(node.test, consequent, alternate));
+            exprs.push(
+              t.conditionalExpression(node.test, consequent, alternate)
+            );
           }
         } else if (t.isBlockStatement(node)) {
           const res = convert(node.body);

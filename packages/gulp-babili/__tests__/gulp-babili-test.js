@@ -12,24 +12,28 @@ describe("gulp-babili", () => {
     return new Promise((resolve, reject) => {
       const stream = gulpBabili();
 
-      const source = unpad(`
+      const source = unpad(
+        `
         function foo() {
           const a = 10;
           return a;
         }
-      `);
+      `
+      );
       const expected = "function foo(){return 10}";
 
-      stream.on("data", function (file) {
+      stream.on("data", function(file) {
         expect(file.contents.toString()).toBe(expected);
         resolve();
       });
       stream.on("error", reject);
 
-      stream.write(new gutil.File({
-        path: "defaults.js",
-        contents: new Buffer(source),
-      }));
+      stream.write(
+        new gutil.File({
+          path: "defaults.js",
+          contents: new Buffer(source)
+        })
+      );
     });
   });
 
@@ -43,23 +47,27 @@ describe("gulp-babili", () => {
         }
       });
 
-      const source = unpad(`
+      const source = unpad(
+        `
         function foo(bar, baz) {
           return bar + baz;
         }
-      `);
+      `
+      );
       const expected = "function foo(bar,a){return bar+a}";
 
-      stream.on("data", function (file) {
+      stream.on("data", function(file) {
         expect(file.contents.toString()).toBe(expected);
         resolve();
       });
       stream.on("error", reject);
 
-      stream.write(new gutil.File({
-        path: "options.js",
-        contents: new Buffer(source)
-      }));
+      stream.write(
+        new gutil.File({
+          path: "options.js",
+          contents: new Buffer(source)
+        })
+      );
     });
   });
 
@@ -76,32 +84,38 @@ describe("gulp-babili", () => {
       });
 
       let usedPreset = false;
-      const babili = function (...args) {
+      const babili = function(...args) {
         usedPreset = true;
         return babiliPreset(...args);
       };
 
-      const stream = gulpBabili({}, {
-        babel,
-        babili,
-      });
+      const stream = gulpBabili(
+        {},
+        {
+          babel,
+          babili
+        }
+      );
 
-      stream.on("data", function () {
+      stream.on("data", function() {
         expect(usedTransform).toBe(true);
         expect(usedPreset).toBe(true);
         resolve();
       });
       stream.on("error", reject);
 
-      stream.write(new gutil.File({
-        path: "custom-transformers.js",
-        contents: new Buffer("foo()")
-      }));
+      stream.write(
+        new gutil.File({
+          path: "custom-transformers.js",
+          contents: new Buffer("foo()")
+        })
+      );
     });
   });
 
   describe("comments", () => {
-    const source = unpad(`
+    const source = unpad(
+      `
       /**
        * @license
        * This is a test
@@ -111,7 +125,8 @@ describe("gulp-babili", () => {
       bar();
       /* YAC - yet another comment */
       var a = baz();
-    `);
+    `
+    );
 
     let file;
 
@@ -125,7 +140,7 @@ describe("gulp-babili", () => {
     it("should remove comments by default except license and preserve", () => {
       return new Promise((resolve, reject) => {
         const stream = gulpBabili();
-        stream.on("data", function (file) {
+        stream.on("data", function(file) {
           expect(file.contents.toString()).toMatchSnapshot();
           resolve();
         });
@@ -136,9 +151,12 @@ describe("gulp-babili", () => {
 
     it("should remove all comments when false", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({}, {
-          comments: false
-        });
+        const stream = gulpBabili(
+          {},
+          {
+            comments: false
+          }
+        );
         stream.on("data", () => {
           expect(file.contents.toString()).toMatchSnapshot();
           resolve();
@@ -150,11 +168,14 @@ describe("gulp-babili", () => {
 
     it("should take a custom function", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili({}, {
-          comments(contents) {
-            return contents.indexOf("YAC") !== -1;
+        const stream = gulpBabili(
+          {},
+          {
+            comments(contents) {
+              return contents.indexOf("YAC") !== -1;
+            }
           }
-        });
+        );
         stream.on("data", () => {
           expect(file.contents.toString()).toMatchSnapshot();
           resolve();
@@ -167,13 +188,17 @@ describe("gulp-babili", () => {
 
   it("should remove comments while doing DCE and simplify", () => {
     return new Promise((resolve, reject) => {
-      const stream = gulpBabili({}, {
-        comments(contents) {
-          return contents.indexOf("optimized") !== -1;
+      const stream = gulpBabili(
+        {},
+        {
+          comments(contents) {
+            return contents.indexOf("optimized") !== -1;
+          }
         }
-      });
+      );
 
-      const source = unpad(`
+      const source = unpad(
+        `
         /**
          * @license
          * throw away
@@ -194,18 +219,21 @@ describe("gulp-babili", () => {
           }
           test();
         }
-      `);
+      `
+      );
 
-      stream.on("data", function (file) {
+      stream.on("data", function(file) {
         expect(file.contents.toString()).toMatchSnapshot();
         resolve();
       });
       stream.on("error", reject);
 
-      stream.write(new gutil.File({
-        path: "options.js",
-        contents: new Buffer(source)
-      }));
+      stream.write(
+        new gutil.File({
+          path: "options.js",
+          contents: new Buffer(source)
+        })
+      );
     });
   });
 });

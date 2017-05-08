@@ -12,7 +12,7 @@ module.exports = function({ types: t }) {
       // false -> !1
       BooleanLiteral(path) {
         path.replaceWith(path.node.value ? TRUE : FALSE);
-      },
-    },
+      }
+    }
   };
 };

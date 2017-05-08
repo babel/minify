@@ -4,14 +4,13 @@ const babel = require("babel-core");
 const plugin = require("../src/index");
 
 function transform(code) {
-  return babel.transform(code,  {
-    plugins: [plugin],
+  return babel.transform(code, {
+    plugins: [plugin]
   }).code;
 }
 
 describe("numeric-literals", () => {
   it("should shorten properly", () => {
-
     let source = "[10, 100, 1000, 10000, -2, -30000];";
     let expected = "[10, 100, 1e3, 1e4, -2, -3e4];";
 

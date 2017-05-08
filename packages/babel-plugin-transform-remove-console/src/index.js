@@ -24,7 +24,10 @@ module.exports = function({ types: t }) {
       MemberExpression: {
         exit(path) {
           if (isConsole(path) && !path.parentPath.isMemberExpression()) {
-            if (path.parentPath.isAssignmentExpression() && path.parentKey === "left") {
+            if (
+              path.parentPath.isAssignmentExpression() &&
+              path.parentKey === "left"
+            ) {
               path.parentPath.get("right").replaceWith(createNoop());
             } else {
               path.replaceWith(createNoop());
@@ -37,9 +40,11 @@ module.exports = function({ types: t }) {
 
   function isGlobalConsoleId(id) {
     const name = "console";
-    return id.isIdentifier({ name })
-      && !id.scope.getBinding(name)
-      && id.scope.hasGlobal(name);
+    return (
+      id.isIdentifier({ name }) &&
+      !id.scope.getBinding(name) &&
+      id.scope.hasGlobal(name)
+    );
   }
 
   function isConsole(memberExpr) {
@@ -47,18 +52,20 @@ module.exports = function({ types: t }) {
     if (isGlobalConsoleId(object)) return true;
 
     const property = memberExpr.get("property");
-    return isGlobalConsoleId(object.get("object"))
-      && (
-        property.isIdentifier({ name: "call" })
-        || property.isIdentifier({ name: "apply" })
-      );
+    return (
+      isGlobalConsoleId(object.get("object")) &&
+      (property.isIdentifier({ name: "call" }) ||
+        property.isIdentifier({ name: "apply" }))
+    );
   }
 
   function isConsoleBind(memberExpr) {
     const object = memberExpr.get("object");
-    return object.isMemberExpression()
-      && isGlobalConsoleId(object.get("object"))
-      && memberExpr.get("property").isIdentifier({ name: "bind" });
+    return (
+      object.isMemberExpression() &&
+      isGlobalConsoleId(object.get("object")) &&
+      memberExpr.get("property").isIdentifier({ name: "bind" })
+    );
   }
 
   function createNoop() {

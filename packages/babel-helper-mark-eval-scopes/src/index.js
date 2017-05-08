@@ -7,24 +7,28 @@ module.exports = {
   getEvalScopes,
   markEvalScopes,
   isMarked,
-  hasEval,
+  hasEval
 };
 
 function getEvalScopes(path) {
-  const evalScopes = new Set;
+  const evalScopes = new Set();
 
   function add(scope) {
     let evalScope = scope;
     do {
       evalScopes.add(evalScope);
-    } while (evalScope = evalScope.parent);
+    } while ((evalScope = evalScope.parent));
   }
 
   path.traverse({
     CallExpression(evalPath) {
       const callee = evalPath.get("callee");
 
-      if (callee.isIdentifier() && callee.node.name === "eval" && !callee.scope.getBinding("eval")) {
+      if (
+        callee.isIdentifier() &&
+        callee.node.name === "eval" &&
+        !callee.scope.getBinding("eval")
+      ) {
         add(callee.scope);
       }
     }
@@ -35,7 +39,7 @@ function getEvalScopes(path) {
 
 function markEvalScopes(path, key = EVAL_SCOPE_MARKER) {
   const evalScopes = getEvalScopes(path);
-  [...evalScopes].forEach((scope) => {
+  [...evalScopes].forEach(scope => {
     scope[key] = true;
   });
 }

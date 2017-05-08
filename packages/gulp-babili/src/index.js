@@ -10,12 +10,15 @@ const NAME = "gulp-babili";
 
 module.exports = gulpBabili;
 
-function gulpBabili(babiliOpts = {}, {
-  babel = babelCore,
-  babili = babiliPreset,
-  comments = /preserve|licen(s|c)e/
-} = {}) {
-  return through2.obj(function (file, enc, callback) {
+function gulpBabili(
+  babiliOpts = {},
+  {
+    babel = babelCore,
+    babili = babiliPreset,
+    comments = /preserve|licen(s|c)e/
+  } = {}
+) {
+  return through2.obj(function(file, enc, callback) {
     if (file.isNull()) {
       return callback(null, file);
     }
@@ -35,7 +38,7 @@ function gulpBabili(babiliOpts = {}, {
       ast: false,
 
       /* preset */
-      presets: [ [ babili, babiliOpts ] ],
+      presets: [[babili, babiliOpts]],
 
       /* sourcemaps */
       sourceMaps: !!file.sourceMap,
@@ -47,7 +50,7 @@ function gulpBabili(babiliOpts = {}, {
 
       /* file */
       filename: file.path,
-      filenameRelative: file.relative,
+      filenameRelative: file.relative
     };
 
     const { result, success, error } = transform({
@@ -84,8 +87,11 @@ function transform({ babel, input, babelOpts }) {
 
 function shouldPrintComment(contents, predicate) {
   switch (typeof predicate) {
-    case "function": return predicate(contents);
-    case "object": return predicate.test(contents);
-    default: return !!predicate;
+    case "function":
+      return predicate(contents);
+    case "object":
+      return predicate.test(contents);
+    default:
+      return !!predicate;
   }
 }

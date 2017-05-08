@@ -1,7 +1,6 @@
 "use strict";
 
 const evaluate = require("babel-helper-evaluate-path");
-const jsesc = require("jsesc");
 
 module.exports = ({ types: t, traverse }) => {
   const seen = Symbol("seen");
@@ -9,7 +8,6 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-constant-folding",
     visitor: {
-
       // Evaluate string expressions that are next to each other
       // but are not actually a binary expression.
       // "a" + b + "c" + "d" -> "a" + b + "cd"
@@ -40,8 +38,8 @@ module.exports = ({ types: t, traverse }) => {
         }
 
         const value = literal.key === "right"
-                                    ? relevant.node.value + literal.node.value
-                                    : literal.node.value + relevant.node.value;
+          ? relevant.node.value + literal.node.value
+          : literal.node.value + relevant.node.value;
 
         relevant.replaceWith(t.stringLiteral(value));
         path.replaceWith(bin.node);
@@ -71,25 +69,34 @@ module.exports = ({ types: t, traverse }) => {
           return;
         }
 
-        if (traverse.hasType(node, path.scope, "Identifier", t.FUNCTION_TYPES)) {
+        if (
+          traverse.hasType(node, path.scope, "Identifier", t.FUNCTION_TYPES)
+        ) {
           return;
         }
 
         // -0 maybe compared via dividing and then checking against -Infinity
         // Also -X will always be -X.
-        if (t.isUnaryExpression(node, { operator: "-" }) && t.isNumericLiteral(node.argument)) {
+        if (
+          t.isUnaryExpression(node, { operator: "-" }) &&
+          t.isNumericLiteral(node.argument)
+        ) {
           return;
         }
 
         // We have a transform that converts true/false to !0/!1
-        if (t.isUnaryExpression(node, { operator: "!" }) && t.isNumericLiteral(node.argument)) {
+        if (
+          t.isUnaryExpression(node, { operator: "!" }) &&
+          t.isNumericLiteral(node.argument)
+        ) {
           if (node.argument.value === 0 || node.argument.value === 1) {
             return;
           }
         }
 
         // void 0 is used for undefined.
-        if (t.isUnaryExpression(node, { operator: "void" }) &&
+        if (
+          t.isUnaryExpression(node, { operator: "void" }) &&
           t.isNumericLiteral(node.argument, { value: 0 })
         ) {
           return;
@@ -113,18 +120,11 @@ module.exports = ({ types: t, traverse }) => {
             }
           }
 
-          // https://github.com/babel/babili/issues/382
-          if (typeof res.value === "string") {
-            res.value = jsesc(res.value, {
-              isScriptContext: true
-            });
-          }
-
           const node = t.valueToNode(res.value);
           node[seen] = true;
           path.replaceWith(node);
         }
-      },
-    },
+      }
+    }
   };
 };

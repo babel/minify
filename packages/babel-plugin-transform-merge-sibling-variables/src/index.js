@@ -1,10 +1,8 @@
 "use strict";
 
 module.exports = function({ types: t }) {
-
   function liftDeclaration(path, body, kind) {
     if (body[0] && body[0].isVariableDeclaration({ kind: kind })) {
-
       if (body[0].node.declarations.length > 1) {
         return;
       }
@@ -26,11 +24,13 @@ module.exports = function({ types: t }) {
 
       init.pushContainer("declarations", t.variableDeclarator(firstNode.id));
 
-      body[0].replaceWith(t.assignmentExpression(
-        "=",
-        t.clone(firstNode.id),
-        t.clone(firstNode.init)
-      ));
+      body[0].replaceWith(
+        t.assignmentExpression(
+          "=",
+          t.clone(firstNode.id),
+          t.clone(firstNode.init)
+        )
+      );
     }
   }
 
@@ -38,10 +38,9 @@ module.exports = function({ types: t }) {
     name: "transform-merge-sibling-variables",
     visitor: {
       ForStatement(path) {
-
         // Lift declarations to the loop initializer
         let body = path.get("body");
-        body = body.isBlockStatement() ? body.get("body") : [ body ];
+        body = body.isBlockStatement() ? body.get("body") : [body];
 
         liftDeclaration(path, body, "var");
         liftDeclaration(path, body, "let");
@@ -49,28 +48,29 @@ module.exports = function({ types: t }) {
       VariableDeclaration: {
         enter: [
           // concat variables of the same kind with their siblings
-          function (path) {
+          function(path) {
             if (!path.inList) {
               return;
             }
 
             const { node } = path;
 
-            while (true) {
-              const sibling = path.getSibling(path.key + 1);
-              if (!sibling.isVariableDeclaration({ kind: node.kind })) {
-                break;
-              }
+            let sibling = path.getSibling(path.key + 1);
 
-              node.declarations = node.declarations.concat(sibling.node.declarations);
+            while (sibling.isVariableDeclaration({ kind: node.kind })) {
+              node.declarations = node.declarations.concat(
+                sibling.node.declarations
+              );
               sibling.remove();
+
+              sibling = path.getSibling(path.key + 1);
             }
           },
 
           // concat `var` declarations next to for loops with it's initialisers.
           // block-scoped `let` and `const` are not moved because the for loop
           // is a different block scope.
-          function (path) {
+          function(path) {
             if (!path.inList) {
               return;
             }
@@ -94,9 +94,9 @@ module.exports = function({ types: t }) {
               init.node.declarations
             );
             path.remove();
-          },
-        ],
-      },
-    },
+          }
+        ]
+      }
+    }
   };
 };

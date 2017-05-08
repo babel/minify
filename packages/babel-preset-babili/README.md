@@ -56,31 +56,50 @@ require("babel-core").transform("code", {
 
 ## Options
 
-All options are **enabled** by default **except** the ones with an explicit mention - `(Default: false)`
+Two types of options:
 
-Three types of options:
+1. 1-1 mapping with plugin
+2. The same option passed to multiple plugins
 
-### 1-1 mapping with plugin
+#### 1-1 mapping with plugin
 
-+ `false` to disable the plugin
-+ `true` to enable the plugin with default plugin specific options
-+ `{ ...pluginOpts }` to enable the plugin with custom plugin options
++ `false` - disable plugin
++ `true` - enable plugin
++ `{ ...pluginOpts }` - enable plugin and pass pluginOpts to plugin
 
-The following options have 1-1 mapping with a plugin,
-+ `evaluate` - [babel-plugin-minify-constant-folding](../../packages/babel-plugin-minify-constant-folding)
-+ `deadcode` - [babel-plugin-minify-dead-code-elimination](../../packages/babel-plugin-minify-dead-code-elimination)
-+ `infinity` - [babel-plugin-minify-infinity](../../packages/babel-plugin-minify-infinity)
-+ `mangle` - [babel-plugin-minify-mangle-names](../../packages/babel-plugin-minify-mangle-names)
-+ `numericLiterals` - [babel-plugin-minify-numeric-literals](../../packages/babel-plugin-minify-numeric-literals)
-+ `replace` - [babel-plugin-minify-replace](../../packages/babel-plugin-minify-replace)
-+ `simplify` - [babel-plugin-minify-simplify](../../packages/babel-plugin-minify-simplify)
-+ `mergeVars` - [babel-plugin-transform-merge-sibling-variables](../../packages/babel-plugin-transform-merge-sibling-variables)
-+ `booleans` - [babel-plugin-transform-minify-booleans](../../packages/babel-plugin-transform-minify-booleans)
-+ `regexpConstructors` - [babel-plugin-transform-regexp-constructors](../../packages/babel-plugin-transform-regexp-constructors)
-+ `removeConsole` - `(Default: false)` - [babel-plugin-transform-remove-console](../../packages/babel-plugin-transform-remove-console)
-+ `removeDebugger` - `(Default: false)` - [babel-plugin-transform-remove-debugger](../../packages/babel-plugin-transform-remove-debugger)
-+ `removeUndefined` - [babel-plugin-transform-remove-undefined](../../packages/babel-plugin-transform-remove-undefined)
-+ `undefinedToVoid` - [babel-plugin-transform-undefined-to-void](../../packages/babel-plugin-transform-undefined-to-void)
+OptionName          | Plugin                                                         | DefaultValue
+----------          | ------                                                         | ------------
+booleans            | [transform-minify-booleans][booleans]                          | true
+builtIns            | [minify-builtins][builtIns]                                    | true
+consecutiveAdds     | [transform-inline-consecutive-adds][consecutiveAdds]           | true
+deadcode            | [minify-dead-code-elimination][deadcode]                       | true
+evaluate            | [minify-constant-folding][evaluate]                            | true
+flipComparisons     | [minify-flip-comparisons][flipComparisons]                     | true
+guards              | [minify-guarded-expressions][guards]                           | true
+infinity            | [minify-infinity][infinity]                                    | true
+mangle              | [minify-mangle-names][mangle]                                  | true
+memberExpressions   | [transform-member-expression-literals][memberExpressions]      | true
+mergeVars           | [transform-merge-sibling-variables][mergeVars]                 | true
+numericLiterals     | [minify-numeric-literals][numericLiterals]                     | true
+propertyLiterals    | [transform-property-literals][propertyLiterals]                | true
+regexpConstructors  | [transform-regexp-constructors][regexpConstructors]            | true
+removeConsole       | [transform-remove-console][removeConsole]                      | false
+removeDebugger      | [transform-remove-debugger][removeDebugger]                    | false
+removeUndefined     | [transform-remove-undefined][removeUndefined]                  | true
+replace             | [minify-replace][replace]                                      | true
+simplify            | [minify-simplify][simplify]                                    | true
+simplifyComparisons | [transform-simplify-comparison-operators][simplifyComparisons] | true
+typeConstructors    | [minify-type-constructors][typeConstructors]                   | true
+undefinedToVoid     | [transform-undefined-to-void][undefinedToVoid]                 | true
+
+#### The same option passed to multiple plugins
+
++ When multiple plugins require the same option, it's easier to declare it in one place. These options are passed on to two or more plugins.
+
+OptionName          | Plugins
+----------          | -------
+keepFnName          | Passed to [mangle][mangle] & [deadcode][deadcode]
+keepClassName       | Passed to [mangle][mangle] & [deadcode][deadcode]
 
 **Examples**
 
@@ -97,63 +116,11 @@ The following options have 1-1 mapping with a plugin,
 {
   "presets": [["babili", {
     "mangle": {
-      "blacklist": {
-        "ParserError": true,
-        "NetworkError": false
-      }
+      "blacklist": ["ParserError", "NetworkError"]
     }
   }]]
 }
 ```
-
-### Option groups
-
-+ `false` to disable the entire group
-+ `true` to enable every plugin in the group
-+ `{ pluginKey: <1-1 mapping> }` - enable/disable a particular plugin in a group (or) pass options to that plugin
-
-The following are groups of plugins -
-
-+ `unsafe`
-  + `flipComparisons` - [babel-plugin-minify-flip-comparisons](../../packages/babel-plugin-minify-flip-comparisons)
-  + `simplifyComparisons` - [babel-plugin-transform-simplify-comparison-operators](../../babel-plugin-transform-simplify-comparison-operators)
-  + `guards` - [babel-plugin-minify-guarded-expressions](../../packages/babel-plugin-minify-guarded-expressions)
-  + `typeConstructors` - [babel-plugin-minify-type-constructors](../../packages/babel-plugin-minify-type-constructors)
-+ `properties`
-  + `memberExpressions` - [babel-plugin-transform-member-expression-literals](../../packages/babel-plugin-transform-member-expression-literals)
-  + `propertyLiterals` - [babel-plugin-transform-property-literals](../../packages/babel-plugin-transform-property-literals)
-
-**Examples**
-
-Disables all unsafe plugins:
-
-```json
-{
-  "presets": [["babili", {
-    "unsafe": false
-  }]]
-}
-```
-
-Disables only minify-guarded-expressions, and enable all other unsafe plugins:
-
-```json
-{
-  "presets": [["babili", {
-    "unsafe": {
-      "guards": false
-    }
-  }]]
-}
-```
-
-### Passing same plugin options to multiple plugins
-
-In babili, multiple plugins require the same set of options and it is easier to mention it in one place instead of two.
-
-+ `keepFnName` - This will be passed to `mangle` and `deadcode` and will NOT be overriden if the same option exists under either mangle or deadcode.
-
-**Examples**
 
 ```json
 {
@@ -161,13 +128,7 @@ In babili, multiple plugins require the same set of options and it is easier to 
     "keepFnName": true
   }]]
 }
-```
-
-is the same as,
-
-Plugins applied:
-
-```json
+// is the same as
 {
   "presets": [["babili", {
     "mangle": {
@@ -179,3 +140,26 @@ Plugins applied:
   }]]
 }
 ```
+
+[booleans]: ../../packages/babel-plugin-transform-minify-booleans
+[builtIns]: ../../packages/babel-plugin-minify-builtins
+[consecutiveAdds]: ../../packages/babel-plugin-transform-inline-consecutive-adds
+[deadcode]: ../../packages/babel-plugin-minify-dead-code-elimination
+[evaluate]: ../../packages/babel-plugin-minify-constant-folding
+[flipComparisons]: ../../packages/babel-plugin-minify-flip-comparisons
+[guards]: ../../packages/babel-plugin-minify-guarded-expressions
+[infinity]: ../../packages/babel-plugin-minify-infinity
+[mangle]: ../../packages/babel-plugin-minify-mangle-names
+[memberExpressions]: ../../packages/babel-plugin-transform-member-expression-literals
+[mergeVars]: ../../packages/babel-plugin-transform-merge-sibling-variables
+[numericLiterals]: ../../packages/babel-plugin-minify-numeric-literals
+[propertyLiterals]: ../../packages/babel-plugin-transform-property-literals
+[regexpConstructors]: ../../packages/babel-plugin-transform-regexp-constructors
+[removeConsole]: ../../packages/babel-plugin-transform-remove-console
+[removeDebugger]: ../../packages/babel-plugin-transform-remove-debugger
+[removeUndefined]: ../../packages/babel-plugin-transform-remove-undefined
+[replace]: ../../packages/babel-plugin-minify-replace
+[simplify]: ../../packages/babel-plugin-minify-simplify
+[simplifyComparisons]: ../../packages/babel-plugin-transform-simplify-comparison-operators
+[typeConstructors]: ../../packages/babel-plugin-minify-type-constructors
+[undefinedToVoid]: ../../packages/babel-plugin-transform-undefined-to-void

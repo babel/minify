@@ -1,7 +1,11 @@
 "use strict";
 
 module.exports = function({ types: t }) {
-  const INFINITY = t.binaryExpression("/", t.numericLiteral(1), t.numericLiteral(0));
+  const INFINITY = t.binaryExpression(
+    "/",
+    t.numericLiteral(1),
+    t.numericLiteral(0)
+  );
   return {
     name: "minify-infinity",
     visitor: {
@@ -29,7 +33,7 @@ module.exports = function({ types: t }) {
         }
 
         path.replaceWith(INFINITY);
-      },
-    },
+      }
+    }
   };
 };

@@ -13,14 +13,17 @@ module.exports = function({ types: t }) {
           }
 
           if (key.value.match(/^\d+$/)) {
-            node.key = t.numericLiteral(parseInt(node.key.value, 10));
-            node.computed = false;
+            const newProp = parseInt(node.key.value, 10);
+            if (newProp.toString() === node.key.value) {
+              node.key = t.numericLiteral(newProp);
+              node.computed = false;
+            }
           } else if (t.isValidIdentifier(key.value)) {
             node.key = t.identifier(key.value);
             node.computed = false;
           }
-        },
-      },
-    },
+        }
+      }
+    }
   };
 };

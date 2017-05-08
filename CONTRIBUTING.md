@@ -8,50 +8,133 @@ $ npm install
 $ npm run bootstrap
 ```
 
-Then you can either run:
+#### Build
+
+To build **once**:
 
 ```sh
-$ npm run build
+npm run build
 ```
 
-to build Babel **once** or:
+Or to do an incremental build in watch mode:
 
 ```sh
-$ npm run watch
+npm run watch
 ```
 
-to have Babel build itself then incrementally build files on change.
+#### Lint
 
-To run tests:
+This project uses [prettier](https://github.com/prettier/prettier) for formatting code and [eslint](https://github.com/eslint/eslint) for other linting.
+
+To check both:
 
 ```sh
-$ npm test
+npm run lint
 ```
 
-To run lint:
+You can also run them each individually:
 
-```sh
-$ npm run lint
+ ```sh
+# prettier
+npm run format-check
+
+# eslint
+npm run eslint
 ```
 
-To run lint autofixes:
+##### Lint Fix
+
+To fix formatting and auto-fixable eslint errors,
 
 ```sh
-$ npm run fix
+npm run fix
 ```
 
-To run current benchmarks on a file:
+You can also run them each individually:
 
 ```sh
-$ ./scripts/benchmark.js package [file.js]
-# do not remove package after installing to node_modules
-$ ./scripts/benchmark.js package [file.js] --offline
+# prettier
+npm run format
+
+# eslint
+npm run eslint-fix
 ```
 
-To run current plugin timing on a file:
+#### Test
+
+To run all tests,
 
 ```sh
-$ ./scripts/plugin-timing.js file.js
+npm test
+```
+
+To run tests for a specific package,
+
+```sh
+npm test packages/babel-preset-babili
+```
+
+#### Smoke Tests
+
+Prepare:
+
+```sh
+git submodule init
+git submodule update
+```
+
+Run:
+
+```sh
+node smoke/run.js [options] [inputTests...]
+```
+
+Usage:
+
+```
+Usage: run [options] [inputTests...]
+
+  Options:
+
+    -h, --help         output usage information
+    -i --skip-install  Skip Install Step
+    -b --skip-build    Skip Build step
+    -c --skip-cleanup  Skip cleanup step
+    -q --quiet         Quiet mode
+```
+
+Example:
+
+To build and test `lodash`,
+
+```sh
+node smoke/run.js lodash
+```
+
+To run smoke test without re-building and re-installing again
+
+```sh
+node smoke/run.js -ib lodash
+```
+
+#### Benchmarks
+
+[benchmark.js](https://github.com/babel/babili/blob/master/scripts/benchmark.js) compares Babili with [Uglify](https://github.com/mishoo/UglifyJS2), [Closure Compiler](https://github.com/google/closure-compiler) and [Closure Compiler JS](https://github.com/google/closure-compiler-js)
+
+```sh
+./scripts/benchmark.js [file...]
+```
+
+[plugin-timing.js](https://github.com/babel/babili/blob/master/scripts/plugin-timing.js) is used to calculate and compare the time spent in each plugin.
+
+```sh
+./scripts/plugin-timing.js file.js
+```
+
+[plugin-contribution.js](https://github.com/babel/babili/blob/master/scripts/plugin-contribution.js) calculates how much each plugin of babili contributes to size reduction.
+
+```sh
+./scripts/plugin-contribution.js file.js
 ```
 
 ### Debugging

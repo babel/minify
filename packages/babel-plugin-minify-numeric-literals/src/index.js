@@ -32,6 +32,6 @@ module.exports = function() {
           path.node.extra.raw = newVal;
         }
       }
-    },
+    }
   };
 };

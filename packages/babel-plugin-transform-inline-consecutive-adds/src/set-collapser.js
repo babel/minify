@@ -4,12 +4,15 @@ const Collapser = require("./collapser");
 
 class SetCollapser extends Collapser {
   isInitTypeValid(init) {
-    return init.isNewExpression() &&
-           init.get("callee").isIdentifier() &&
-           init.node.callee.name === "Set" &&
-           // other iterables might not be append-able
-           (init.node.arguments.length === 0 ||
-             (init.node.arguments.length === 1 && init.get("arguments")[0].isArrayExpression()));
+    return (
+      init.isNewExpression() &&
+      init.get("callee").isIdentifier() &&
+      init.node.callee.name === "Set" &&
+      // other iterables might not be append-able
+      (init.node.arguments.length === 0 ||
+        (init.node.arguments.length === 1 &&
+          init.get("arguments")[0].isArrayExpression()))
+    );
   }
 
   isExpressionTypeValid(expr) {
@@ -17,7 +20,7 @@ class SetCollapser extends Collapser {
   }
 
   getExpressionChecker(objName, checkReference) {
-    return (expr) => {
+    return expr => {
       // checks expr is of form:
       // foo.add(rval)
 
@@ -28,10 +31,11 @@ class SetCollapser extends Collapser {
       }
 
       const obj = callee.get("object"), prop = callee.get("property");
-      if (!obj.isIdentifier() ||
-          obj.node.name !== objName ||
-          !prop.isIdentifier() ||
-          prop.node.name !== "add"
+      if (
+        !obj.isIdentifier() ||
+        obj.node.name !== objName ||
+        !prop.isIdentifier() ||
+        prop.node.name !== "add"
       ) {
         return false;
       }
@@ -40,7 +44,7 @@ class SetCollapser extends Collapser {
       if (args.length !== 1) {
         return false;
       }
-      if (checkReference(args)) {
+      if (checkReference(args[0])) {
         return false;
       }
       return true;

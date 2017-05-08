@@ -25,7 +25,7 @@ const mocks = [
   "babel-plugin-transform-undefined-to-void"
 ];
 
-mocks.forEach((mockName) => {
+mocks.forEach(mockName => {
   // it's called mockName for jest(babel-jest-plugin) workaround
   jest.mock(mockName, () => mockName);
 });
@@ -69,21 +69,6 @@ describe("preset-options", () => {
     });
   });
 
-  it("should handle groups - remove entire group", () => {
-    testOpts({
-      unsafe: false
-    });
-  });
-
-  it("should handle individual items in a group of options", () => {
-    testOpts({
-      unsafe: {
-        flipComparisons: false
-      },
-      mangle: false
-    });
-  });
-
   it("should handle options that are delegated to multiple other options", () => {
     testOpts({
       keepFnName: false,
@@ -102,7 +87,7 @@ describe("preset-options", () => {
       mangle: {
         blacklist: ["baz"],
         keepFnName: false,
-        keepClassName: false,
+        keepClassName: false
       }
     });
   });

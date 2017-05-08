@@ -12,7 +12,9 @@ module.exports = class PatternMatch {
     }
 
     if (typeof result.value !== "function") {
-      throw new Error("Expecting a function. Instead got - " + result.value.toString());
+      throw new Error(
+        "Expecting a function. Instead got - " + result.value.toString()
+      );
     }
 
     result.value.call(null, input, result.keys);
@@ -58,7 +60,7 @@ module.exports = class PatternMatch {
   }
   makeDecisionTree(patterns) {
     // order of keys in a Map is the order of insertion
-    const root = new Map;
+    const root = new Map();
 
     for (const pattern of patterns) {
       make(root, pattern);
@@ -80,9 +82,7 @@ module.exports = class PatternMatch {
           // here we don't handle duplicates
           // this pattern would have already been matched
         } else {
-          parent.set(pattern[0], new Map([
-            [LEAF_NODE, pattern[1]]
-          ]));
+          parent.set(pattern[0], new Map([[LEAF_NODE, pattern[1]]]));
         }
 
         return parent;
@@ -93,7 +93,7 @@ module.exports = class PatternMatch {
       if (parent.has(current)) {
         make(parent.get(current), rest);
       } else {
-        parent.set(current, make(new Map, rest));
+        parent.set(current, make(new Map(), rest));
       }
       return parent;
     }

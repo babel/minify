@@ -3,23 +3,23 @@ git:
   depth: 10
 sudo: false
 language: node_js
-cache:
-  directories:
-  - node_modules
+cache: yarn
 
 node_js:
 - '7'
 - '6'
 - '4'
 
+before_script:
+- yarn run bootstrap && yarn run build
+
 script:
-- 'if [ -n "${LINT-}" ]; then npm run lint ; fi'
-- npm run bootstrap
-- npm run build
-- npm run test
+- if [ -n "${LINT-}" ]; then yarn run lint ; fi
+- if [ -z "${SKIPTESTS-}" ]; then yarn run coverage; fi
 
 matrix:
-  fast_finish: true
   include:
     - node_js: "node"
-      env: LINT=true
+      env: LINT=true SKIPTESTS=true
+
+after_success: yarn run coverage-ci

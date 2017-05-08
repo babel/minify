@@ -4,17 +4,23 @@
   "author": "amasad",
   "scripts": {
     "bootstrap": "lerna bootstrap",
+    "build": "gulp build",
     "changelog": "lerna-changelog",
     "clean": "lerna clean",
+    "coverage": "jest --coverage",
+    "coverage-ci": "codecov -f coverage/coverage-final.json",
+    "eslint": "eslint packages/*/src/ packages/*/__tests__/ utils/*.js scripts/*.js",
+    "eslint-fix": "eslint --fix packages/*/src/ packages/*/__tests__/ utils/*.js scripts/*.js",
+    "fix": "npm run format && npm run eslint-fix",
+    "format-check": "git ls-files | egrep '\\.js$' | xargs prettier -l --print-width 80",
+    "format": "git ls-files | egrep '\\.js$' | xargs prettier --write --print-width 80",
+    "lint": "npm run format-check && npm run eslint",
     "publish": "git pull origin master --rebase && npm run build && npm test && lerna publish",
     "publish-internal": "git pull origin master --rebase && npm run build && NPM_DIST_TAG=internal ./node_modules/.bin/lerna publish --skip-git",
-    "updated": "lerna updated",
-    "lint": "eslint packages/*/src packages/*/__tests__ scripts/*.js",
-    "fix": "eslint packages/*/src packages/*/__tests__ scripts/*.js --fix",
     "test": "jest",
-    "build": "gulp build",
-    "watch": "gulp watch",
-    "ci": "npm run lint && npm run bootstrap && jest"
+    "test-ci": "npm run bootstrap && npm run build && npm run coverage",
+    "updated": "lerna updated",
+    "watch": "gulp watch"
   },
   "jest": {
     "transform": {
@@ -26,32 +32,35 @@
     ],
     "transformIgnorePatterns": [
       "/node_modules/"
-    ]
+    ],
+    "coverageDirectory": "./coverage/"
   },
   "devDependencies": {
-    "babel-core": "^6.23.1",
-    "babel-eslint": "^7.1.1",
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
     "babel-jest": "^19.0.0",
-    "babel-plugin-transform-es2015-block-scoping": "^6.23.0",
-    "babel-preset-env": "^1.1.11",
-    "babel-traverse": "^6.23.1",
-    "bytes": "^2.1.0",
+    "babel-plugin-transform-es2015-block-scoping": "^6.24.1",
+    "babel-preset-env": "^1.4.0",
+    "babel-traverse": "^6.24.1",
+    "bytes": "^2.5.0",
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",
     "closure-compiler": "^0.2.12",
+    "codecov": "^2.1.0",
     "commander": "^2.9.0",
-    "eslint": "^3.16.1",
-    "eslint-config-babel": "^6.0.0",
-    "eslint-plugin-flowtype": "^2.29.2",
-    "google-closure-compiler-js": "^20170124.0.0",
+    "eslint": "^3.18.0",
+    "google-closure-compiler-js": "^20170423.0.0",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-babel": "^6.1.2",
     "gulp-newer": "^1.1.0",
     "gulp-util": "^3.0.8",
     "jest-cli": "^19.0.2",
-    "lerna": "2.0.0-beta.38",
-    "lerna-changelog": "^0.3.0",
+    "lerna": "^2.0.0-rc.4",
+    "lerna-changelog": "^0.4.0",
+    "markdown-table": "^1.1.0",
+    "prettier": "^1.3.1",
+    "request": "^2.81.0",
     "through2": "^2.0.1",
-    "uglify-js": "^2.8.5"
+    "uglify-js": "^2.8.22"
   }
 }
