@@ -1,7 +1,7 @@
 const other = Symbol("other");
 
 module.exports = ({ types: t }) => {
-  const undef = t.identifier("undefined");
+  const undef = t.unaryExpression("void", t.numericLiteral(0));
 
   function defaultZero(cb) {
     return function(i = t.numericLiteral(0), ...args) {
