@@ -131,7 +131,7 @@ class Benchmark {
     return out.compiledCode;
   }
   butternut(code) {
-    return butternut.squash(code, { check: true }).code;
+    return butternut.squash(code, { sourceMap: false }).code;
   }
   getParseTime(code) {
     const start = process.hrtime();
