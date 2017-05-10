@@ -9,8 +9,8 @@ module.exports = function({ types: t }) {
           const key = path.toComputedKey();
           if (
             t.isStringLiteral(key) &&
-            (!include || include.includes(key.value)) &&
-            (!exclude || !exclude.includes(key.value))
+            (!include || include.indexOf(key.value) !== -1) &&
+            (!exclude || exclude.indexOf(key.value) === -1)
           ) {
             path.replaceWith(t.valueToNode(process.env[key.value]));
           }
