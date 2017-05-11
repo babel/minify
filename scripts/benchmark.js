@@ -16,6 +16,7 @@ const path = require("path");
 const request = require("request");
 const program = require("commander");
 const compile = require("google-closure-compiler-js").compile;
+const butternut = require("butternut");
 
 const ASSETS_DIR = path.join(__dirname, "benchmark_cache");
 const DEFAULT_ASSETS = {
@@ -57,7 +58,8 @@ class Benchmark {
         this.test(this.babili, code),
         this.test(this.uglify, code),
         this.test(this.closureCompiler, filename, false),
-        this.test(this.closureCompilerJs, code)
+        this.test(this.closureCompilerJs, code),
+        this.test(this.butternut, code)
       ]
     };
 
@@ -127,6 +129,9 @@ class Benchmark {
     };
     const out = compile(flags);
     return out.compiledCode;
+  }
+  butternut(code) {
+    return butternut.squash(code, { sourceMap: false }).code;
   }
   getParseTime(code) {
     const start = process.hrtime();

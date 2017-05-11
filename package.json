@@ -42,6 +42,7 @@
     "babel-plugin-transform-es2015-block-scoping": "^6.24.1",
     "babel-preset-env": "^1.4.0",
     "babel-traverse": "^6.24.1",
+    "butternut": "^0.3.2",
     "bytes": "^2.5.0",
     "chalk": "^1.1.3",
     "cli-table": "^0.3.1",

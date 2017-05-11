@@ -189,23 +189,25 @@ Input Size (gzip): 29.82kB
 
 | minifier              | output raw  | raw win | gzip output | gzip win | parse time (ms) | minify time (ms) |
 | --------------------- | ----------- | ------- | ----------- | -------- | --------------- | ---------------- |
-| **babili**            | 36.13kB     | 71%     | 12.6kB      | 58%      | 3.14            | 1995.80          |
-| **uglify**            | **35.73kB** | **71%** | **11.96kB** | **60%**  | **2.28**        | **770.76**       |
-| **closureCompiler**   | 34.77kB     | 72%     | 11.96kB     | 60%      | 2.62            | 3940.01          |
-| **closureCompilerJs** | 65.41kB     | 48%     | 15.83kB     | 47%      | 2.96            | 1049.21          |
+| **babili**            | 35.86kB     | 71%     | 12.47kB     | 58%      | 2.49            | 1840.76          |
+| **uglify**            | 35.74kB     | 71%     | 11.97kB     | 60%      | 2.43            | 798.81           |
+| **closureCompiler**   | **34.77kB** | **72%** | **11.96kB** | **60%**  | **3.11**        | **2726.80**      |
+| **closureCompilerJs** | 65.41kB     | 48%     | 15.83kB     | 47%      | 2.98            | 1109.41          |
+| **butternut**         | 37.16kB     | 70%     | 12.4kB      | 58%      | 2.32            | 222.86           |
 
 Benchmark Results for vue.js:
 
-Input Size: 234.23kB
+Input Size: 238.7kB
 
-Input Size (gzip): 64.53kB
+Input Size (gzip): 65.76kB
 
 | minifier              | output raw  | raw win | gzip output | gzip win | parse time (ms) | minify time (ms) |
 | --------------------- | ----------- | ------- | ----------- | -------- | --------------- | ---------------- |
-| **babili**            | 96.41kB     | 59%     | 34.55kB     | 46%      | 8.01            | 6754.26          |
-| **uglify**            | 88.9kB      | 62%     | 32.77kB     | 49%      | 7.17            | 1696.36          |
-| **closureCompiler**   | **86.94kB** | **63%** | **32.75kB** | **49%**  | **6.70**        | **7625.19**      |
-| **closureCompilerJs** | 90.09kB     | 62%     | 33.67kB     | 48%      | 6.48            | 11422.21         |
+| **babili**            | 98.24kB     | 59%     | 35.2kB      | 46%      | 7.84            | 5673.69          |
+| **uglify**            | 90.53kB     | 62%     | 33.58kB     | 49%      | 6.10            | 1686.80          |
+| **closureCompiler**   | **88.51kB** | **63%** | **33.49kB** | **49%**  | **8.56**        | **3350.70**      |
+| **closureCompilerJs** | 91.68kB     | 62%     | 34.39kB     | 48%      | 10.08           | 12221.72         |
+| **butternut**         | 93.56kB     | 61%     | 34.24kB     | 48%      | 12.21           | 765.93           |
 
 Benchmark Results for lodash.js:
 
@@ -215,10 +217,11 @@ Input Size (gzip): 93.91kB
 
 | minifier              | output raw  | raw win | gzip output | gzip win | parse time (ms) | minify time (ms) |
 | --------------------- | ----------- | ------- | ----------- | -------- | --------------- | ---------------- |
-| **babili**            | 76.07kB     | 86%     | 25.42kB     | 73%      | 7.93            | 5923.21          |
-| **uglify**            | 70.25kB     | 87%     | 24.48kB     | 74%      | 6.31            | 1533.58          |
-| **closureCompiler**   | **70.68kB** | **87%** | **24.11kB** | **74%**  | **7.74**        | **7455.41**      |
-| **closureCompilerJs** | 73.11kB     | 86%     | 24.82kB     | 74%      | 7.94            | 8276.89          |
+| **babili**            | 76.98kB     | 85%     | 25.41kB     | 73%      | 9.96            | 5828.37          |
+| **uglify**            | 69.18kB     | 87%     | 24.57kB     | 74%      | 13.31           | 2710.79          |
+| **closureCompiler**   | **70.68kB** | **87%** | **24.11kB** | **74%**  | **7.86**        | **4523.72**      |
+| **closureCompilerJs** | 73.13kB     | 86%     | 24.85kB     | 74%      | 9.62            | 8564.78          |
+| **butternut**         | 72.19kB     | 86%     | 25.24kB     | 73%      | 6.98            | 717.95           |
 
 Benchmark Results for three.js:
 
@@ -228,10 +231,11 @@ Input Size (gzip): 199.96kB
 
 | minifier              | output raw   | raw win | gzip output  | gzip win | parse time (ms) | minify time (ms) |
 | --------------------- | ------------ | ------- | ------------ | -------- | --------------- | ---------------- |
-| **babili**            | 526.27kB     | 47%     | 130.08kB     | 35%      | 34.22           | 17339.80         |
-| **uglify**            | **496.16kB** | **51%** | **123.99kB** | **38%**  | **30.37**       | **5524.94**      |
-| **closureCompiler**   | 491.56kB     | 51%     | 124.93kB     | 38%      | 33.72           | 13765.79         |
-| **closureCompilerJs** | 499.81kB     | 50%     | 126.02kB     | 37%      | 35.50           | 98327.82         |
+| **babili**            | 523.09kB     | 48%     | 130.14kB     | 35%      | 31.25           | 16050.42         |
+| **uglify**            | **496.43kB** | **50%** | **124.46kB** | **38%**  | **28.11**       | **5663.19**      |
+| **closureCompiler**   | 491.56kB     | 51%     | 124.93kB     | 38%      | 33.68           | 8527.89          |
+| **closureCompilerJs** | 500.18kB     | 50%     | 126.14kB     | 37%      | 28.13           | 99797.53         |
+| **butternut**         | 508.71kB     | 49%     | 127.06kB     | 36%      | 39.21           | 1783.69          |
 
 ## Browser support
 
