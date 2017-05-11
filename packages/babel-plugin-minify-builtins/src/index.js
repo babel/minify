@@ -140,32 +140,33 @@ module.exports = function({ types: t }) {
     let segments = new Map();
 
     // Get earliest Path in tree where paths intersect
-    paths[
-      0
-    ].getDeepestCommonAncestorFrom(paths, (lastCommon, index, ancestries) => {
-      // we found the LCA
-      if (!(lastCommon.isProgram() || lastCommon.isClassBody())) {
-        lastCommon = !lastCommon.isFunction()
-          ? lastCommon.getFunctionParent()
-          : lastCommon;
-        segments.set(lastCommon, paths);
-        return;
-      }
-      // Deopt and construct segments otherwise
-      // Hold node references to avoid traversal incase of same subpaths
-      let wm = new WeakMap();
-      for (const ancestor of ancestries) {
-        let parentPath = ancestor[index + 1];
-        const validDescendants = paths.filter(p => {
-          return p.isDescendant(parentPath);
-        });
-
-        if (!parentPath.isFunction()) {
-          parentPath = getChildFunction(parentPath.node, wm);
+    paths[0].getDeepestCommonAncestorFrom(
+      paths,
+      (lastCommon, index, ancestries) => {
+        // we found the LCA
+        if (!(lastCommon.isProgram() || lastCommon.isClassBody())) {
+          lastCommon = !lastCommon.isFunction()
+            ? lastCommon.getFunctionParent()
+            : lastCommon;
+          segments.set(lastCommon, paths);
+          return;
         }
-        segments.set(parentPath, validDescendants);
+        // Deopt and construct segments otherwise
+        // Hold node references to avoid traversal incase of same subpaths
+        let wm = new WeakMap();
+        for (const ancestor of ancestries) {
+          let parentPath = ancestor[index + 1];
+          const validDescendants = paths.filter(p => {
+            return p.isDescendant(parentPath);
+          });
+
+          if (!parentPath.isFunction()) {
+            parentPath = getChildFunction(parentPath.node, wm);
+          }
+          segments.set(parentPath, validDescendants);
+        }
       }
-    });
+    );
     return segments;
   }
 
