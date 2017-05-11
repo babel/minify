@@ -54,7 +54,7 @@ describe("minify-builtins", () => {
       `
       function a (){
         Math.max(b, a);
-        function b() {
+        const b = () => {
           const a = Math.floor(c);
           Math.min(b, a) * Math.floor(b);
           function c() {
@@ -75,6 +75,53 @@ describe("minify-builtins", () => {
         Math.max(b, a) + Math.max(c, d);
       }
       Math.max(e, f)
+    `
+    );
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
+  });
+
+  it("should minify builtins to method scope for class declarations", () => {
+    const source = unpad(
+      `
+      class Test {
+        foo() {
+          Math.max(c, d)
+          Math.max(c, d)
+          const c = function() {
+            Math.max(c, d)
+            Math.floor(m);
+            Math.floor(m);
+          }
+        }
+        bar() {
+          Math.min(c, d)
+          Math.min(c, d)
+        }
+      }
+    `
+    );
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
+  });
+
+  it("should minify builtins to function scopes ", () => {
+    const source = unpad(
+      `
+      var a = () => {
+        Math.floor(b);
+        Math.floor(b);
+        c: () => {
+          Math.floor(d);
+          Math.max(2,1);
+        }
+      }
+      A.b("asdas", function() {
+        Math.floor(d) + Math.max(d,e);
+        Math.max(e,d);
+      })
+      A.b("asdas1", function() {
+        Math.floor(d) + Math.floor(d,e);
+        Math.max(e,d);
+      })
     `
     );
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();

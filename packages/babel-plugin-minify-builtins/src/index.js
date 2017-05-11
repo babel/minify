@@ -89,7 +89,11 @@ module.exports = function({ types: t }) {
             path.replaceWith(uniqueIdentifier);
           }
           // hoist the created var to the top of the function scope
-          parent.get("body").unshiftContainer("body", newNode);
+          if (typeof parent.get !== "function") {
+            parent.body.body.unshift(newNode);
+          } else {
+            parent.get("body").unshiftContainer("body", newNode);
+          }
         }
       }
     }
@@ -129,26 +133,18 @@ module.exports = function({ types: t }) {
     }
     return false;
   }
-};
 
-function addToMap(map, key, value) {
-  if (!map.has(key)) {
-    map.set(key, []);
-  }
-  map.get(key).push(value);
-}
+  // Creates a segmented map that contains the earliest common Ancestor
+  // as the key and array of subpaths that are descendats of the LCA as value
+  function getSegmentedSubPaths(paths) {
+    let segments = new Map();
 
-// Creates a segmented map that contains the earliest common Ancestor
-// as the key and array of subpaths that are descendats of the LCA as value
-function getSegmentedSubPaths(paths) {
-  let segments = new Map();
-
-  // Get earliest Path in tree where paths intersect
-  paths[0].getDeepestCommonAncestorFrom(
-    paths,
-    (lastCommon, index, ancestries) => {
+    // Get earliest Path in tree where paths intersect
+    paths[
+      0
+    ].getDeepestCommonAncestorFrom(paths, (lastCommon, index, ancestries) => {
       // we found the LCA
-      if (!lastCommon.isProgram()) {
+      if (!(lastCommon.isProgram() || lastCommon.isClassBody())) {
         lastCommon = !lastCommon.isFunction()
           ? lastCommon.getFunctionParent()
           : lastCommon;
@@ -156,17 +152,43 @@ function getSegmentedSubPaths(paths) {
         return;
       }
       // Deopt and construct segments otherwise
+      // Hold node references to avoid traversal incase of same subpaths
+      let wm = new WeakMap();
       for (const ancestor of ancestries) {
-        const parentPath = ancestor[index + 1];
+        let parentPath = ancestor[index + 1];
         const validDescendants = paths.filter(p => {
           return p.isDescendant(parentPath);
         });
+
+        if (!parentPath.isFunction()) {
+          parentPath = getChildFunction(parentPath.node, wm);
+        }
         segments.set(parentPath, validDescendants);
       }
-    }
-  );
+    });
+    return segments;
+  }
 
-  return segments;
+  function getChildFunction(node, wm) {
+    let funcNode;
+    if (wm.has(node)) {
+      return wm.get(node);
+    }
+    t.traverseFast(node, subNode => {
+      if (t.isFunction(subNode)) {
+        funcNode = subNode;
+        wm.set(node, funcNode);
+      }
+    });
+    return funcNode;
+  }
+};
+
+function addToMap(map, key, value) {
+  if (!map.has(key)) {
+    map.set(key, []);
+  }
+  map.get(key).push(value);
 }
 
 function hasPureArgs(path) {
