@@ -1,6 +1,7 @@
 const Charset = require("./charset");
 const ScopeTracker = require("./scope-tracker");
 const isLabelIdentifier = require("./is-label-identifier");
+const bfsTraverseCreator = require("./bfs-traverse");
 
 const {
   markEvalScopes,
@@ -8,7 +9,9 @@ const {
   hasEval
 } = require("babel-helper-mark-eval-scopes");
 
-module.exports = ({ types: t, traverse }) => {
+module.exports = babel => {
+  const { types: t, traverse } = babel;
+  const bfsTraverse = bfsTraverseCreator(babel);
   const hop = Object.prototype.hasOwnProperty;
 
   class Mangler {
@@ -20,8 +23,7 @@ module.exports = ({ types: t, traverse }) => {
         keepFnName = false,
         keepClassName = false,
         eval: _eval = false,
-        topLevel = false,
-        reuse = true
+        topLevel = false
       } = {}
     ) {
       this.charset = charset;
@@ -31,15 +33,15 @@ module.exports = ({ types: t, traverse }) => {
       this.keepClassName = keepClassName;
       this.topLevel = topLevel;
       this.eval = _eval;
-      this.reuse = reuse;
 
       this.visitedScopes = new Set();
-      this.scopeTracker = new ScopeTracker({ reuse });
+      this.scopeTracker = new ScopeTracker();
       this.renamedNodes = new Set();
     }
 
     run() {
       this.crawlScope();
+      this.fixup();
       this.collect();
       this.charset.sort();
       this.mangle();
@@ -52,6 +54,49 @@ module.exports = ({ types: t, traverse }) => {
     crawlScope() {
       traverse.clearCache();
       this.program.scope.crawl();
+    }
+
+    fixup() {
+      const mangler = this;
+      this.program.traverse({
+        // this fixes a bug where converting let to var
+        // doesn't change the binding's scope to function scope
+        // https://github.com/babel/babel/issues/4818
+        VariableDeclaration(path) {
+          if (path.node.kind !== "var") {
+            return;
+          }
+          const ids = path.getOuterBindingIdentifiers();
+          const fnScope = path.scope.getFunctionParent();
+          Object.keys(ids).forEach(id => {
+            const binding = path.scope.getBinding(id);
+
+            if (binding.scope !== fnScope) {
+              const existingBinding = fnScope.bindings[id];
+              if (!existingBinding) {
+                // move binding to the function scope
+                fnScope.bindings[id] = binding;
+                binding.scope = fnScope;
+                delete binding.scope.bindings[id];
+              } else {
+                // we need a new binding that's valid in both the scopes
+                // binding.scope and fnScope
+                const newName = fnScope.generateUid(
+                  binding.scope.generateUid(id)
+                );
+
+                // rename binding in the original scope
+                mangler.rename(binding.scope, binding, id, newName);
+
+                // move binding to fnScope as newName
+                fnScope.bindings[newName] = binding;
+                binding.scope = fnScope;
+                delete binding.scope.bindings[newName];
+              }
+            }
+          });
+        }
+      });
     }
 
     collect() {
@@ -77,62 +122,23 @@ module.exports = ({ types: t, traverse }) => {
           const binding = scope.getBinding(name);
           scopeTracker.addReference(scope, binding, name);
         },
-        // this fixes a bug where converting let to var
-        // doesn't change the binding's scope to function scope
-        VariableDeclaration: {
-          enter(path) {
-            if (path.node.kind !== "var") {
+
+        BindingIdentifier(path) {
+          if (isLabelIdentifier(path)) return;
+
+          const { scope, node: { name } } = path;
+          const binding = scope.getBinding(name);
+          if (!binding) {
+            if (scope.hasGlobal(name)) return;
+            if (
+              path.parentPath.isExportSpecifier() &&
+              path.parentKey === "exported"
+            ) {
               return;
             }
-            const ids = path.getOuterBindingIdentifiers();
-            const fnScope = path.scope.getFunctionParent();
-            Object.keys(ids).forEach(id => {
-              const binding = path.scope.getBinding(id);
-
-              if (binding.scope !== fnScope) {
-                const existingBinding = fnScope.bindings[id];
-                if (!existingBinding) {
-                  // move binding to the function scope
-                  fnScope.bindings[id] = binding;
-                  binding.scope = fnScope;
-                  delete binding.scope.bindings[id];
-                } else {
-                  // we need a new binding that's valid in both the scopes
-                  // binding.scope and fnScope
-                  const newName = fnScope.generateUid(
-                    binding.scope.generateUid(id)
-                  );
-
-                  // rename binding in the original scope
-                  mangler.rename(binding.scope, binding, id, newName);
-
-                  // move binding to fnScope as newName
-                  fnScope.bindings[newName] = binding;
-                  binding.scope = fnScope;
-                  delete binding.scope.bindings[newName];
-                }
-              }
-            });
+            throw new Error("binding not found " + name);
           }
-        },
-        BindingIdentifier: {
-          exit(path) {
-            if (isLabelIdentifier(path)) return;
-            const { scope, node: { name } } = path;
-            const binding = scope.getBinding(name);
-            if (!binding) {
-              if (scope.hasGlobal(name)) return;
-              if (
-                path.parentPath.isExportSpecifier() &&
-                path.parentKey === "exported"
-              ) {
-                return;
-              }
-              console.log(scope.globals);
-              throw new Error("binding not found " + name);
-            }
-            scopeTracker.addBinding(binding);
-          }
+          scopeTracker.addBinding(binding);
         }
       };
 
@@ -152,7 +158,7 @@ module.exports = ({ types: t, traverse }) => {
         };
       }
 
-      mangler.program.traverse(collectVisitor);
+      bfsTraverse(mangler.program, collectVisitor);
     }
 
     isExportedWithName(binding) {
@@ -237,9 +243,8 @@ module.exports = ({ types: t, traverse }) => {
           !scopeTracker.canUseInReferencedScopes(binding, next)
         );
 
-        if (mangler.reuse) {
-          resetNext();
-        }
+        resetNext();
+
         mangler.rename(scope, binding, oldName, next);
       }
     }
@@ -247,13 +252,10 @@ module.exports = ({ types: t, traverse }) => {
     mangle() {
       const mangler = this;
 
-      if (mangler.topLevel) {
-        mangler.mangleScope(this.program.scope);
-      }
-
-      this.program.traverse({
+      bfsTraverse(this.program, {
         Scopable(path) {
-          mangler.mangleScope(path.scope);
+          if (!path.isProgram() || mangler.topLevel)
+            mangler.mangleScope(path.scope);
         }
       });
     }

@@ -5,20 +5,18 @@ const isLabelIdentifier = require("./is-label-identifier");
  * Scope - References, Bindings
  */
 module.exports = class ScopeTracker {
-  constructor({ reuse }) {
-    this.references = new Map;
-    this.bindings = new Map;
-
-    this.reuse = reuse;
+  constructor() {
+    this.references = new Map();
+    this.bindings = new Map();
   }
 
   // Register a new Scope and initiliaze it with empty sets
   addScope(scope) {
     if (!this.references.has(scope)) {
-      this.references.set(scope, new CountedSet);
+      this.references.set(scope, new CountedSet());
     }
     if (!this.bindings.has(scope)) {
-      this.bindings.set(scope, new Map);
+      this.bindings.set(scope, new Map());
     }
   }
 
@@ -36,13 +34,10 @@ module.exports = class ScopeTracker {
       if (binding && binding.scope === parent) {
         break;
       }
-    } while (parent = parent.parent);
+    } while ((parent = parent.parent));
   }
 
   hasReference(scope, name) {
-    if (!this.reuse) {
-      return scope.hasReference(name);
-    }
     if (!this.references.has(scope)) {
       this.addScope(scope);
       this.updateScope(scope);
@@ -108,7 +103,7 @@ module.exports = class ScopeTracker {
       if (binding.scope === parent) {
         break;
       }
-    } while (parent = parent.parent);
+    } while ((parent = parent.parent));
   }
 
   addBinding(binding) {
@@ -122,9 +117,6 @@ module.exports = class ScopeTracker {
   }
 
   hasBinding(scope, name) {
-    if (!this.reuse) {
-      return scope.hasBinding(name);
-    }
     return this.bindings.get(scope).has(name);
   }
 
@@ -142,7 +134,10 @@ module.exports = class ScopeTracker {
   // with a throw statement. This helps in understanding where it
   // happens to debug it.
   updateScope(scope) {
-    throw new Error("Tracker received a scope it doesn't know about yet. Please report this - https://github.com/babel/babili/issues/new");
+    /* eslint-disable no-unreachable */
+    throw new Error(
+      "Tracker received a scope it doesn't know about yet. Please report this - https://github.com/babel/babili/issues/new"
+    );
 
     const tracker = this;
     scope.path.traverse({
@@ -153,5 +148,6 @@ module.exports = class ScopeTracker {
         }
       }
     });
+    /* eslint-enable */
   }
 };
