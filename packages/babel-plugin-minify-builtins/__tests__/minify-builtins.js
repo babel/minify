@@ -127,26 +127,44 @@ describe("minify-builtins", () => {
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
-  it("should collect and minify in segments if there is no common ancestor", () => {
+  it("should collect and minify in segments in any depth if there is no LCA", () => {
     const source = unpad(
       `
-      function a(){
-        function d(){
-          Math.floor(as, bb);
-        }
-      }
       function b(){
         Math.floor(as, bb);
         function d(){
           Math.floor(as, bb);
         }
       }
-      function c(){
-        Math.floor(as, bb);
-        function d(){
-          Math.floor(as, bb);
+      const a = {
+        c : () => {
+            Math.floor(bbb);
+            Math.floor(bbb);
+        },
+        d : () => {
+            Math.abs(aa);
+            Math.abs(aa);
+            Math.floor(aa);
+            return () => {
+              Math.floor(aa);
+            }
         }
-      }
+      };
+      class A {
+        constructor() {
+          let a = Math.floor(b,c) + Math.floor(b,c);
+        }
+        c() {
+            Math.floor(asdas);
+            Math.floor(dasda);
+        }
+        d() {
+          var a = Math.floor;
+            a(aa, bb);
+            Math.floor(aa, bb);
+        }
+      };
+      new A()
     `
     );
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();

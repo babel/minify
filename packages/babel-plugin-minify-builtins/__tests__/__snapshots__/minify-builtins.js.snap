@@ -1,30 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`minify-builtins should collect and minify in segments if there is no common ancestor 1`] = `
+exports[`minify-builtins should collect and minify in segments in any depth if there is no LCA 1`] = `
 Object {
-  "_source": "function a(){
-  function d(){
-    Math.floor(as, bb);
-  }
-}
-function b(){
+  "_source": "function b(){
   Math.floor(as, bb);
   function d(){
     Math.floor(as, bb);
   }
 }
-function c(){
-  Math.floor(as, bb);
-  function d(){
-    Math.floor(as, bb);
+const a = {
+  c : () => {
+      Math.floor(bbb);
+      Math.floor(bbb);
+  },
+  d : () => {
+      Math.abs(aa);
+      Math.abs(aa);
+      Math.floor(aa);
+      return () => {
+        Math.floor(aa);
+      }
   }
-}",
-  "expected": "function a() {
-  function d() {
-    Math.floor(as, bb);
+};
+class A {
+  constructor() {
+    let a = Math.floor(b,c) + Math.floor(b,c);
   }
-}
-function b() {
+  c() {
+      Math.floor(asdas);
+      Math.floor(dasda);
+  }
+  d() {
+    var a = Math.floor;
+      a(aa, bb);
+      Math.floor(aa, bb);
+  }
+};
+new A()",
+  "expected": "function b() {
   var _Mathfloor = Math.floor;
 
   _Mathfloor(as, bb);
@@ -32,14 +45,46 @@ function b() {
     _Mathfloor(as, bb);
   }
 }
-function c() {
-  var _Mathfloor2 = Math.floor;
+const a = {
+  c: () => {
+    var _Mathfloor2 = Math.floor;
 
-  _Mathfloor2(as, bb);
-  function d() {
-    _Mathfloor2(as, bb);
+    _Mathfloor2(bbb);
+    _Mathfloor2(bbb);
+  },
+  d: () => {
+    var _Mathabs = Math.abs;
+    var _Mathfloor3 = Math.floor;
+
+    _Mathabs(aa);
+    _Mathabs(aa);
+    _Mathfloor3(aa);
+    return () => {
+      _Mathfloor3(aa);
+    };
   }
-}",
+};
+class A {
+  constructor() {
+    var _Mathfloor4 = Math.floor;
+
+    let a = _Mathfloor4(b, c) + _Mathfloor4(b, c);
+  }
+  c() {
+    var _Mathfloor5 = Math.floor;
+
+    _Mathfloor5(asdas);
+    _Mathfloor5(dasda);
+  }
+  d() {
+    var _Mathfloor6 = Math.floor;
+
+    var a = _Mathfloor6;
+    a(aa, bb);
+    _Mathfloor6(aa, bb);
+  }
+};
+new A();",
 }
 `;
 
@@ -103,11 +148,11 @@ A.b(\\"asdas1\\", function() {
   Math.max(e,d);
 })",
   "expected": "var a = () => {
+  var _Mathfloor = Math.floor;
+
   _Mathfloor(b);
   _Mathfloor(b);
   c: () => {
-    var _Mathfloor = Math.floor;
-
     _Mathfloor(d);
     2;
   };
