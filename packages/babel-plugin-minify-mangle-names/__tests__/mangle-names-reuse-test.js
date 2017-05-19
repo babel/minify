@@ -1,16 +1,14 @@
 jest.autoMockOff();
 
 const traverse = require("babel-traverse").default;
-const babel    = require("babel-core");
-const unpad    = require("../../../utils/unpad");
+const babel = require("babel-core");
+const unpad = require("../../../utils/unpad");
 
 function transform(code, options = {}, sourceType = "script") {
   options.reuse = true;
-  return babel.transform(code,  {
+  return babel.transform(code, {
     sourceType,
-    plugins: [
-      [require("../src/index"), options],
-    ],
+    plugins: [[require("../src/index"), options]]
   }).code;
 }
 
@@ -293,7 +291,7 @@ describe("mangle-names", () => {
     expect(transform(source)).toBe(expected);
   });
 
-  it("should handle only think in function scopes", () => {
+  it("should handle only thunk in function scopes", () => {
     const source = unpad(`
       function foo() {
         function xx(bar, baz) {
@@ -449,7 +447,9 @@ describe("mangle-names", () => {
         var a = 2;
       }
     `);
-    expect(transform(source, { blacklist: {foo: true, bar: true }})).toBe(expected);
+    expect(transform(source, { blacklist: { foo: true, bar: true } })).toBe(
+      expected
+    );
   });
 
   it("should handle deeply nested paths with no bindings", () => {
@@ -591,13 +591,13 @@ describe("mangle-names", () => {
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
-      code: false,
+      code: false
     });
 
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [[require("../src/index"), { reuse: true }]],
+      plugins: [[require("../src/index"), { reuse: true }]]
     }).code;
 
     const expected = unpad(`
@@ -639,13 +639,13 @@ describe("mangle-names", () => {
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
-      code: false,
+      code: false
     });
 
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [[require("../src/index"), { reuse: true }]],
+      plugins: [[require("../src/index"), { reuse: true }]]
     }).code;
 
     const expected = unpad(`
@@ -795,7 +795,7 @@ describe("mangle-names", () => {
         b();
       })();
     `);
-    expect(transform(source, {keepFnName: true})).toBe(expected);
+    expect(transform(source, { keepFnName: true })).toBe(expected);
   });
 
   it("should NOT mangle classes when keepClassName is true", () => {
@@ -821,7 +821,7 @@ describe("mangle-names", () => {
         a();
       })();
     `);
-    expect(transform(source, {keepClassName: true})).toBe(expected);
+    expect(transform(source, { keepClassName: true })).toBe(expected);
   });
 
   it("should mangle variable re-declaration / K violations", () => {

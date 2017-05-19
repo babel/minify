@@ -2,8 +2,12 @@ const CountedSet = require("./counted-set");
 const isLabelIdentifier = require("./is-label-identifier");
 
 /**
- * Scope - References, Bindings
+ * Scope Tracker
+ *   references: Map<Scope, CountedSet<String> >
+ *   bindings: Map<Scope, Map<String, Binding> >
  */
+
+let counter = 0;
 module.exports = class ScopeTracker {
   constructor() {
     this.references = new Map();
@@ -23,50 +27,57 @@ module.exports = class ScopeTracker {
   addReference(scope, binding, name) {
     let parent = scope;
     do {
-      if (!this.references.has(parent)) {
-        this.addScope(parent);
-        this.updateScope(parent);
-      }
       this.references.get(parent).add(name);
-
-      // here binding is undefined for globals,
-      // so we just add to all scopes up
-      if (binding && binding.scope === parent) {
-        break;
-      }
+      if (!binding) throw new Error("How did global come here");
+      if (binding.scope === parent) break;
     } while ((parent = parent.parent));
   }
 
   hasReference(scope, name) {
-    if (!this.references.has(scope)) {
-      this.addScope(scope);
-      this.updateScope(scope);
-    }
     return this.references.get(scope).has(name);
+  }
+
+  updateReference(scope, binding, oldName, newName) {
+    let parent = scope;
+    do {
+      const ref = this.references.get(parent);
+      // if (!ref.has(oldName)) {
+      //   throw new Error("ref " + oldName + " not found");
+      // }
+      ref.delete(oldName);
+      ref.add(newName);
+      // console.log("adding", newName, "to", parent.path.type);
+      if (!binding) throw new Error("How did global get here");
+      if (binding.scope === parent) break;
+    } while ((parent = parent.parent));
+  }
+
+  hasBindingOrReference(scope, binding, name) {
+    return this.hasReference(scope, name) || this.hasBinding(scope, name);
   }
 
   canUseInReferencedScopes(binding, next) {
     const tracker = this;
 
-    if (tracker.hasReference(binding.scope, next)) {
+    if (tracker.hasBindingOrReference(binding.scope, binding, next)) {
       return false;
     }
 
     for (let i = 0; i < binding.constantViolations.length; i++) {
       const violation = binding.constantViolations[i];
-      if (tracker.hasReference(violation.scope, next)) {
+      if (tracker.hasBindingOrReference(violation.scope, binding, next)) {
         return false;
       }
     }
 
-    for (let i = 0; i < binding.referencePaths; i++) {
+    for (let i = 0; i < binding.referencePaths.length; i++) {
       const ref = binding.referencePaths[i];
       if (!ref.isIdentifier()) {
         let canUse = true;
         ref.traverse({
           ReferencedIdentifier(path) {
             if (path.node.name !== next) return;
-            if (tracker.hasReference(path.scope, next)) {
+            if (tracker.hasBindingOrReference(path.scope, binding, next)) {
               canUse = false;
             }
           }
@@ -75,7 +86,7 @@ module.exports = class ScopeTracker {
           return canUse;
         }
       } else if (!isLabelIdentifier(ref)) {
-        if (tracker.hasReference(ref.scope, next)) {
+        if (tracker.hasBindingOrReference(ref.scope, binding, next)) {
           return false;
         }
       }
@@ -84,36 +95,39 @@ module.exports = class ScopeTracker {
     return true;
   }
 
-  updateReference(scope, binding, oldName, newName) {
-    let parent = scope;
-    do {
-      if (!this.references.has(parent)) {
-        this.addScope(parent);
-        this.updateScope(parent);
-      }
-
-      // update
-      const ref = this.references.get(parent);
-      if (ref.has(oldName)) {
-        ref.delete(oldName);
-        ref.add(newName);
-      }
-      // else already renamed
-
-      if (binding.scope === parent) {
-        break;
-      }
-    } while ((parent = parent.parent));
-  }
-
   addBinding(binding) {
     if (!binding) {
       return;
     }
+
     const bindings = this.bindings.get(binding.scope);
-    if (!bindings.has(binding.identifier.name)) {
-      bindings.set(binding.identifier.name, binding);
+    const existingBinding = bindings.get(binding.identifier.name);
+
+    if (existingBinding && existingBinding !== binding) {
+      throw new Error(
+        "Binding " +
+          existingBinding.identifier.name +
+          "already exists. " +
+          "Trying to add " +
+          binding.identifier.name
+      );
     }
+
+    bindings.set(binding.identifier.name, binding);
+  }
+
+  // required for fixup-var-scope
+  moveBinding(binding, toScope) {
+    // console.log(
+    //   "moving binding",
+    //   binding.identifier.name,
+    //   "to",
+    //   toScope.path.type,
+    //   "from",
+    //   binding.scope.path.type
+    // );
+    this.bindings.get(binding.scope).delete(binding.identifier.name);
+    this.bindings.get(toScope).set(binding.identifier.name, binding);
   }
 
   hasBinding(scope, name) {
@@ -124,30 +138,5 @@ module.exports = class ScopeTracker {
     const bindings = this.bindings.get(scope);
     bindings.set(newName, bindings.get(oldName));
     bindings.delete(oldName);
-  }
-
-  // This is a fallback option and is used when something happens -
-  // during traversal and checks we find that a scope doesn't
-  // exist in the tracker
-  //
-  // This should NOT happen ultimately. Just used as a fallback
-  // with a throw statement. This helps in understanding where it
-  // happens to debug it.
-  updateScope(scope) {
-    /* eslint-disable no-unreachable */
-    throw new Error(
-      "Tracker received a scope it doesn't know about yet. Please report this - https://github.com/babel/babili/issues/new"
-    );
-
-    const tracker = this;
-    scope.path.traverse({
-      ReferencedIdentifier(path) {
-        if (path.scope === scope) {
-          const binding = scope.getBinding(path.node.name);
-          tracker.addReference(scope, binding, path.node.name);
-        }
-      }
-    });
-    /* eslint-enable */
   }
 };
