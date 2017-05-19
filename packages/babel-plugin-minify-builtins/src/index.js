@@ -148,27 +148,27 @@ function getSegmentedSubPaths(paths) {
     paths,
     (lastCommon, index, ancestries) => {
       // found the LCA
-      if (!lastCommon.isProgram() && lastCommon.isFunction()) {
-        segments.set(lastCommon, paths);
-        return;
-      }
-      // Found the LCA in the parent
-      let funParent = lastCommon.getFunctionParent();
-      if (!(lastCommon.isProgram() || funParent.isProgram())) {
-        segments.set(funParent, paths);
-        return;
+      if (!lastCommon.isProgram()) {
+        let fnParent;
+        if (lastCommon.isFunction()) {
+          segments.set(lastCommon, paths);
+          return;
+        } else if (!(fnParent = lastCommon.getFunctionParent()).isProgram()) {
+          segments.set(fnParent, paths);
+          return;
+        }
       }
 
       // Deopt and construct segments otherwise
       for (const ancestor of ancestries) {
-        const funcPath = getChildFuncion(ancestor);
-        if (funcPath === void 0) {
+        const fnPath = getChildFuncion(ancestor);
+        if (fnPath === void 0) {
           return;
         }
         const validDescendants = paths.filter(p => {
-          return p.isDescendant(funcPath);
+          return p.isDescendant(fnPath);
         });
-        segments.set(funcPath, validDescendants);
+        segments.set(fnPath, validDescendants);
       }
     }
   );
@@ -181,7 +181,6 @@ function getChildFuncion(ancestors = []) {
       return path;
     }
   }
-  return void 0;
 }
 
 function hasPureArgs(path) {
