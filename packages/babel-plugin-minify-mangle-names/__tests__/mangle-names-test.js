@@ -438,14 +438,17 @@ describe("mangle-names", () => {
     `);
 
     const expected = unpad(`
-      function foo() {
+      function a() {
         var bar = 1;
         var a = 2;
       }
     `);
-    expect(transform(source, { blacklist: { foo: true, bar: false } })).toBe(
-      expected
-    );
+    expect(
+      transform(source, {
+        blacklist: { foo: false, bar: true },
+        topLevel: true
+      })
+    ).toBe(expected);
   });
 
   it("should handle deeply nested paths with no bindings", () => {
