@@ -1,14 +1,16 @@
 "use strict";
 
 const CHARSET = ("abcdefghijklmnopqrstuvwxyz" +
-                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_").split("");
 
 module.exports = class Charset {
   constructor(shouldConsider) {
     this.shouldConsider = shouldConsider;
     this.chars = CHARSET.slice();
     this.frequency = {};
-    this.chars.forEach((c) => { this.frequency[c] = 0; });
+    this.chars.forEach(c => {
+      this.frequency[c] = 0;
+    });
     this.finalized = false;
   }
 
@@ -17,7 +19,7 @@ module.exports = class Charset {
       return;
     }
 
-    str.split("").forEach((c) => {
+    str.split("").forEach(c => {
       if (this.frequency[c] != null) {
         this.frequency[c]++;
       }

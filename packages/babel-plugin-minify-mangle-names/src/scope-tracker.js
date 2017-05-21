@@ -7,7 +7,6 @@ const isLabelIdentifier = require("./is-label-identifier");
  *   bindings: Map<Scope, Map<String, Binding> >
  */
 
-let counter = 0;
 module.exports = class ScopeTracker {
   constructor() {
     this.references = new Map();

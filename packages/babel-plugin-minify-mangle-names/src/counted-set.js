@@ -2,7 +2,7 @@
 module.exports = class CountedSet {
   constructor() {
     // because you can't simply extend Builtins yet
-    this.map = new Map;
+    this.map = new Map();
   }
   keys() {
     return [...this.map.keys()];
