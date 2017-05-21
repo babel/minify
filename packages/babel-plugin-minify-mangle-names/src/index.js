@@ -1,3 +1,5 @@
+"use strict";
+
 const Charset = require("./charset");
 const ScopeTracker = require("./scope-tracker");
 const isLabelIdentifier = require("./is-label-identifier");
@@ -9,6 +11,8 @@ const {
   isMarked: isEvalScopesMarked,
   hasEval
 } = require("babel-helper-mark-eval-scopes");
+
+const newIssueUrl = "https://github.com/babel/babili/issues/new";
 
 module.exports = babel => {
   const { types: t, traverse } = babel;
@@ -29,17 +33,23 @@ module.exports = babel => {
     ) {
       this.charset = charset;
       this.program = program;
+
+      // user passed options
       this.blacklist = toObject(blacklist);
       this.keepFnName = keepFnName;
       this.keepClassName = keepClassName;
       this.topLevel = topLevel;
       this.eval = _eval;
 
+      // tracking
       this.visitedScopes = new Set();
       this.scopeTracker = new ScopeTracker();
       this.renamedNodes = new Set();
     }
 
+    /**
+     * Run the mangler
+     */
     run() {
       this.crawlScope();
       this.collect();
@@ -48,77 +58,171 @@ module.exports = babel => {
       this.mangle();
     }
 
+    /**
+     * Tells if a variable name is blacklisted
+     * @param {String} name
+     */
     isBlacklist(name) {
       return hop.call(this.blacklist, name) && this.blacklist[name];
     }
 
+    /**
+     * Clears traverse cache and recrawls the AST
+     *
+     * to recompute the bindings, references, other scope information
+     * and paths because the other transformations in the same pipeline
+     * (other plugins and presets) changes the AST and does NOT update
+     * the scope objects
+     */
     crawlScope() {
       traverse.clearCache();
       this.program.scope.crawl();
     }
 
+    /**
+     * Re-crawling comes with a side-effect that let->var conversion
+     * reverts the update of the binding information (block to fn scope).
+     * This function takes care of it by updating it again.
+     *
+     * TODO: This is unnecessary work and needs to be fixed in babel.
+     * https://github.com/babel/babel/issues/4818
+     *
+     * When this is removed, remember to remove fixup's dependency in
+     * ScopeTracker
+     */
     fixup() {
       fixupVarScoping(this);
     }
 
+    /**
+     * A single pass through the AST to collect info for
+     *
+     * 1. Scope Tracker
+     * 2. Unsafe Scopes (direct eval scopes)
+     * 3. Charset considerations for better gzip compression
+     *
+     * Traversed in the same fashion(BFS) the mangling is done
+     */
     collect() {
       const mangler = this;
       const { scopeTracker } = mangler;
 
       scopeTracker.addScope(this.program.scope);
 
+      /**
+       * Same usage as in DCE, whichever runs first
+       */
       if (!isEvalScopesMarked(mangler.program.scope)) {
         markEvalScopes(mangler.program);
       }
 
+      /**
+       * The visitors to be used in traversal.
+       *
+       * Note: BFS traversal supports only the `enter` handlers, `exit`
+       * handlers are simply dropped without Errors
+       *
+       * Collects items defined in the ScopeTracker
+       */
       const collectVisitor = {
         Scopable({ scope }) {
           scopeTracker.addScope(scope);
+
+          // Collect bindings defined in the scope
           Object.keys(scope.bindings).forEach(name => {
             scopeTracker.addBinding(scope.bindings[name]);
           });
         },
+        /**
+         * This is necessary because, in Babel, the scope.references
+         * does NOT contain the references in that scope. Only the program
+         * scope (top most level) contains all the references.
+         *
+         * We collect the references in a fashion where all the scopes between
+         * and including the referenced scope and scope where it is declared
+         * is considered as scope referencing that identifier
+         */
         ReferencedIdentifier(path) {
           if (isLabelIdentifier(path)) return;
           const { scope, node: { name } } = path;
           const binding = scope.getBinding(name);
           if (!binding) {
+            // Do not collect globals as they are already available via
+            // babel's API
             if (scope.hasGlobal(name)) return;
-            throw new Error("Something went wrong");
+            // This should NOT happen ultimately. Panic if this code block is
+            // reached
+            throw new Error(
+              "Binding not found for ReferencedIdentifier. " +
+                name +
+                "Please report this at " +
+                newIssueUrl
+            );
           } else {
+            // Add it to our scope tracker if everything is fine
             scopeTracker.addReference(scope, binding, name);
           }
         },
 
+        /**
+         * This is useful to detect binding ids and add them to the
+         * scopeTracker's bindings
+         */
         BindingIdentifier(path) {
           if (isLabelIdentifier(path)) return;
 
           const { scope, node: { name } } = path;
           const binding = scope.getBinding(name);
+
           if (!binding) {
+            // ignore the globals as it's available via Babel's API
             if (scope.hasGlobal(name)) return;
+
+            // Ignore the NamedExports as they should NOT be mangled
             if (
               path.parentPath.isExportSpecifier() &&
               path.parentKey === "exported"
             ) {
               return;
             }
-            throw new Error("binding not found " + name);
+
+            // This should NOT happen ultimately. Panic if this code is reached
+            throw new Error(
+              "Binding not found for BindingIdentifier. " +
+                name +
+                "Please report this at " +
+                newIssueUrl
+            );
           }
+
+          /**
+           * Detect constant violations
+           *
+           * If it's a constant violation, then add the Identifier Path as
+           * a Reference instead of Binding - This is because the ScopeTracker
+           * tracks these Re-declaration and mutation of variables as References
+           * as it is simple to rename them
+           */
           if (binding.identifier === path.node) {
             scopeTracker.addBinding(binding);
           } else {
-            //constant violation
-            // track constant violations as references in ScopeTracking
+            // constant violation
             scopeTracker.addReference(scope, binding, name);
           }
         }
       };
 
+      /**
+       * These visitors are for collecting the Characters used in the program
+       * to measure the frequency and generate variable names for mangling so
+       * as to improve the gzip compression - as gzip likes repetition
+       */
       if (this.charset.shouldConsider) {
         collectVisitor.Identifier = function Identifer(path) {
           const { node } = path;
 
+          // We don't mangle properties, so we collect them as they contribute
+          // to the frequency of characters
           if (
             path.parentPath.isMemberExpression({ property: node }) ||
             path.parentPath.isObjectProperty({ key: node })
@@ -131,9 +235,16 @@ module.exports = babel => {
         };
       }
 
+      // Traverse the AST
       bfsTraverse(mangler.program, collectVisitor);
     }
 
+    /**
+     * Tells if a binding is exported as a NamedExport - so as to NOT mangle
+     *
+     * Babel treats NamedExports as a binding referenced by this NamedExport decl
+     * @param {Binding} binding
+     */
     isExportedWithName(binding) {
       // short circuit
       if (!this.topLevel) {
@@ -152,26 +263,30 @@ module.exports = babel => {
       return false;
     }
 
+    /**
+     * Mangle the scope
+     * @param {Scope} scope
+     */
     mangleScope(scope) {
       const mangler = this;
       const { scopeTracker } = mangler;
 
+      // Unsafe Scope
       if (!mangler.eval && hasEval(scope)) return;
 
+      // Already visited
+      // This is because for a function, in Babel, the function and
+      // the function body's BlockStatement has the same scope, and will
+      // be visited twice by the Scopable handler, and we want to mangle
+      // it only once
       if (mangler.visitedScopes.has(scope)) return;
       mangler.visitedScopes.add(scope);
 
+      // Helpers to generate names
       let i = 0;
       function getNext() {
         return mangler.charset.getIdentifier(i++);
       }
-
-      // This is useful when we have vars of single character
-      // => var a, ...z, A, ...Z, $, _;
-      // to
-      // => var aa, a, b ,c;
-      // instead of
-      // => var aa, ab, ...;
       function resetNext() {
         i = 0;
       }
@@ -179,19 +294,24 @@ module.exports = babel => {
       const bindings = scopeTracker.bindings.get(scope);
       const names = [...bindings.keys()];
 
+      /**
+       * 1. Iterate through the list of BindingIdentifiers
+       * 2. Rename each of them in-place
+       * 3. Update the scope tree.
+       */
       for (let i = 0; i < names.length; i++) {
         const oldName = names[i];
         const binding = bindings.get(oldName);
 
+        // Names which should NOT be mangled
         if (
-          // arguments
+          // arguments - for non-strict mode
           oldName === "arguments" ||
           // labels
           binding.path.isLabeledStatement() ||
           // ClassDeclaration has binding in two scopes
           //   1. The scope in which it is declared
           //   2. The class's own scope
-          // - https://github.com/babel/babel/issues/5156
           (binding.path.isClassDeclaration() && binding.path === scope.path) ||
           // blacklisted
           mangler.isBlacklist(oldName) ||
@@ -208,14 +328,6 @@ module.exports = babel => {
         let next;
         do {
           next = getNext();
-          // console.log(
-          //   next,
-          //   !t.isValidIdentifier(next),
-          //   scopeTracker.hasBinding(scope, next),
-          //   scope.hasGlobal(next),
-          //   scopeTracker.hasReference(scope, next),
-          //   !scopeTracker.canUseInReferencedScopes(binding, next)
-          // );
         } while (
           !t.isValidIdentifier(next) ||
           scopeTracker.hasBinding(scope, next) ||
@@ -224,14 +336,19 @@ module.exports = babel => {
           !scopeTracker.canUseInReferencedScopes(binding, next)
         );
 
+        // Reset so variables which are removed can be reused
         resetNext();
 
-        // console.log("-----------------");
-        // console.log("mangling", oldName, next);
+        // Once we detected a valid `next` Identifier which could be used,
+        // call the renamer
         mangler.rename(scope, binding, oldName, next);
       }
     }
 
+    /**
+     * The mangle function that traverses through all the Scopes in a BFS
+     * fashion - calls mangleScope
+     */
     mangle() {
       const mangler = this;
 
@@ -243,6 +360,18 @@ module.exports = babel => {
       });
     }
 
+    /**
+     * Given a NodePath, collects all the Identifiers which are BindingIdentifiers
+     * and replaces them with the new name
+     *
+     * For example,
+     *   var a = 1, { b } = c; // a and b are BindingIdentifiers
+     *
+     * @param {NodePath} path
+     * @param {String} oldName
+     * @param {String} newName
+     * @param {Function} predicate
+     */
     renameBindingIds(path, oldName, newName, predicate = () => true) {
       const bindingIds = path.getBindingIdentifierPaths(true, false);
       for (const name in bindingIds) {
@@ -257,6 +386,21 @@ module.exports = babel => {
       }
     }
 
+    /**
+     * The Renamer:
+     * Renames the following for one Binding in a Scope
+     *
+     * 1. Binding in that Scope
+     * 2. All the Binding's constant violations
+     * 3. All its References
+     * 4. Updates mangler.scopeTracker
+     * 5. Updates Babel's Scope tracking
+     *
+     * @param {Scope} scope
+     * @param {Binding} binding
+     * @param {String} oldName
+     * @param {String} newName
+     */
     rename(scope, binding, oldName, newName) {
       const mangler = this;
       const { scopeTracker } = mangler;
@@ -269,10 +413,10 @@ module.exports = babel => {
         idPath => idPath.node === binding.identifier
       );
 
-      // update Tracking
+      // update mangler's ScopeTracker
       scopeTracker.renameBinding(scope, oldName, newName);
 
-      // update all constant violations & redeclarations
+      // update all constant violations
       const violations = binding.constantViolations;
       for (let i = 0; i < violations.length; i++) {
         if (violations[i].isLabeledStatement()) continue;
@@ -328,26 +472,20 @@ module.exports = babel => {
             mangler.renamedNodes.add(path.node);
             path.replaceWith(t.identifier(newName));
             mangler.renamedNodes.add(path.node);
-            // console.log(
-            //   "renaming ref in ",
-            //   path.scope.path.type,
-            //   oldName,
-            //   newName
-            // );
-
             scopeTracker.updateReference(path.scope, binding, oldName, newName);
           } else if (mangler.renamedNodes.has(path.node)) {
             // already renamed,
             // just update the references
-            // throw new Error("Who is replacing again");
             scopeTracker.updateReference(path.scope, binding, oldName, newName);
           } else {
             throw new Error(
-              `Unexpected Error - Trying to replace ${node.name}: from ${oldName} to ${newName}`
+              `Unexpected Rename Error: ` +
+                `Trying to replace ${node.name}: from ${oldName} to ${newName}` +
+                `Please report it at ${newIssueUrl}`
             );
           }
         }
-        // else label
+        // else label identifier - silently ignore
       }
 
       // update babel's scope tracking
@@ -360,6 +498,9 @@ module.exports = babel => {
   return {
     name: "minify-mangle-names",
     visitor: {
+      /**
+       * Mangler is run as a single pass. It's the same pattern as used in DCE
+       */
       Program: {
         exit(path) {
           // If the source code is small then we're going to assume that the user

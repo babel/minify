@@ -12,7 +12,7 @@ module.exports = function bfsTraverseCreator({ types: t, traverse }) {
     const visitor = traverse.explode(_visitor);
 
     const queue = [path];
-    let current; // current depth
+    let current;
 
     while (queue.length > 0) {
       current = queue.shift();

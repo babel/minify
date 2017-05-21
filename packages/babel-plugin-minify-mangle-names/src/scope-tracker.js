@@ -1,19 +1,25 @@
+"use strict";
+
 const CountedSet = require("./counted-set");
 const isLabelIdentifier = require("./is-label-identifier");
 
+const newIssueUrl = "https://github.com/babel/babili/issues/new";
+
 /**
- * Scope Tracker
+ * ScopeTracker
  *   references: Map<Scope, CountedSet<String> >
  *   bindings: Map<Scope, Map<String, Binding> >
  */
-
 module.exports = class ScopeTracker {
   constructor() {
     this.references = new Map();
     this.bindings = new Map();
   }
 
-  // Register a new Scope and initiliaze it with empty sets
+  /**
+   * Register a new Scope and initiliaze it with empty sets
+   * @param {Scope} scope
+   */
   addScope(scope) {
     if (!this.references.has(scope)) {
       this.references.set(scope, new CountedSet());
@@ -23,6 +29,13 @@ module.exports = class ScopeTracker {
     }
   }
 
+  /**
+   * Add reference to all Scopes between and including the ReferencedScope
+   * and Binding's Scope
+   * @param {Scope} scope
+   * @param {Binding} binding
+   * @param {String} name
+   */
   addReference(scope, binding, name) {
     let parent = scope;
     do {
@@ -32,29 +45,70 @@ module.exports = class ScopeTracker {
     } while ((parent = parent.parent));
   }
 
+  /**
+   * has a Reference in the given {Scope} or a child Scope
+   *
+   * Refer {addReference} to know why the following call will be valid
+   * for detecting references in child Scopes
+   *
+   * @param {Scope} scope
+   * @param {String} name
+   */
   hasReference(scope, name) {
     return this.references.get(scope).has(name);
   }
 
+  /**
+   * Update reference count in all scopes between and including the
+   * Referenced Scope and the Binding's Scope
+   *
+   * @param {Scope} scope
+   * @param {Binding} binding
+   * @param {String} oldName
+   * @param {String} newName
+   */
   updateReference(scope, binding, oldName, newName) {
     let parent = scope;
     do {
       const ref = this.references.get(parent);
-      // if (!ref.has(oldName)) {
-      //   throw new Error("ref " + oldName + " not found");
-      // }
+
       ref.delete(oldName);
       ref.add(newName);
-      // console.log("adding", newName, "to", parent.path.type);
-      if (!binding) throw new Error("How did global get here");
+
+      if (!binding) {
+        // Something went wrong - panic
+        throw new Error(
+          "Binding Not Found during scopeTracker.updateRefernce: " +
+            `Updating "${oldName}" to "${newName}"` +
+            `Please report at ${newIssueUrl}`
+        );
+      }
+
       if (binding.scope === parent) break;
     } while ((parent = parent.parent));
   }
 
+  /**
+   * has either a Binding or a Reference
+   * @param {Scope} scope
+   * @param {Binding} binding
+   * @param {String} name
+   */
   hasBindingOrReference(scope, binding, name) {
     return this.hasReference(scope, name) || this.hasBinding(scope, name);
   }
 
+  /**
+   * For a Binding visit all places where the Binding is used and detect
+   * if the newName {next} can be used in all these places
+   *
+   * 1. binding's own scope
+   * 2. constant violations' scopes
+   * 3. referencePaths' scopes
+   *
+   * @param {Binding} binding
+   * @param {String} next
+   */
   canUseInReferencedScopes(binding, next) {
     const tracker = this;
 
@@ -94,6 +148,10 @@ module.exports = class ScopeTracker {
     return true;
   }
 
+  /**
+   * Add a binding to Tracker in binding's own Scope
+   * @param {Binding} binding
+   */
   addBinding(binding) {
     if (!binding) {
       return;
@@ -115,24 +173,34 @@ module.exports = class ScopeTracker {
     bindings.set(binding.identifier.name, binding);
   }
 
-  // required for fixup-var-scope
+  /**
+   * Moves Binding from it's own Scope to {toScope}
+   *
+   * required for fixup-var-scope
+   *
+   * @param {Binding} binding
+   * @param {Scope} toScope
+   */
   moveBinding(binding, toScope) {
-    // console.log(
-    //   "moving binding",
-    //   binding.identifier.name,
-    //   "to",
-    //   toScope.path.type,
-    //   "from",
-    //   binding.scope.path.type
-    // );
     this.bindings.get(binding.scope).delete(binding.identifier.name);
     this.bindings.get(toScope).set(binding.identifier.name, binding);
   }
 
+  /**
+   * has a Binding in the current {Scope}
+   * @param {Scope} scope
+   * @param {String} name
+   */
   hasBinding(scope, name) {
     return this.bindings.get(scope).has(name);
   }
 
+  /**
+   * Update the ScopeTracker on rename
+   * @param {Scope} scope
+   * @param {String} oldName
+   * @param {String} newName
+   */
   renameBinding(scope, oldName, newName) {
     const bindings = this.bindings.get(scope);
     bindings.set(newName, bindings.get(oldName));
