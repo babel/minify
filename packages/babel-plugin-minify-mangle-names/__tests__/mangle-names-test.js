@@ -5,7 +5,6 @@ const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
 
 function transform(code, options = {}, sourceType = "script") {
-  options.reuse = false;
   return babel.transform(code, {
     sourceType,
     plugins: [[require("../src/index"), options]]
@@ -13,7 +12,6 @@ function transform(code, options = {}, sourceType = "script") {
 }
 
 function transformWithSimplify(code, options = {}, sourceType = "script") {
-  options.reuse = false;
   return babel.transform(code, {
     sourceType,
     plugins: [
@@ -25,48 +23,39 @@ function transformWithSimplify(code, options = {}, sourceType = "script") {
 
 describe("mangle-names", () => {
   it("should not mangle names in the global namespace", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var Foo = 1;
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var Foo = 1;
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should mangle names", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var xxx = 1;
         if (xxx) {
           console.log(xxx);
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         var a = 1;
         if (a) {
           console.log(a);
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle name collisions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = 2;
         var xxx = 1;
@@ -74,10 +63,8 @@ describe("mangle-names", () => {
           console.log(xxx + x);
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         var a = 2;
         var b = 1;
@@ -85,15 +72,13 @@ describe("mangle-names", () => {
           console.log(b + a);
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should be fine with shadowing", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var a = 1;
       function foo() {
         var xxx = 1;
@@ -101,127 +86,105 @@ describe("mangle-names", () => {
           console.log(xxx);
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var a = 1;
       function foo() {
-        var b = 1;
-        if (b) {
-          console.log(b);
+        var a = 1;
+        if (a) {
+          console.log(a);
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not shadow outer references", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function bar() {
         function foo(a, b, c) {
           lol(a,b,c);
         }
-
         function lol() {}
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function bar() {
-        function d(f, g, h) {
-          e(f, g, h);
+        function a(e, a, b) {
+          d(e, a, b);
         }
-
-        function e() {}
+        function d() {}
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should mangle args", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo(xxx) {
         if (xxx) {
           console.log(xxx);
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo(a) {
         if (a) {
           console.log(a);
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should ignore labels", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         meh: for (;;) {
           continue meh;
         }
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         meh: for (;;) {
           continue meh;
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not have labels conflicting with bindings", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         meh: for (;;) {
           var meh;
           break meh;
         }
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         meh: for (;;) {
           var a;
           break meh;
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   // https://phabricator.babeljs.io/T6957
   it("labels should not shadow bindings", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var meh;
         meh: for (;;) {
@@ -229,11 +192,9 @@ describe("mangle-names", () => {
         }
         return meh;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         var a;
         meh: for (;;) {
@@ -241,15 +202,13 @@ describe("mangle-names", () => {
         }
         return a;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("labels should not shadow bindings 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function f(a) {
         try {
           a: {
@@ -257,25 +216,21 @@ describe("mangle-names", () => {
           }
         } catch ($a) { }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function f(b) {
         try {
           a: {
             console.log(b);
           }
-        } catch (c) {}
+        } catch (a) {}
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should be order independent", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         function bar(aaa, bbb, ccc) {
           baz(aaa, bbb, ccc);
@@ -286,30 +241,26 @@ describe("mangle-names", () => {
         }
         bar();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
-        function a(c, d, e) {
-          b(c, d, e);
+        function a(a, c, d) {
+          b(a, c, d);
         }
         function b() {
-          var c = who();
-          c.bam();
+          var a = who();
+          a.bam();
         }
         a();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should be order independent 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         (function bar() {
           bar();
@@ -319,29 +270,25 @@ describe("mangle-names", () => {
           };
         })();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         (function a() {
           a();
           return function () {
-            var b = wow();
-            b.woo();
+            var a = wow();
+            a.woo();
           };
         })();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
-  it("should handle only think in function scopes", () => {
-    const source = unpad(
-      `
+  it("should handle only thunk in function scopes", () => {
+    const source = unpad(`
       function foo() {
         function xx(bar, baz) {
           if (1) {
@@ -350,27 +297,23 @@ describe("mangle-names", () => {
         }
         function yy(){}
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
-        function a(c, d) {
+        function a(a, c) {
           if (1) {
-            b(c, d);
+            b(a, c);
           }
         }
         function b() {}
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should be fine with shadowing 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         function xx(bar, baz) {
           return function(boo, foo) {
@@ -379,27 +322,23 @@ describe("mangle-names", () => {
         }
         function yy(){}
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
-        function a(c, d) {
-          return function (e, f) {
-            c(e, f);
+        function a(a, b) {
+          return function (b, c) {
+            a(b, c);
           };
         }
         function b() {}
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not be confused by scopes", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         function bar() {
           var baz;
@@ -409,28 +348,24 @@ describe("mangle-names", () => {
         }
         function bam() {}
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         function a() {
-          var c;
-          if (c) {
+          var a;
+          if (a) {
             b();
           }
         }
         function b() {}
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not be confused by scopes (closures)", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         function bar(baz) {
           return function() {
@@ -439,100 +374,82 @@ describe("mangle-names", () => {
         }
         function bam() {}
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
-        function a(c) {
+        function a(a) {
           return function () {
             b();
           };
         }
         function b() {}
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle recursion", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function bar() {
         function foo(a, b, c) {
           foo(a,b,c);
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function bar() {
-        function d(e, f, g) {
-          d(e, f, g);
+        function d(e, a, b) {
+          d(e, a, b);
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle global name conflict", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function e() {
         function foo() {
           b = bar();
         }
         function bar() {}
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function e() {
         function a() {
           b = c();
         }
         function c() {}
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle global name", () => {
-    const source = unpad(
-      `
-      function Foo() {
-        var foo = 3;
+    const source = unpad(`
+      function foo() {
         var bar = 1;
         var baz = 2;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
-      function Foo() {
-        var foo = 3;
-        var a = 1;
-        var b = 2;
+    const expected = unpad(`
+      function foo() {
+        var bar = 1;
+        var a = 2;
       }
-    `
-    );
+    `);
     expect(transform(source, { blacklist: { foo: true, bar: false } })).toBe(
       expected
     );
   });
 
   it("should handle deeply nested paths with no bindings", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function xoo() {
         function foo(zz, xx, yy) {
           function bar(zip, zap, zop) {
@@ -545,52 +462,44 @@ describe("mangle-names", () => {
           }
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function xoo() {
-        function a(b, c, d) {
-          function e(f, g, h) {
-            return function (i) {
-              g();
+        function a(a, b, c) {
+          function d(a, b, c) {
+            return function (c) {
+              b();
               return function () {
-                f();
+                a();
               };
             };
           }
         }
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle try/catch", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function xoo() {
         var e;
         try {} catch (e) {
 
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function xoo() {
         var a;
-        try {} catch (b) {}
+        try {} catch (a) {}
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should not mangle vars in scope with eval", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var inScopeOuter = 1;
         (function () {
@@ -601,10 +510,8 @@ describe("mangle-names", () => {
           })();
         })();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         var inScopeOuter = 1;
         (function () {
@@ -615,36 +522,30 @@ describe("mangle-names", () => {
           })();
         })();
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should mangle names with local eval bindings", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function eval() {}
       function foo() {
         var bar = 1;
         eval('...');
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function eval() {}
       function foo() {
         var a = 1;
         eval('...');
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should mangle names with option eval = true", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var inScopeOuter = 1;
         (function () {
@@ -655,28 +556,24 @@ describe("mangle-names", () => {
           })();
         })();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         var a = 1;
         (function () {
-          var b = 2;
+          var a = 2;
           eval("...");
           (function () {
-            var c = 1;
+            var a = 1;
           })();
         })();
       }
-    `
-    );
+    `);
     expect(transform(source, { eval: true })).toBe(expected);
   });
 
   it("should integrate with block scoping plugin", () => {
-    const srcTxt = unpad(
-      `
+    const srcTxt = unpad(`
       function f(x) {
         for (let i = 0; i; i++) {
           let n;
@@ -686,8 +583,7 @@ describe("mangle-names", () => {
           g(() => n);
         }
       }
-    `
-    );
+    `);
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
@@ -697,20 +593,19 @@ describe("mangle-names", () => {
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [[require("../src/index"), { reuse: false }]]
+      plugins: [require("../src/index")]
     }).code;
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function f(a) {
-        var b = function (e) {
-          var h = void 0;
-          if (h) {
+        var b = function (a) {
+          var b = void 0;
+          if (b) {
             return {
               v: void 0
             };
           }
-          g(() => h);
+          g(() => b);
         };
 
         for (var d = 0; d; d++) {
@@ -718,15 +613,13 @@ describe("mangle-names", () => {
           if (typeof c === "object") return c.v;
         }
       }
-    `
-    );
+    `);
 
     expect(actual).toBe(expected);
   });
 
   it("should integrate with block scoping plugin 2", () => {
-    const srcTxt = unpad(
-      `
+    const srcTxt = unpad(`
       (function () {
         function bar() {
           if (smth) {
@@ -738,8 +631,7 @@ describe("mangle-names", () => {
         function foo() { }
         module.exports = { bar };
       })();
-    `
-    );
+    `);
 
     const first = babel.transform(srcTxt, {
       plugins: ["transform-es2015-block-scoping"],
@@ -749,31 +641,28 @@ describe("mangle-names", () => {
     traverse.clearCache();
 
     const actual = babel.transformFromAst(first.ast, null, {
-      plugins: [[require("../src/index"), { reuse: false }]]
+      plugins: [require("../src/index")]
     }).code;
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       (function () {
         function a() {
           if (smth) {
-            var c = blah();
-            c();
+            var a = blah();
+            a();
           }
           b();
         }
         function b() {}
         module.exports = { bar: a };
       })();
-    `
-    );
+    `);
 
     expect(actual).toBe(expected);
   });
 
   it("should keep mangled named consistent across scopes when defined later on", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function() {
         function foo() {
           {
@@ -787,15 +676,13 @@ describe("mangle-names", () => {
 
         function bar() {}
       }());
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       (function () {
         function a() {
           {
-            var c = true;
+            var a = true;
 
             {
               b();
@@ -805,15 +692,13 @@ describe("mangle-names", () => {
 
         function b() {}
       })();
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should correctly mangle in nested loops", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         for (let x in foo) {
           for (let y in foo[x]) {
@@ -821,11 +706,9 @@ describe("mangle-names", () => {
           }
         }
       })();
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       (function () {
         for (let a in foo) {
           for (let b in foo[a]) {
@@ -833,16 +716,14 @@ describe("mangle-names", () => {
           }
         }
       })();
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   // #issue55, #issue57
   it("should correctly mangle function declarations in different order", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function(){
         (function() {
           for (let x in y) y[x];
@@ -850,8 +731,7 @@ describe("mangle-names", () => {
         })();
         function g() {}
       })();
-    `
-    );
+    `);
 
     const ast = babel.transform(source, {
       presets: ["env"],
@@ -866,8 +746,7 @@ describe("mangle-names", () => {
       plugins: [require("../src/index")]
     }).code;
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       "use strict";
 
       (function () {
@@ -880,15 +759,13 @@ describe("mangle-names", () => {
         })();
         function a() {}
       })();
-    `
-    );
+    `);
 
     expect(actual).toBe(expected);
   });
 
   it("should NOT mangle functions when keepFnName is true", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function() {
         var foo = function foo() {
           foo();
@@ -900,10 +777,8 @@ describe("mangle-names", () => {
         var baz = foo;
         baz();
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         var a = function foo() {
           foo();
@@ -915,14 +790,12 @@ describe("mangle-names", () => {
         var b = a;
         b();
       })();
-    `
-    );
+    `);
     expect(transform(source, { keepFnName: true })).toBe(expected);
   });
 
   it("should NOT mangle classes when keepClassName is true", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function() {
         class Foo {}
         const Bar = class Bar extends Foo {}
@@ -932,10 +805,8 @@ describe("mangle-names", () => {
         }
         bar();
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         class Foo {}
         const b = class Bar extends Foo {};
@@ -945,38 +816,32 @@ describe("mangle-names", () => {
         }
         a();
       })();
-    `
-    );
+    `);
     expect(transform(source, { keepClassName: true })).toBe(expected);
   });
 
   it("should mangle variable re-declaration / K violations", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       !function () {
         var foo = 1;
         foo++;
         var foo = 2;
         foo++;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       !function () {
         var a = 1;
         a++;
         var a = 2;
         a++;
       };
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle K violations - 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       !function () {
         var bar = 1;
         bar--;
@@ -989,96 +854,122 @@ describe("mangle-names", () => {
           foo(foo);
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       !function () {
         var b = 1;
         b--;
         var b = 10;
         a(b);
         function a() {
-          var c = 10;
-          c++;
-          var c = 20;
-          c(c);
+          var a = 10;
+          a++;
+          var a = 20;
+          a(a);
         }
       };
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should work with redeclarations", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         var x = y;
         x = z;
         x;
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         var a = y;
         a = z;
         a;
       })();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should reuse removed vars", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function Foo() {
         var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
         var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
         var $, _;
+        a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+        A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+        $, _;
+        function Foo() {
+          var a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+          var $, _;
+          a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+          $, _;
+          function Foo() {
+            var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+            var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+            var $, _;
+            a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+            A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+            $, _;
+          }
+          Foo();
+        }
+        Foo();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function Foo() {
-        var aa, ba, ca, da, ea, fa, ga, ha, ia, ja, ka, la, ma, na, oa, pa, qa, ra, sa, ta, ua, va, wa, xa, ya, za;
-        var Aa, Ba, Ca, Da, Ea, Fa, Ga, Ha, Ia, Ja, Ka, La, Ma, Na, Oa, Pa, Qa, Ra, Sa, Ta, Ua, Va, Wa, Xa, Ya, Za;
-        var $a, _a;
+        var ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+        var Z, $;
+        ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+        Z, $;
+        function aa() {
+          var aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+          var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+          var Z, $;
+          aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+          z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+          Z, $;
+          function h() {
+            var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+            var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+            var Z, $;
+            aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+            z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+            Z, $;
+          }
+          h();
+        }
+        aa();
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should mangle both referenced and binding identifiers with K violations", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         var foo = bar,
             foo = baz;
         foo;
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         var a = bar,
             a = baz;
         a;
       })();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle export declarations", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       const foo = 1;
       export { foo };
       export const bar = 2;
@@ -1090,10 +981,8 @@ describe("mangle-names", () => {
         bar();
         baz();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       const foo = 1;
       export { foo };
       export const bar = 2;
@@ -1105,14 +994,12 @@ describe("mangle-names", () => {
         a();
         b();
       }
-    `
-    );
+    `);
     expect(transform(source, {}, "module")).toBe(expected);
   });
 
   it("should find global scope properly", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       class A {}
       class B extends A {}
       (function () {
@@ -1124,10 +1011,8 @@ describe("mangle-names", () => {
           }
         }
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       class A {}
       class B extends A {}
       (function () {
@@ -1139,14 +1024,12 @@ describe("mangle-names", () => {
           }
         }
       })();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should mangle classes properly", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       class A {}
       class B {}
       new A();
@@ -1157,226 +1040,42 @@ describe("mangle-names", () => {
         new A();
         new B();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       class A {}
       class B {}
       new A();
       new B();
       function a() {
+        class a {}
         class b {}
-        class c {}
+        new a();
         new b();
-        new c();
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   // https://github.com/babel/babili/issues/138
   it("should handle class exports in modules - issue#138", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       export class App extends Object {};
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source, {}, "module")).toBe(expected);
   });
 
   it("should not mangle the name arguments", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         var arguments = void 0;
         (function () {
           console.log(arguments);
         })("argument");
       })();
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
-  });
-
-  it("should mangle topLevel when topLevel option is true", () => {
-    const source = unpad(
-      `
-      function foo() {
-        if (FOO_ENV === "production") {
-          HELLO_WORLD.call();
-        }
-      }
-      const FOO_ENV = "production";
-      var HELLO_WORLD = function bar() {
-        new AbstractClass({
-          [FOO_ENV]: "foo",
-          a: foo(HELLO_WORLD)
-        });
-      };
-      class AbstractClass {}
-      foo();
-    `
-    );
-
-    const expected = unpad(
-      `
-      function a() {
-        if (b === "production") {
-          c.call();
-        }
-      }
-      const b = "production";
-      var c = function e() {
-        new d({
-          [b]: "foo",
-          a: a(c)
-        });
-      };
-      class d {}
-      a();
-    `
-    );
-
-    expect(transform(source, { topLevel: true })).toBe(expected);
-  });
-
-  it("should fix #326, #369 - destructuring", () => {
-    const source = unpad(
-      `
-      // issue#326
-      function a() {
-        let foo, bar, baz;
-        ({foo, bar, baz} = {});
-        return {foo, bar, baz};
-      }
-      // issue#369
-      function decodeMessage(message){
-        let namespace;
-        let name;
-        let value = null;
-
-        [, namespace, name, value] = message.split(',') || [];
-        console.log(name);
-      }
-    `
-    );
-    const expected = unpad(
-      `
-      // issue#326
-      function a() {
-        let b, c, d;
-        ({ foo: b, bar: c, baz: d } = {});
-        return { foo: b, bar: c, baz: d };
-      }
-      // issue#369
-      function decodeMessage(b) {
-        let c;
-        let d;
-        let e = null;
-
-        [, c, d, e] = b.split(\',\') || [];
-        console.log(d);
-      }
-    `
-    );
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should rename binding.identifier - issue#411", () => {
-    const source = unpad(
-      `
-      !function () {
-        function e(e) {
-          foo(e);
-        }
-        return function () {
-          return e();
-        };
-      }();
-    `
-    );
-    const expected = unpad(
-      `
-      !function () {
-        function a(b) {
-          foo(b);
-        }
-        return function () {
-          return a();
-        };
-      }();
-    `
-    );
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should fix issue#365 - classDeclaration with unsafe parent scope", () => {
-    const source = unpad(
-      `
-      function foo() {
-        eval("");
-        class A {}
-        class B {}
-      }
-    `
-    );
-    expect(transform(source)).toBe(source);
-  });
-
-  it("should fix classDeclaration with unsafe program scope", () => {
-    const source = unpad(
-      `
-      class A {}
-      class B {}
-      eval("");
-    `
-    );
-    expect(transform(source, { topLevel: true })).toBe(source);
-  });
-
-  it("should not mangle named exports - 1", () => {
-    const source = unpad(
-      `
-      export const Foo = foo;
-    `
-    );
-    expect(transform(source, { topLevel: true }, "module")).toBe(source);
-  });
-
-  it("should not mangle named exports - 2", () => {
-    const source = unpad(
-      `
-      const Foo = a;
-      export {Foo};
-    `
-    );
-    const expected = unpad(
-      `
-      const b = a;
-      export { b as Foo };
-    `
-    );
-    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
-  });
-
-  it("should not mangle named exports - 3", () => {
-    const source = unpad(
-      `
-      const Foo = a;
-      export {Foo as Bar};
-    `
-    );
-    const expected = unpad(
-      `
-      const b = a;
-      export { b as Bar };
-    `
-    );
-    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
   });
 
   it("should handle constant violations across multiple blocks", () => {
@@ -1400,9 +1099,9 @@ describe("mangle-names", () => {
         {
           var a;a;a;
           function b() {
-            var c;c;c;
+            var a;a;a;
             {
-              var c;c;c;
+              var a;a;a;
             }
           }
         }
@@ -1427,5 +1126,244 @@ describe("mangle-names", () => {
       }
     `);
     expect(transformWithSimplify(source)).toBe(expected);
+  });
+
+  it("should fix #326, #369 - destructuring", () => {
+    const source = unpad(`
+      // issue#326
+      function a() {
+        let foo, bar, baz;
+        ({foo, bar, baz} = {});
+        return {foo, bar, baz};
+      }
+      // issue#369
+      function decodeMessage(message){
+        let namespace;
+        let name;
+        let value = null;
+
+        [, namespace, name, value] = message.split(',') || [];
+        console.log(name);
+      }
+    `);
+    const expected = unpad(`
+      // issue#326
+      function a() {
+        let a, b, c;
+        ({ foo: a, bar: b, baz: c } = {});
+        return { foo: a, bar: b, baz: c };
+      }
+      // issue#369
+      function decodeMessage(a) {
+        let b;
+        let c;
+        let d = null;
+
+        [, b, c, d] = a.split(',') || [];
+        console.log(c);
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should mangle topLevel when topLevel option is true", () => {
+    const source = unpad(`
+      function foo() {
+        if (FOO_ENV === "production") {
+          HELLO_WORLD.call();
+        }
+      }
+      const FOO_ENV = "production";
+      var HELLO_WORLD = function bar() {
+        new AbstractClass({
+          [FOO_ENV]: "foo",
+          a: foo(HELLO_WORLD)
+        });
+      };
+      class AbstractClass {}
+      foo();
+    `);
+
+    const expected = unpad(`
+      function a() {
+        if (b === "production") {
+          c.call();
+        }
+      }
+      const b = "production";
+      var c = function e() {
+        new d({
+          [b]: "foo",
+          a: a(c)
+        });
+      };
+      class d {}
+      a();
+    `);
+
+    expect(transform(source, { topLevel: true })).toBe(expected);
+  });
+
+  it("should fix #326, #369 - destructuring", () => {
+    const source = unpad(`
+      // issue#326
+      function a() {
+        let foo, bar, baz;
+        ({foo, bar, baz} = {});
+        return {foo, bar, baz};
+      }
+      // issue#369
+      function decodeMessage(message){
+        let namespace;
+        let name;
+        let value = null;
+
+        [, namespace, name, value] = message.split(',') || [];
+        console.log(name);
+      }
+    `);
+    const expected = unpad(`
+      // issue#326
+      function a() {
+        let a, b, c;
+        ({ foo: a, bar: b, baz: c } = {});
+        return { foo: a, bar: b, baz: c };
+      }
+      // issue#369
+      function decodeMessage(a) {
+        let b;
+        let c;
+        let d = null;
+
+        [, b, c, d] = a.split(',') || [];
+        console.log(c);
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should rename binding.identifier - issue#411", () => {
+    const source = unpad(`
+      !function () {
+        function e(e) {
+          foo(e);
+        }
+        return function () {
+          return e();
+        };
+      }();
+    `);
+    const expected = unpad(`
+      !function () {
+        function a(a) {
+          foo(a);
+        }
+        return function () {
+          return a();
+        };
+      }();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should fix issue#365 - classDeclaration with unsafe parent scope", () => {
+    const source = unpad(`
+      function foo() {
+        eval("");
+        class A {}
+        class B {}
+      }
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should fix classDeclaration with unsafe program scope", () => {
+    const source = unpad(`
+      class A {}
+      class B {}
+      eval("");
+    `);
+    expect(transform(source, { topLevel: true })).toBe(source);
+  });
+
+  it("should handle constant violations across multiple blocks", () => {
+    const source = unpad(`
+      function foo() {
+        var x;x;x;
+        {
+          var x;x;x;
+          function y() {
+            var x;x;x;
+            {
+              var x;x;x;
+            }
+          }
+        }
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        var a;a;a;
+        {
+          var a;a;a;
+          function b() {
+            var a;a;a;
+            {
+              var a;a;a;
+            }
+          }
+        }
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should work with if_return optimization changing fn scope", () => {
+    const source = unpad(`
+      function foo() {
+        if (x)
+          return;
+        function bar() {}
+        bar(a);
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        function b() {}
+        x || b(a);
+      }
+    `);
+    expect(transformWithSimplify(source)).toBe(expected);
+  });
+
+  it("should not mangle named exports - 1", () => {
+    const source = unpad(`
+      export const Foo = foo;
+    `);
+    expect(transform(source, { topLevel: true }, "module")).toBe(source);
+  });
+
+  it("should not mangle named exports - 2", () => {
+    const source = unpad(`
+      const Foo = a;
+      export {Foo};
+    `);
+    const expected = unpad(`
+      const b = a;
+      export { b as Foo };
+    `);
+    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
+  });
+
+  it("should not mangle named exports - 3", () => {
+    const source = unpad(`
+      const Foo = a;
+      export {Foo as Bar};
+    `);
+    const expected = unpad(`
+      const b = a;
+      export { b as Bar };
+    `);
+    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
   });
 });

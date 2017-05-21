@@ -109,7 +109,7 @@ module.exports = babel => {
             scopeTracker.addBinding(binding);
           } else {
             //constant violation
-            // console.log("adding constant violation for ", name);
+            // track constant violations as references in ScopeTracking
             scopeTracker.addReference(scope, binding, name);
           }
         }
