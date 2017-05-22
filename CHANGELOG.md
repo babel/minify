@@ -2,11 +2,13 @@
 
 #### Summary
 
-+ New rewritten `mangler` which shaves off lots of bytes. Check [Benchmarks](https://github.com/babel/babili#benchmarks) for info about how Babili compares with other minifiers.
++ Better mangling - significant improvement in output code size.
 + The preset options are [flattened](https://github.com/babel/babili/tree/master/packages/babel-preset-babili#options)
-+ Smoke tests
-+ Project uses [Yarn](https://yarnpkg.com) & [Prettier](https://github.com/prettier/prettier)
++ [Smoke tests](https://github.com/babel/babili/blob/master/CONTRIBUTING.md#smoke-tests)
++ Use [Yarn](https://yarnpkg.com) & [Prettier](https://github.com/prettier/prettier)
 + And a lot of bug fixes (refer below)
+
+Check [Benchmarks](https://github.com/babel/babili#benchmarks) for info about how Babili compares with other minifiers for a few samples.
 
 <details>
 <summary>Updated Pacakges:</summary>
