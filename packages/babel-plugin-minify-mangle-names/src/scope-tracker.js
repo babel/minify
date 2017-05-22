@@ -40,7 +40,12 @@ module.exports = class ScopeTracker {
     let parent = scope;
     do {
       this.references.get(parent).add(name);
-      if (!binding) throw new Error("How did global come here");
+      if (!binding) {
+        throw new Error(
+          `Binding Not Found for ${name} during scopeTracker.addRefernce: ` +
+            `Please report at ${newIssueUrl}`
+        );
+      }
       if (binding.scope === parent) break;
     } while ((parent = parent.parent));
   }
