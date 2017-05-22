@@ -1,3 +1,70 @@
+## babili@0.1.1 (2017-05-22)
+
+#### :boom: Breaking Change
+* `babel-preset-babili`
+  * [#508](https://github.com/babel/babili/pull/508) Flatten options. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-constant-folding`
+  * [#490](https://github.com/babel/babili/pull/490) Remove jsesc. ([@boopathi](https://github.com/boopathi))
+
+#### :rocket: New Feature
+* `babel-plugin-minify-mangle-names`, `babel-preset-babili`
+  * [#395](https://github.com/babel/babili/pull/395) Reuse removed vars in mangler. ([@boopathi](https://github.com/boopathi))
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-builtins`
+  * [#533](https://github.com/babel/babili/pull/533) handle deopt case in builtins properly. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-inline-consecutive-adds`
+  * [#523](https://github.com/babel/babili/pull/523) Fix collapse with circular reference. ([@jhen0409](https://github.com/jhen0409))
+* `babel-plugin-minify-mangle-names`
+  * [#518](https://github.com/babel/babili/pull/518) Fix mangling of Named Exports in Modules. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#517](https://github.com/babel/babili/pull/517) Fix crashing in simplify plugin. Deopt instead. ([@boopathi](https://github.com/boopathi))
+  * [#482](https://github.com/babel/babili/pull/482) handle default statements with fallthrough properly [Closes [#423](https://github.com/babel/babili/issues/423)]. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-minify-constant-folding`
+  * [#490](https://github.com/babel/babili/pull/490) Remove jsesc. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-builtins`, `babel-plugin-minify-mangle-names`, `babel-preset-babili`
+  * [#472](https://github.com/babel/babili/pull/472) fix builtins plugins from leaking vars. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-property-literals`
+  * [#466](https://github.com/babel/babili/pull/466) Deopt number like properties (Closes [#464](https://github.com/babel/babili/issues/464)). ([@boopathi](https://github.com/boopathi))
+
+#### :nail_care: Polish
+* `babel-preset-babili`
+  * [#508](https://github.com/babel/babili/pull/508) Flatten options. ([@boopathi](https://github.com/boopathi))
+
+#### :memo: Documentation
+* Other
+  * [#496](https://github.com/babel/babili/pull/496) Use absolute links in CONTRIBUTING.md. ([@aaronang](https://github.com/aaronang))
+  * [#494](https://github.com/babel/babili/pull/494) Add smoke test docs [skip ci]. ([@boopathi](https://github.com/boopathi))
+  * [#480](https://github.com/babel/babili/pull/480) Update Contributing.md [skip ci]. ([@boopathi](https://github.com/boopathi))
+  * [#475](https://github.com/babel/babili/pull/475) Update CONTRIBUTING.md [skip ci]. ([@alxpy](https://github.com/alxpy))
+  * [#462](https://github.com/babel/babili/pull/462) Use absolute paths in CONTRIBUTING.md. ([@aaronang](https://github.com/aaronang))
+
+#### :house: Internal
+* Other
+  * [#527](https://github.com/babel/babili/pull/527) Add butternut to benchmarks. ([@boopathi](https://github.com/boopathi))
+  * [#504](https://github.com/babel/babili/pull/504) Add CircleCI badge [skip ci]. ([@boopathi](https://github.com/boopathi))
+  * [#497](https://github.com/babel/babili/pull/497) Set static coverage % & disable patch. ([@boopathi](https://github.com/boopathi))
+  * [#495](https://github.com/babel/babili/pull/495) Add Circle CI. ([@boopathi](https://github.com/boopathi))
+  * [#492](https://github.com/babel/babili/pull/492) Smoke Tests. ([@boopathi](https://github.com/boopathi))
+  * [#488](https://github.com/babel/babili/pull/488) Use Yarn. ([@boopathi](https://github.com/boopathi))
+  * [#489](https://github.com/babel/babili/pull/489) Create benchmark_cache dir if it doesn't exist. ([@dirtybit](https://github.com/dirtybit))
+  * [#474](https://github.com/babel/babili/pull/474) Enable code coverage. ([@alxpy](https://github.com/alxpy))
+  * [#470](https://github.com/babel/babili/pull/470) Fix Benchmark scripts. ([@boopathi](https://github.com/boopathi))
+  * [#478](https://github.com/babel/babili/pull/478) 🚀 Prettier. ([@boopathi](https://github.com/boopathi))
+
+#### Chore
+  * [#522](https://github.com/babel/babili/pull/522) Upgrade deps. ([@boopathi](https://github.com/boopathi))
+
+#### Committers: 8
+- Aaron Ang ([aaronang](https://github.com/aaronang))
+- Alex Kuzmenko ([alxpy](https://github.com/alxpy))
+- Andrew Start ([andrewstart](https://github.com/andrewstart))
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Jhen-Jie Hong ([jhen0409](https://github.com/jhen0409))
+- Joshua Carter ([JoshuaCWebDeveloper](https://github.com/JoshuaCWebDeveloper))
+- Sertac Olgunsoylu ([dirtybit](https://github.com/dirtybit))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babili@0.0.12 (2017-03-03)
 
 - babel-helper-mark-eval-scopes@0.0.3
