@@ -9,7 +9,7 @@ const PLUGINS = [
   // [optionname,         plugin,                                                          default],
   ["booleans",            require("babel-plugin-transform-minify-booleans"),               true],
   ["builtIns",            require("babel-plugin-minify-builtins"),                         true],
-  ["consecutiveAdds",     require("babel-plugin-transform-inline-consecutive-adds"),       true],
+  ["consecutiveAdds",     require("babel-plugin-minify-inline-consecutive-adds"),          true],
   ["deadcode",            require("babel-plugin-minify-dead-code-elimination"),            true],
   ["evaluate",            require("babel-plugin-minify-constant-folding"),                 true],
   ["flipComparisons",     require("babel-plugin-minify-flip-comparisons"),                 true],

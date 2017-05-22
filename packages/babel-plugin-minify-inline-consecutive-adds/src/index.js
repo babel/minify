@@ -196,7 +196,7 @@ function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
 
 module.exports = function({ types: t }) {
   return {
-    name: "transform-inline-consecutive-adds",
+    name: "minify-inline-consecutive-adds",
     visitor: {
       VariableDeclaration(varDecl) {
         const topLevel = validateTopLevel(varDecl);
