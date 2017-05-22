@@ -46,7 +46,7 @@
   * [#490](https://github.com/babel/babili/pull/490) Remove jsesc. ([@boopathi](https://github.com/boopathi))
 
 #### :rocket: New Feature
-* `babel-plugin-minify-mangle-names`, `babel-preset-babili`
+* `babel-plugin-minify-mangle-names`
   * [#395](https://github.com/babel/babili/pull/395) Reuse removed vars in mangler. ([@boopathi](https://github.com/boopathi))
 
 #### :bug: Bug Fix
