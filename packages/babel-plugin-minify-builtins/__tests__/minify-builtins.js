@@ -137,10 +137,7 @@ describe("minify-builtins", () => {
         }
       }
       const a = {
-        c : () => {
-            Math.floor(bbb);
-            Math.floor(bbb);
-        },
+        c : () => Math.floor(bbb) + Math.floor(bbb) ,
         d : () => {
             Math.abs(aa);
             Math.abs(aa);
@@ -148,7 +145,8 @@ describe("minify-builtins", () => {
             return () => {
               Math.floor(aa);
             }
-        }
+        },
+        e : () => Math.abs(aa) + Math.abs(aa)
       };
       class A {
         constructor() {
@@ -197,6 +195,15 @@ describe("minify-builtins", () => {
       `
       let max = "floor";
       Math[max](1.5);
+    `
+    );
+    expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
+  });
+
+  it("should not minify for arrow fn without block statment", () => {
+    const source = unpad(
+      `
+      const a = () => Math.floor(b) + Math.floor(b);
     `
     );
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();

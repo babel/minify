@@ -9,10 +9,7 @@ Object {
   }
 }
 const a = {
-  c : () => {
-      Math.floor(bbb);
-      Math.floor(bbb);
-  },
+  c : () => Math.floor(bbb) + Math.floor(bbb) ,
   d : () => {
       Math.abs(aa);
       Math.abs(aa);
@@ -20,7 +17,8 @@ const a = {
       return () => {
         Math.floor(aa);
       }
-  }
+  },
+  e : () => Math.abs(aa) + Math.abs(aa)
 };
 class A {
   constructor() {
@@ -46,42 +44,38 @@ new A()",
   }
 }
 const a = {
-  c: () => {
-    var _Mathfloor2 = Math.floor;
-
-    _Mathfloor2(bbb);
-    _Mathfloor2(bbb);
-  },
+  c: () => Math.floor(bbb) + Math.floor(bbb),
   d: () => {
     var _Mathabs = Math.abs;
-    var _Mathfloor3 = Math.floor;
+    var _Mathfloor2 = Math.floor;
 
     _Mathabs(aa);
     _Mathabs(aa);
-    _Mathfloor3(aa);
+    _Mathfloor2(aa);
     return () => {
-      _Mathfloor3(aa);
+      _Mathfloor2(aa);
     };
-  }
+  },
+  e: () => Math.abs(aa) + Math.abs(aa)
 };
 class A {
   constructor() {
-    var _Mathfloor4 = Math.floor;
+    var _Mathfloor3 = Math.floor;
 
-    let a = _Mathfloor4(b, c) + _Mathfloor4(b, c);
+    let a = _Mathfloor3(b, c) + _Mathfloor3(b, c);
   }
   c() {
-    var _Mathfloor5 = Math.floor;
+    var _Mathfloor4 = Math.floor;
 
-    _Mathfloor5(asdas);
-    _Mathfloor5(dasda);
+    _Mathfloor4(asdas);
+    _Mathfloor4(dasda);
   }
   d() {
-    var _Mathfloor6 = Math.floor;
+    var _Mathfloor5 = Math.floor;
 
-    var a = _Mathfloor6;
+    var a = _Mathfloor5;
     a(aa, bb);
-    _Mathfloor6(aa, bb);
+    _Mathfloor5(aa, bb);
   }
 };
 new A();",
@@ -254,6 +248,13 @@ Object {
 Math.random();",
   "expected": "Math.max(foo(), 1);
 Math.random();",
+}
+`;
+
+exports[`minify-builtins should not minify for arrow fn without block statment 1`] = `
+Object {
+  "_source": "const a = () => Math.floor(b) + Math.floor(b);",
+  "expected": "const a = () => Math.floor(b) + Math.floor(b);",
 }
 `;
 

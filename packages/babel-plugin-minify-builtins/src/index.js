@@ -150,20 +150,25 @@ function getSegmentedSubPaths(paths) {
       // found the LCA
       if (!lastCommon.isProgram()) {
         let fnParent;
-        if (lastCommon.isFunction()) {
+        if (
+          lastCommon.isFunction() &&
+          lastCommon.get("body").isBlockStatement()
+        ) {
           segments.set(lastCommon, paths);
           return;
-        } else if (!(fnParent = lastCommon.getFunctionParent()).isProgram()) {
+        } else if (
+          !(fnParent = lastCommon.getFunctionParent()).isProgram() &&
+          fnParent.get("body").isBlockStatement()
+        ) {
           segments.set(fnParent, paths);
           return;
         }
       }
-
       // Deopt and construct segments otherwise
       for (const ancestor of ancestries) {
         const fnPath = getChildFuncion(ancestor);
         if (fnPath === void 0) {
-          return;
+          continue;
         }
         const validDescendants = paths.filter(p => {
           return p.isDescendant(fnPath);
@@ -177,7 +182,7 @@ function getSegmentedSubPaths(paths) {
 
 function getChildFuncion(ancestors = []) {
   for (const path of ancestors) {
-    if (path.isFunction()) {
+    if (path.isFunction() && path.get("body").isBlockStatement()) {
       return path;
     }
   }
