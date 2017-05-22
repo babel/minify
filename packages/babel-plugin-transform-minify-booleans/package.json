@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-minify-booleans",
-  "version": "6.8.1",
+  "version": "6.8.2",
   "description": "Turn boolean literals into !0 for true and !1 for false.",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-minify-booleans",

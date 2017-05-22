@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-constant-folding",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-constant-folding",
@@ -12,6 +12,6 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-evaluate-path": "^0.0.3"
+    "babel-helper-evaluate-path": "^0.1.0"
   }
 }
