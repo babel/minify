@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-mangle-names",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-mangle-names",
@@ -12,7 +12,7 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-mark-eval-scopes": "^0.0.3"
+    "babel-helper-mark-eval-scopes": "^0.1.0"
   },
   "devDependencies": {}
 }

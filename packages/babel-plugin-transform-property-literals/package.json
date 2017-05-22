@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-property-literals",
-  "version": "6.8.1",
+  "version": "6.8.2",
   "description": "Turn valid property key literals to plain identifiers",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-property-literals",

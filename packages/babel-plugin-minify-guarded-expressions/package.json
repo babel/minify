@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-guarded-expressions",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-guarded-expressions",
@@ -12,7 +12,7 @@
     "babel-plugin"
   ],
   "dependencies": {
-    "babel-helper-flip-expressions": "^0.0.2"
+    "babel-helper-flip-expressions": "^0.1.0"
   },
   "devDependencies": {}
 }

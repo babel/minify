@@ -1,6 +1,6 @@
 {
   "name": "babel-helper-mark-eval-scopes",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Mark scopes for deopt which contain a direct eval call",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-helper-mark-eval-scopes",
