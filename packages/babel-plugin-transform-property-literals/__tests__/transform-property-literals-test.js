@@ -40,7 +40,13 @@ describe("transform-property-literals-plugin", () => {
         "import": null
       });
     `);
-    expect(transform(source)).toBe(source);
+    const expected = unpad(`
+      ({
+        default: null,
+        import: null
+      });
+    `);
+    expect(transform(source)).toBe(expected);
   });
 
   it("should not transform non-string properties", () => {
@@ -59,5 +65,31 @@ describe("transform-property-literals-plugin", () => {
       });
     `);
     expect(transform(source)).toBe(source);
+  });
+
+  it("should not transform invalid es5 property names", () => {
+    const source = unpad(`
+      ({
+        "\u2118": "wp",
+        "𐊧": "foo"
+      });
+    `);
+    expect(transform(source)).toBe(source);
+  });
+
+  it("should transform valid ES5 unicodes as property names", () => {
+    const source = unpad(`
+      ({
+        "ಠ_ಠ": "bar",
+        "12e34": "wut"
+      })
+    `);
+    const expected = unpad(`
+      ({
+        ಠ_ಠ: "bar",
+        12e34: "wut"
+      });
+    `);
+    expect(transform(source)).toBe(expected);
   });
 });
