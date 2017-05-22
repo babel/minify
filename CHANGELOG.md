@@ -1,5 +1,8 @@
 ## babili@0.1.1 (2017-05-22)
 
+<details>
+<summary>Updated Pacakges:</summary>
+
  - babel-helper-evaluate-path@0.1.0
  - babel-helper-flip-expressions@0.1.1
  - babel-helper-is-void-0@0.1.1
@@ -33,6 +36,8 @@
  - babel-preset-babili@0.1.1
  - babili@0.1.1
  - gulp-babili@0.1.1
+
+</details>
 
 #### :boom: Breaking Change
 * `babel-preset-babili`
