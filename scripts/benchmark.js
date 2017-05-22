@@ -108,9 +108,7 @@ class Benchmark {
     }).code;
   }
   uglify(code) {
-    return uglify.minify(code, {
-      fromString: true
-    }).code;
+    return uglify.minify(code).code;
   }
   closureCompiler(filename) {
     return child
