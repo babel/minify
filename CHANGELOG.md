@@ -1,5 +1,39 @@
 ## babili@0.1.1 (2017-05-22)
 
+ - babel-helper-evaluate-path@0.1.0
+ - babel-helper-flip-expressions@0.1.1
+ - babel-helper-is-void-0@0.1.1
+ - babel-helper-mark-eval-scopes@0.1.1
+ - babel-helper-remove-or-void@0.1.1
+ - babel-helper-to-multiple-sequence-expressions@0.1.1
+ - babel-plugin-minify-builtins@0.1.1
+ - babel-plugin-minify-constant-folding@0.1.1
+ - babel-plugin-minify-dead-code-elimination@0.1.6
+ - babel-plugin-minify-flip-comparisons@0.1.1
+ - babel-plugin-minify-guarded-expressions@0.1.1
+ - babel-plugin-minify-infinity@0.1.1
+ - babel-plugin-minify-mangle-names@0.1.1
+ - babel-plugin-minify-numeric-literals@0.1.1
+ - babel-plugin-minify-replace@0.1.1
+ - babel-plugin-minify-simplify@0.1.1
+ - babel-plugin-minify-type-constructors@0.1.1
+ - babel-plugin-transform-inline-consecutive-adds@0.1.1
+ - babel-plugin-transform-inline-environment-variables@0.1.1
+ - babel-plugin-transform-member-expression-literals@6.8.3
+ - babel-plugin-transform-merge-sibling-variables@6.8.4
+ - babel-plugin-transform-minify-booleans@6.8.2
+ - babel-plugin-transform-node-env-inline@0.1.1
+ - babel-plugin-transform-property-literals@6.8.3
+ - babel-plugin-transform-regexp-constructors@0.1.1
+ - babel-plugin-transform-remove-console@6.8.3
+ - babel-plugin-transform-remove-debugger@6.8.3
+ - babel-plugin-transform-remove-undefined@0.1.1
+ - babel-plugin-transform-simplify-comparison-operators@6.8.3
+ - babel-plugin-transform-undefined-to-void@6.8.2
+ - babel-preset-babili@0.1.1
+ - babili@0.1.1
+ - gulp-babili@0.1.1
+
 #### :boom: Breaking Change
 * `babel-preset-babili`
   * [#508](https://github.com/babel/babili/pull/508) Flatten options. ([@boopathi](https://github.com/boopathi))
