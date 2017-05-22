@@ -147,26 +147,45 @@ function getSegmentedSubPaths(paths) {
   paths[0].getDeepestCommonAncestorFrom(
     paths,
     (lastCommon, index, ancestries) => {
-      // we found the LCA
+      // found the LCA
       if (!lastCommon.isProgram()) {
-        lastCommon = !lastCommon.isFunction()
-          ? lastCommon.getFunctionParent()
-          : lastCommon;
-        segments.set(lastCommon, paths);
-        return;
+        let fnParent;
+        if (
+          lastCommon.isFunction() &&
+          lastCommon.get("body").isBlockStatement()
+        ) {
+          segments.set(lastCommon, paths);
+          return;
+        } else if (
+          !(fnParent = lastCommon.getFunctionParent()).isProgram() &&
+          fnParent.get("body").isBlockStatement()
+        ) {
+          segments.set(fnParent, paths);
+          return;
+        }
       }
       // Deopt and construct segments otherwise
       for (const ancestor of ancestries) {
-        const parentPath = ancestor[index + 1];
+        const fnPath = getChildFuncion(ancestor);
+        if (fnPath === void 0) {
+          continue;
+        }
         const validDescendants = paths.filter(p => {
-          return p.isDescendant(parentPath);
+          return p.isDescendant(fnPath);
         });
-        segments.set(parentPath, validDescendants);
+        segments.set(fnPath, validDescendants);
       }
     }
   );
-
   return segments;
+}
+
+function getChildFuncion(ancestors = []) {
+  for (const path of ancestors) {
+    if (path.isFunction() && path.get("body").isBlockStatement()) {
+      return path;
+    }
+  }
 }
 
 function hasPureArgs(path) {

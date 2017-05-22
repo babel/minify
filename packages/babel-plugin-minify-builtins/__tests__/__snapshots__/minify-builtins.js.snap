@@ -1,30 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`minify-builtins should collect and minify in segments if there is no common ancestor 1`] = `
+exports[`minify-builtins should collect and minify in segments in any depth if there is no LCA 1`] = `
 Object {
-  "_source": "function a(){
-  function d(){
-    Math.floor(as, bb);
-  }
-}
-function b(){
+  "_source": "function b(){
   Math.floor(as, bb);
   function d(){
     Math.floor(as, bb);
   }
 }
-function c(){
-  Math.floor(as, bb);
-  function d(){
-    Math.floor(as, bb);
+const a = {
+  c : () => Math.floor(bbb) + Math.floor(bbb) ,
+  d : () => {
+      Math.abs(aa);
+      Math.abs(aa);
+      Math.floor(aa);
+      return () => {
+        Math.floor(aa);
+      }
+  },
+  e : () => Math.abs(aa) + Math.abs(aa)
+};
+class A {
+  constructor() {
+    let a = Math.floor(b,c) + Math.floor(b,c);
   }
-}",
-  "expected": "function a() {
-  function d() {
-    Math.floor(as, bb);
+  c() {
+      Math.floor(asdas);
+      Math.floor(dasda);
   }
-}
-function b() {
+  d() {
+    var a = Math.floor;
+      a(aa, bb);
+      Math.floor(aa, bb);
+  }
+};
+new A()",
+  "expected": "function b() {
   var _Mathfloor = Math.floor;
 
   _Mathfloor(as, bb);
@@ -32,14 +43,42 @@ function b() {
     _Mathfloor(as, bb);
   }
 }
-function c() {
-  var _Mathfloor2 = Math.floor;
+const a = {
+  c: () => Math.floor(bbb) + Math.floor(bbb),
+  d: () => {
+    var _Mathabs = Math.abs;
+    var _Mathfloor2 = Math.floor;
 
-  _Mathfloor2(as, bb);
-  function d() {
-    _Mathfloor2(as, bb);
+    _Mathabs(aa);
+    _Mathabs(aa);
+    _Mathfloor2(aa);
+    return () => {
+      _Mathfloor2(aa);
+    };
+  },
+  e: () => Math.abs(aa) + Math.abs(aa)
+};
+class A {
+  constructor() {
+    var _Mathfloor3 = Math.floor;
+
+    let a = _Mathfloor3(b, c) + _Mathfloor3(b, c);
   }
-}",
+  c() {
+    var _Mathfloor4 = Math.floor;
+
+    _Mathfloor4(asdas);
+    _Mathfloor4(dasda);
+  }
+  d() {
+    var _Mathfloor5 = Math.floor;
+
+    var a = _Mathfloor5;
+    a(aa, bb);
+    _Mathfloor5(aa, bb);
+  }
+};
+new A();",
 }
 `;
 
@@ -47,7 +86,7 @@ exports[`minify-builtins should collect and minify no matter any depth 1`] = `
 Object {
   "_source": "function a (){
   Math.max(b, a);
-  function b() {
+  const b = () => {
     const a = Math.floor(c);
     Math.min(b, a) * Math.floor(b);
     function c() {
@@ -57,7 +96,7 @@ Object {
 }",
   "expected": "function a() {
   Math.max(b, a);
-  function b() {
+  const b = () => {
     var _Mathmin = Math.min;
     var _Mathfloor = Math.floor;
 
@@ -66,7 +105,7 @@ Object {
     function c() {
       _Mathfloor(c) + _Mathmin(b, a);
     }
-  }
+  };
 }",
 }
 `;
@@ -81,6 +120,90 @@ foo(x);",
 let b = 1.8;
 let x = 5;
 foo(x);",
+}
+`;
+
+exports[`minify-builtins should minify builtins to function scopes  1`] = `
+Object {
+  "_source": "var a = () => {
+  Math.floor(b);
+  Math.floor(b);
+  c: () => {
+    Math.floor(d);
+    Math.max(2,1);
+  }
+}
+A.b(\\"asdas\\", function() {
+  Math.floor(d) + Math.max(d,e);
+  Math.max(e,d);
+})
+A.b(\\"asdas1\\", function() {
+  Math.floor(d) + Math.floor(d,e);
+  Math.max(e,d);
+})",
+  "expected": "var a = () => {
+  var _Mathfloor = Math.floor;
+
+  _Mathfloor(b);
+  _Mathfloor(b);
+  c: () => {
+    _Mathfloor(d);
+    2;
+  };
+};
+A.b(\\"asdas\\", function () {
+  var _Mathmax = Math.max;
+
+  Math.floor(d) + _Mathmax(d, e);
+  _Mathmax(e, d);
+});
+A.b(\\"asdas1\\", function () {
+  var _Mathfloor2 = Math.floor;
+
+  _Mathfloor2(d) + _Mathfloor2(d, e);
+  Math.max(e, d);
+});",
+}
+`;
+
+exports[`minify-builtins should minify builtins to method scope for class declarations 1`] = `
+Object {
+  "_source": "class Test {
+  foo() {
+    Math.max(c, d)
+    Math.max(c, d)
+    const c = function() {
+      Math.max(c, d)
+      Math.floor(m);
+      Math.floor(m);
+    }
+  }
+  bar() {
+    Math.min(c, d)
+    Math.min(c, d)
+  }
+}",
+  "expected": "class Test {
+  foo() {
+    var _Mathmax = Math.max;
+
+    _Mathmax(c, d);
+    _Mathmax(c, d);
+    const c = function () {
+      var _Mathfloor = Math.floor;
+
+      _Mathmax(c, d);
+      _Mathfloor(m);
+      _Mathfloor(m);
+    };
+  }
+  bar() {
+    var _Mathmin = Math.min;
+
+    _Mathmin(c, d);
+    _Mathmin(c, d);
+  }
+}",
 }
 `;
 
@@ -125,6 +248,13 @@ Object {
 Math.random();",
   "expected": "Math.max(foo(), 1);
 Math.random();",
+}
+`;
+
+exports[`minify-builtins should not minify for arrow fn without block statment 1`] = `
+Object {
+  "_source": "const a = () => Math.floor(b) + Math.floor(b);",
+  "expected": "const a = () => Math.floor(b) + Math.floor(b);",
 }
 `;
 
