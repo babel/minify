@@ -143,7 +143,7 @@ keepClassName       | Passed to [mangle][mangle] & [deadcode][deadcode]
 
 [booleans]: ../../packages/babel-plugin-transform-minify-booleans
 [builtIns]: ../../packages/babel-plugin-minify-builtins
-[consecutiveAdds]: ../../packages/babel-plugin-transform-inline-consecutive-adds
+[consecutiveAdds]: ../../packages/babel-plugin-minify-inline-consecutive-adds
 [deadcode]: ../../packages/babel-plugin-minify-dead-code-elimination
 [evaluate]: ../../packages/babel-plugin-minify-constant-folding
 [flipComparisons]: ../../packages/babel-plugin-minify-flip-comparisons

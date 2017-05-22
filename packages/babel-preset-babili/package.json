@@ -18,12 +18,12 @@
     "babel-plugin-minify-flip-comparisons": "^0.0.2",
     "babel-plugin-minify-guarded-expressions": "^0.0.4",
     "babel-plugin-minify-infinity": "^0.0.3",
+    "babel-plugin-minify-inline-consecutive-adds": "^0.0.2",
     "babel-plugin-minify-mangle-names": "^0.0.8",
     "babel-plugin-minify-numeric-literals": "^0.0.1",
     "babel-plugin-minify-replace": "^0.0.4",
     "babel-plugin-minify-simplify": "^0.0.8",
     "babel-plugin-minify-type-constructors": "^0.0.4",
-    "babel-plugin-transform-inline-consecutive-adds": "^0.0.2",
     "babel-plugin-transform-member-expression-literals": "^6.8.1",
     "babel-plugin-transform-merge-sibling-variables": "^6.8.2",
     "babel-plugin-transform-minify-booleans": "^6.8.0",
@@ -35,6 +35,5 @@
     "babel-plugin-transform-simplify-comparison-operators": "^6.8.1",
     "babel-plugin-transform-undefined-to-void": "^6.8.0",
     "lodash.isplainobject": "^4.0.6"
-  },
-  "devDependencies": {}
+  }
 }
