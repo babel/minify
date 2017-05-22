@@ -7,7 +7,7 @@ function transform(code, options = {}, sourceType = "script") {
   return babel.transform(code, {
     sourceType,
     minified: false,
-    presets: [require("../src/index")]
+    presets: [[require("../src/index"), options]]
   }).code;
 }
 
@@ -34,8 +34,8 @@ describe("preset", () => {
     const expected = unpad(
       `
       function foo() {
-        var d, e, f;
-        d ? e && f : e || f;
+        var d, a, b;
+        d ? a && b : a || b;
       }
     `
     );
@@ -129,12 +129,30 @@ describe("preset", () => {
     const expected = unpad(
       `
       function a() {
-        var b = Math.floor,
-            c = Math.max;
-        c(foo, bar);
+        var a = Math.floor,
+            b = Math.max;
+        b(foo, bar);
       }
     `
     );
+    expect(transform(source)).toBe(expected);
+  });
+
+  it("should fix bug#326 - object destructuring", () => {
+    const source = unpad(`
+      function a() {
+        let foo, bar, baz;
+        ({foo, bar, baz} = {});
+        return {foo, bar, baz};
+      }
+    `);
+    const expected = unpad(`
+      function a() {
+        let a, b, c;
+
+        return ({ foo: a, bar: b, baz: c } = {}), { foo: a, bar: b, baz: c };
+      }
+    `);
     expect(transform(source)).toBe(expected);
   });
 });
