@@ -29,12 +29,10 @@ describe("transform-member-expressions-literals-plugin", () => {
   });
 
   it("should not transform invalid identifiers", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       foo["default"];
       foo["import"];
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 

@@ -24,27 +24,23 @@ describe("remove-debugger-plugin", () => {
   });
 
   it("statement no block", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (blah) debugger;
       for (;;) debugger;
       for (var blah in []) debugger;
       for (var blah of []) debugger;
       while (blah) debugger;
       do debugger; while (blah);
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       if (blah) {}
       for (;;) {}
       for (var blah in []) {}
       for (var blah of []) {}
       while (blah) {}
       do {} while (blah);
-    `
-    );
+    `);
     expect(transform(source).trim()).toBe(expected);
   });
 });

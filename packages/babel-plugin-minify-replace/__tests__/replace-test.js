@@ -21,27 +21,23 @@ describe("replace-plugin", () => {
       }
     ];
 
-    const source = unpad(
-      `
+    const source = unpad(`
       if (__DEV__) {
         foo();
       }
       if (!__DEV__) {
         foo();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       if (0) {
         foo();
       }
       if (!0) {
         foo();
       }
-    `
-    );
+    `);
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -57,27 +53,23 @@ describe("replace-plugin", () => {
       }
     ];
 
-    const source = unpad(
-      `
+    const source = unpad(`
       if (__DEV__) {
         foo();
       }
       if (a.__DEV__) {
         foo();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       if (0) {
         foo();
       }
       if (a.__DEV__) {
         foo();
       }
-    `
-    );
+    `);
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -93,21 +85,17 @@ describe("replace-plugin", () => {
       }
     ];
 
-    const source = unpad(
-      `
+    const source = unpad(`
       if (__DEV__) {
         foo();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       if (true) {
         foo();
       }
-    `
-    );
+    `);
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -124,19 +112,15 @@ describe("replace-plugin", () => {
       }
     ];
 
-    const source = unpad(
-      `
+    const source = unpad(`
       console.log('wat');
       (console.log)('wat');
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       emptyFunction('wat');
       emptyFunction('wat');
-    `
-    );
+    `);
 
     expect(transform(source, replacements)).toBe(expected);
   });
@@ -161,21 +145,17 @@ describe("replace-plugin", () => {
       }
     ];
 
-    const source = unpad(
-      `
+    const source = unpad(`
       console.log('wat');
       (console.log)('wat');
       console.error('wat');
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       emptyFunction('wat');
       emptyFunction('wat');
       emptyFunction('wat');
-    `
-    );
+    `);
 
     expect(transform(source, replacements)).toBe(expected);
   });
