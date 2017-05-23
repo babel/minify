@@ -16,7 +16,7 @@ gulp.task("minify", () =>
   gulp.src("./build/app.js")
     .pipe(babili({
       mangle: {
-        keepClassNames: true
+        keepClassName: true
       }
     }))
     .pipe(gulp.dest("./dist"));
