@@ -1,6 +1,6 @@
 {
   "name": "babel-preset-babili",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-preset-babili",
@@ -18,7 +18,7 @@
     "babel-plugin-minify-flip-comparisons": "^0.1.1",
     "babel-plugin-minify-guarded-expressions": "^0.1.1",
     "babel-plugin-minify-infinity": "^0.1.1",
-    "babel-plugin-minify-mangle-names": "^0.1.1",
+    "babel-plugin-minify-mangle-names": "^0.1.2",
     "babel-plugin-minify-numeric-literals": "^0.1.1",
     "babel-plugin-minify-replace": "^0.1.1",
     "babel-plugin-minify-simplify": "^0.1.1",
