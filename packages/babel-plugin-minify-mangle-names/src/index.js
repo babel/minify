@@ -153,10 +153,9 @@ module.exports = babel => {
             // This should NOT happen ultimately. Panic if this code block is
             // reached
             throw new Error(
-              "Binding not found for ReferencedIdentifier. " +
-                name +
-                "Please report this at " +
-                newIssueUrl
+              `Binding not found for ReferencedIdentifier "${name}" ` +
+                `present in "${path.parentPath.type}". ` +
+                `Please report this at ${newIssueUrl}`
             );
           } else {
             // Add it to our scope tracker if everything is fine
@@ -188,10 +187,9 @@ module.exports = babel => {
 
             // This should NOT happen ultimately. Panic if this code is reached
             throw new Error(
-              "Binding not found for BindingIdentifier. " +
-                name +
-                "Please report this at " +
-                newIssueUrl
+              `Binding not found for BindingIdentifier "${name}" ` +
+                `present in "${path.parentPath.type}". ` +
+                `Please report this at ${newIssueUrl}`
             );
           }
 
@@ -480,7 +478,7 @@ module.exports = babel => {
           } else {
             throw new Error(
               `Unexpected Rename Error: ` +
-                `Trying to replace ${node.name}: from ${oldName} to ${newName}` +
+                `Trying to replace "${node.name}": from "${oldName}" to "${newName}". ` +
                 `Please report it at ${newIssueUrl}`
             );
           }
