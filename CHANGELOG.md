@@ -1,3 +1,21 @@
+## babili@0.1.2 (2017-05-23)
+
+- babel-plugin-minify-mangle-names@0.1.2
+- babel-preset-babili@0.1.2
+- babili@0.1.2
+- gulp-babili@0.1.2
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-mangle-names`
+  * [#550](https://github.com/babel/babili/pull/550) Remove throwing error on unrecognized binding. ([@boopathi](https://github.com/boopathi))
+
+#### :nail_care: Polish
+* `babel-plugin-minify-mangle-names`
+  * [#548](https://github.com/babel/babili/pull/548) Polish mangle error messages. ([@boopathi](https://github.com/boopathi))
+
+#### Committers: 1
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+
 ## babili@0.1.1 (2017-05-22)
 
 #### Summary
