@@ -42,7 +42,7 @@ module.exports = class ScopeTracker {
       this.references.get(parent).add(name);
       if (!binding) {
         throw new Error(
-          `Binding Not Found for ${name} during scopeTracker.addRefernce: ` +
+          `Binding Not Found for ${name} during scopeTracker.addRefernce. ` +
             `Please report at ${newIssueUrl}`
         );
       }
@@ -83,8 +83,8 @@ module.exports = class ScopeTracker {
       if (!binding) {
         // Something went wrong - panic
         throw new Error(
-          "Binding Not Found during scopeTracker.updateRefernce: " +
-            `Updating "${oldName}" to "${newName}"` +
+          "Binding Not Found during scopeTracker.updateRefernce " +
+            `while updating "${oldName}" to "${newName}". ` +
             `Please report at ${newIssueUrl}`
         );
       }
@@ -167,11 +167,9 @@ module.exports = class ScopeTracker {
 
     if (existingBinding && existingBinding !== binding) {
       throw new Error(
-        "Binding " +
-          existingBinding.identifier.name +
-          "already exists. " +
-          "Trying to add " +
-          binding.identifier.name
+        `scopeTracker.addBinding: ` +
+          `Binding "${existingBinding.identifier.name}" already exists. ` +
+          `Trying to add "${binding.identifier.name}" again.`
       );
     }
 
