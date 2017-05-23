@@ -166,6 +166,12 @@ module.exports = babel => {
         /**
          * This is useful to detect binding ids and add them to the
          * scopeTracker's bindings
+         *
+         * TODO:
+         *
+         * This visitor is probably unnecessary. It was added to capture the
+         * bindings that was not present in scope.bindings. But, now, it looks
+         * like the unit and smoke tests pass without this.
          */
         BindingIdentifier(path) {
           if (isLabelIdentifier(path)) return;
@@ -173,25 +179,21 @@ module.exports = babel => {
           const { scope, node: { name } } = path;
           const binding = scope.getBinding(name);
 
-          if (!binding) {
-            // ignore the globals as it's available via Babel's API
-            if (scope.hasGlobal(name)) return;
-
-            // Ignore the NamedExports as they should NOT be mangled
-            if (
-              path.parentPath.isExportSpecifier() &&
-              path.parentKey === "exported"
-            ) {
-              return;
-            }
-
-            // This should NOT happen ultimately. Panic if this code is reached
-            throw new Error(
-              `Binding not found for BindingIdentifier "${name}" ` +
-                `present in "${path.parentPath.type}". ` +
-                `Please report this at ${newIssueUrl}`
-            );
-          }
+          /**
+           * We have already captured the bindings when traversing through
+           * Scopables, if a binding identifier doesn't have a binding, it
+           * probably means that another transformation created a new binding,
+           * refer https://github.com/babel/babili/issues/549 for example -
+           * binding created by plugin transform-es2015-function-name
+           *
+           * So we just don't care about bindings that do not exist
+           *
+           * TODO:
+           *
+           * this deopts in DCE as this name can be removed for this particular
+           * case (es2015-function-name)
+           */
+          if (!binding) return;
 
           /**
            * Detect constant violations
