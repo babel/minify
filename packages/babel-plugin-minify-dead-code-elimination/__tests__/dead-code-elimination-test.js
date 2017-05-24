@@ -2686,4 +2686,28 @@ describe("dce-plugin", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should remove unnecessary use strict directives", () => {
+    const source = unpad(`
+      function foo() {
+        "use strict";
+        function bar() {
+          "use strict";
+          bar();
+        }
+        bar.call();
+      }
+    `);
+    const expected = unpad(`
+      function foo() {
+        "use strict";
+
+        function bar() {
+          bar();
+        }
+        bar.call();
+      }
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
