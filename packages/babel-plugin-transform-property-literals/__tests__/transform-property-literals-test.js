@@ -24,48 +24,40 @@ describe("transform-property-literals-plugin", () => {
   });
 
   it("should not strip necessaary quotes for numeric like things", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var data = {
         "00": 1,
         "01": 2
       };
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 
   it("should not transform invalid identifiers", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       ({
         "default": null,
         "import": null
       });
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 
   it("should not transform non-string properties", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       ({
         foo: null
       });
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 
   it("should not transform propety keys that are computed", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       ({
         [a]: null
       });
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 });

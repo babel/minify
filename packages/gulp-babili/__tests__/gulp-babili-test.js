@@ -12,14 +12,12 @@ describe("gulp-babili", () => {
     return new Promise((resolve, reject) => {
       const stream = gulpBabili();
 
-      const source = unpad(
-        `
+      const source = unpad(`
         function foo() {
           const a = 10;
           return a;
         }
-      `
-      );
+      `);
       const expected = "function foo(){return 10}";
 
       stream.on("data", function(file) {
@@ -47,13 +45,11 @@ describe("gulp-babili", () => {
         }
       });
 
-      const source = unpad(
-        `
+      const source = unpad(`
         function foo(bar, baz) {
           return bar + baz;
         }
-      `
-      );
+      `);
       const expected = "function foo(bar,a){return bar+a}";
 
       stream.on("data", function(file) {
@@ -197,8 +193,7 @@ describe("gulp-babili", () => {
         }
       );
 
-      const source = unpad(
-        `
+      const source = unpad(`
         /**
          * @license
          * throw away
@@ -219,8 +214,7 @@ describe("gulp-babili", () => {
           }
           test();
         }
-      `
-      );
+      `);
 
       stream.on("data", function(file) {
         expect(file.contents.toString()).toMatchSnapshot();

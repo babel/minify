@@ -41,19 +41,16 @@ describe("dce-plugin", () => {
 
   it("should handle impure right-hands", () => {
     const source = "function foo() { var x = f(); }";
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         f();
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove unused params", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       _(function bar(p) {
         return 1;
       });
@@ -73,11 +70,9 @@ describe("dce-plugin", () => {
         }
       }
       new A();
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       _(function () {
         return 1;
       });
@@ -96,14 +91,12 @@ describe("dce-plugin", () => {
         foo() {}
       }
       new A();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should NOT remove params when keepFnArgs is true (preserve fn.length)", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo(p) {
         return 1;
       }
@@ -121,8 +114,7 @@ describe("dce-plugin", () => {
       foo();
       bar();
       new A();
-    `
-    );
+    `);
 
     const expected = source;
 
@@ -130,8 +122,7 @@ describe("dce-plugin", () => {
   });
 
   it("should handle all cases of parameter list - and remove unused ones", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a(foo, bar, baz) {
         return foo;
       }
@@ -150,10 +141,8 @@ describe("dce-plugin", () => {
       function e({foo}, bar = {}, baz) {
         return foo;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function a(foo) {
         return foo;
       }
@@ -172,55 +161,45 @@ describe("dce-plugin", () => {
       function e({ foo }, bar = {}) {
         return foo;
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should inline binding with one reference", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = 1;
         console.log(x);
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         console.log(1);
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   // This isn't considered pure. (it should)
   it("should inline binding with one reference 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var y = 1, x = { y: y };
         foo.exports = x;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         foo.exports = { y: 1 };
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should not inline objects literals in loops", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = { y: 1 };
         while (true) foo(x);
@@ -231,10 +210,8 @@ describe("dce-plugin", () => {
         var bar = function () {};
         while (true) foo(bar);
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         var x = { y: 1 };
         while (true) foo(x);
@@ -245,61 +222,51 @@ describe("dce-plugin", () => {
         var bar = function () {};
         while (true) foo(bar);
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should not inline object literals in exprs in loops", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a(p) {
         var w = p || [];
         f(function (foo) {
           return w.concat(foo);
         });
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a(p) {
         var w = p || [];
         f(function (foo) {
           return w.concat(foo);
         });
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should inline objects in if statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = { y: 1 }, y = ['foo'], z = function () {};
         if (wat) foo(x, y, z);
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         if (wat) foo({ y: 1 }, ['foo'], function () {});
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should not inline objects in functions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = { y: 1 },
             y = ['foo'],
@@ -308,10 +275,8 @@ describe("dce-plugin", () => {
           foo(x, y , z);
         });
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         var x = { y: 1 },
             y = ['foo'],
@@ -320,32 +285,26 @@ describe("dce-plugin", () => {
           foo(x, y, z);
         });
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove side effectless statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         1;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {}
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should work with multiple scopes", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function x() {
         var i = 1;
         function y() {
@@ -354,10 +313,8 @@ describe("dce-plugin", () => {
         y();
         y();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function x() {
         function y() {
           console.log(1);
@@ -365,136 +322,114 @@ describe("dce-plugin", () => {
         y();
         y();
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should inline function decl", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         function x() {
           return 1;
         }
         x();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         (function () {
           return 1;
         })();
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should inline function expressions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = function() {
           return 1;
         };
         x();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         (function () {
           return 1;
         })();
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should not inline in a different scope", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = function (a) {
           return a;
         };
         while (1) x(1);
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         var x = function (a) {
           return a;
         };
         while (1) x(1);
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should handle recursion", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function baz() {
         var bar = function foo(config) {
           return foo;
         };
         exports.foo = bar;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function baz() {
         exports.foo = function foo() {
           return foo;
         };
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should handle recursion 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function baz() {
         var foo = function foo(config) {
           return foo;
         };
         exports.foo = foo;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function baz() {
         exports.foo = function foo() {
           return foo;
         };
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should handle mutual recursion", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function baz() {
         function foo() {
           return bar();
@@ -503,10 +438,8 @@ describe("dce-plugin", () => {
           return foo();
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function baz() {
         function foo() {
           return bar();
@@ -515,15 +448,13 @@ describe("dce-plugin", () => {
           return foo();
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should not inline vars with multiple references", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = function() {
          if (!y) {
@@ -534,11 +465,9 @@ describe("dce-plugin", () => {
         x();
         var y = null;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         var x = function () {
           if (!y) {
@@ -549,59 +478,49 @@ describe("dce-plugin", () => {
         x();
         var y = null;
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove redundant returns", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         if (a) {
           y();
           return;
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         if (a) {
           y();
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove redundant returns part 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         y();
         return;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         y();
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove redundant returns (complex)", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         if (a) {
           y();
@@ -612,25 +531,21 @@ describe("dce-plugin", () => {
         }
         return;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         if (a) {
           y();
           if (b) {}
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should keep needed returns", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         if (a) {
           y();
@@ -638,10 +553,8 @@ describe("dce-plugin", () => {
         }
         x();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         if (a) {
           y();
@@ -649,36 +562,30 @@ describe("dce-plugin", () => {
         }
         x();
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove code unreachable after return", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         z();
         return;
         x();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         z();
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should be fine with fun decl after return", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         z();
         z();
@@ -687,10 +594,8 @@ describe("dce-plugin", () => {
           wow();
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         z();
         z();
@@ -699,57 +604,47 @@ describe("dce-plugin", () => {
           wow();
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should handle returns that were orphaned", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var a = true;
       function foo() {
         if (a) return;
         x();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var a = true;
       function foo() {}
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should handle returns that were orphaned 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var a = true;
       function foo() {
         if (a) return 1;
         x();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var a = true;
       function foo() {
         return 1;
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should handle orphaned + redundant returns", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var x = true;
       function foo() {
         if (b) {
@@ -760,25 +655,21 @@ describe("dce-plugin", () => {
           y();
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var x = true;
       function foo() {
         if (b) {
           z();
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove functions only called in themselves", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         function baz() {
           function bar() {
@@ -788,16 +679,14 @@ describe("dce-plugin", () => {
           bar();
         }
       }
-    `
-    );
+    `);
     const expected = "function foo() {}";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove functions only called in themselves 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var baz = function () {
           function bar() {
@@ -807,16 +696,14 @@ describe("dce-plugin", () => {
           bar();
         };
       }
-    `
-    );
+    `);
     const expected = "function foo() {}";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove functions only called in themselves 3", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         function boo() {}
         function baz() {
@@ -828,16 +715,14 @@ describe("dce-plugin", () => {
           boo();
         }
       }
-    `
-    );
+    `);
     const expected = "function foo() {}";
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove functions only called in themselves 3", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         function foo () {
           console.log( 'this function was included!' );
@@ -854,25 +739,21 @@ describe("dce-plugin", () => {
 
         foo();
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
 
         (function () {
           console.log('this function was included!');
         })();
       })();
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove dead if statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (1) {
         foo();
       }
@@ -881,22 +762,18 @@ describe("dce-plugin", () => {
       } else {
         bar();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
 
       bar();
-    `
-    );
+    `);
 
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should remove empty if statements block", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (a) {
       } else {
         foo();
@@ -906,18 +783,15 @@ describe("dce-plugin", () => {
       } else {
 
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       if (!a) {
         foo();
       }
       if (a) {
         foo();
       }
-    `
-    );
+    `);
     expect(transform(source).trim()).toBe(expected);
   });
 
@@ -958,61 +832,48 @@ describe("dce-plugin", () => {
   });
 
   it("should not remove needed expressions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var n = 1;
       if (foo) n;
       console.log(n);
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var n = 1;
       if (foo) ;
       console.log(n);
-    `
-    );
+    `);
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should not remove needed expressions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo(a) {
         var a = a ? a : a;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo(a) {
         var a = a ? a : a;
       }
-    `
-    );
+    `);
     expect(transform(source).trim()).toBe(expected);
   });
 
   it("should join the assignment and def", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var x;
       x = 1;
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       var x = 1;
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not replace the wrong things", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var n = 1;
         wow(n);
@@ -1022,11 +883,9 @@ describe("dce-plugin", () => {
         }
         return wat;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         wow(1);
 
@@ -1034,14 +893,12 @@ describe("dce-plugin", () => {
           wow(2);
         };
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle case blocks ", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         switch (foo) {
           case 6:
@@ -1049,11 +906,9 @@ describe("dce-plugin", () => {
             break;
         }
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         switch (foo) {
           case 6:
@@ -1061,15 +916,13 @@ describe("dce-plugin", () => {
             break;
         }
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   // TODO: Handle this (blocks that have no semantic meaning).
   xit("should understand extraneous blocks", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         var f = 25;
         function b() {
@@ -1090,11 +943,9 @@ describe("dce-plugin", () => {
         b();
         b();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         function b() {
           {}
@@ -1112,15 +963,13 @@ describe("dce-plugin", () => {
         b();
         b();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should understand closures", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         var f = 25;
         function b() {
@@ -1139,11 +988,9 @@ describe("dce-plugin", () => {
         b();
         b();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         function b() {
           function c() {
@@ -1160,292 +1007,242 @@ describe("dce-plugin", () => {
         b();
         b();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle vars in if statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         if (x()) {
           var foo = 1;
         }
         bar(foo);
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         if (x()) {
           var foo = 1;
         }
         bar(foo);
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle vars in if statements 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         if (x()) var foo = 1;
         bar(foo);
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         if (x()) var foo = 1;
         bar(foo);
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle vars in for statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         for (;;) var foo = 1;
         bar(foo);
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         for (;;) var foo = 1;
         bar(foo);
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle for statements 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         for (;;) {
           var foo = 1;
           bar(foo);
         }
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         for (;;) {
           bar(1);
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove binding and assignment", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         var a, b, c;
         a = 1;
         b = 2;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {}
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should nore remove binding and assignment if the value is used", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         var x = 1;
         while (a) wow = x += 1;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         var x = 1;
         while (a) wow = x += 1;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should keep side-effectful assignment values", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         var x;
         x = wow();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a() {
         wow();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not evaluate this binary expression to truthy", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function boo() {
         var bar = foo || [];
         if (!bar || baz.length === 0) {
           return 'wow';
         }
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function boo() {
         var bar = foo || [];
         if (!bar || baz.length === 0) {
           return 'wow';
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("eval the following to false", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function bar () {
         var x = foo || 'boo';
         bar = x === 'wow' ? ' ' + z : '';
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function bar() {
         var x = foo || 'boo';
         bar = x === 'wow' ? ' ' + z : '';
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should get rid of the constant violations", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function bar () {
         var x = foo();
         x = bar();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function bar() {
         foo();
 
         bar();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove names from NFE", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function bar() {
         return function wow() {
           return boo();
         };
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function bar() {
         return function () {
           return boo();
         };
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove names from NFE when referenced", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function bar() {
         return function wow() {
           return wow();
         };
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function bar() {
         return function wow() {
           return wow();
         };
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove name from NFE when shadowed", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function bar() {
         return function wow() {
           var wow = foo;
@@ -1453,11 +1250,9 @@ describe("dce-plugin", () => {
           return wow;
         };
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function bar() {
         return function () {
           var wow = foo;
@@ -1465,58 +1260,48 @@ describe("dce-plugin", () => {
           return wow;
         };
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   // issue#81
   it("should NOT remove name from NFE when referenced - issue#81", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function (require, module, exports) {
         var Hub = function Hub(file, options) {
           (0, _classCallCheck3.default)(this, Hub);
         };
         module.exports = Hub;
       })(require, module, exports);
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function (require, module) {
         module.exports = function Hub() {
           (0, _classCallCheck3.default)(this, Hub);
         };
       })(require, module, exports);
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove name from NFE when replaced - issue#81", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         var x = function foo() {};
         module.exports = x;
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         module.exports = function () {};
       })();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should preserve fn names when keepFnName is true", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         function A() {}
         exports.A = A;
@@ -1524,24 +1309,20 @@ describe("dce-plugin", () => {
         exports.B = B;
         onClick(function C() {});
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         exports.A = function A() {};
 
         exports.B = function B() {};
         onClick(function C() {});
       })();
-    `
-    );
+    `);
     expect(transform(source, { keepFnName: true })).toBe(expected);
   });
 
   it("should preserve class names when keepClassName is true", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         class A {}
         exports.A = A;
@@ -1549,54 +1330,44 @@ describe("dce-plugin", () => {
         exports.B = B;
         class AA {} new AA()
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         exports.A = class A {};
 
         exports.B = class B {};
         new class AA {}();
       })();
-    `
-    );
+    `);
     expect(transform(source, { keepClassName: true })).toBe(expected);
   });
 
   // NCE = Named Class Expressions
   it("should remove name from NCE", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var Foo = class Bar {};
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var Foo = class {};
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove referenced name from NCE", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var Foo = class Bar {
         constructor() {
           console.log(Bar);
         }
       };
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   // issue#78
   it("should not replace NCE with void 0 - issue#78", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function() {
         var B = class A {
           constructor(x) {
@@ -1607,10 +1378,8 @@ describe("dce-plugin", () => {
           new B(event);
         });
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
     (function () {
       var B = class {
         constructor(x) {
@@ -1621,14 +1390,12 @@ describe("dce-plugin", () => {
         new B(event);
       });
     })();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle var decl with same name as class expr name", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         var A = class A {
           constructor() {
@@ -1639,10 +1406,8 @@ describe("dce-plugin", () => {
         exports.A = A;
         exports.B = B;
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {
         exports.A = class A {
           constructor() {
@@ -1651,36 +1416,30 @@ describe("dce-plugin", () => {
         };
         exports.B = class {};
       })();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should track purity", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
      function x(a) {
        var l = a;
        var x = l
        foo(x);
      }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function x(a) {
         foo(a);
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should latch on to exisiting vars", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
      function x(a) {
        if (a) {
          var x = a.wat;
@@ -1689,11 +1448,9 @@ describe("dce-plugin", () => {
        var z = a.foo, b = b.bar;
        return z + b;
      }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function x(a) {
         if (a) {
           x = a.wat;
@@ -1705,62 +1462,52 @@ describe("dce-plugin", () => {
             x;
         return z + b;
       }
-    `
-    );
+    `);
 
     expect(transform(source, { optimizeRawSize: true })).toBe(expected);
   });
 
   it("should put the var in the for in", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
      function x(a) {
        var x;
        wow();
        for (x in a) wow();
      }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
      function x(a) {
        wow();
        for (var x in a) wow();
      }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should put the var in the for in only when the var is alone", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
      function x(a) {
        var x, y;
        wow(y);
        for (x in a) wow(y);
      }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
      function x(a) {
        var x, y;
        wow(y);
        for (x in a) wow(y);
      }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("inlining should check name collision", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
      function foo() {
        var a = 1;
        var b = a;
@@ -1771,11 +1518,9 @@ describe("dce-plugin", () => {
        x();
        return a;
      }
-  `
-    );
+  `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         var a = 1;
         var b = a;
@@ -1786,15 +1531,13 @@ describe("dce-plugin", () => {
         x();
         return a;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("inlining should check name collision for expressions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
      function foo() {
        var a = c + d;
        function x(c, d) {
@@ -1803,11 +1546,9 @@ describe("dce-plugin", () => {
        x();
        x();
      }
-  `
-    );
+  `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         var a = c + d;
         function x(c, d) {
@@ -1816,109 +1557,87 @@ describe("dce-plugin", () => {
         x();
         x();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should replace with empty statement if in body position 1", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var a = 0;
         while (wat()) a += 1;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         while (wat());
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should replace with empty statement if in body position 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         while (wat()) 1;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         while (wat());
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should replace with empty statement if in body position 3", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         while (wat()) var x;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         while (wat());
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("it should update binding path", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var key;
         for (key in o);
         for (key in o2);
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         for (var key in o);
         for (key in o2);
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   xit("it should evaluate and remove falsy code", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       foo(0 && bar());
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo(0);
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should not move functions into other scopes", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var a = 1;
         var bar = { x: {z: a, v: a} };
@@ -1933,11 +1652,9 @@ describe("dce-plugin", () => {
 
         return moo;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         var a = 1;
         var bar = { x: { z: a, v: a } };
@@ -1950,74 +1667,60 @@ describe("dce-plugin", () => {
           maa(wow, bar, baz, boo, a, a);
         };
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should preserve vars from the removed block", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (0) {var a = foo()}
       if (0) var b = foo();
       if (1) { } else { var c = foo() }
       if (0) var d = bar(); else { }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var a;
       var b;
       var c;
       var d;
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should optimize alternate when empty consequent is replaced with alternate", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (baz) {
       } else {
         let foo = 'bar';
         function foobar() {}
         console.log('foo' + foo);
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       if (!baz) {
         console.log('foo' + 'bar');
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should transform simple switch statement", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (0) {
         case 0: foo(); break;
         case 1: bar(); break;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should NOT optimize when one of the cases is not evaluate-able", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (a) {
         case 1:
           break;
@@ -2029,36 +1732,30 @@ describe("dce-plugin", () => {
           foo();
           break;
       }
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle cases where there is no break", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (1) {
         case 1: foo();
         case 2: bar();
         case 3: baz(); break;
         case 4: foobarbaz();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
       bar();
       baz();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle defaults", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (10) {
         default:
           foo();
@@ -2079,21 +1776,17 @@ describe("dce-plugin", () => {
         default:
           foo();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
 
       foo();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should predict break statement within blocks", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (1) {
         case 1:
           foo();
@@ -2109,11 +1802,9 @@ describe("dce-plugin", () => {
         case 3:
           foo();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       foo();
       var i;
 
@@ -2126,15 +1817,13 @@ describe("dce-plugin", () => {
       }
 
       foo();
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should bail out when break label is above switch's scope", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       x: switch (1) {
         case 1:
           break x;
@@ -2151,36 +1840,30 @@ describe("dce-plugin", () => {
             break z;
           }
       }
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   it("should NOT bail out when break label is under switch's scope", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (1) {
         case 1:
           x: while (true) {
             break x;
           }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       x: while (true) {
         break x;
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle nested switch statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (1) {
         case 1:
           foo();
@@ -2193,21 +1876,17 @@ describe("dce-plugin", () => {
         case 2:
           baz();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
 
       bar();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should break correctly when there is a break statement after break", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (0) {
         case 0:
           foo();
@@ -2215,19 +1894,15 @@ describe("dce-plugin", () => {
           bar();
           break;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should break correctly for the correct break statement", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (0) {
         case 0:
           foo();
@@ -2239,19 +1914,15 @@ describe("dce-plugin", () => {
         case 1:
           baz();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should bail out for runtime evaluated if(x) break", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (0) {
         case 0:
           foo();
@@ -2259,15 +1930,13 @@ describe("dce-plugin", () => {
         case 1:
           bar();
       }
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   it("should NOT bail out for runtime evaluated if(x) break inside loop", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (0) {
         case 0:
           foo();
@@ -2275,24 +1944,20 @@ describe("dce-plugin", () => {
         case 1:
           bar();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       foo();
       while (1) {
         if (x) break;
       }
 
       bar();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should optimize While statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       while (false) {
         foo();
       }
@@ -2302,24 +1967,20 @@ describe("dce-plugin", () => {
       while (x) {
         baz();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       while (true) {
         bar();
       }
       while (x) {
         baz();
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should optimize For statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       for (var i = 0; i < 8; i++) {
         foo();
       }
@@ -2329,24 +1990,20 @@ describe("dce-plugin", () => {
       for (; false;) {
         baz();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       for (var i = 0; i < 8; i++) {
         foo();
       }
       for (;;) {
         bar();
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should optimize dowhile statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       do {
         foo();
       } while (1);
@@ -2356,10 +2013,8 @@ describe("dce-plugin", () => {
       do {
         baz();
       } while (a);
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       do {
         foo();
       } while (1);
@@ -2369,32 +2024,26 @@ describe("dce-plugin", () => {
       do {
         baz();
       } while (a);
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should not evaluate to false and remove conditional", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo(obj) {
         return obj && typeof obj === 'object' ? x() : obj;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo(obj) {
         return obj && typeof obj === 'object' ? x() : obj;
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should extract vars from the removed switch statement", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       switch (0) {
         case 1:
           var a = 5;
@@ -2405,23 +2054,19 @@ describe("dce-plugin", () => {
           var a = 1;
           var b = 2;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       var a, b;
       var a, b;
 
       var a = 1;
       var b = 2;
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle side-effecty things in cases", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       let i = 0;
       let bar = () => console.log('foo');
       switch (1) {
@@ -2431,89 +2076,75 @@ describe("dce-plugin", () => {
         case bar():
           baz();
       }
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   it("should preserve names in NFEs", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function method() {
         var removeListeners = function removeListeners() {
           log(removeListeners);
         };
         removeListeners();
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function method() {
         (function removeListeners() {
           log(removeListeners);
         })();
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   // https://github.com/babel/babili/issues/130
   it("should not convert expression to expression during replace issue#130", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function outer() {
         const inner = (d) => d.x;
         return inner;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function outer() {
         return d => d.x;
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   // https://github.com/babel/babili/issues/151
   it("should fix issue#151 - array patterns and object patterns", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       const me = lyfe => {
         const [swag] = lyfe;
         return swag;
       };
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   // https://github.com/babel/babili/issues/151
   it("should fix issue#151 - array patterns and object patterns 2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       const me = lyfe => {
         const [swag, yolo] = lyfe;
         return swag && yolo;
       };
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   // https://github.com/babel/babili/issues/232
   it("should fix issue#232 - array patterns and object patterns with non constant init", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       const a = {
         lol: input => {
           const [hello, world] = input.split('|');
@@ -2523,36 +2154,31 @@ describe("dce-plugin", () => {
           return 'bottom';
         }
       };
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   // https://github.com/babel/babili/issues/232
   it("should fix issue#232 - array & object patterns with non-constant init", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         const { bar1, bar2 } = baz();
         return bar1;
       }
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   it("should preserve variabledeclarations(var) after completion statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         a = 1;
         return a;
         var a;
       }
-    `
-    );
+    `);
 
     const expected = source;
 
@@ -2560,51 +2186,43 @@ describe("dce-plugin", () => {
   });
 
   it("should NOT preserve variabledeclarations(let) after completion statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         a = 1;
         b = 2;
         return a + b;
         let a, b;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         a = 1;
         b = 2;
         return a + b;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove var from for..in/for..of statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         for (var i in x) console.log("foo");
         for (var j of y) console.log("foo");
       }
-    `
-    );
+    `);
     const expected = source;
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove var from for..await statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       async function foo() {
         for await (var x of y) console.log("bar");
       }
-    `
-    );
+    `);
     const expected = source;
     expect(
       transform(
@@ -2619,8 +2237,7 @@ describe("dce-plugin", () => {
     ).toBe(expected);
   });
   it("should remove empty statements when children of block", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       (function () {
         function foo() {};
         function bar() {};
@@ -2629,19 +2246,15 @@ describe("dce-plugin", () => {
         function quux() {};
         function cake() {};
       })();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       (function () {})();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should NOT remove fn params for setters", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = {
           set a(b) {}
@@ -2653,15 +2266,13 @@ describe("dce-plugin", () => {
         }
         return new A();
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 
   // https://github.com/babel/babili/issues/265
   it("should not remove return void 0; statement if inside a loop", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function getParentConditionalPath(path) {
         let parentPath;
         while (parentPath = path.parentPath) {
@@ -2676,16 +2287,14 @@ describe("dce-plugin", () => {
           }
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(source);
   });
 
   // https://github.com/babel/babili/issues/265
   it("should integrate with simplify plugin changing scopes", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function getParentConditionalPath(path) {
         let parentPath;
         while (parentPath = path.parentPath) {
@@ -2700,24 +2309,20 @@ describe("dce-plugin", () => {
           }
         }
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function getParentConditionalPath(path) {
         for (let parentPath; parentPath = path.parentPath;) {
           if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) return path.key === "test" ? void 0 : parentPath;
           path = parentPath;
         }
       }
-    `
-    );
+    `);
     expect(transformWithSimplify(source)).toBe(expected);
   });
 
   it("should not remove params from functions containing direct eval", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a(b, c, d) {
         eval(";");
         return b;
@@ -2726,11 +2331,9 @@ describe("dce-plugin", () => {
         (1, eval)(";");
         return c;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function a(b, c, d) {
         eval(";");
         return b;
@@ -2739,15 +2342,13 @@ describe("dce-plugin", () => {
         (1, eval)(";");
         return c;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove params/vars from functions containing direct eval", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo(bar, baz) {
         function foox(a, b, c) {
           x.then((data, unused) => {
@@ -2767,11 +2368,9 @@ describe("dce-plugin", () => {
           console.log("fooy");
         }
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo(bar, baz) {
         function foox(a, b, c) {
           x.then((data, unused) => {
@@ -2791,15 +2390,13 @@ describe("dce-plugin", () => {
           console.log("fooy");
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not optimize/remove vars from functions containing direct eval", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         bar();
 
@@ -2816,11 +2413,9 @@ describe("dce-plugin", () => {
           return x;
         }
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         bar();
 
@@ -2836,33 +2431,27 @@ describe("dce-plugin", () => {
           return 10;
         }
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should impure expressions in confidently evaluated if statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (a.b(), true) {
         foo();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       a.b();
 
       foo();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should extract all necessary things from if statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (a.b(), false) {
         var foo = foo1;
         foo();
@@ -2873,10 +2462,8 @@ describe("dce-plugin", () => {
         var baz = baz1;
         baz();
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       a.b();
       b.c();
 
@@ -2884,35 +2471,29 @@ describe("dce-plugin", () => {
       bar();
       var baz;
       var foo;
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove vars after return statement", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function f() {
         return x;
         var x = 1;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function f() {
         return void 0;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove vars after return statement #2", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var x = 0;
       function f1(){
         function f2(){
@@ -2921,11 +2502,9 @@ describe("dce-plugin", () => {
         return f2();
         var x = 1;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       var x = 0;
       function f1() {
         return function () {
@@ -2933,36 +2512,30 @@ describe("dce-plugin", () => {
         }();
         var x = 1;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove vars after return statement #3", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         bar = x;
         var x = 1;
       }
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       function foo() {
         bar = void 0;
       }
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
 
   it("should deopt for impure tests", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         do {
           bar();
@@ -2974,14 +2547,12 @@ describe("dce-plugin", () => {
           bar();
         }
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 
   it("should handle confident do..while with break statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         do {
           if (x) break;
@@ -3013,10 +2584,8 @@ describe("dce-plugin", () => {
           }
         } while (false);
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         do {
           if (x) break;
@@ -3044,14 +2613,12 @@ describe("dce-plugin", () => {
           }
         } while (false);
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should handle confident do..while with continue statements", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         do {
           if (x) continue;
@@ -3083,10 +2650,8 @@ describe("dce-plugin", () => {
           }
         } while (false);
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         do {
           if (x) continue;
@@ -3118,8 +2683,7 @@ describe("dce-plugin", () => {
           }
         } while (false);
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 });

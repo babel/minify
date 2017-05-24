@@ -35,108 +35,85 @@ describe("transform-remove-undefined-plugin", () => {
   });
 
   it("should remove undefined return value", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         return undefined;
-      }`
-    );
-    const expected = unpad(
-      `
+      }`);
+    const expected = unpad(`
       function foo() {
         return;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove var declarations in functions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var a = undefined;
-      }`
-    );
-    const expected = unpad(
-      `
+      }`);
+    const expected = unpad(`
       function foo() {
         var a;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove let-assignments in inner blocks", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       let a = 1;
       {
         let a = undefined;
-      }`
-    );
-    const expected = unpad(
-      `
+      }`);
+    const expected = unpad(`
       let a = 1;
       {
         let a;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove var-assignments in loops if no modify", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       for (var a = undefined;;) {
         var b = undefined;
-      }`
-    );
-    const expected = unpad(
-      `
+      }`);
+    const expected = unpad(`
       for (var a;;) {
         var b;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove var-assignments in loops if modify", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       for (var a;;) {
         var b = undefined;
         console.log(b);
         b = 3;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(source);
   });
 
   it("should not remove var-assignments if referenced before", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         a = 3;
         var a = undefined;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(source);
   });
 
   it("should not remove nested var-assignments if referenced before", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         aa = 3;
         var { a: aa, b: bb } = undefined;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(source);
   });
 
   it("should not remove if lval is reference before via a function", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         bar();
         var x = undefined;
@@ -144,14 +121,12 @@ describe("transform-remove-undefined-plugin", () => {
         function bar() {
           x = 3;
         }
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(source);
   });
 
   it("should remove if not referenced in any way before", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var x = undefined;
         bar();
@@ -159,10 +134,8 @@ describe("transform-remove-undefined-plugin", () => {
         function bar() {
           x = 3;
         }
-      }`
-    );
-    const expected = unpad(
-      `
+      }`);
+    const expected = unpad(`
       function foo() {
         var x;
         bar();
@@ -170,14 +143,12 @@ describe("transform-remove-undefined-plugin", () => {
         function bar() {
           x = 3;
         }
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(expected);
   });
 
   it("should not remove on mutually recursive function", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         a();
         var c = undefined;
@@ -188,72 +159,57 @@ describe("transform-remove-undefined-plugin", () => {
           a();
           c = 3;
         }
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(source);
   });
 
   it("should not remove if rval has side effects", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         var a = void b();
         return void bar();
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(source);
   });
 
   it("should remove from sequence expressions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       a = b, void 0, b = c, d.e.f(), void 0, hello.world();
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       a = b, b = c, d.e.f(), hello.world();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should NOT remove last undefined from sequence expressions", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       if (foo.bar(), void 0) {
         foo.baz();
       }
       function bar() {
         return a.b(), void 0;
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(source);
   });
 
   it("should remove last undefined from sequence expressions if safe", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       a = b, void 0, b = c, d.e.f(), void 0, hello.world(), void 0;
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       a = b, b = c, d.e.f(), hello.world();
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
   it("should remove not remove local undefined", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo(undefined) {
         a = b, undefined;
         return undefined;
-      }`
-    );
+      }`);
     expect(transform(source)).toBe(source);
   });
 });

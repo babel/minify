@@ -12,46 +12,39 @@ function transform(code) {
 
 describe("minify-builtins", () => {
   it("should minify standard built in methods", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function c() {
         let a = 10;
         const d = Number.isNaN(a);
         Math.max(a, b) + Math.max(b, a);
         return d && Number.isFinite(a);
       }
-    `
-    );
+    `);
     // Jest arranges in alphabetical order, So keeping it as _source
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should minify standard built in properties", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a () {
         Number.NAN + Number.NAN;
         return Math.PI + Math.PI + Number.EPSILON + Number.NAN;
       }
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should take no of occurences in to account", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a() {
         Math.floor(a) + Math.floor(b) + Math.min(a, b);
       }
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should collect and minify no matter any depth", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function a (){
         Math.max(b, a);
         const b = () => {
@@ -62,27 +55,23 @@ describe("minify-builtins", () => {
           }
         }
       }
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("shouldn't minify builtins in the program scope to avoid leaking", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       Math.max(c, d)
       function a (){
         Math.max(b, a) + Math.max(c, d);
       }
       Math.max(e, f)
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should minify builtins to method scope for class declarations", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       class Test {
         foo() {
           Math.max(c, d)
@@ -98,14 +87,12 @@ describe("minify-builtins", () => {
           Math.min(c, d)
         }
       }
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should minify builtins to function scopes ", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       var a = () => {
         Math.floor(b);
         Math.floor(b);
@@ -122,14 +109,12 @@ describe("minify-builtins", () => {
         Math.floor(d) + Math.floor(d,e);
         Math.max(e,d);
       })
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should collect and minify in segments in any depth if there is no LCA", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function b(){
         Math.floor(as, bb);
         function d(){
@@ -163,49 +148,40 @@ describe("minify-builtins", () => {
         }
       };
       new A()
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should evalaute expressions if applicable and optimize it", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       const a = Math.max(Math.floor(2), 5);
       let b = 1.8;
       let x = Math.floor(Math.max(a, b));
       foo(x);
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should not evaluate if its side effecty", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       Math.max(foo(), 1);
       Math.random();
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should not minify for computed properties", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       let max = "floor";
       Math[max](1.5);
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 
   it("should not minify for arrow fn without block statment", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       const a = () => Math.floor(b) + Math.floor(b);
-    `
-    );
+    `);
     expect({ _source: source, expected: transform(source) }).toMatchSnapshot();
   });
 });

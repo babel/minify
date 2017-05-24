@@ -12,17 +12,13 @@ function transform(code) {
 
 describe("flip-comparisons", () => {
   it("should merge two conditionals if the same consequent", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       x === null ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       null === x ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
@@ -46,8 +42,7 @@ describe("flip-comparisons", () => {
   });
 
   it("should put pures first in binary expressions 3", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       function foo() {
         if (foo !== null) {
           var bar;
@@ -56,10 +51,8 @@ describe("flip-comparisons", () => {
         x();
         return x;
       }
-    `
-    );
-    const expected = unpad(
-      `
+    `);
+    const expected = unpad(`
       function foo() {
         if (null !== foo) {
           var bar;
@@ -68,8 +61,7 @@ describe("flip-comparisons", () => {
         x();
         return x;
       }
-    `
-    );
+    `);
     expect(transform(source)).toBe(expected);
   });
 
@@ -80,27 +72,23 @@ describe("flip-comparisons", () => {
   });
 
   it("should put constants first", () => {
-    const source = unpad(
-      `
+    const source = unpad(`
       x * 100;
       x + 100;
       x - 100;
       x / 100;
       x > 100;
       x === void 0;
-    `
-    );
+    `);
 
-    const expected = unpad(
-      `
+    const expected = unpad(`
       100 * x;
       x + 100;
       x - 100;
       x / 100;
       100 < x;
       void 0 === x;
-    `
-    );
+    `);
 
     expect(transform(source)).toBe(expected);
   });
