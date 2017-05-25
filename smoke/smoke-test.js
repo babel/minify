@@ -60,7 +60,8 @@ class SmokeTest {
   }
 
   run() {
-    return this.install()
+    return this.cleanup()
+      .then(() => this.install())
       .then(() => this.build())
       .then(() => this.minifyAll())
       .then(() => this.test())
