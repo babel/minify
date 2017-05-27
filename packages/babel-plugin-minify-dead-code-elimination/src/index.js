@@ -2,6 +2,7 @@
 
 const some = require("lodash.some");
 const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
+const removeUseStrict = require("./remove-use-strict");
 
 function prevSiblings(path) {
   const parentPath = path.parentPath;
@@ -743,6 +744,18 @@ module.exports = ({ types: t, traverse }) => {
   return {
     name: "minify-dead-code-elimination",
     visitor: {
+      Function: {
+        exit(path) {
+          /**
+           * Use exit handler to traverse in a dfs post-order fashion
+           * to remove use strict
+           */
+          const body = path.get("body");
+          if (body.isBlockStatement()) {
+            removeUseStrict(body);
+          }
+        }
+      },
       IfStatement: {
         exit(path) {
           const consequent = path.get("consequent");
