@@ -81,15 +81,31 @@ describe("transform-property-literals-plugin", () => {
     const source = unpad(`
       ({
         "ಠ_ಠ": "bar",
-        "12e34": "wut"
+        "12e34": "wut",
+        "\u01FC": "AE"
       })
     `);
     const expected = unpad(`
       ({
         ಠ_ಠ: "bar",
-        12e34: "wut"
+        "12e34": "wut"
       });
     `);
     expect(transform(source)).toBe(expected);
+  });
+
+  it("should transform computed properties which are strings", () => {
+    const source = unpad(`
+      ({
+        [ಠ_ಠ]: "foo",
+        ["ಠ_ಠ"]: "bar"
+      });
+    `);
+    const expected = unpad(`
+      ({
+        [ಠ_ಠ]: "foo",
+        ಠ_ಠ: "bar"
+      });
+    `);
   });
 });
