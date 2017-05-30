@@ -2,6 +2,10 @@ const FALLBACK_HANDLER = Symbol("fallback handler");
 
 module.exports = ({ types: t }) => {
   const undef = t.unaryExpression("void", t.numericLiteral(0));
+  
+  function isUndef(ob) {
+    return ob === undefined || t.isIdentifier(ob, { name: "undefined" }) || t.isUnaryOperator(ob, { operator: 'void' })
+  }
 
   function defaultZero(cb) {
     return function(i = t.numericLiteral(0), ...args) {
@@ -102,7 +106,7 @@ module.exports = ({ types: t }) => {
           if (t.isStringLiteral(sep)) {
             realSep = sep.value;
           }
-          if (t.isIdentifier(sep, { name: "undefined" })) {
+          if (isUndef(sep)) {
             realSep = sep;
           }
           if (realSep !== null) {
