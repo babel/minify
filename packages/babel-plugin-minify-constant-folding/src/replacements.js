@@ -117,9 +117,11 @@ module.exports = ({ types: t }) => {
         },
         charAt: defaultZero(({ value }, i) => t.stringLiteral(value.charAt(i))),
         charCodeAt: defaultZero(({ value }, i) =>
-          t.numericLiteral(value.charCodeAt(i))),
+          t.numericLiteral(value.charCodeAt(i))
+        ),
         codePointAt: defaultZero(({ value }, i) =>
-          t.numericLiteral(value.codePointAt(i)))
+          t.numericLiteral(value.codePointAt(i))
+        )
       }
     }
   };
