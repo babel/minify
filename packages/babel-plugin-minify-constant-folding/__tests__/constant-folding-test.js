@@ -154,9 +154,9 @@ describe("constant-folding-plugin", () => {
       3;
       2;
       2;
-      undefined;
+      void 0;
 
-      undefined;
+      void 0;
       2;
 
       [1, 2, 3];
@@ -166,7 +166,7 @@ describe("constant-folding-plugin", () => {
 
       3;
       c;
-      undefined;
+      void 0;
 
       [c, b, a];
       [3, 2, 1];
@@ -226,7 +226,7 @@ describe("constant-folding-plugin", () => {
       ["a,b,c"];
       "a";
       "a";
-      undefined;
+      void 0;
       "a";
       "b";
       97;
