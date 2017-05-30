@@ -2,7 +2,7 @@
 
 const evaluate = require("babel-helper-evaluate-path");
 
-const { other } = require("./replacements");
+const { FALLBACK_HANDLER } = require("./replacements");
 
 function getName(member) {
   if (member.computed) {
@@ -23,8 +23,8 @@ function swap(path, member, handlers, ...args) {
   if (key === undefined) return;
   let handler = handlers[key];
   if (typeof handler !== "function") {
-    if (typeof handlers[other] === "function") {
-      handler = handlers[other].bind(member.object, key);
+    if (typeof handlers[FALLBACK_HANDLER] === "function") {
+      handler = handlers[FALLBACK_HANDLER].bind(member.object, key);
     } else {
       return false;
     }

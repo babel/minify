@@ -1,4 +1,4 @@
-const other = Symbol("other");
+const FALLBACK_HANDLER = Symbol("fallback handler");
 
 module.exports = ({ types: t }) => {
   const undef = t.unaryExpression("void", t.numericLiteral(0));
@@ -17,7 +17,7 @@ module.exports = ({ types: t }) => {
         length() {
           return t.numericLiteral(this.elements.length);
         },
-        [other](i) {
+        [FALLBACK_HANDLER](i) {
           if (typeof i === "number" || i.match(/^\d+$/)) {
             return this.elements[i] || undef;
           }
@@ -89,7 +89,7 @@ module.exports = ({ types: t }) => {
         length() {
           return t.numericLiteral(this.value.length);
         },
-        [other](i) {
+        [FALLBACK_HANDLER](i) {
           if (typeof i === "number" || i.match(/^\d+$/)) {
             const ch = this.value[i];
             return ch ? t.stringLiteral(ch) : undef;
@@ -120,4 +120,4 @@ module.exports = ({ types: t }) => {
     }
   };
 };
-module.exports.other = other;
+module.exports.FALLBACK_HANDLER = FALLBACK_HANDLER;
