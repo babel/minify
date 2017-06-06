@@ -131,4 +131,19 @@ describe("preset", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix bug#TBD - builtins and mangle conflict", () => {
+    const source = unpad(`
+      function a() {
+        [Math.pi, Math.pi];
+      }
+    `);
+    const expected = unpad(`
+      function a() {
+        var a = Math.pi;
+        [a, a];
+      }
+    `);
+    expect(transform(source, { deadcode: false })).toBe(expected);
+  });
 });
