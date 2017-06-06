@@ -126,27 +126,31 @@ module.exports = class ScopeTracker {
     // https://github.com/babel/babili/issues/559
     // https://bugs.webkit.org/show_bug.cgi?id=171041
     // https://trac.webkit.org/changeset/217200/webkit/trunk/Source
-    const isBlockScoped = binding.kind === "let" || binding.kind === "const";
-    const isForLoopDeclaration =
-      (binding.path.parentPath.parent.type === "ForStatement" &&
-        binding.path.parentPath.key === "init") ||
-      (binding.path.parentPath.parent.type === "ForInStatement" &&
-        binding.path.parentPath.key === "left") ||
-      (binding.path.parentPath.parent.type === "ForOfStatement" &&
-        binding.path.parentPath.key === "left");
-    if (isBlockScoped && isForLoopDeclaration) {
-      const functionParentScope = binding.scope.getFunctionParent();
-      const isIncorrectlyTopLevelInSafari =
-        binding.scope.parent === functionParentScope;
-      if (isIncorrectlyTopLevelInSafari) {
-        const parentFunctionBinding = this.bindings
-          .get(functionParentScope)
-          .get(next);
-        if (parentFunctionBinding) {
-          const parentFunctionHasParamBinding =
-            parentFunctionBinding.kind === "param";
-          if (parentFunctionHasParamBinding) {
-            return false;
+    const maybeDecl = binding.path.parentPath;
+    const isBlockScoped =
+      maybeDecl.isVariableDeclaration({ kind: "let" }) ||
+      maybeDecl.isVariableDeclaration({ kind: "const" });
+    if (isBlockScoped) {
+      const maybeFor = maybeDecl.parentPath;
+      const isForLoopBinding =
+        maybeFor.isForStatement({ init: maybeDecl.node }) ||
+        maybeFor.isForXStatement({ left: maybeDecl.node });
+      if (isForLoopBinding) {
+        const fnParent = maybeFor.getFunctionParent();
+        if (fnParent.isFunction()) {
+          const parentScope = maybeFor.scope.parent;
+          const isIncorrectlyTopLevelInSafari = parentScope === fnParent.scope;
+          if (isIncorrectlyTopLevelInSafari) {
+            const parentFunctionBinding = this.bindings
+              .get(parentScope)
+              .get(next);
+            if (parentFunctionBinding) {
+              const parentFunctionHasParamBinding =
+                parentFunctionBinding.kind === "param";
+              if (parentFunctionHasParamBinding) {
+                return false;
+              }
+            }
           }
         }
       }
