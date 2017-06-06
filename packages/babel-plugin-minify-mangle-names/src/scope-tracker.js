@@ -121,6 +121,37 @@ module.exports = class ScopeTracker {
       return false;
     }
 
+    // Safari raises a syntax error for a `let` or `const` declaration in a
+    // `for` loop initialization that shadows a parent function's parameter.
+    // https://github.com/babel/babili/issues/559
+    // https://bugs.webkit.org/show_bug.cgi?id=171041
+    // https://trac.webkit.org/changeset/217200/webkit/trunk/Source
+    const isBlockScoped = binding.kind === "let" || binding.kind === "const";
+    const isForLoopDeclaration =
+      (binding.path.parentPath.parent.type === "ForStatement" &&
+        binding.path.parentPath.key === "init") ||
+      (binding.path.parentPath.parent.type === "ForInStatement" &&
+        binding.path.parentPath.key === "left") ||
+      (binding.path.parentPath.parent.type === "ForOfStatement" &&
+        binding.path.parentPath.key === "left");
+    if (isBlockScoped && isForLoopDeclaration) {
+      const functionParentScope = binding.scope.getFunctionParent();
+      const isIncorrectlyTopLevelInSafari =
+        binding.scope.parent === functionParentScope;
+      if (isIncorrectlyTopLevelInSafari) {
+        const parentFunctionBinding = this.bindings
+          .get(functionParentScope)
+          .get(next);
+        if (parentFunctionBinding) {
+          const parentFunctionHasParamBinding =
+            parentFunctionBinding.kind === "param";
+          if (parentFunctionHasParamBinding) {
+            return false;
+          }
+        }
+      }
+    }
+
     for (let i = 0; i < binding.constantViolations.length; i++) {
       const violation = binding.constantViolations[i];
       if (tracker.hasBindingOrReference(violation.scope, binding, next)) {

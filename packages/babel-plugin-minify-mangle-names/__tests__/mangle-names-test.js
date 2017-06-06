@@ -1281,4 +1281,67 @@ describe("mangle-names", () => {
     `);
     expect(transform(source, { topLevel: true }, "module")).toBe(expected);
   });
+
+  // Safari raises a syntax error for a `let` or `const` declaration in a `for`
+  // loop initialization that shadows a parent function's parameter.
+  // https://github.com/babel/babili/issues/559
+  // https://bugs.webkit.org/show_bug.cgi?id=171041
+  // https://trac.webkit.org/changeset/217200/webkit/trunk/Source
+  describe("Safari for loop lexical scope workaround", () => {
+    it("should not shadow params in ForStatement.init", () => {
+      const source = unpad(`
+        function a(b) {
+          for (let c;;);
+        }
+      `);
+      const expected = unpad(`
+        function a(a) {
+          for (let b;;);
+        }
+      `);
+      expect(transform(source)).toBe(expected);
+    });
+
+    it("should not shadow params in ForInStatement.left", () => {
+      const source = unpad(`
+        function a(b) {
+          for (let c in d);
+        }
+      `);
+      const expected = unpad(`
+        function a(a) {
+          for (let b in d);
+        }
+      `);
+      expect(transform(source)).toBe(expected);
+    });
+
+    it("should not shadow params in ForOfStatement.left", () => {
+      const source = unpad(`
+        function a(b) {
+          for (const c of d);
+        }
+      `);
+      const expected = unpad(`
+        function a(a) {
+          for (const b of d);
+        }
+      `);
+      expect(transform(source)).toBe(expected);
+    });
+
+    it("should not shadow params in complex ForOfStatement.left", () => {
+      const source = unpad(`
+        function a(b) {
+          for (const [c, d] of e);
+        }
+      `);
+      const expected = unpad(`
+        function a(a) {
+          for (const [b, c] of e);
+        }
+      `);
+      expect(transform(source)).toBe(expected);
+    });
+  });
 });
