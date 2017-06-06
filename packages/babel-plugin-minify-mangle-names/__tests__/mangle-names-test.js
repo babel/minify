@@ -1288,57 +1288,333 @@ describe("mangle-names", () => {
   // https://bugs.webkit.org/show_bug.cgi?id=171041
   // https://trac.webkit.org/changeset/217200/webkit/trunk/Source
   describe("Safari for loop lexical scope workaround", () => {
-    it("should not shadow params in ForStatement.init", () => {
+    it("should permit shadowing in top-level for loops", () => {
       const source = unpad(`
-        function a(b) {
-          for (let c;;);
+        var a;
+
+        for (a = 0;;);
+        for (a of x);
+        for (x of a);
+        for (a in x);
+        for (x in a);
+        for (;; a++);
+        for (;; a = 1);
+
+        for (let b;;);
+        for (let b of x);
+        for (const b of x);
+        for (let b in x);
+        for (const b in x);
+        for (let [b, c] of x);
+        for (const [b, c] of x);
+        for (let [b, c] in x);
+        for (const [b, c] in x);
+        for (let { c: { b: { a } } } = x;;);
+        for (;; () => {
+          let a = 1;
+        });
+      `);
+      const expected = unpad(`
+        var a;
+
+        for (a = 0;;);
+        for (a of x);
+        for (x of a);
+        for (a in x);
+        for (x in a);
+        for (;; a++);
+        for (;; a = 1);
+
+        for (let a;;);
+        for (let a of x);
+        for (const a of x);
+        for (let a in x);
+        for (const a in x);
+        for (let [a, b] of x);
+        for (const [a, b] of x);
+        for (let [a, b] in x);
+        for (const [a, b] in x);
+        for (let { c: { b: { a: b } } } = x;;);
+        for (;; () => {
+          let b = 1;
+        });
+      `);
+      expect(transform(source)).toBe(expected);
+    });
+
+    it("should permit shadowing in nested for loops", () => {
+      const source = unpad(`
+        function a(a) {
+          {
+            for (a = 0;;);
+            for (a of x);
+            for (x of a);
+            for (a in x);
+            for (x in a);
+            for (;; a++);
+            for (;; a = 1);
+
+            for (let a;;);
+            for (let a of x);
+            for (const a of x);
+            for (let a in x);
+            for (const a in x);
+            for (let [a, b] of x);
+            for (const [a, b] of x);
+            for (let [a, b] in x);
+            for (const [a, b] in x);
+            for (let { c: { b: { a } } } = x;;);
+            for (;; () => {
+              let a = 1;
+            });
+          }
         }
       `);
       const expected = unpad(`
+        function a(b) {
+          {
+            for (b = 0;;);
+            for (b of x);
+            for (x of b);
+            for (b in x);
+            for (x in b);
+            for (;; b++);
+            for (;; b = 1);
+
+            for (let b;;);
+            for (let b of x);
+            for (const b of x);
+            for (let b in x);
+            for (const b in x);
+            for (let [c, a] of x);
+            for (const [c, a] of x);
+            for (let [c, a] in x);
+            for (const [c, a] in x);
+            for (let { c: { b: { a: b } } } = x;;);
+            for (;; () => {
+              let b = 1;
+            });
+          }
+        }
+      `);
+      expect(transform(source)).toBe(expected);
+    });
+
+    it("should not shadow params in function declaration top-level for loops", () => {
+      const source = unpad(`
         function a(a) {
+          for (a = 0;;);
+          for (a of x);
+          for (x of a);
+          for (a in x);
+          for (x in a);
+          for (;; a++);
+          for (;; a = 1);
+
           for (let b;;);
+          for (let b of x);
+          for (const b of x);
+          for (let b in x);
+          for (const b in x);
+          for (let [b, c] of x);
+          for (const [b, c] of x);
+          for (let [b, c] in x);
+          for (const [b, c] in x);
+          for (let { c: { b: { a } } } = x;;);
+          for (;; () => {
+            let a = 1;
+          });
+        }
+      `);
+      const expected = unpad(`
+        function a(b) {
+          for (b = 0;;);
+          for (b of x);
+          for (x of b);
+          for (b in x);
+          for (x in b);
+          for (;; b++);
+          for (;; b = 1);
+
+          for (let a;;);
+          for (let a of x);
+          for (const a of x);
+          for (let a in x);
+          for (const a in x);
+          for (let [a, d] of x);
+          for (const [a, d] of x);
+          for (let [a, d] in x);
+          for (const [a, d] in x);
+          for (let { c: { b: { a: c } } } = x;;);
+          for (;; () => {
+            let b = 1;
+          });
         }
       `);
       expect(transform(source)).toBe(expected);
     });
 
-    it("should not shadow params in ForInStatement.left", () => {
+    it("should not shadow params in function expression top-level for loops", () => {
       const source = unpad(`
-        function a(b) {
-          for (let c in d);
-        }
+        var a = function (a) {
+          for (a = 0;;);
+          for (a of x);
+          for (x of a);
+          for (a in x);
+          for (x in a);
+          for (;; a++);
+          for (;; a = 1);
+
+          for (let b;;);
+          for (let b of x);
+          for (const b of x);
+          for (let b in x);
+          for (const b in x);
+          for (let [b, c] of x);
+          for (const [b, c] of x);
+          for (let [b, c] in x);
+          for (const [b, c] in x);
+          for (let { c: { b: { a } } } = x;;);
+          for (;; () => {
+            let a = 1;
+          });
+        };
       `);
       const expected = unpad(`
-        function a(a) {
-          for (let b in d);
-        }
+        var a = function (b) {
+          for (b = 0;;);
+          for (b of x);
+          for (x of b);
+          for (b in x);
+          for (x in b);
+          for (;; b++);
+          for (;; b = 1);
+
+          for (let a;;);
+          for (let a of x);
+          for (const a of x);
+          for (let a in x);
+          for (const a in x);
+          for (let [a, d] of x);
+          for (const [a, d] of x);
+          for (let [a, d] in x);
+          for (const [a, d] in x);
+          for (let { c: { b: { a: c } } } = x;;);
+          for (;; () => {
+            let b = 1;
+          });
+        };
       `);
       expect(transform(source)).toBe(expected);
     });
 
-    it("should not shadow params in ForOfStatement.left", () => {
+    it("should not shadow params in arrow function top-level for loops", () => {
       const source = unpad(`
-        function a(b) {
-          for (const c of d);
-        }
+        var a = (a) => {
+          for (a = 0;;);
+          for (a of x);
+          for (x of a);
+          for (a in x);
+          for (x in a);
+          for (;; a++);
+          for (;; a = 1);
+
+          for (let b;;);
+          for (let b of x);
+          for (const b of x);
+          for (let b in x);
+          for (const b in x);
+          for (let [b, c] of x);
+          for (const [b, c] of x);
+          for (let [b, c] in x);
+          for (const [b, c] in x);
+          for (let { c: { b: { a } } } = x;;);
+          for (;; () => {
+            let a = 1;
+          });
+        };
       `);
       const expected = unpad(`
-        function a(a) {
-          for (const b of d);
-        }
+        var a = (b) => {
+          for (b = 0;;);
+          for (b of x);
+          for (x of b);
+          for (b in x);
+          for (x in b);
+          for (;; b++);
+          for (;; b = 1);
+
+          for (let a;;);
+          for (let a of x);
+          for (const a of x);
+          for (let a in x);
+          for (const a in x);
+          for (let [a, d] of x);
+          for (const [a, d] of x);
+          for (let [a, d] in x);
+          for (const [a, d] in x);
+          for (let { c: { b: { a: c } } } = x;;);
+          for (;; () => {
+            let b = 1;
+          });
+        };
       `);
       expect(transform(source)).toBe(expected);
     });
 
-    it("should not shadow params in complex ForOfStatement.left", () => {
+    it("should not shadow params in class method top-level for loops", () => {
       const source = unpad(`
-        function a(b) {
-          for (const [c, d] of e);
+        class a {
+          a(a) {
+            for (a = 0;;);
+            for (a of x);
+            for (x of a);
+            for (a in x);
+            for (x in a);
+            for (;; a++);
+            for (;; a = 1);
+
+            for (let b;;);
+            for (let b of x);
+            for (const b of x);
+            for (let b in x);
+            for (const b in x);
+            for (let [b, c] of x);
+            for (const [b, c] of x);
+            for (let [b, c] in x);
+            for (const [b, c] in x);
+            for (let { c: { b: { a } } } = x;;);
+            for (;; () => {
+              let a = 1;
+            });
+          }
         }
       `);
       const expected = unpad(`
-        function a(a) {
-          for (const [b, c] of e);
+        class a {
+          a(b) {
+            for (b = 0;;);
+            for (b of x);
+            for (x of b);
+            for (b in x);
+            for (x in b);
+            for (;; b++);
+            for (;; b = 1);
+
+            for (let a;;);
+            for (let a of x);
+            for (const a of x);
+            for (let a in x);
+            for (const a in x);
+            for (let [a, d] of x);
+            for (const [a, d] of x);
+            for (let [a, d] in x);
+            for (const [a, d] in x);
+            for (let { c: { b: { a: c } } } = x;;);
+            for (;; () => {
+              let b = 1;
+            });
+          }
         }
       `);
       expect(transform(source)).toBe(expected);
