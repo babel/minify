@@ -135,15 +135,15 @@ describe("preset", () => {
   it("should fix bug#TBD - builtins and mangle conflict", () => {
     const source = unpad(`
       function a() {
-        foo([Math.pi, Math.pi]);
+        [Math.pi, Math.pi];
       }
     `);
     const expected = unpad(`
       function a() {
         var a = Math.pi;
-        foo([a, a]);
+        [a, a];
       }
     `);
-    expect(transform(source)).toBe(expected);
+    expect(transform(source, { deadcode: false })).toBe(expected);
   });
 });
