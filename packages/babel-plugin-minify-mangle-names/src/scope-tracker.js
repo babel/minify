@@ -137,19 +137,15 @@ module.exports = class ScopeTracker {
         maybeFor.isForXStatement({ left: maybeDecl.node });
       if (isForLoopBinding) {
         const fnParent = maybeFor.getFunctionParent();
-        if (fnParent.isFunction()) {
-          const parentScope = maybeFor.scope.parent;
-          const isIncorrectlyTopLevelInSafari = parentScope === fnParent.scope;
-          if (isIncorrectlyTopLevelInSafari) {
-            const parentFunctionBinding = this.bindings
-              .get(parentScope)
-              .get(next);
-            if (parentFunctionBinding) {
-              const parentFunctionHasParamBinding =
-                parentFunctionBinding.kind === "param";
-              if (parentFunctionHasParamBinding) {
-                return false;
-              }
+        if (fnParent.isFunction({ body: maybeFor.parent })) {
+          const parentFunctionBinding = this.bindings
+            .get(fnParent.scope)
+            .get(next);
+          if (parentFunctionBinding) {
+            const parentFunctionHasParamBinding =
+              parentFunctionBinding.kind === "param";
+            if (parentFunctionHasParamBinding) {
+              return false;
             }
           }
         }
