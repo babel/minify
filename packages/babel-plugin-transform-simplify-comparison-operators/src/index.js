@@ -9,6 +9,13 @@ module.exports = function() {
       BinaryExpression(path) {
         const { node } = path;
         const op = node.operator;
+ 
+        if (["!=", "=="].includes(node.operator)) {
+          if (t.isIdentifier(node.right, { name: "undefined" })) {
+            path.get("right").replaceWith(t.nullLiteral());
+          }
+        }
+
         if (op !== "===" && op !== "!==") {
           return;
         }
