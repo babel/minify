@@ -5,6 +5,7 @@ const ScopeTracker = require("./scope-tracker");
 const isLabelIdentifier = require("./is-label-identifier");
 const bfsTraverseCreator = require("./bfs-traverse");
 const fixupVarScoping = require("./fixup-var-scoping");
+const keywordVisitors = require("./keyword-visitors");
 
 const {
   markEvalScopes,
@@ -218,21 +219,27 @@ module.exports = babel => {
        * as to improve the gzip compression - as gzip likes repetition
        */
       if (this.charset.shouldConsider) {
-        collectVisitor.Identifier = function Identifer(path) {
-          const { node } = path;
+        Object.assign(
+          collectVisitor,
+          keywordVisitors(name => mangler.charset.consider(name)),
+          {
+            Identifier(path) {
+              const { node } = path;
 
-          // We don't mangle properties, so we collect them as they contribute
-          // to the frequency of characters
-          if (
-            path.parentPath.isMemberExpression({ property: node }) ||
-            path.parentPath.isObjectProperty({ key: node })
-          ) {
-            mangler.charset.consider(node.name);
+              // We don't mangle properties, so we collect them as they contribute
+              // to the frequency of characters
+              if (
+                path.parentPath.isMemberExpression({ property: node }) ||
+                path.parentPath.isObjectProperty({ key: node })
+              ) {
+                mangler.charset.consider(node.name);
+              }
+            },
+            Literal({ node }) {
+              mangler.charset.consider(String(node.value));
+            }
           }
-        };
-        collectVisitor.Literal = function Literal({ node }) {
-          mangler.charset.consider(String(node.value));
-        };
+        );
       }
 
       // Traverse the AST
@@ -507,7 +514,7 @@ module.exports = babel => {
           // is running on this on single files before bundling. Therefore we
           // need to achieve as much determinisim and we will not do any frequency
           // sorting on the character set. Currently the number is pretty arbitrary.
-          const shouldConsiderSource = path.getSource().length > 70000;
+          const shouldConsiderSource = path.getSource().length > 20000;
 
           const charset = new Charset(shouldConsiderSource);
 
