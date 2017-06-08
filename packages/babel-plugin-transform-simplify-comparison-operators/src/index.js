@@ -1,6 +1,9 @@
 "use strict";
 
 module.exports = function() {
+  const TRUE = t.unaryExpression("!", t.numericLiteral(0), true);
+  const FALSE = t.unaryExpression("!", t.numericLiteral(1), true);
+
   return {
     name: "transform-simplify-comparison-operators",
     visitor: {
@@ -9,10 +12,16 @@ module.exports = function() {
       BinaryExpression(path) {
         const { node } = path;
         const op = node.operator;
+        const negated = node.operator.startsWith("!");
  
         if (["!=", "=="].includes(node.operator)) {
           if (t.isIdentifier(node.right, { name: "undefined" })) {
             path.get("right").replaceWith(t.nullLiteral());
+          }
+          if (t.isIdentifier(node.left, { name: "undefined" }) || t.isNullLiteral(node.left)) {
+            if (t.isIdentifer(node.right, { name: "undefined" }) || t.isNullLiteral(node.right)) {
+              path.replaceWith(negated ? FALSE : TRUE);
+            }
           }
         }
 
