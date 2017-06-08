@@ -2,9 +2,13 @@ const FALLBACK_HANDLER = Symbol("fallback handler");
 
 module.exports = ({ types: t }) => {
   const undef = t.unaryExpression("void", t.numericLiteral(0));
-  
+
   function isUndef(ob) {
-    return ob === undefined || t.isIdentifier(ob, { name: "undefined" }) || t.isUnaryExpression(ob, { operator: 'void' })
+    return (
+      ob === undefined ||
+      t.isIdentifier(ob, { name: "undefined" }) ||
+      t.isUnaryExpression(ob, { operator: "void" })
+    );
   }
 
   function defaultZero(cb) {
