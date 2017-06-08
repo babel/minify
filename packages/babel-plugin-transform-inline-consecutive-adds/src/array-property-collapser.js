@@ -22,7 +22,8 @@ class ArrayPropertyCollapser extends Collapser {
         return false;
       }
 
-      const obj = left.get("object"), prop = left.get("property");
+      const obj = left.get("object"),
+        prop = left.get("property");
       if (!obj.isIdentifier() || obj.node.name !== objName) {
         return false;
       }

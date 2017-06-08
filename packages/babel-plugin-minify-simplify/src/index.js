@@ -137,9 +137,11 @@ module.exports = ({ types: t }) => {
 
             // We need to make sure that the return type will always be boolean.
             if (
-              !(t.isLogicalExpression(expr) ||
+              !(
+                t.isLogicalExpression(expr) ||
                 t.isConditionalExpression(expr) ||
-                t.isBinaryExpression(expr))
+                t.isBinaryExpression(expr)
+              )
             ) {
               return;
             }
@@ -417,8 +419,10 @@ module.exports = ({ types: t }) => {
 
               if (
                 !path.isAssignmentExpression() ||
-                !(path.get("left").isIdentifier() ||
-                  path.get("left").isMemberExpression())
+                !(
+                  path.get("left").isIdentifier() ||
+                  path.get("left").isMemberExpression()
+                )
               ) {
                 return true;
               }
@@ -1584,8 +1588,10 @@ module.exports = ({ types: t }) => {
     // issue#399
     const deopt = !statements.every(stmt => {
       if (
-        !(stmt.isVariableDeclaration({ kind: "let" }) ||
-          stmt.isVariableDeclaration({ kind: "const" }))
+        !(
+          stmt.isVariableDeclaration({ kind: "let" }) ||
+          stmt.isVariableDeclaration({ kind: "const" })
+        )
       ) {
         return true;
       }

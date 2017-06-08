@@ -30,7 +30,8 @@ class SetCollapser extends Collapser {
         return false;
       }
 
-      const obj = callee.get("object"), prop = callee.get("property");
+      const obj = callee.get("object"),
+        prop = callee.get("property");
       if (
         !obj.isIdentifier() ||
         obj.node.name !== objName ||
