@@ -16,7 +16,7 @@ module.exports = function({ types: t }) {
         const op = node.operator;
         const negated = node.operator.startsWith("!");
  
-        if (["!=", "=="].includes(node.operator)) {
+        if (["!=", "=="].indexOf(node.operator) !== -1) {
           if (t.isIdentifier(node.right, { name: "undefined" })) {
             path.get("right").replaceWith(t.nullLiteral());
           }
