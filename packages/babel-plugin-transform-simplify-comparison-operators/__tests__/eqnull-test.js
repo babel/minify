@@ -23,22 +23,22 @@ describe("simplify-comparison-operators-plugin", () => {
   
   it("should shorten `undefined == null`", () => {
     const source = "undefined == null";
-    const expected = "!0";
+    const expected = "!0;";
     expect(transform(source)).toBe(expected);
   });
   it("should shorten `undefined == undefined`", () => {
     const source = "undefined == undefined";
-    const expected = "!0";
+    const expected = "!0;";
     expect(transform(source)).toBe(expected);
   });
   it("should shorten `undefined != null`", () => {
     const source = "undefined != undefined";
-    const expected = "!1";
+    const expected = "!1;";
     expect(transform(source)).toBe(expected);
   });
   it("should shorten `undefined != undefined`", () => {
     const source = "undefined != undefined";
-    const expected = "!1";
+    const expected = "!1;";
     expect(transform(source)).toBe(expected);
   });
 });
