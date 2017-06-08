@@ -16,9 +16,29 @@ describe("simplify-comparison-operators-plugin", () => {
     const expected = "x == null;";
     expect(transform(source)).toBe(expected);
   });
-
   it("should not shorten `x === undefined`", () => {
     const source = "x === undefined;";
     expect(transform(source)).toBe(source);
+  });
+  
+  it("should shorten `undefined == null`", () => {
+    const source = "undefined == null";
+    const expected = "!0";
+    expect(transform(source)).toBe(expected);
+  });
+  it("should shorten `undefined == undefined`", () => {
+    const source = "undefined == undefined";
+    const expected = "!0";
+    expect(transform(source)).toBe(expected);
+  });
+  it("should shorten `undefined != null`", () => {
+    const source = "undefined != undefined";
+    const expected = "!1";
+    expect(transform(source)).toBe(expected);
+  });
+  it("should shorten `undefined != undefined`", () => {
+    const source = "undefined != undefined";
+    const expected = "!1";
+    expect(transform(source)).toBe(expected);
   });
 });
