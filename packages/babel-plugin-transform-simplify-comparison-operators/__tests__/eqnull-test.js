@@ -19,7 +19,7 @@ describe("simplify-comparison-operators-plugin", () => {
     const source = "x === undefined;";
     expect(transform(source)).toBe(source);
   });
-  
+
   it("should shorten `undefined == null`", () => {
     const source = "undefined == null";
     const expected = "!0;";

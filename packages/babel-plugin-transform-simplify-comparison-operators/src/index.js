@@ -3,8 +3,9 @@
 module.exports = function({ types: t }) {
   const TRUE = t.unaryExpression("!", t.numericLiteral(0), true);
   const FALSE = t.unaryExpression("!", t.numericLiteral(1), true);
-  
-  const eqNull = node => t.isIdentifier(node, { name: "undefined" }) || t.isNullLiteral(node)
+
+  const eqNull = node =>
+    t.isIdentifier(node, { name: "undefined" }) || t.isNullLiteral(node);
 
   return {
     name: "transform-simplify-comparison-operators",
@@ -15,7 +16,7 @@ module.exports = function({ types: t }) {
         const { node } = path;
         const op = node.operator;
         const negated = node.operator.startsWith("!");
- 
+
         if (["!=", "=="].indexOf(node.operator) !== -1) {
           if (t.isIdentifier(node.right, { name: "undefined" })) {
             path.get("right").replaceWith(t.nullLiteral());
