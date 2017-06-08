@@ -3,6 +3,8 @@
 module.exports = function({ types: t }) {
   const TRUE = t.unaryExpression("!", t.numericLiteral(0), true);
   const FALSE = t.unaryExpression("!", t.numericLiteral(1), true);
+  
+  const eqNull = node => t.isIdentifier(node, { name: "undefined" }) || t.isNullLiteral(node)
 
   return {
     name: "transform-simplify-comparison-operators",
@@ -18,10 +20,8 @@ module.exports = function({ types: t }) {
           if (t.isIdentifier(node.right, { name: "undefined" })) {
             path.get("right").replaceWith(t.nullLiteral());
           }
-          if (t.isIdentifier(node.left, { name: "undefined" }) || t.isNullLiteral(node.left)) {
-            if (t.isIdentifer(node.right, { name: "undefined" }) || t.isNullLiteral(node.right)) {
-              path.replaceWith(negated ? FALSE : TRUE);
-            }
+          if (eqNull(node.left) && eqNull(node.right)) {
+            path.replaceWith(negated ? FALSE : TRUE);
           }
         }
 
