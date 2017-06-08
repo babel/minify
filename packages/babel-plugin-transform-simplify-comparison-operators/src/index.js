@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function() {
+module.exports = function({ types: t }) {
   const TRUE = t.unaryExpression("!", t.numericLiteral(0), true);
   const FALSE = t.unaryExpression("!", t.numericLiteral(1), true);
 
