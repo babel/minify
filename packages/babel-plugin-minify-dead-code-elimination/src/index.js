@@ -1177,7 +1177,8 @@ module.exports = ({ types: t, traverse }) => {
   }
 
   function getLabel(name, _path) {
-    let label, path = _path;
+    let label,
+      path = _path;
     do {
       label = path.scope.getLabel(name);
       if (label) {

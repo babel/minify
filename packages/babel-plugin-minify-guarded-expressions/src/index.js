@@ -67,8 +67,10 @@ module.exports = function({ types: t }) {
 
             if (
               !path.parentPath.isExpressionStatement() &&
-              !(path.parentPath.isSequenceExpression() &&
-                path.parentPath.parentPath.isExpressionStatement())
+              !(
+                path.parentPath.isSequenceExpression() &&
+                path.parentPath.parentPath.isExpressionStatement()
+              )
             ) {
               return;
             }

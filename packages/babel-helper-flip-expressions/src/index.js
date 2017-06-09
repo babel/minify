@@ -27,8 +27,10 @@ module.exports = function(t) {
         }
 
         if (
-          !(t.isBinaryExpression(node) &&
-            t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) > -1)
+          !(
+            t.isBinaryExpression(node) &&
+            t.EQUALITY_BINARY_OPERATORS.indexOf(node.operator) > -1
+          )
         ) {
           // Binary expressions wouldn't hurut because we know how to flip them
           savings--;
