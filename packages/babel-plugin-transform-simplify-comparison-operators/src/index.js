@@ -9,7 +9,6 @@ module.exports = function({ types: t }) {
       BinaryExpression(path) {
         const { node } = path;
         const op = node.operator;
-        const negated = node.operator.startsWith("!");
 
         if (["!=", "=="].indexOf(node.operator) !== -1) {
           if (t.isIdentifier(node.right, { name: "undefined" })) {
