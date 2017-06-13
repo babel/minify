@@ -12,6 +12,11 @@ module.exports = function({ types: t }) {
             return;
           }
 
+          const containsUnicode = /[^a-z0-9$_]/i.test(key.value);
+          if (containsUnicode) {
+            return;
+          }
+
           if (key.value.match(/^\d+$/)) {
             const newProp = parseInt(node.key.value, 10);
             if (newProp.toString() === node.key.value) {
