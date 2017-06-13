@@ -11,7 +11,10 @@ module.exports = function({ types: t }) {
         const op = node.operator;
 
         if (["!=", "=="].indexOf(node.operator) !== -1) {
-          if (t.isIdentifier(node.right, { name: "undefined" })) {
+          if (
+            t.isIdentifier(node.right, { name: "undefined" }) ||
+            t.isUnaryExpression(node.right, { operator: "void" })
+          ) {
             path.get("right").replaceWith(t.nullLiteral());
           }
         }
