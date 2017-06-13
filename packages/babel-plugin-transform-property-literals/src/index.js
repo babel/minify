@@ -14,7 +14,11 @@ module.exports = function({ types: t }) {
             return;
           }
 
-          key.replaceWith(reduceStaticPropertyNameES5(t, key.node));
+          const newNode = t.clone(path.node);
+          newNode.key = reduceStaticPropertyNameES5(t, key.node);
+          newNode.computed = false;
+
+          path.replaceWith(newNode);
         }
       }
     }

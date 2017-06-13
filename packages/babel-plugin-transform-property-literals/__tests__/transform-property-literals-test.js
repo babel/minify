@@ -108,5 +108,6 @@ describe("transform-property-literals-plugin", () => {
         ಠ_ಠ: "bar"
       });
     `);
+    expect(transform(source)).toBe(expected);
   });
 });

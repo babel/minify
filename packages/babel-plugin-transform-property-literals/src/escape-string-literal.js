@@ -25,7 +25,8 @@ limitations under the License.
  */
 module.exports = function escapeStringLiteral(stringValue) {
   let result = "";
-  let nSingle = 0, nDouble = 0;
+  let nSingle = 0,
+    nDouble = 0;
   for (let i = 0, l = stringValue.length; i < l; ++i) {
     let ch = stringValue[i];
     if (ch === '"') {
