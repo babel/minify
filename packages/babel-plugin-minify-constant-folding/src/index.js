@@ -2,8 +2,45 @@
 
 const evaluate = require("babel-helper-evaluate-path");
 
-module.exports = ({ types: t, traverse }) => {
+const { FALLBACK_HANDLER } = require("./replacements");
+
+function getName(member) {
+  if (member.computed) {
+    switch (member.property.type) {
+      case "StringLiteral":
+      case "NumericLiteral":
+        return member.property.value;
+      case "TemplateLiteral":
+        return;
+    }
+  } else {
+    return member.property.name;
+  }
+}
+
+function swap(path, member, handlers, ...args) {
+  const key = getName(member);
+  if (key === undefined) return;
+  let handler = handlers[key];
+  if (typeof handler !== "function") {
+    if (typeof handlers[FALLBACK_HANDLER] === "function") {
+      handler = handlers[FALLBACK_HANDLER].bind(member.object, key);
+    } else {
+      return false;
+    }
+  }
+  const replacement = handler.apply(member.object, args);
+  if (replacement) {
+    path.replaceWith(replacement);
+    return true;
+  }
+  return false;
+}
+
+module.exports = babel => {
+  const replacements = require("./replacements.js")(babel);
   const seen = Symbol("seen");
+  const { types: t, traverse } = babel;
 
   return {
     name: "minify-constant-folding",
@@ -124,6 +161,21 @@ module.exports = ({ types: t, traverse }) => {
           node[seen] = true;
           path.replaceWith(node);
         }
+      },
+      CallExpression(path) {
+        const { node } = path;
+        const { callee: member } = node;
+        if (t.isMemberExpression(member)) {
+          const helpers = replacements[member.object.type];
+          if (!helpers || !helpers.calls) return;
+          swap(path, member, helpers.calls, ...node.arguments);
+        }
+      },
+      MemberExpression(path) {
+        const { node: member } = path;
+        const helpers = replacements[member.object.type];
+        if (!helpers || !helpers.members) return;
+        swap(path, member, helpers.members);
       }
     }
   };
