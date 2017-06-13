@@ -2,7 +2,9 @@
 
 module.exports = function({ types: t }) {
   function isPureVoid(path) {
-    return t.isUnaryExpression(path.node, { operator: "void" }) && path.isPure();
+    return (
+      t.isUnaryExpression(path.node, { operator: "void" }) && path.isPure()
+    );
   }
 
   return {
