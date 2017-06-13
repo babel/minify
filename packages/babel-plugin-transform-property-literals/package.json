@@ -11,6 +11,8 @@
   "keywords": [
     "babel-plugin"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "esutils": "^2.0.2"
+  },
   "devDependencies": {}
 }

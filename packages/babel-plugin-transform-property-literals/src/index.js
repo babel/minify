@@ -1,27 +1,24 @@
 "use strict";
 
+const { reduceStaticPropertyNameES5 } = require("./property-name");
+
 module.exports = function({ types: t }) {
   return {
     name: "transform-property-literals",
     visitor: {
       // { 'foo': 'bar' } -> { foo: 'bar' }
       ObjectProperty: {
-        exit({ node }) {
-          const key = node.key;
-          if (!t.isStringLiteral(key)) {
+        exit(path) {
+          const key = path.get("key");
+          if (!key.isStringLiteral()) {
             return;
           }
 
-          if (key.value.match(/^\d+$/)) {
-            const newProp = parseInt(node.key.value, 10);
-            if (newProp.toString() === node.key.value) {
-              node.key = t.numericLiteral(newProp);
-              node.computed = false;
-            }
-          } else if (t.isValidIdentifier(key.value)) {
-            node.key = t.identifier(key.value);
-            node.computed = false;
-          }
+          const newNode = t.clone(path.node);
+          newNode.key = reduceStaticPropertyNameES5(t, key.node);
+          newNode.computed = false;
+
+          path.replaceWith(newNode);
         }
       }
     }
