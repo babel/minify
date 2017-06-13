@@ -10,7 +10,7 @@ Tries to evaluate expressions and inline the result.
 "a" + "b"
 2 * 3;
 4 | 3;
-"b" + a + "c" + "d" + g + z + "f" + "h" + "z"
+"b" + a + "c" + "d" + g + z + "f" + "h" + "i"
 
 [a, b, c].concat([d, e], f, g, [h]);
 ["a", "b", "c"].join();
@@ -34,7 +34,7 @@ Tries to evaluate expressions and inline the result.
 "ab";
 6;
 7;
-"b" + a + "cd" + g + z + "fhz";
+"b" + a + "cd" + g + z + "fhi";
 
 [a, b, c, d, e, f, g, h];
 "a,b,c";
