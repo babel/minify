@@ -1,5 +1,9 @@
 "use strict";
 
+function isPureVoid(path) {
+  return t.isUnaryExpression(path.node, { operator: "void" }) && path.isPure();
+}
+
 module.exports = function({ types: t }) {
   return {
     name: "transform-simplify-comparison-operators",
@@ -13,7 +17,7 @@ module.exports = function({ types: t }) {
         if (["!=", "=="].indexOf(node.operator) !== -1) {
           if (
             t.isIdentifier(node.right, { name: "undefined" }) ||
-            t.isUnaryExpression(node.right, { operator: "void" })
+            isPureVoid(path.get("right"))
           ) {
             path.get("right").replaceWith(t.nullLiteral());
           }
