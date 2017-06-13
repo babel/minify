@@ -1,10 +1,10 @@
 "use strict";
 
-function isPureVoid(path) {
-  return t.isUnaryExpression(path.node, { operator: "void" }) && path.isPure();
-}
-
 module.exports = function({ types: t }) {
+  function isPureVoid(path) {
+    return t.isUnaryExpression(path.node, { operator: "void" }) && path.isPure();
+  }
+
   return {
     name: "transform-simplify-comparison-operators",
     visitor: {
