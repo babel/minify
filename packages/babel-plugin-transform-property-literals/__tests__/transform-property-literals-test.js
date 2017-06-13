@@ -88,7 +88,8 @@ describe("transform-property-literals-plugin", () => {
     const expected = unpad(`
       ({
         ಠ_ಠ: "bar",
-        "12e34": "wut"
+        "12e34": "wut",
+        \u01FC: "AE"
       });
     `);
     expect(transform(source)).toBe(expected);
