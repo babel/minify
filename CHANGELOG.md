@@ -1,3 +1,29 @@
+## babili@0.1.3 (2017-06-13)
+
+#### :rocket: New Feature
+* `babel-plugin-minify-constant-folding`
+  * [#505](https://github.com/babel/babili/pull/505) Evaluate some String and Array instance methods at compile time. ([@j-f1](https://github.com/j-f1))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#553](https://github.com/babel/babili/pull/553) Remove redundant use strict (Closes [#542](https://github.com/babel/babili/issues/542)). ([@boopathi](https://github.com/boopathi))
+
+#### :bug: Bug Fix
+* `babel-plugin-transform-property-literals`
+  * [#543](https://github.com/babel/babili/pull/543) Fix removal of quotes from property names. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-mangle-names`
+  * [#567](https://github.com/babel/babili/pull/567) Add workaround for Safari for loop lexical scope bug. ([@btmills](https://github.com/btmills))
+
+#### :house: Internal
+* `babel-helper-flip-expressions`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-simplify`, `babel-plugin-transform-inline-consecutive-adds`
+  * [#573](https://github.com/babel/babili/pull/573) Upgrade deps, formatting, node 8 in Travis. ([@boopathi](https://github.com/boopathi))
+* Other
+  * [#557](https://github.com/babel/babili/pull/557) Clean up before every run to avoid working on already minified file. ([@buunguyen](https://github.com/buunguyen))
+
+#### Committers: 4
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Brandon Mills ([btmills](https://github.com/btmills))
+- Buu Nguyen ([buunguyen](https://github.com/buunguyen))
+- Jed Fox ([j-f1](https://github.com/j-f1))
+
 ## babili@0.1.2 (2017-05-23)
 
 - babel-plugin-minify-mangle-names@0.1.2
