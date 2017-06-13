@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-type-constructors",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-type-constructors",
@@ -13,6 +13,5 @@
   ],
   "dependencies": {
     "babel-helper-is-void-0": "^0.1.1"
-  },
-  "devDependencies": {}
+  }
 }

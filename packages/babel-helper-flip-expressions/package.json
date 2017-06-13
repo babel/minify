@@ -1,6 +1,6 @@
 {
   "name": "babel-helper-flip-expressions",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "homepage": "https://github.com/babel/babili#readme",
   "repository": "https://github.com/babel/babili/tree/master/packages/babel-helper-flip-expressions",
@@ -10,7 +10,5 @@
   "main": "lib/index.js",
   "keywords": [
     "babel-plugin"
-  ],
-  "dependencies": {},
-  "devDependencies": {}
+  ]
 }
