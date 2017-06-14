@@ -131,4 +131,20 @@ describe("preset", () => {
     `);
     expect(transform(source)).toBe(expected);
   });
+
+  it("should fix bug#568 - conflicts b/w builtIns and mangle", () => {
+    const source = unpad(`
+      (function () {
+        return [Math.pi, Math.pi];
+      })();
+    `);
+    const expected = unpad(`
+      (function () {
+        var a = Math.pi;
+
+        return [a, a];
+      })();
+    `);
+    expect(transform(source)).toBe(expected);
+  });
 });
