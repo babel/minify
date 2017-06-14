@@ -108,6 +108,7 @@ describe("constant-folding-plugin", () => {
     const source = unpad(
       `
       [1, 2, 3].push([4, 5, 6]);
+      [1, 2, 3]["push"]([4, 5, 6]);
 
       [1, 2, 3].join();
       ["a", "b", "c"].join();
@@ -139,6 +140,7 @@ describe("constant-folding-plugin", () => {
     );
     const expected = unpad(
       `
+      4;
       4;
 
       "1,2,3";
