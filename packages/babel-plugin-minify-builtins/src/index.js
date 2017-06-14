@@ -78,15 +78,13 @@ module.exports = function({ types: t }) {
           if (subpaths.length <= 1) {
             continue;
           }
-          const uniqueIdentifier = this.program.scope.generateUidIdentifier(
-            expName
-          );
+          const uniqueIdentifier = parent.scope.generateUidIdentifier(expName);
           const newNode = t.variableDeclaration("var", [
             t.variableDeclarator(uniqueIdentifier, subpaths[0].node)
           ]);
 
           for (const path of subpaths) {
-            path.replaceWith(uniqueIdentifier);
+            path.replaceWith(t.clone(uniqueIdentifier));
           }
           // hoist the created var to the top of the function scope
           parent.get("body").unshiftContainer("body", newNode);
