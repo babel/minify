@@ -107,9 +107,6 @@ describe("constant-folding-plugin", () => {
   it("should handle Array methods on array literals", () => {
     const source = unpad(
       `
-      [1, 2, 3].concat([4, 5, 6]);
-      [a, b, c].concat([d, e], f, g, [h]);
-      [1, 2, 3]["concat"]([4, 5, 6]);
       [1, 2, 3].push([4, 5, 6]);
 
       [1, 2, 3].join();
@@ -142,9 +139,6 @@ describe("constant-folding-plugin", () => {
     );
     const expected = unpad(
       `
-      [1, 2, 3, 4, 5, 6];
-      [a, b, c, d, e, f, g, h];
-      [1, 2, 3, 4, 5, 6];
       4;
 
       "1,2,3";

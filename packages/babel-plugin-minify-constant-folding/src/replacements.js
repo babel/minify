@@ -32,16 +32,6 @@ module.exports = ({ types: t }) => {
         }
       },
       calls: {
-        concat(...args) {
-          return t.arrayExpression(
-            this.elements.concat(
-              ...args.map(arg => {
-                if (t.isArrayExpression(arg)) return arg.elements;
-                return arg;
-              })
-            )
-          );
-        },
         join(sep = t.stringLiteral(",")) {
           if (!t.isStringLiteral(sep)) return;
           let bad = false;
