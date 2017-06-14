@@ -17,6 +17,7 @@ const request = require("request");
 const program = require("commander");
 const compile = require("google-closure-compiler-js").compile;
 const butternut = require("butternut");
+const brotli = require("brotli");
 
 const ASSETS_DIR = path.join(__dirname, "benchmark_cache");
 const DEFAULT_ASSETS = {
@@ -49,10 +50,12 @@ class Benchmark {
 
     const code = this.getFile(filename);
     const gzipped = zlib.gzipSync(code);
+    const brotlied = brotli.compress(Buffer.from(code, "utf-8"));
 
     const result = {
       input: code,
       gzipped,
+      brotlied,
       filename,
       items: [
         this.test(this.babili, code),
@@ -90,12 +93,14 @@ class Benchmark {
     const delta = process.hrtime(start);
 
     const gzipped = zlib.gzipSync(output);
+    const brotlied = brotli.compress(Buffer.from(output, "utf-8"));
     const parseTime = this.getParseTime(output);
 
     return {
       name: fn.name,
       output,
       gzipped,
+      brotlied,
       parseTime,
       time: delta[0] * 1e3 + delta[1] / 1e6
     };
@@ -156,15 +161,7 @@ class Printer {
       );
     this.target = target;
 
-    this.header = [
-      "minifier",
-      "output raw",
-      "raw win",
-      "gzip output",
-      "gzip win",
-      "parse time (ms)",
-      "minify time (ms)"
-    ];
+    this.header = this.getHeader();
   }
   print() {
     switch (this.target) {
@@ -215,7 +212,9 @@ class Printer {
     this.target === "MD" && console.log("");
     console.log(`Input Size: ${bytes(data.input.length)}`);
     this.target === "MD" && console.log("");
-    console.log(`Input Size (gzip): ${bytes(data.gzipped.length)}\n`);
+    console.log(`Input Size (gzip): ${bytes(data.gzipped.length)}`);
+    this.target === "MD" && console.log("");
+    console.log(`Input Size (brotli): ${bytes(data.brotlied.length)}\n`);
   }
   getRows(result) {
     return result.items.map(item =>
@@ -236,11 +235,26 @@ class Printer {
   red(col) {
     return this.target === "MD" ? col : chalk.red(col);
   }
+  getHeader() {
+    return [
+      "minifier",
+      "output raw",
+      "raw win",
+      "brotli output",
+      "brotli win",
+      "gzip output",
+      "gzip win",
+      "parse time (ms)",
+      "minify time (ms)"
+    ];
+  }
   getColumns(item, res) {
     return [
       item.name,
       bytes(item.output.length),
       Math.round(100 - 100 * item.output.length / res.input.length) + "%",
+      bytes(item.brotlied.length),
+      Math.round(100 - 100 * item.brotlied.length / res.brotlied.length) + "%",
       bytes(item.gzipped.length),
       Math.round(100 - 100 * item.gzipped.length / res.gzipped.length) + "%",
       item.parseTime.toFixed(2),
