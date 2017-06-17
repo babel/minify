@@ -22,7 +22,10 @@ function swap(path, member, handlers, ...args) {
   const key = getName(member);
   if (key === undefined) return;
   let handler = handlers[key];
-  if (typeof handler !== "function" || !Object.hasOwnProperty.call(handlers, key)) {
+  if (
+    typeof handler !== "function" ||
+    !Object.hasOwnProperty.call(handlers, key)
+  ) {
     if (typeof handlers[FALLBACK_HANDLER] === "function") {
       handler = handlers[FALLBACK_HANDLER].bind(member.object, key);
     } else {
