@@ -243,10 +243,10 @@ describe("constant-folding-plugin", () => {
       `
       "foo".toString()
       ["foo", "bar"].toString()
-      {}.toString()
+      ({}).toString()
       "foo".toString
       ["foo", "bar"].toString
-      {}.toString
+      ({}).toString
       `
     )
     expect(transform(source)).toBe(source);
