@@ -1,579 +1,547 @@
 jest.autoMockOff();
 
-const traverse = require("babel-traverse").default;
 const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
-
-function transform(code, options = {}, sourceType = "script") {
-  return babel.transform(code, {
-    sourceType,
-    plugins: [[require("../src/index"), options]]
-  }).code;
-}
-
-function transformWithSimplify(code, options = {}, sourceType = "script") {
-  return babel.transform(code, {
-    sourceType,
-    plugins: [
-      require("../../babel-plugin-minify-simplify/src/index"),
-      [require("../src/index"), options]
-    ]
-  }).code;
-}
+const traverse = require("babel-traverse").default;
+const mangler = require("../src/index");
+const thePlugin = require("../../../utils/test-transform")(mangler);
 
 describe("mangle-names", () => {
-  it("should not mangle names in the global namespace", () => {
-    const source = unpad(`
-      var Foo = 1;
-    `);
-    const expected = unpad(`
-      var Foo = 1;
-    `);
+  thePlugin(
+    "should not mangle names in the global namespace",
+    `
+    var Foo = 1;
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should mangle names", () => {
-    const source = unpad(`
-      function foo() {
-        var xxx = 1;
-        if (xxx) {
-          console.log(xxx);
-        }
+  thePlugin(
+    "should mangle names",
+    `
+    function foo() {
+      var xxx = 1;
+      if (xxx) {
+        console.log(xxx);
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var a = 1;
-        if (a) {
-          console.log(a);
-        }
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle name collisions", () => {
-    const source = unpad(`
-      function foo() {
-        var x = 2;
-        var xxx = 1;
-        if (xxx) {
-          console.log(xxx + x);
-        }
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var a = 2;
-        var b = 1;
-        if (b) {
-          console.log(b + a);
-        }
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should be fine with shadowing", () => {
-    const source = unpad(`
+    }
+  `,
+    `
+    function foo() {
       var a = 1;
-      function foo() {
-        var xxx = 1;
-        if (xxx) {
-          console.log(xxx);
-        }
+      if (a) {
+        console.log(a);
       }
-    `);
-    const expected = unpad(`
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle name collisions",
+    `
+    function foo() {
+      var x = 2;
+      var xxx = 1;
+      if (xxx) {
+        console.log(xxx + x);
+      }
+    }
+  `,
+    `
+    function foo() {
+      var a = 2;
+      var b = 1;
+      if (b) {
+        console.log(b + a);
+      }
+    }
+  `
+  );
+
+  thePlugin(
+    "should be fine with shadowing",
+    `
+    var a = 1;
+    function foo() {
+      var xxx = 1;
+      if (xxx) {
+        console.log(xxx);
+      }
+    }
+  `,
+    `
+    var a = 1;
+    function foo() {
       var a = 1;
-      function foo() {
-        var a = 1;
-        if (a) {
-          console.log(a);
-        }
+      if (a) {
+        console.log(a);
       }
-    `);
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not shadow outer references", () => {
-    const source = unpad(`
-      function bar() {
-        function foo(a, b, c) {
-          lol(a,b,c);
-        }
-        function lol() {}
+  thePlugin(
+    "should not shadow outer references",
+    `
+    function bar() {
+      function foo(a, b, c) {
+        lol(a,b,c);
       }
-    `);
-    const expected = unpad(`
-      function bar() {
-        function a(e, a, b) {
-          d(e, a, b);
-        }
-        function d() {}
+      function lol() {}
+    }
+  `,
+    `
+    function bar() {
+      function a(e, a, b) {
+        d(e, a, b);
       }
-    `);
+      function d() {}
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should mangle args", () => {
-    const source = unpad(`
-      function foo(xxx) {
-        if (xxx) {
-          console.log(xxx);
-        }
+  thePlugin(
+    "should mangle args",
+    `
+    function foo(xxx) {
+      if (xxx) {
+        console.log(xxx);
       }
-    `);
-    const expected = unpad(`
-      function foo(a) {
-        if (a) {
-          console.log(a);
-        }
+    }
+  `,
+    `
+    function foo(a) {
+      if (a) {
+        console.log(a);
       }
-    `);
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should ignore labels", () => {
-    const source = unpad(`
-      function foo() {
-        meh: for (;;) {
-          continue meh;
-        }
+  thePlugin(
+    "should ignore labels",
+    `
+    function foo() {
+      meh: for (;;) {
+        continue meh;
       }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        meh: for (;;) {
-          continue meh;
-        }
+    }
+  `,
+    `
+    function foo() {
+      meh: for (;;) {
+        continue meh;
       }
-    `);
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not have labels conflicting with bindings", () => {
-    const source = unpad(`
-      function foo() {
-        meh: for (;;) {
-          var meh;
-          break meh;
-        }
+  thePlugin(
+    "should not have labels conflicting with bindings",
+    `
+    function foo() {
+      meh: for (;;) {
+        var meh;
+        break meh;
       }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        meh: for (;;) {
-          var a;
-          break meh;
-        }
+    }
+  `,
+    `
+    function foo() {
+      meh: for (;;) {
+        var a;
+        break meh;
       }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
+    }
+  `
+  );
 
   // https://phabricator.babeljs.io/T6957
-  it("labels should not shadow bindings", () => {
-    const source = unpad(`
-      function foo() {
-        var meh;
-        meh: for (;;) {
-          break meh;
-        }
-        return meh;
+  thePlugin(
+    "labels should not shadow bindings",
+    `
+    function foo() {
+      var meh;
+      meh: for (;;) {
+        break meh;
       }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        var a;
-        meh: for (;;) {
-          break meh;
-        }
-        return a;
+      return meh;
+    }
+  `,
+    `
+    function foo() {
+      var a;
+      meh: for (;;) {
+        break meh;
       }
-    `);
+      return a;
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("labels should not shadow bindings 2", () => {
-    const source = unpad(`
-      function f(a) {
-        try {
-          a: {
-            console.log(a);
-          }
-        } catch ($a) { }
-      }
-    `);
-    const expected = unpad(`
-      function f(b) {
-        try {
-          a: {
-            console.log(b);
-          }
-        } catch (a) {}
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should be order independent", () => {
-    const source = unpad(`
-      function foo() {
-        function bar(aaa, bbb, ccc) {
-          baz(aaa, bbb, ccc);
+  thePlugin(
+    "labels should not shadow bindings 2",
+    `
+    function f(a) {
+      try {
+        a: {
+          console.log(a);
         }
-        function baz() {
-          var baz = who();
-          baz.bam();
+      } catch ($a) { }
+    }
+  `,
+    `
+    function f(b) {
+      try {
+        a: {
+          console.log(b);
         }
+      } catch (a) {}
+    }
+  `
+  );
+
+  thePlugin(
+    "should be order independent",
+    `
+    function foo() {
+      function bar(aaa, bbb, ccc) {
+        baz(aaa, bbb, ccc);
+      }
+      function baz() {
+        var baz = who();
+        baz.bam();
+      }
+      bar();
+    }
+  `,
+    `
+    function foo() {
+      function a(a, c, d) {
+        b(a, c, d);
+      }
+      function b() {
+        var a = who();
+        a.bam();
+      }
+      a();
+    }
+  `
+  );
+
+  thePlugin(
+    "should be order independent 2",
+    `
+    function foo() {
+      (function bar() {
         bar();
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        function a(a, c, d) {
-          b(a, c, d);
-        }
-        function b() {
-          var a = who();
-          a.bam();
-        }
+        return function() {
+          var bar = wow();
+          bar.woo();
+        };
+      })();
+    }
+  `,
+    `
+    function foo() {
+      (function a() {
         a();
-      }
-    `);
+        return function () {
+          var a = wow();
+          a.woo();
+        };
+      })();
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should be order independent 2", () => {
-    const source = unpad(`
-      function foo() {
-        (function bar() {
-          bar();
-          return function() {
-            var bar = wow();
-            bar.woo();
-          };
-        })();
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        (function a() {
-          a();
-          return function () {
-            var a = wow();
-            a.woo();
-          };
-        })();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle only thunk in function scopes", () => {
-    const source = unpad(`
-      function foo() {
-        function xx(bar, baz) {
-          if (1) {
-            yy(bar, baz);
-          }
+  thePlugin(
+    "should handle only thunk in function scopes",
+    `
+    function foo() {
+      function xx(bar, baz) {
+        if (1) {
+          yy(bar, baz);
         }
-        function yy(){}
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a(a, c) {
-          if (1) {
-            b(a, c);
-          }
+      function yy(){}
+    }
+  `,
+    `
+    function foo() {
+      function a(a, c) {
+        if (1) {
+          b(a, c);
         }
-        function b() {}
       }
-    `);
+      function b() {}
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should be fine with shadowing 2", () => {
-    const source = unpad(`
-      function foo() {
-        function xx(bar, baz) {
-          return function(boo, foo) {
-            bar(boo, foo);
-          };
-        }
-        function yy(){}
+  thePlugin(
+    "should be fine with shadowing 2",
+    `
+    function foo() {
+      function xx(bar, baz) {
+        return function(boo, foo) {
+          bar(boo, foo);
+        };
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a(a, b) {
-          return function (b, c) {
-            a(b, c);
-          };
-        }
-        function b() {}
+      function yy(){}
+    }
+  `,
+    `
+    function foo() {
+      function a(a, b) {
+        return function (b, c) {
+          a(b, c);
+        };
       }
-    `);
+      function b() {}
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not be confused by scopes", () => {
-    const source = unpad(`
-      function foo() {
-        function bar() {
-          var baz;
-          if (baz) {
-            bam();
-          }
-        }
-        function bam() {}
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a() {
-          var a;
-          if (a) {
-            b();
-          }
-        }
-        function b() {}
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not be confused by scopes (closures)", () => {
-    const source = unpad(`
-      function foo() {
-        function bar(baz) {
-          return function() {
-            bam();
-          };
-        }
-        function bam() {}
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function a(a) {
-          return function () {
-            b();
-          };
-        }
-        function b() {}
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle recursion", () => {
-    const source = unpad(`
+  thePlugin(
+    "should not be confused by scopes",
+    `
+    function foo() {
       function bar() {
-        function foo(a, b, c) {
-          foo(a,b,c);
+        var baz;
+        if (baz) {
+          bam();
         }
       }
-    `);
-    const expected = unpad(`
-      function bar() {
-        function d(e, a, b) {
-          d(e, a, b);
-        }
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle global name conflict", () => {
-    const source = unpad(`
-      function e() {
-        function foo() {
-          b = bar();
-        }
-        function bar() {}
-      }
-    `);
-    const expected = unpad(`
-      function e() {
-        function a() {
-          b = c();
-        }
-        function c() {}
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle global name", () => {
-    const source = unpad(`
-      function foo() {
-        var bar = 1;
-        var baz = 2;
-      }
-    `);
-
-    const expected = unpad(`
+      function bam() {}
+    }
+  `,
+    `
+    function foo() {
       function a() {
-        var bar = 1;
-        var a = 2;
+        var a;
+        if (a) {
+          b();
+        }
       }
-    `);
-    expect(
-      transform(source, {
-        blacklist: { foo: false, bar: true },
-        topLevel: true
-      })
-    ).toBe(expected);
-  });
+      function b() {}
+    }
+  `
+  );
 
-  it("should handle deeply nested paths with no bindings", () => {
-    const source = unpad(`
-      function xoo() {
-        function foo(zz, xx, yy) {
-          function bar(zip, zap, zop) {
-            return function(bar) {
-              zap();
-              return function() {
-                zip();
-              }
+  thePlugin(
+    "should not be confused by scopes (closures)",
+    `
+    function foo() {
+      function bar(baz) {
+        return function() {
+          bam();
+        };
+      }
+      function bam() {}
+    }
+  `,
+    `
+    function foo() {
+      function a(a) {
+        return function () {
+          b();
+        };
+      }
+      function b() {}
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle recursion",
+    `
+    function bar() {
+      function foo(a, b, c) {
+        foo(a,b,c);
+      }
+    }
+  `,
+    `
+    function bar() {
+      function d(e, a, b) {
+        d(e, a, b);
+      }
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle global name conflict",
+    `
+    function e() {
+      function foo() {
+        b = bar();
+      }
+      function bar() {}
+    }
+  `,
+    `
+    function e() {
+      function a() {
+        b = c();
+      }
+      function c() {}
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle global name",
+    `
+    function foo() {
+      var bar = 1;
+      var baz = 2;
+    }
+  `,
+    `
+    function a() {
+      var bar = 1;
+      var a = 2;
+    }
+  `,
+    {
+      plugins: [
+        [
+          mangler,
+          {
+            blacklist: { foo: false, bar: true },
+            topLevel: true
+          }
+        ]
+      ]
+    }
+  );
+
+  thePlugin(
+    "should handle deeply nested paths with no bindings",
+    `
+    function xoo() {
+      function foo(zz, xx, yy) {
+        function bar(zip, zap, zop) {
+          return function(bar) {
+            zap();
+            return function() {
+              zip();
             }
           }
         }
       }
-    `);
-    const expected = unpad(`
-      function xoo() {
-        function a(a, b, c) {
-          function d(a, b, c) {
-            return function (c) {
-              b();
-              return function () {
-                a();
-              };
+    }
+  `,
+    `
+    function xoo() {
+      function a(a, b, c) {
+        function d(a, b, c) {
+          return function (c) {
+            b();
+            return function () {
+              a();
             };
-          }
+          };
         }
       }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    }
+  `
+  );
 
-  it("should handle try/catch", () => {
-    const source = unpad(`
-      function xoo() {
-        var e;
-        try {} catch (e) {
+  thePlugin(
+    "should handle try/catch",
+    `
+    function xoo() {
+      var e;
+      try {} catch (e) {
 
-        }
       }
-    `);
-    const expected = unpad(`
-      function xoo() {
-        var a;
-        try {} catch (a) {}
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    }
+  `,
+    `
+    function xoo() {
+      var a;
+      try {} catch (a) {}
+    }
+  `
+  );
 
-  it("should not mangle vars in scope with eval", () => {
-    const source = unpad(`
-      function foo() {
-        var inScopeOuter = 1;
+  thePlugin(
+    "should not mangle vars in scope with eval",
+    `
+    function foo() {
+      var inScopeOuter = 1;
+      (function () {
+        var inScopeInner = 2;
+        eval("inScopeInner + inScopeOuter");
         (function () {
-          var inScopeInner = 2;
-          eval("inScopeInner + inScopeOuter");
-          (function () {
-            var outOfScope = 1;
-          })();
+          var outOfScope = 1;
         })();
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var inScopeOuter = 1;
+      })();
+    }
+  `,
+    `
+    function foo() {
+      var inScopeOuter = 1;
+      (function () {
+        var inScopeInner = 2;
+        eval("inScopeInner + inScopeOuter");
         (function () {
-          var inScopeInner = 2;
-          eval("inScopeInner + inScopeOuter");
-          (function () {
-            var a = 1;
-          })();
+          var a = 1;
         })();
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+      })();
+    }
+  `
+  );
 
-  it("should mangle names with local eval bindings", () => {
-    const source = unpad(`
-      function eval() {}
-      function foo() {
-        var bar = 1;
-        eval('...');
-      }
-    `);
-    const expected = unpad(`
-      function eval() {}
-      function foo() {
-        var a = 1;
-        eval('...');
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should mangle names with local eval bindings",
+    `
+    function eval() {}
+    function foo() {
+      var bar = 1;
+      eval('...');
+    }
+  `,
+    `
+    function eval() {}
+    function foo() {
+      var a = 1;
+      eval('...');
+    }
+  `
+  );
 
-  it("should mangle names with option eval = true", () => {
-    const source = unpad(`
-      function foo() {
-        var inScopeOuter = 1;
+  thePlugin(
+    "should mangle names with option eval = true",
+    `
+    function foo() {
+      var inScopeOuter = 1;
+      (function () {
+        var inScopeInner = 2;
+        eval("...");
         (function () {
-          var inScopeInner = 2;
-          eval("...");
-          (function () {
-            var outOfScope = 1;
-          })();
+          var outOfScope = 1;
         })();
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var a = 1;
+      })();
+    }
+  `,
+    `
+    function foo() {
+      var a = 1;
+      (function () {
+        var a = 2;
+        eval("...");
         (function () {
-          var a = 2;
-          eval("...");
-          (function () {
-            var a = 1;
-          })();
+          var a = 1;
         })();
-      }
-    `);
-    expect(transform(source, { eval: true })).toBe(expected);
-  });
+      })();
+    }
+  `,
+    {
+      plugins: [[mangler, { eval: true }]]
+    }
+  );
 
   it("should integrate with block scoping plugin", () => {
     const srcTxt = unpad(`
@@ -664,65 +632,61 @@ describe("mangle-names", () => {
     expect(actual).toBe(expected);
   });
 
-  it("should keep mangled named consistent across scopes when defined later on", () => {
-    const source = unpad(`
-      (function() {
-        function foo() {
+  thePlugin(
+    "should keep mangled named consistent across scopes when defined later on",
+    `
+    (function() {
+      function foo() {
+        {
+          var baz = true;
+
           {
-            var baz = true;
-
-            {
-              bar();
-            }
+            bar();
           }
         }
+      }
 
-        function bar() {}
-      }());
-    `);
+      function bar() {}
+    }());
+  `,
+    `
+    (function () {
+      function a() {
+        {
+          var a = true;
 
-    const expected = unpad(`
-      (function () {
-        function a() {
           {
-            var a = true;
-
-            {
-              b();
-            }
+            b();
           }
         }
+      }
 
-        function b() {}
-      })();
-    `);
+      function b() {}
+    })();
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should correctly mangle in nested loops", () => {
-    const source = unpad(`
-      (function () {
-        for (let x in foo) {
-          for (let y in foo[x]) {
-            alert(foo[x][y]);
-          }
+  thePlugin(
+    "should correctly mangle in nested loops",
+    `
+    (function () {
+      for (let x in foo) {
+        for (let y in foo[x]) {
+          alert(foo[x][y]);
         }
-      })();
-    `);
-
-    const expected = unpad(`
-      (function () {
-        for (let a in foo) {
-          for (let b in foo[a]) {
-            alert(foo[a][b]);
-          }
+      }
+    })();
+  `,
+    `
+    (function () {
+      for (let a in foo) {
+        for (let b in foo[a]) {
+          alert(foo[a][b]);
         }
-      })();
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
+      }
+    })();
+  `
+  );
 
   // #issue55, #issue57
   it("should correctly mangle function declarations in different order", () => {
@@ -767,520 +731,552 @@ describe("mangle-names", () => {
     expect(actual).toBe(expected);
   });
 
-  it("should NOT mangle functions when keepFnName is true", () => {
-    const source = unpad(`
-      (function() {
-        var foo = function foo() {
-          foo();
-        }
-        function bar() {
-          foo();
-        }
-        bar();
-        var baz = foo;
-        baz();
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        var a = function foo() {
-          foo();
-        };
-        function bar() {
-          a();
-        }
-        bar();
-        var b = a;
-        b();
-      })();
-    `);
-    expect(transform(source, { keepFnName: true })).toBe(expected);
-  });
-
-  it("should NOT mangle classes when keepClassName is true", () => {
-    const source = unpad(`
-      (function() {
-        class Foo {}
-        const Bar = class Bar extends Foo {}
-        var foo = class Baz {}
-        function bar() {
-          new foo();
-        }
-        bar();
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        class Foo {}
-        const b = class Bar extends Foo {};
-        var c = class Baz {};
-        function a() {
-          new c();
-        }
+  thePlugin(
+    "should NOT mangle functions when keepFnName is true",
+    `
+    (function() {
+      var foo = function foo() {
+        foo();
+      }
+      function bar() {
+        foo();
+      }
+      bar();
+      var baz = foo;
+      baz();
+    })();
+  `,
+    `
+    (function () {
+      var a = function foo() {
+        foo();
+      };
+      function bar() {
         a();
-      })();
-    `);
-    expect(transform(source, { keepClassName: true })).toBe(expected);
-  });
-
-  it("should mangle variable re-declaration / K violations", () => {
-    const source = unpad(`
-      !function () {
-        var foo = 1;
-        foo++;
-        var foo = 2;
-        foo++;
       }
-    `);
-    const expected = unpad(`
-      !function () {
-        var a = 1;
-        a++;
-        var a = 2;
-        a++;
-      };
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+      bar();
+      var b = a;
+      b();
+    })();
+  `,
+    {
+      plugins: [[mangler, { keepFnName: true }]]
+    }
+  );
 
-  it("should handle K violations - 2", () => {
-    const source = unpad(`
-      !function () {
-        var bar = 1;
-        bar--;
-        var bar = 10;
-        foo(bar)
-        function foo() {
-          var foo = 10;
-          foo++;
-          var foo = 20;
-          foo(foo);
-        }
+  thePlugin(
+    "should NOT mangle classes when keepClassName is true",
+    `
+    (function() {
+      class Foo {}
+      const Bar = class Bar extends Foo {}
+      var foo = class Baz {}
+      function bar() {
+        new foo();
       }
-    `);
-    const expected = unpad(`
-      !function () {
-        var b = 1;
-        b--;
-        var b = 10;
-        a(b);
-        function a() {
-          var a = 10;
-          a++;
-          var a = 20;
-          a(a);
-        }
-      };
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+      bar();
+    })();
+  `,
+    `
+    (function () {
+      class Foo {}
+      const b = class Bar extends Foo {};
+      var c = class Baz {};
+      function a() {
+        new c();
+      }
+      a();
+    })();
+  `,
+    {
+      plugins: [[mangler, { keepClassName: true }]]
+    }
+  );
 
-  it("should work with redeclarations", () => {
-    const source = unpad(`
-      (function () {
-        var x = y;
-        x = z;
-        x;
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        var a = y;
-        a = z;
-        a;
-      })();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should mangle variable re-declaration / K violations",
+    `
+    !function () {
+      var foo = 1;
+      foo++;
+      var foo = 2;
+      foo++;
+    }
+  `,
+    `
+    !function () {
+      var a = 1;
+      a++;
+      var a = 2;
+      a++;
+    };
+  `
+  );
 
-  it("should reuse removed vars", () => {
-    const source = unpad(`
+  thePlugin(
+    "should handle K violations - 2",
+    `
+    !function () {
+      var bar = 1;
+      bar--;
+      var bar = 10;
+      foo(bar)
+      function foo() {
+        var foo = 10;
+        foo++;
+        var foo = 20;
+        foo(foo);
+      }
+    }
+  `,
+    `
+    !function () {
+      var b = 1;
+      b--;
+      var b = 10;
+      a(b);
+      function a() {
+        var a = 10;
+        a++;
+        var a = 20;
+        a(a);
+      }
+    };
+  `
+  );
+
+  thePlugin(
+    "should work with redeclarations",
+    `
+    (function () {
+      var x = y;
+      x = z;
+      x;
+    })();
+  `,
+    `
+    (function () {
+      var a = y;
+      a = z;
+      a;
+    })();
+  `
+  );
+
+  thePlugin(
+    "should reuse removed vars",
+    `
+    function Foo() {
+      var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+      var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+      var $, _;
+      a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+      A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+      $, _;
       function Foo() {
-        var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+        var a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
         var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
         var $, _;
-        a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+        a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
         A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
         $, _;
         function Foo() {
-          var a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
           var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
           var $, _;
-          a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+          a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
           A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
           $, _;
-          function Foo() {
-            var a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
-            var A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
-            var $, _;
-            a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
-            A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
-            $, _;
-          }
-          Foo();
         }
         Foo();
       }
-    `);
-    const expected = unpad(`
-      function Foo() {
-        var ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+      Foo();
+    }
+  `,
+    `
+    function Foo() {
+      var ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+      var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+      var Z, $;
+      ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+      z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
+      Z, $;
+      function aa() {
+        var aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
         var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
         var Z, $;
-        ba, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
         z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
         Z, $;
-        function aa() {
-          var aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+        function h() {
+          var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
           var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
           var Z, $;
-          aa, a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
+          aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
           z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
           Z, $;
-          function h() {
-            var aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
-            var z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
-            var Z, $;
-            aa, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y;
-            z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y;
-            Z, $;
-          }
-          h();
         }
-        aa();
+        h();
       }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+      aa();
+    }
+  `
+  );
 
-  it("should mangle both referenced and binding identifiers with K violations", () => {
-    const source = unpad(`
-      (function () {
-        var foo = bar,
-            foo = baz;
-        foo;
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        var a = bar,
-            a = baz;
-        a;
-      })();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should mangle both referenced and binding identifiers with K violations",
+    `
+    (function () {
+      var foo = bar,
+          foo = baz;
+      foo;
+    })();
+  `,
+    `
+    (function () {
+      var a = bar,
+          a = baz;
+      a;
+    })();
+  `
+  );
 
-  it("should handle export declarations", () => {
-    const source = unpad(`
-      const foo = 1;
-      export { foo };
-      export const bar = 2;
-      export function baz(bar, foo) {
-        bar();
-        foo();
-      };
-      export default function (bar, baz) {
-        bar();
-        baz();
-      }
-    `);
-    const expected = unpad(`
-      const foo = 1;
-      export { foo };
-      export const bar = 2;
-      export function baz(a, b) {
-        a();
-        b();
-      };
-      export default function (a, b) {
-        a();
-        b();
-      }
-    `);
-    expect(transform(source, {}, "module")).toBe(expected);
-  });
+  thePlugin(
+    "should handle export declarations",
+    `
+    const foo = 1;
+    export { foo };
+    export const bar = 2;
+    export function baz(bar, foo) {
+      bar();
+      foo();
+    };
+    export default function (bar, baz) {
+      bar();
+      baz();
+    }
+  `,
+    `
+    const foo = 1;
+    export { foo };
+    export const bar = 2;
+    export function baz(a, b) {
+      a();
+      b();
+    };
+    export default function (a, b) {
+      a();
+      b();
+    }
+  `,
+    {
+      sourceType: "module"
+    }
+  );
 
-  it("should find global scope properly", () => {
-    const source = unpad(`
-      class A {}
-      class B extends A {}
-      (function () {
-        class C {
-          constructor() {
-            new A();
-            new B();
-            C;
-          }
+  thePlugin(
+    "should find global scope properly",
+    `
+    class A {}
+    class B extends A {}
+    (function () {
+      class C {
+        constructor() {
+          new A();
+          new B();
+          C;
         }
-      })();
-    `);
-    const expected = unpad(`
-      class A {}
-      class B extends A {}
-      (function () {
-        class a {
-          constructor() {
-            new A();
-            new B();
-            a;
-          }
+      }
+    })();
+  `,
+    `
+    class A {}
+    class B extends A {}
+    (function () {
+      class a {
+        constructor() {
+          new A();
+          new B();
+          a;
         }
-      })();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+      }
+    })();
+  `
+  );
 
-  it("should mangle classes properly", () => {
-    const source = unpad(`
+  thePlugin(
+    "should mangle classes properly",
+    `
+    class A {}
+    class B {}
+    new A();
+    new B();
+    function a() {
       class A {}
       class B {}
       new A();
       new B();
-      function a() {
-        class A {}
-        class B {}
-        new A();
-        new B();
-      }
-    `);
-    const expected = unpad(`
-      class A {}
-      class B {}
-      new A();
-      new B();
-      function a() {
-        class a {}
-        class b {}
-        new a();
-        new b();
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    }
+  `,
+    `
+    class A {}
+    class B {}
+    new A();
+    new B();
+    function a() {
+      class a {}
+      class b {}
+      new a();
+      new b();
+    }
+  `
+  );
 
   // https://github.com/babel/babili/issues/138
-  it("should handle class exports in modules - issue#138", () => {
-    const source = unpad(`
-      export class App extends Object {};
-    `);
-    const expected = source;
-    expect(transform(source, {}, "module")).toBe(expected);
-  });
+  thePlugin(
+    "should handle class exports in modules - issue#138",
+    `
+    export class App extends Object {};
+  `,
+    {
+      sourceType: "module"
+    }
+  );
 
-  it("should not mangle the name arguments", () => {
-    const source = unpad(`
+  thePlugin(
+    "should not mangle the name arguments",
+    `
+    (function () {
+      var arguments = void 0;
       (function () {
-        var arguments = void 0;
-        (function () {
-          console.log(arguments);
-        })("argument");
-      })();
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
+        console.log(arguments);
+      })("argument");
+    })();
+  `
+  );
 
-  it("should mangle topLevel when topLevel option is true", () => {
-    const source = unpad(`
-      function foo() {
-        if (FOO_ENV === "production") {
-          HELLO_WORLD.call();
-        }
+  thePlugin(
+    "should mangle topLevel when topLevel option is true",
+    `
+    function foo() {
+      if (FOO_ENV === "production") {
+        HELLO_WORLD.call();
       }
-      const FOO_ENV = "production";
-      var HELLO_WORLD = function bar() {
-        new AbstractClass({
-          [FOO_ENV]: "foo",
-          a: foo(HELLO_WORLD)
-        });
+    }
+    const FOO_ENV = "production";
+    var HELLO_WORLD = function bar() {
+      new AbstractClass({
+        [FOO_ENV]: "foo",
+        a: foo(HELLO_WORLD)
+      });
+    };
+    class AbstractClass {}
+    foo();
+  `,
+    `
+    function a() {
+      if (b === "production") {
+        c.call();
+      }
+    }
+    const b = "production";
+    var c = function e() {
+      new d({
+        [b]: "foo",
+        a: a(c)
+      });
+    };
+    class d {}
+    a();
+  `,
+    {
+      plugins: [[mangler, { topLevel: true }]]
+    }
+  );
+
+  thePlugin(
+    "should fix #326, #369 - destructuring",
+    `
+    // issue#326
+    function a() {
+      let foo, bar, baz;
+      ({foo, bar, baz} = {});
+      return {foo, bar, baz};
+    }
+    // issue#369
+    function decodeMessage(message){
+      let namespace;
+      let name;
+      let value = null;
+
+      [, namespace, name, value] = message.split(',') || [];
+      console.log(name);
+    }
+  `,
+    `
+    // issue#326
+    function a() {
+      let a, b, c;
+      ({ foo: a, bar: b, baz: c } = {});
+      return { foo: a, bar: b, baz: c };
+    }
+    // issue#369
+    function decodeMessage(a) {
+      let b;
+      let c;
+      let d = null;
+
+      [, b, c, d] = a.split(',') || [];
+      console.log(c);
+    }
+  `
+  );
+
+  thePlugin(
+    "should rename binding.identifier - issue#411",
+    `
+    !function () {
+      function e(e) {
+        foo(e);
+      }
+      return function () {
+        return e();
       };
-      class AbstractClass {}
-      foo();
-    `);
-
-    const expected = unpad(`
-      function a() {
-        if (b === "production") {
-          c.call();
-        }
+    }();
+  `,
+    `
+    !function () {
+      function a(a) {
+        foo(a);
       }
-      const b = "production";
-      var c = function e() {
-        new d({
-          [b]: "foo",
-          a: a(c)
-        });
+      return function () {
+        return a();
       };
-      class d {}
-      a();
-    `);
+    }();
+  `
+  );
 
-    expect(transform(source, { topLevel: true })).toBe(expected);
-  });
-
-  it("should fix #326, #369 - destructuring", () => {
-    const source = unpad(`
-      // issue#326
-      function a() {
-        let foo, bar, baz;
-        ({foo, bar, baz} = {});
-        return {foo, bar, baz};
-      }
-      // issue#369
-      function decodeMessage(message){
-        let namespace;
-        let name;
-        let value = null;
-
-        [, namespace, name, value] = message.split(',') || [];
-        console.log(name);
-      }
-    `);
-    const expected = unpad(`
-      // issue#326
-      function a() {
-        let a, b, c;
-        ({ foo: a, bar: b, baz: c } = {});
-        return { foo: a, bar: b, baz: c };
-      }
-      // issue#369
-      function decodeMessage(a) {
-        let b;
-        let c;
-        let d = null;
-
-        [, b, c, d] = a.split(',') || [];
-        console.log(c);
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should rename binding.identifier - issue#411", () => {
-    const source = unpad(`
-      !function () {
-        function e(e) {
-          foo(e);
-        }
-        return function () {
-          return e();
-        };
-      }();
-    `);
-    const expected = unpad(`
-      !function () {
-        function a(a) {
-          foo(a);
-        }
-        return function () {
-          return a();
-        };
-      }();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should fix issue#365 - classDeclaration with unsafe parent scope", () => {
-    const source = unpad(`
-      function foo() {
-        eval("");
-        class A {}
-        class B {}
-      }
-    `);
-    expect(transform(source)).toBe(source);
-  });
-
-  it("should fix classDeclaration with unsafe program scope", () => {
-    const source = unpad(`
+  thePlugin(
+    "should fix issue#365 - classDeclaration with unsafe parent scope",
+    `
+    function foo() {
+      eval("");
       class A {}
       class B {}
-      eval("");
-    `);
-    expect(transform(source, { topLevel: true })).toBe(source);
-  });
+    }
+  `
+  );
 
-  it("should handle constant violations across multiple blocks", () => {
-    const source = unpad(`
-      function foo() {
+  thePlugin(
+    "should fix classDeclaration with unsafe program scope",
+    `
+    class A {}
+    class B {}
+    eval("");
+  `,
+    {
+      plugins: [[mangler, { topLevel: true }]]
+    }
+  );
+
+  thePlugin(
+    "should handle constant violations across multiple blocks",
+    `
+    function foo() {
+      var x;x;x;
+      {
         var x;x;x;
-        {
+        function y() {
           var x;x;x;
-          function y() {
+          {
             var x;x;x;
-            {
-              var x;x;x;
-            }
           }
         }
       }
-    `);
-    const expected = unpad(`
-      function foo() {
+    }
+  `,
+    `
+    function foo() {
+      var a;a;a;
+      {
         var a;a;a;
-        {
+        function b() {
           var a;a;a;
-          function b() {
+          {
             var a;a;a;
-            {
-              var a;a;a;
-            }
           }
         }
       }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    }
+  `
+  );
 
-  it("should work with if_return optimization changing fn scope", () => {
-    const source = unpad(`
-      function foo() {
-        if (x)
-          return;
-        function bar() {}
-        bar(a);
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        function b() {}
-        x || b(a);
-      }
-    `);
-    expect(transformWithSimplify(source)).toBe(expected);
-  });
+  thePlugin(
+    "should work with if_return optimization changing fn scope",
+    `
+    function foo() {
+      if (x)
+        return;
+      function bar() {}
+      bar(a);
+    }
+  `,
+    `
+    function foo() {
+      function b() {}
+      x || b(a);
+    }
+  `,
+    {
+      plugins: [
+        require("../../babel-plugin-minify-simplify/src/index"),
+        mangler
+      ]
+    }
+  );
 
-  it("should not mangle named exports - 1", () => {
-    const source = unpad(`
-      export const Foo = foo;
-    `);
-    expect(transform(source, { topLevel: true }, "module")).toBe(source);
-  });
+  thePlugin(
+    "should not mangle named exports - 1",
+    `
+    export const Foo = foo;
+  `,
+    {
+      sourceType: "module",
+      plugins: [[mangler, { topLevel: true }]]
+    }
+  );
 
-  it("should not mangle named exports - 2", () => {
-    const source = unpad(`
-      const Foo = a;
-      export {Foo};
-    `);
-    const expected = unpad(`
-      const b = a;
-      export { b as Foo };
-    `);
-    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
-  });
+  thePlugin(
+    "should not mangle named exports - 2",
+    `
+    const Foo = a;
+    export {Foo};
+  `,
+    `
+    const b = a;
+    export { b as Foo };
+  `,
+    {
+      sourceType: "module",
+      plugins: [[mangler, { topLevel: true }]]
+    }
+  );
 
-  it("should not mangle named exports - 3", () => {
-    const source = unpad(`
-      const Foo = a;
-      export {Foo as Bar};
-    `);
-    const expected = unpad(`
-      const b = a;
-      export { b as Bar };
-    `);
-    expect(transform(source, { topLevel: true }, "module")).toBe(expected);
-  });
+  thePlugin(
+    "should not mangle named exports - 3",
+    `
+    const Foo = a;
+    export {Foo as Bar};
+  `,
+    `
+    const b = a;
+    export { b as Bar };
+  `,
+    {
+      sourceType: "module",
+      plugins: [[mangler, { topLevel: true }]]
+    }
+  );
 
   // Safari raises a syntax error for a `let` or `const` declaration in a `for`
   // loop initialization that shadows a parent function's parameter.
@@ -1288,8 +1284,9 @@ describe("mangle-names", () => {
   // https://bugs.webkit.org/show_bug.cgi?id=171041
   // https://trac.webkit.org/changeset/217200/webkit/trunk/Source
   describe("Safari for loop lexical scope workaround", () => {
-    it("should permit shadowing in top-level for loops", () => {
-      const source = unpad(`
+    thePlugin(
+      "should permit shadowing in top-level for loops",
+      `
         var a;
 
         for (a = 0;;);
@@ -1313,8 +1310,8 @@ describe("mangle-names", () => {
         for (;; () => {
           let a = 1;
         });
-      `);
-      const expected = unpad(`
+      `,
+      `
         var a;
 
         for (a = 0;;);
@@ -1338,71 +1335,234 @@ describe("mangle-names", () => {
         for (;; () => {
           let b = 1;
         });
-      `);
-      expect(transform(source)).toBe(expected);
-    });
+      `
+    );
 
-    it("should permit shadowing in nested for loops", () => {
-      const source = unpad(`
-        function a(a) {
-          {
-            for (a = 0;;);
-            for (a of x);
-            for (x of a);
-            for (a in x);
-            for (x in a);
-            for (;; a++);
-            for (;; a = 1);
+    thePlugin(
+      "should permit shadowing in nested for loops",
+      `
+      function a(a) {
+        {
+          for (a = 0;;);
+          for (a of x);
+          for (x of a);
+          for (a in x);
+          for (x in a);
+          for (;; a++);
+          for (;; a = 1);
 
-            for (let a;;);
-            for (let a of x);
-            for (const a of x);
-            for (let a in x);
-            for (const a in x);
-            for (let [a, b] of x);
-            for (const [a, b] of x);
-            for (let [a, b] in x);
-            for (const [a, b] in x);
-            for (let { c: { b: { a } } } = x;;);
-            for (;; () => {
-              let a = 1;
-            });
-          }
+          for (let a;;);
+          for (let a of x);
+          for (const a of x);
+          for (let a in x);
+          for (const a in x);
+          for (let [a, b] of x);
+          for (const [a, b] of x);
+          for (let [a, b] in x);
+          for (const [a, b] in x);
+          for (let { c: { b: { a } } } = x;;);
+          for (;; () => {
+            let a = 1;
+          });
         }
-      `);
-      const expected = unpad(`
-        function a(b) {
-          {
-            for (b = 0;;);
-            for (b of x);
-            for (x of b);
-            for (b in x);
-            for (x in b);
-            for (;; b++);
-            for (;; b = 1);
+      }
+    `,
+      `
+      function a(b) {
+        {
+          for (b = 0;;);
+          for (b of x);
+          for (x of b);
+          for (b in x);
+          for (x in b);
+          for (;; b++);
+          for (;; b = 1);
 
-            for (let b;;);
-            for (let b of x);
-            for (const b of x);
-            for (let b in x);
-            for (const b in x);
-            for (let [c, a] of x);
-            for (const [c, a] of x);
-            for (let [c, a] in x);
-            for (const [c, a] in x);
-            for (let { c: { b: { a: b } } } = x;;);
-            for (;; () => {
-              let b = 1;
-            });
-          }
+          for (let b;;);
+          for (let b of x);
+          for (const b of x);
+          for (let b in x);
+          for (const b in x);
+          for (let [c, a] of x);
+          for (const [c, a] of x);
+          for (let [c, a] in x);
+          for (const [c, a] in x);
+          for (let { c: { b: { a: b } } } = x;;);
+          for (;; () => {
+            let b = 1;
+          });
         }
-      `);
-      expect(transform(source)).toBe(expected);
-    });
+      }
+    `
+    );
 
-    it("should not shadow params in function declaration top-level for loops", () => {
-      const source = unpad(`
-        function a(a) {
+    thePlugin(
+      "should not shadow params in function declaration top-level for loops",
+      `
+      function a(a) {
+        for (a = 0;;);
+        for (a of x);
+        for (x of a);
+        for (a in x);
+        for (x in a);
+        for (;; a++);
+        for (;; a = 1);
+
+        for (let b;;);
+        for (let b of x);
+        for (const b of x);
+        for (let b in x);
+        for (const b in x);
+        for (let [b, c] of x);
+        for (const [b, c] of x);
+        for (let [b, c] in x);
+        for (const [b, c] in x);
+        for (let { c: { b: { a } } } = x;;);
+        for (;; () => {
+          let a = 1;
+        });
+      }
+    `,
+      `
+      function a(b) {
+        for (b = 0;;);
+        for (b of x);
+        for (x of b);
+        for (b in x);
+        for (x in b);
+        for (;; b++);
+        for (;; b = 1);
+
+        for (let a;;);
+        for (let a of x);
+        for (const a of x);
+        for (let a in x);
+        for (const a in x);
+        for (let [a, d] of x);
+        for (const [a, d] of x);
+        for (let [a, d] in x);
+        for (const [a, d] in x);
+        for (let { c: { b: { a: c } } } = x;;);
+        for (;; () => {
+          let b = 1;
+        });
+      }
+    `
+    );
+
+    thePlugin(
+      "should not shadow params in function expression top-level for loops",
+      `
+      var a = function (a) {
+        for (a = 0;;);
+        for (a of x);
+        for (x of a);
+        for (a in x);
+        for (x in a);
+        for (;; a++);
+        for (;; a = 1);
+
+        for (let b;;);
+        for (let b of x);
+        for (const b of x);
+        for (let b in x);
+        for (const b in x);
+        for (let [b, c] of x);
+        for (const [b, c] of x);
+        for (let [b, c] in x);
+        for (const [b, c] in x);
+        for (let { c: { b: { a } } } = x;;);
+        for (;; () => {
+          let a = 1;
+        });
+      };
+    `,
+      `
+      var a = function (b) {
+        for (b = 0;;);
+        for (b of x);
+        for (x of b);
+        for (b in x);
+        for (x in b);
+        for (;; b++);
+        for (;; b = 1);
+
+        for (let a;;);
+        for (let a of x);
+        for (const a of x);
+        for (let a in x);
+        for (const a in x);
+        for (let [a, d] of x);
+        for (const [a, d] of x);
+        for (let [a, d] in x);
+        for (const [a, d] in x);
+        for (let { c: { b: { a: c } } } = x;;);
+        for (;; () => {
+          let b = 1;
+        });
+      };
+    `
+    );
+
+    thePlugin(
+      "should not shadow params in arrow function top-level for loops",
+      `
+      var a = (a) => {
+        for (a = 0;;);
+        for (a of x);
+        for (x of a);
+        for (a in x);
+        for (x in a);
+        for (;; a++);
+        for (;; a = 1);
+
+        for (let b;;);
+        for (let b of x);
+        for (const b of x);
+        for (let b in x);
+        for (const b in x);
+        for (let [b, c] of x);
+        for (const [b, c] of x);
+        for (let [b, c] in x);
+        for (const [b, c] in x);
+        for (let { c: { b: { a } } } = x;;);
+        for (;; () => {
+          let a = 1;
+        });
+      };
+    `,
+      `
+      var a = (b) => {
+        for (b = 0;;);
+        for (b of x);
+        for (x of b);
+        for (b in x);
+        for (x in b);
+        for (;; b++);
+        for (;; b = 1);
+
+        for (let a;;);
+        for (let a of x);
+        for (const a of x);
+        for (let a in x);
+        for (const a in x);
+        for (let [a, d] of x);
+        for (const [a, d] of x);
+        for (let [a, d] in x);
+        for (const [a, d] in x);
+        for (let { c: { b: { a: c } } } = x;;);
+        for (;; () => {
+          let b = 1;
+        });
+      };
+    `
+    );
+
+    thePlugin(
+      "should not shadow params in class method top-level for loops",
+      `
+      class a {
+        a(a) {
           for (a = 0;;);
           for (a of x);
           for (x of a);
@@ -1425,9 +1585,11 @@ describe("mangle-names", () => {
             let a = 1;
           });
         }
-      `);
-      const expected = unpad(`
-        function a(b) {
+      }
+    `,
+      `
+      class a {
+        a(b) {
           for (b = 0;;);
           for (b of x);
           for (x of b);
@@ -1450,174 +1612,8 @@ describe("mangle-names", () => {
             let b = 1;
           });
         }
-      `);
-      expect(transform(source)).toBe(expected);
-    });
-
-    it("should not shadow params in function expression top-level for loops", () => {
-      const source = unpad(`
-        var a = function (a) {
-          for (a = 0;;);
-          for (a of x);
-          for (x of a);
-          for (a in x);
-          for (x in a);
-          for (;; a++);
-          for (;; a = 1);
-
-          for (let b;;);
-          for (let b of x);
-          for (const b of x);
-          for (let b in x);
-          for (const b in x);
-          for (let [b, c] of x);
-          for (const [b, c] of x);
-          for (let [b, c] in x);
-          for (const [b, c] in x);
-          for (let { c: { b: { a } } } = x;;);
-          for (;; () => {
-            let a = 1;
-          });
-        };
-      `);
-      const expected = unpad(`
-        var a = function (b) {
-          for (b = 0;;);
-          for (b of x);
-          for (x of b);
-          for (b in x);
-          for (x in b);
-          for (;; b++);
-          for (;; b = 1);
-
-          for (let a;;);
-          for (let a of x);
-          for (const a of x);
-          for (let a in x);
-          for (const a in x);
-          for (let [a, d] of x);
-          for (const [a, d] of x);
-          for (let [a, d] in x);
-          for (const [a, d] in x);
-          for (let { c: { b: { a: c } } } = x;;);
-          for (;; () => {
-            let b = 1;
-          });
-        };
-      `);
-      expect(transform(source)).toBe(expected);
-    });
-
-    it("should not shadow params in arrow function top-level for loops", () => {
-      const source = unpad(`
-        var a = (a) => {
-          for (a = 0;;);
-          for (a of x);
-          for (x of a);
-          for (a in x);
-          for (x in a);
-          for (;; a++);
-          for (;; a = 1);
-
-          for (let b;;);
-          for (let b of x);
-          for (const b of x);
-          for (let b in x);
-          for (const b in x);
-          for (let [b, c] of x);
-          for (const [b, c] of x);
-          for (let [b, c] in x);
-          for (const [b, c] in x);
-          for (let { c: { b: { a } } } = x;;);
-          for (;; () => {
-            let a = 1;
-          });
-        };
-      `);
-      const expected = unpad(`
-        var a = (b) => {
-          for (b = 0;;);
-          for (b of x);
-          for (x of b);
-          for (b in x);
-          for (x in b);
-          for (;; b++);
-          for (;; b = 1);
-
-          for (let a;;);
-          for (let a of x);
-          for (const a of x);
-          for (let a in x);
-          for (const a in x);
-          for (let [a, d] of x);
-          for (const [a, d] of x);
-          for (let [a, d] in x);
-          for (const [a, d] in x);
-          for (let { c: { b: { a: c } } } = x;;);
-          for (;; () => {
-            let b = 1;
-          });
-        };
-      `);
-      expect(transform(source)).toBe(expected);
-    });
-
-    it("should not shadow params in class method top-level for loops", () => {
-      const source = unpad(`
-        class a {
-          a(a) {
-            for (a = 0;;);
-            for (a of x);
-            for (x of a);
-            for (a in x);
-            for (x in a);
-            for (;; a++);
-            for (;; a = 1);
-
-            for (let b;;);
-            for (let b of x);
-            for (const b of x);
-            for (let b in x);
-            for (const b in x);
-            for (let [b, c] of x);
-            for (const [b, c] of x);
-            for (let [b, c] in x);
-            for (const [b, c] in x);
-            for (let { c: { b: { a } } } = x;;);
-            for (;; () => {
-              let a = 1;
-            });
-          }
-        }
-      `);
-      const expected = unpad(`
-        class a {
-          a(b) {
-            for (b = 0;;);
-            for (b of x);
-            for (x of b);
-            for (b in x);
-            for (x in b);
-            for (;; b++);
-            for (;; b = 1);
-
-            for (let a;;);
-            for (let a of x);
-            for (const a of x);
-            for (let a in x);
-            for (const a in x);
-            for (let [a, d] of x);
-            for (const [a, d] of x);
-            for (let [a, d] in x);
-            for (const [a, d] in x);
-            for (let { c: { b: { a: c } } } = x;;);
-            for (;; () => {
-              let b = 1;
-            });
-          }
-        }
-      `);
-      expect(transform(source)).toBe(expected);
-    });
+      }
+    `
+    );
   });
 });

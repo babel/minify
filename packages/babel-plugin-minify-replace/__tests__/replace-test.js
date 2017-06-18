@@ -1,162 +1,142 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const unpad = require("../../../utils/unpad");
+const replacer = require("../src/index");
 
-function transform(code, replacements) {
-  return babel.transform(code, {
-    plugins: [[require("../src/index"), { replacements }]]
-  }).code;
+const theTester = require("../../../utils/test-transform")(replacer);
+function thePlugin(name, source, expected, ...replacements) {
+  if (typeof expected === "object") {
+    replacements.unshift(expected);
+    expected = source;
+  }
+  theTester(name, source, expected, {
+    plugins: [[replacer, { replacements }]]
+  });
 }
+thePlugin.skip = theTester.skip();
 
 describe("replace-plugin", () => {
-  it("should replace identifiers", () => {
-    const replacements = [
-      {
-        identifierName: "__DEV__",
-        replacement: {
-          type: "numericLiteral",
-          value: 0
-        }
+  thePlugin(
+    "should replace identifiers",
+    `
+    if (__DEV__) {
+      foo();
+    }
+    if (!__DEV__) {
+      foo();
+    }
+  `,
+    `
+    if (0) {
+      foo();
+    }
+    if (!0) {
+      foo();
+    }
+  `,
+    {
+      identifierName: "__DEV__",
+      replacement: {
+        type: "numericLiteral",
+        value: 0
       }
-    ];
+    }
+  );
 
-    const source = unpad(`
-      if (__DEV__) {
-        foo();
+  thePlugin(
+    "should only replace actual full identifiers",
+    `
+    if (__DEV__) {
+      foo();
+    }
+    if (a.__DEV__) {
+      foo();
+    }
+  `,
+    `
+    if (0) {
+      foo();
+    }
+    if (a.__DEV__) {
+      foo();
+    }
+  `,
+    {
+      identifierName: "__DEV__",
+      replacement: {
+        type: "numericLiteral",
+        value: 0
       }
-      if (!__DEV__) {
-        foo();
+    }
+  );
+
+  thePlugin(
+    "should replace with boolean",
+    `
+    if (__DEV__) {
+      foo();
+    }
+  `,
+    `
+    if (true) {
+      foo();
+    }
+  `,
+    {
+      identifierName: "__DEV__",
+      replacement: {
+        type: "booleanLiteral",
+        value: true
       }
-    `);
+    }
+  );
 
-    const expected = unpad(`
-      if (0) {
-        foo();
+  thePlugin(
+    "should replace member expressions",
+    `
+    console.log('wat');
+    (console.log)('wat');
+  `,
+    `
+    emptyFunction('wat');
+    emptyFunction('wat');
+  `,
+    {
+      identifierName: "console",
+      member: "log",
+      replacement: {
+        type: "identifier",
+        value: "emptyFunction"
       }
-      if (!0) {
-        foo();
+    }
+  );
+
+  thePlugin(
+    "should replace multiple member expressions",
+    `
+    console.log('wat');
+    (console.log)('wat');
+    console.error('wat');
+  `,
+    `
+    emptyFunction('wat');
+    emptyFunction('wat');
+    emptyFunction('wat');
+  `,
+    {
+      identifierName: "console",
+      member: "log",
+      replacement: {
+        type: "identifier",
+        value: "emptyFunction"
       }
-    `);
-
-    expect(transform(source, replacements)).toBe(expected);
-  });
-
-  it("should only replace actual full identifiers", () => {
-    const replacements = [
-      {
-        identifierName: "__DEV__",
-        replacement: {
-          type: "numericLiteral",
-          value: 0
-        }
+    },
+    {
+      identifierName: "console",
+      member: "error",
+      replacement: {
+        type: "identifier",
+        value: "emptyFunction"
       }
-    ];
-
-    const source = unpad(`
-      if (__DEV__) {
-        foo();
-      }
-      if (a.__DEV__) {
-        foo();
-      }
-    `);
-
-    const expected = unpad(`
-      if (0) {
-        foo();
-      }
-      if (a.__DEV__) {
-        foo();
-      }
-    `);
-
-    expect(transform(source, replacements)).toBe(expected);
-  });
-
-  it("should replace with boolean", () => {
-    const replacements = [
-      {
-        identifierName: "__DEV__",
-        replacement: {
-          type: "booleanLiteral",
-          value: true
-        }
-      }
-    ];
-
-    const source = unpad(`
-      if (__DEV__) {
-        foo();
-      }
-    `);
-
-    const expected = unpad(`
-      if (true) {
-        foo();
-      }
-    `);
-
-    expect(transform(source, replacements)).toBe(expected);
-  });
-
-  it("should replace member expressions", () => {
-    const replacements = [
-      {
-        identifierName: "console",
-        member: "log",
-        replacement: {
-          type: "identifier",
-          value: "emptyFunction"
-        }
-      }
-    ];
-
-    const source = unpad(`
-      console.log('wat');
-      (console.log)('wat');
-    `);
-
-    const expected = unpad(`
-      emptyFunction('wat');
-      emptyFunction('wat');
-    `);
-
-    expect(transform(source, replacements)).toBe(expected);
-  });
-
-  it("should replace multiple member expressions", () => {
-    const replacements = [
-      {
-        identifierName: "console",
-        member: "log",
-        replacement: {
-          type: "identifier",
-          value: "emptyFunction"
-        }
-      },
-      {
-        identifierName: "console",
-        member: "error",
-        replacement: {
-          type: "identifier",
-          value: "emptyFunction"
-        }
-      }
-    ];
-
-    const source = unpad(`
-      console.log('wat');
-      (console.log)('wat');
-      console.error('wat');
-    `);
-
-    const expected = unpad(`
-      emptyFunction('wat');
-      emptyFunction('wat');
-      emptyFunction('wat');
-    `);
-
-    expect(transform(source, replacements)).toBe(expected);
-  });
+    }
+  );
 });
