@@ -248,7 +248,7 @@ describe("constant-folding-plugin", () => {
       ["foo", "bar"].toString;
       ({}).toString;
       `
-    )
+    );
     expect(transform(source)).toBe(source);
-  })
+  });
 });
