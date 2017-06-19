@@ -237,4 +237,18 @@ describe("constant-folding-plugin", () => {
     );
     expect(transform(source)).toBe(expected);
   });
+
+  it("shouldn’t crash on toString() calls or accesses", () => {
+    const source = unpad(
+      `
+      "foo".toString();
+      ["foo", "bar"].toString();
+      ({}).toString();
+      "foo".toString;
+      ["foo", "bar"].toString;
+      ({}).toString;
+      `
+    );
+    expect(transform(source)).toBe(source);
+  });
 });
