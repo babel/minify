@@ -1,3 +1,17 @@
+## babili@0.1.4 (2017-06-20)
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-constant-folding`
+  * [#587](https://github.com/babel/babili/pull/587) Closes [#576](https://github.com/babel/babili/issues/576). ([@j-f1](https://github.com/j-f1))
+  * [#578](https://github.com/babel/babili/pull/578) Remove folding Array.prototype.concat (Closes [#577](https://github.com/babel/babili/issues/577)). ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-builtins`, `babel-preset-babili`
+  * [#579](https://github.com/babel/babili/pull/579) replace paths with cloned nodes in builtins transform. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### Committers: 3
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Jed Fox ([j-f1](https://github.com/j-f1))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babili@0.1.3 (2017-06-13)
 
 #### :rocket: New Feature
