@@ -1,5 +1,7 @@
 ## babili@0.1.4 (2017-06-20)
 
+> Just some various bug fixes!
+
 #### :bug: Bug Fix
 * `babel-plugin-minify-constant-folding`
   * [#587](https://github.com/babel/babili/pull/587) Closes [#576](https://github.com/babel/babili/issues/576). ([@j-f1](https://github.com/j-f1))
