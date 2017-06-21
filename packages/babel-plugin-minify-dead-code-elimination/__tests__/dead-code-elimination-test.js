@@ -2462,4 +2462,14 @@ describe("dce-plugin", () => {
       }
     `
   );
+
+  thePlugin(
+    "should deopt when binding is on different scope - issue #574",
+    `
+      function foo(v) {
+        if (v) var w = 10;
+        if (w) console.log("hello", v);
+      }
+    `
+  );
 });

@@ -22,6 +22,10 @@ function forEachAncestor(path, callback) {
   }
 }
 
+function isDifferentScope(varDeclarationPath, ifStatementPath) {
+  return varDeclarationPath.parentPath.isDescendant(ifStatementPath.parentPath);
+}
+
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
   const shouldRevisit = Symbol("shouldRevisit");
@@ -187,11 +191,13 @@ module.exports = ({ types: t, traverse }) => {
             ) {
               continue;
             } else if (binding.path.isVariableDeclarator()) {
+              const parentPath = binding.path.parentPath.parentPath;
               if (
-                binding.path.parentPath.parentPath &&
-                binding.path.parentPath.parentPath.isForXStatement()
+                parentPath &&
+                (parentPath.isForXStatement() || parentPath.isIfStatement())
               ) {
                 // Can't remove if in a for-in/for-of/for-await statement `for (var x in wat)`.
+                // Can't remove if (true) {var a = 10};
                 continue;
               }
             } else if (!scope.isPure(binding.path.node)) {
@@ -293,14 +299,10 @@ module.exports = ({ types: t, traverse }) => {
               let replacementPath = binding.path;
               let isReferencedBefore = false;
 
-              if (binding.referencePaths.length > 1) {
-                throw new Error("Expected only one reference");
-              }
               const refPath = binding.referencePaths[0];
 
               if (t.isVariableDeclarator(replacement)) {
                 const _prevSiblings = prevSiblings(replacementPath);
-
                 // traverse ancestors of a reference checking if it's before declaration
                 forEachAncestor(refPath, ancestor => {
                   if (_prevSiblings.indexOf(ancestor) > -1) {
@@ -309,7 +311,7 @@ module.exports = ({ types: t, traverse }) => {
                 });
 
                 // deopt if reference is in different scope than binding
-                // since we don't know if it's sync or async execition
+                // since we don't know if it's sync or async execution
                 // (i.e. whether value has been assigned to a reference or not)
                 if (isReferencedBefore && refPath.scope !== binding.scope) {
                   continue;
@@ -774,8 +776,21 @@ module.exports = ({ types: t, traverse }) => {
           const evalResult = test.evaluate();
           const isPure = test.isPure();
 
-          const replacements = [];
+          const { path: bindingPath } =
+            path.scope.getBinding(test.node.name) || {};
 
+          // Ref - https://github.com/babel/babili/issues/574
+          // deopt if var is declared in other scope
+          // if (a) { var b = blahl;} if (b) { //something }
+          if (
+            bindingPath &&
+            bindingPath.parentPath.isVariableDeclaration() &&
+            isDifferentScope(bindingPath.parentPath, path)
+          ) {
+            return;
+          }
+
+          const replacements = [];
           if (evalResult.confident && !isPure && test.isSequenceExpression()) {
             replacements.push(
               t.expressionStatement(extractSequenceImpure(test))
