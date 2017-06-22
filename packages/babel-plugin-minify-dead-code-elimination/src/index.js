@@ -776,16 +776,15 @@ module.exports = ({ types: t, traverse }) => {
           const evalResult = test.evaluate();
           const isPure = test.isPure();
 
-          const { path: bindingPath } =
-            path.scope.getBinding(test.node.name) || {};
+          const binding = path.scope.getBinding(test.node.name);
 
           // Ref - https://github.com/babel/babili/issues/574
           // deopt if var is declared in other scope
           // if (a) { var b = blahl;} if (b) { //something }
           if (
-            bindingPath &&
-            bindingPath.parentPath.isVariableDeclaration() &&
-            isDifferentScope(bindingPath.parentPath, path)
+            binding &&
+            binding.path.parentPath.isVariableDeclaration() &&
+            isDifferentScope(binding.path.parentPath, path)
           ) {
             return;
           }
