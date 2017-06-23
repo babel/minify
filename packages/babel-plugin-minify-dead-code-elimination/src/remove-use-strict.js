@@ -51,7 +51,7 @@ function isStrict(block) {
 
 function getUseStrictDirectives(block) {
   var dir = block.get("directives");
-  return dir.filter
+  return Array.isArray(dir)
     ? dir.filter(function(directive) {
         return directive.node.value.value === useStrict;
       })
