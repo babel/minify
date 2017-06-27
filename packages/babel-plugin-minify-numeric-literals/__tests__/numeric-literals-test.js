@@ -17,7 +17,7 @@ describe("numeric-literals", () => {
     expect(transform(source)).toBe(expected);
 
     source = "[1e3, -1e4, 1e-5, 1.5e12, 1.23456, .1];";
-    expected = "[1e3, -1e4, 1e-5, 1.5e12, 1.23456, .1];";
+    expected = "[1e3, -1e4, 1e-5, 15e11, 1.23456, .1];";
 
     expect(transform(source)).toBe(expected);
 
@@ -30,6 +30,16 @@ describe("numeric-literals", () => {
     // TODO: this seems to be specific to how Babel outputs number
     // for some reason it adds + in the beginning
     expected = "[+1e-12, -1e-11];";
+
+    expect(transform(source)).toBe(expected);
+
+    source = "[666200008e1, 666200008e-1];";
+    expected = "[6662000080, 66620000.8];";
+
+    expect(transform(source)).toBe(expected);
+
+    source = "[11000, 66.00000, 6600000, 1.5e-3];";
+    expected = "[11e3, 66, 66e5, 15e-4];";
 
     expect(transform(source)).toBe(expected);
   });
