@@ -1,7 +1,38 @@
 "use strict";
 
+function getBlockPath(path) {
+  var parent = path.findParent(function(p) {
+    return p.isBlockStatement();
+  });
+  // return program path if null
+  return parent !== null ? parent : path.getFunctionParent();
+}
+
 module.exports = function({ types: t }) {
   const flipExpressions = require("babel-helper-flip-expressions")(t);
+
+  // identify defined check patterns like a && a.foo
+  // a && a['foo']
+  // should bail in this case if declaration is inside other block
+  function isDefinedCheck(path, left, right) {
+    if (t.isIdentifier(left) && t.isMemberExpression(right)) {
+      const binding = path.scope.getBinding(left.node.name);
+      // should bail only for var
+      if (binding === null || binding.kind !== "var") {
+        return false;
+      }
+      const expressionParent = getBlockPath(path);
+      const bindingParent = getBlockPath(binding.path);
+      // bail if referenced in the same block
+      if (expressionParent !== bindingParent) {
+        return true;
+      }
+
+      const { object } = right.node;
+      return left.node.name !== object.name;
+    }
+    return false;
+  }
 
   return {
     name: "minify-guarded-expressions",
@@ -32,7 +63,11 @@ module.exports = function({ types: t }) {
               if (leftTruthy === false) {
                 // Short-circuit
                 path.replaceWith(node.left);
-              } else if (leftTruthy === true && left.isPure()) {
+              } else if (
+                leftTruthy === true &&
+                left.isPure() &&
+                !isDefinedCheck(path, left, right)
+              ) {
                 path.replaceWith(node.right);
               } else if (
                 right.evaluateTruthy() === false &&
