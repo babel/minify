@@ -50,7 +50,10 @@ function isStrict(block) {
 }
 
 function getUseStrictDirectives(block) {
-  return block.get("directives").filter(directive => {
-    return directive.node.value.value === useStrict;
-  });
+  var dir = block.get("directives");
+  return Array.isArray(dir)
+    ? dir.filter(function(directive) {
+        return directive.node.value.value === useStrict;
+      })
+    : [];
 }
