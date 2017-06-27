@@ -1271,7 +1271,7 @@ module.exports = ({ types: t }) => {
             let defaultRet;
             for (const switchCase of node.cases) {
               if (switchCase.consequent.length > 1) {
-                return;
+                if (!t.isReturnStatement(switchCase.consequent[0])) return;
               }
 
               const cons = switchCase.consequent[0];
