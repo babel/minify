@@ -718,6 +718,28 @@ module.exports = ({ types: t }) => {
         }
       },
 
+      MemberExpression(path) {
+        if (!t.isObjectExpression(path.node.object) ||
+            path.node.computed ||
+            t.isAssignmentExpression(path.parentPath) &&
+            t.isMemberExpression(path.parentPath.node.left)) {
+          return;
+        }
+
+        const property = path.node.property;
+        const match = path.get("object.properties")
+        .filter((path) => {
+          return t.isObjectProperty(path.node) &&
+                 !path.node.computed &&
+                 (t.isIdentifier(path.node.key, { name: property.name }) ||
+                  t.isStringLiteral(path.node.key, property.value));
+        }).pop();
+
+        if (match) {
+          path.replaceWith(match.node.value);
+        }
+      },
+
       Program(path) {
         // An approximation of the resultant gzipped code after minification
         this.fitsInSlidingWindow = path.getSource().length / 10 < 33000;
