@@ -9,7 +9,7 @@ function _transform(source, options) {
 function makeTester(
   plugins,
   opts,
-  { transform = _transform, check },
+  { transform = _transform, check, test = it },
   excludeKeys = []
 ) {
   if (!Array.isArray(plugins)) {
@@ -26,7 +26,7 @@ function makeTester(
       opts,
       babelOpts
     );
-    it(name, () => {
+    test(name, () => {
       const transformed = transform(source, options);
       try {
         check({
@@ -42,12 +42,13 @@ function makeTester(
       }
     });
   };
-  thePlugin.skip = name => it.skip(name);
+  thePlugin.skip = name => test.skip(name);
   if (excludeKeys.indexOf("inEachLine") === -1) {
     thePlugin.inEachLine = makeTester(
       plugins,
       opts,
       {
+        test,
         transform(source, options) {
           return unpad(source)
             .split("\n")
@@ -57,6 +58,18 @@ function makeTester(
         check
       },
       excludeKeys.concat("inEachLine")
+    );
+  }
+  if (excludeKeys.indexOf("only") === -1) {
+    thePlugin.only = makeTester(
+      plugins,
+      opts,
+      {
+        test: test.only,
+        transform,
+        check
+      },
+      excludeKeys.concat("only")
     );
   }
   return thePlugin;
