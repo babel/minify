@@ -106,7 +106,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should NOT remove params when keepFnArgs is true (preserve fn.length)",
+    "should NOT remove params when keepFnArgs is true, preserving Function#length",
     `
     function foo(p) {
       return 1;
@@ -132,7 +132,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle all cases of parameter list - and remove unused ones",
+    "should remove unused parameters, except ones with side effects",
     `
     function a(foo, bar, baz) {
       return foo;
@@ -176,7 +176,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should inline binding with one reference",
+    "should inline bindings with only one reference",
     `
     function foo() {
       var x = 1;
@@ -190,9 +190,9 @@ describe("dce-plugin", () => {
   `
   );
 
-  // This isn't considered pure. (it should)
+  // This isn’t considered pure. (it should be)
   thePlugin(
-    "should inline binding with one reference 2",
+    "should inline binding with one reference in an object literal",
     `
     function foo() {
       var y = 1, x = { y: y };
@@ -207,14 +207,14 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not inline objects literals in loops",
+    "should not inline object literals in loops",
     `
     function foo() {
       var x = { y: 1 };
       while (true) foo(x);
       var y = { y: 1 };
       for (;;) foo(y);
-      var z = ['foo'];
+      var z = ["foo"];
       while (true) foo(z);
       var bar = function () {};
       while (true) foo(bar);
@@ -223,7 +223,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not inline object literals in exprs in loops",
+    "should not inline object literals in expressions in loops",
     `
     function a(p) {
       var w = p || [];
@@ -235,26 +235,26 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should inline objects in if statements",
+    "should inline object literals in if statements",
     `
     function foo() {
-      var x = { y: 1 }, y = ['foo'], z = function () {};
+      var x = { y: 1 }, y = ["foo"], z = function () {};
       if (wat) foo(x, y, z);
     }
   `,
     `
     function foo() {
-      if (wat) foo({ y: 1 }, ['foo'], function () {});
+      if (wat) foo({ y: 1 }, ["foo"], function () {});
     }
   `
   );
 
   thePlugin(
-    "should not inline objects in functions",
+    "should not inline object literals in functions",
     `
     function foo() {
       var x = { y: 1 },
-          y = ['foo'],
+          y = ["foo"],
           z = function () {};
       f(function () {
         foo(x, y, z);
@@ -298,7 +298,9 @@ describe("dce-plugin", () => {
   `
   );
 
-  thePlugin("should inline function decl", `
+  thePlugin(
+    "should inline function declarations if they’re only called once",
+    `
     function foo() {
       function x() {
         return 1;
@@ -349,26 +351,13 @@ describe("dce-plugin", () => {
   thePlugin(
     "should handle recursion",
     `
-    function baz() {
+    function test1() {
       var bar = function foo(config) {
         return foo;
       };
       exports.foo = bar;
     }
-  `,
-    `
-    function baz() {
-      exports.foo = function foo() {
-        return foo;
-      };
-    }
-  `
-  );
-
-  thePlugin(
-    "should handle recursion 2",
-    `
-    function baz() {
+    function test2() {
       var foo = function foo(config) {
         return foo;
       };
@@ -376,7 +365,12 @@ describe("dce-plugin", () => {
     }
   `,
     `
-    function baz() {
+    function test1() {
+      exports.foo = function foo() {
+        return foo;
+      };
+    }
+    function test2() {
       exports.foo = function foo() {
         return foo;
       };
@@ -435,6 +429,10 @@ describe("dce-plugin", () => {
         return;
       }
     }
+    function bar() {
+      y();
+      return;
+    }
   `,
     `
     function foo() {
@@ -442,26 +440,14 @@ describe("dce-plugin", () => {
         y();
       }
     }
-  `
-  );
-
-  thePlugin(
-    "should remove redundant returns part 2",
-    `
-    function foo() {
-      y();
-      return;
-    }
-  `,
-    `
-    function foo() {
+    function bar() {
       y();
     }
   `
   );
 
   thePlugin(
-    "should remove redundant returns (complex)",
+    "should remove complex redundant returns",
     `
     function foo() {
       if (a) {
@@ -485,7 +471,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should keep needed returns",
+    "should keep non-redundant returns",
     `
     function foo() {
       if (a) {
@@ -507,7 +493,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should remove code unreachable after return",
+    "should remove unreachable code after a return statement",
     `
     function foo() {
       z();
@@ -523,7 +509,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should be fine with fun decl after return",
+    "should keep function declarations after a return statement",
     `
     function foo() {
       z();
@@ -547,7 +533,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle returns that were orphaned",
+    "should handle orpahaned returns",
     `
     var a = true;
     function foo() {
@@ -562,7 +548,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle returns that were orphaned 2",
+    "should handle orpahaned returns with a value",
     `
     var a = true;
     function foo() {
@@ -579,7 +565,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle orphaned + redundant returns",
+    "should handle orphaned, redundant returns",
     `
     var x = true;
     function foo() {
@@ -605,7 +591,7 @@ describe("dce-plugin", () => {
   thePlugin(
     "should remove functions only called in themselves",
     `
-    function foo() {
+    function test1() {
       function baz() {
         function bar() {
           baz();
@@ -614,16 +600,7 @@ describe("dce-plugin", () => {
         bar();
       }
     }
-  `,
-    `
-    function foo() {}
-  `
-  );
-
-  thePlugin(
-    "should remove functions only called in themselves 2",
-    `
-    function foo() {
+    function test2() {
       var baz = function () {
         function bar() {
           baz();
@@ -632,16 +609,7 @@ describe("dce-plugin", () => {
         bar();
       };
     }
-  `,
-    `
-    function foo() {}
-  `
-  );
-
-  thePlugin(
-    "should remove functions only called in themselves 3",
-    `
-    function foo() {
+    function test3() {
       function boo() {}
       function baz() {
         function bar() {
@@ -654,25 +622,27 @@ describe("dce-plugin", () => {
     }
   `,
     `
-    function foo() {}
+    function test1() {}
+    function test2() {}
+    function test3() {}
   `
   );
 
   thePlugin(
-    "should remove functions only called in themselves 3",
+    "should leave externally called functions alone",
     `
     (function () {
       function foo () {
-        console.log( 'this function was included!' );
+        console.log( "this function was included!" );
       }
 
       function bar () {
-        console.log( 'this function was not' );
+        console.log( "this function was not" );
         baz();
       }
 
       function baz () {
-        console.log( 'neither was this' );
+        console.log( "neither was this" );
       }
 
       foo();
@@ -682,7 +652,7 @@ describe("dce-plugin", () => {
     (function () {
 
       (function () {
-        console.log('this function was included!');
+        console.log("this function was included!");
       })();
     })();
   `
@@ -708,118 +678,80 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should remove empty if statements block",
+    "should negate the if block if it’s empty",
     `
     if (a) {
     } else {
       foo();
-    }
-    if (a) {
-      foo();
-    } else {
-
     }
   `,
     `
     if (!a) {
       foo();
     }
+  `
+  );
+
+  thePlugin(
+    "should remove empty else blocks",
+    `
+    if (a) {
+      foo();
+    } else {
+
+    }
+  `,
+    `
     if (a) {
       foo();
     }
-  `
-  );
+
+  `);
 
   thePlugin(
     "should evaluate conditional expressions",
     `
     true ? a() : b();
-  `,
-    `
-    a();
-  `
-  );
-
-  thePlugin(
-    "should evaluate conditional expressions 2",
-    `
     false ? a() : b();
-  `,
-    `
-    b();
-  `
-  );
-
-  thePlugin(
-    "should evaluate conditional expressions 3",
-    `
-    'foo' ? a() : b();
-  `,
-    `
-    a();
-  `
-  );
-
-  thePlugin(
-    "should evaluate conditional expressions 4",
-    `
+    "foo" ? a() : b();
     null ? a() : b();
+    "foo" === "foo" ? a() : b();
+    "foo" !== "bar" ? a() : b();
   `,
     `
+    a();
     b();
-  `
-  );
-
-  thePlugin(
-    "should evaluate conditional expressions 5",
-    `
-    'foo' === 'foo' ? a() : b();
-  `,
-    `
+    a();
+    b();
+    a();
     a();
   `
   );
 
   thePlugin(
-    "should evaluate conditional expressions 6",
-    `
-    'foo' !== 'bar' ? a() : b();
-  `,
-    `
-    a();
-  `
-  );
-
-  thePlugin(
-    "should not remove needed expressions",
+    "should not remove used expressions",
     `
     var n = 1;
     if (foo) n;
     console.log(n);
+
+    function bar(a) {
+      var a = a ? a : a;
+    }
   `,
     `
     var n = 1;
     if (foo) ;
     console.log(n);
-  `
-  );
 
-  thePlugin(
-    "should not remove needed expressions",
-    `
-    function foo(a) {
-      var a = a ? a : a;
-    }
-  `,
-    `
-    function foo(a) {
+    function bar(a) {
       var a = a ? a : a;
     }
   `
   );
 
   thePlugin(
-    "should join the assignment and def",
+    "should join variable declaration and assignment",
     `
     var x;
     x = 1;
@@ -830,7 +762,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not replace the wrong things",
+    "should perform correct replacements",
     `
     function foo() {
       var n = 1;
@@ -964,7 +896,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle vars in if statements",
+    "should handle variable declarations in if statements",
     `
     function a() {
       if (x()) {
@@ -972,6 +904,11 @@ describe("dce-plugin", () => {
       }
       bar(foo);
     }
+
+    function b() {
+      if (x()) var foo = 1;
+      bar(foo);
+    }
   `,
     `
     function a() {
@@ -980,19 +917,8 @@ describe("dce-plugin", () => {
       }
       bar(foo);
     }
-  `
-  );
 
-  thePlugin(
-    "should handle vars in if statements 2",
-    `
-    function a() {
-      if (x()) var foo = 1;
-      bar(foo);
-    }
-  `,
-    `
-    function a() {
+    function b() {
       if (x()) var foo = 1;
       bar(foo);
     }
@@ -1000,25 +926,14 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle vars in for statements",
+    "should handle variable declarations in for statements",
     `
     function a() {
       for (;;) var foo = 1;
       bar(foo);
     }
-  `,
-    `
-    function a() {
-      for (;;) var foo = 1;
-      bar(foo);
-    }
-  `
-  );
 
-  thePlugin(
-    "should handle for statements 2",
-    `
-    function a() {
+    function b() {
       for (;;) {
         var foo = 1;
         bar(foo);
@@ -1027,6 +942,11 @@ describe("dce-plugin", () => {
   `,
     `
     function a() {
+      for (;;) var foo = 1;
+      bar(foo);
+    }
+
+    function b() {
       for (;;) {
         bar(1);
       }
@@ -1035,7 +955,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should remove binding and assignment",
+    "should remove unused variable declarations and assignments",
     `
     function a() {
       var a, b, c;
@@ -1049,13 +969,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should nore remove binding and assignment if the value is used",
-    `
-    function a() {
-      var x = 1;
-      while (a) wow = x += 1;
-    }
-  `,
+    "should not remove varibale declaration and assignment if the variable is used",
     `
     function a() {
       var x = 1;
@@ -1085,32 +999,18 @@ describe("dce-plugin", () => {
     function boo() {
       var bar = foo || [];
       if (!bar || baz.length === 0) {
-        return 'wow';
-      }
-    }
-  `,
-    `
-    function boo() {
-      var bar = foo || [];
-      if (!bar || baz.length === 0) {
-        return 'wow';
+        return "wow";
       }
     }
   `
   );
 
   thePlugin(
-    "eval the following to false",
+    "should eval the following to false",
     `
     function bar () {
-      var x = foo || 'boo';
-      bar = x === 'wow' ? ' ' + z : '';
-    }
-  `,
-    `
-    function bar() {
-      var x = foo || 'boo';
-      bar = x === 'wow' ? ' ' + z : '';
+      var x = foo || "boo";
+      bar = x === "wow" ? " " + z : "";
     }
   `
   );
@@ -1133,7 +1033,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should remove names from NFE",
+    "should remove names from named function expressions",
     `
     function bar() {
       return function wow() {
@@ -1151,14 +1051,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not remove names from NFE when referenced",
-    `
-    function bar() {
-      return function wow() {
-        return wow();
-      };
-    }
-  `,
+    "should not remove names from named function expressions when the names are used",
     `
     function bar() {
       return function wow() {
@@ -1169,7 +1062,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should remove name from NFE when shadowed",
+    "should remove names from named function expressions when the names are shadowed",
     `
     function bar() {
       return function wow() {
@@ -1192,7 +1085,7 @@ describe("dce-plugin", () => {
 
   // issue#81
   thePlugin(
-    "should NOT remove name from NFE when referenced - issue#81",
+    "should not regress on #81",
     `
     (function (require, module, exports) {
       var Hub = function Hub(file, options) {
@@ -1200,6 +1093,12 @@ describe("dce-plugin", () => {
       };
       module.exports = Hub;
     })(require, module, exports);
+
+
+    (function () {
+      var x = function foo() {};
+      module.exports = x;
+    })();
   `,
     `
     (function (require, module) {
@@ -1207,18 +1106,7 @@ describe("dce-plugin", () => {
         (0, _classCallCheck3.default)(this, Hub);
       };
     })(require, module, exports);
-  `
-  );
 
-  thePlugin(
-    "should remove name from NFE when replaced - issue#81",
-    `
-    (function () {
-      var x = function foo() {};
-      module.exports = x;
-    })();
-  `,
-    `
     (function () {
       module.exports = function () {};
     })();
@@ -1226,7 +1114,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should preserve fn names when keepFnName is true",
+    "should preserve function names when keepFnName is true",
     `
     (function () {
       function A() {}
@@ -1275,7 +1163,7 @@ describe("dce-plugin", () => {
 
   // NCE = Named Class Expressions
   thePlugin(
-    "should remove name from NCE",
+    "should remove names from named class expressions",
     `
     var Foo = class Bar {};
   `,
@@ -1285,7 +1173,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not remove referenced name from NCE",
+    "should not remove names from named class expressions when the name is used",
     `
     var Foo = class Bar {
       constructor() {
@@ -1297,7 +1185,7 @@ describe("dce-plugin", () => {
 
   // issue#78
   thePlugin(
-    "should not replace NCE with void 0 - issue#78",
+    "should not replace named class expressions with void 0 - issue#78",
     `
     (function() {
       var B = class A {
@@ -1325,7 +1213,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle var decl with same name as class expr name",
+    "should handle variable declarations with same name as the class expression name",
     `
     (function () {
       var A = class A {
@@ -1397,7 +1285,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should put the var in the for in",
+    "should put the variable declaration in the header of the for...in loop",
     `
    function x(a) {
      var x;
@@ -1414,7 +1302,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should put the var in the for in only when the var is alone",
+    "should put the variable declaration in the header of the for...in loop only when the var is alone",
     `
    function x(a) {
      var x, y;
@@ -1432,7 +1320,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "inlining should check name collision",
+    "inlining should avoid name collision",
     `
     function foo() {
       var a = 1;
@@ -1460,7 +1348,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "inlining should check name collision for expressions",
+    "inlining should avoid name collision in expressions",
     `
     function foo() {
       var a = c + d;
@@ -1484,38 +1372,18 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should replace with empty statement if in body position 1",
+    "should replace with empty statement if the statement is the only one in a block",
     `
     function foo() {
       var a = 0;
       while (wat()) a += 1;
     }
-  `,
-    `
-    function foo() {
-      while (wat());
-    }
-  `
-  );
 
-  thePlugin(
-    "should replace with empty statement if in body position 2",
-    `
-    function foo() {
+    function bar() {
       while (wat()) 1;
     }
-  `,
-    `
-    function foo() {
-      while (wat());
-    }
-  `
-  );
 
-  thePlugin(
-    "should replace with empty statement if in body position 3",
-    `
-    function foo() {
+    function baz() {
       while (wat()) var x;
     }
   `,
@@ -1523,11 +1391,19 @@ describe("dce-plugin", () => {
     function foo() {
       while (wat());
     }
+
+    function bar() {
+      while (wat());
+    }
+
+    function baz() {
+      while (wat());
+    }
   `
   );
 
   thePlugin(
-    "it should update binding path",
+    "should update binding paths",
     `
     function foo() {
       var key;
@@ -1544,7 +1420,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin.skip(
-    "it should evaluate and remove falsy code",
+    "should evaluate and remove falsy code",
     `
     foo(0 && bar());
   `,
@@ -1588,7 +1464,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should preserve vars from the removed block",
+    "should preserve vars from removed blocks",
     `
     if (0) {var a = foo()}
     if (0) var b = foo();
@@ -1604,24 +1480,24 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should optimize alternate when empty consequent is replaced with alternate",
+    "should optimize the alternate when an empty consequent is replaced with the alternate",
     `
     if (baz) {
     } else {
-      let foo = 'bar';
+      let foo = "bar";
       function foobar() {}
-      console.log('foo' + foo);
+      console.log("foo" + foo);
     }
   `,
     `
     if (!baz) {
-      console.log('foo' + 'bar');
+      console.log("foo" + "bar");
     }
   `
   );
 
   thePlugin(
-    "should transform simple switch statement",
+    "should transform simple switch statements",
     `
     switch (0) {
       case 0: foo(); break;
@@ -1634,7 +1510,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should NOT optimize when one of the cases is not evaluate-able",
+    "should bail when one of the cases is not evaluatable",
     `
     switch (a) {
       case 1:
@@ -1668,7 +1544,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle defaults",
+    "should handle `default`s",
     `
     switch (10) {
       default:
@@ -1699,7 +1575,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should predict break statement within blocks",
+    "should predict break statements within blocks",
     `
     switch (1) {
       case 1:
@@ -1734,7 +1610,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should bail out when break label is above switch's scope",
+    "should bail out when break label is above the switch’s scope",
     `
     x: switch (1) {
       case 1:
@@ -1756,7 +1632,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should NOT bail out when break label is under switch's scope",
+    "should NOT bail out when break label is inside the switch’s scope",
     `
     switch (1) {
       case 1:
@@ -1796,7 +1672,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should break correctly when there is a break statement after break",
+    "should break correctly when there is a repeated break statement",
     `
     switch (0) {
       case 0:
@@ -1832,7 +1708,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should bail out for runtime evaluated if(x) break",
+    "should bail out for `break` statements inside a non-pure conditional",
     `
     switch (0) {
       case 0:
@@ -1845,7 +1721,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should NOT bail out for runtime evaluated if(x) break inside loop",
+    "should NOT bail out for `break` statements inside a non-pure conditional inside a loop",
     `
     switch (0) {
       case 0:
@@ -1866,7 +1742,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should optimize While statements",
+    "should optimize `while` statements",
     `
     while (false) {
       foo();
@@ -1889,7 +1765,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should optimize For statements",
+    "should optimize `for` statements",
     `
     for (var i = 0; i < 8; i++) {
       foo();
@@ -1912,7 +1788,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should optimize dowhile statements",
+    "should optimize do...while statements",
     `
     do {
       foo();
@@ -1941,18 +1817,18 @@ describe("dce-plugin", () => {
     "should not evaluate to false and remove conditional",
     `
     function foo(obj) {
-      return obj && typeof obj === 'object' ? x() : obj;
+      return obj && typeof obj === "object" ? x() : obj;
     }
   `,
     `
     function foo(obj) {
-      return obj && typeof obj === 'object' ? x() : obj;
+      return obj && typeof obj === "object" ? x() : obj;
     }
   `
   );
 
   thePlugin(
-    "should extract vars from the removed switch statement",
+    "should extract `var`s from a removed switch statement",
     `
     switch (0) {
       case 1:
@@ -1975,10 +1851,10 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle side-effecty things in cases",
+    "should bail on non-pure expressions in cases",
     `
     let i = 0;
-    let bar = () => console.log('foo');
+    let bar = () => console.log("foo");
     switch (1) {
       case ++i:
         foo();
@@ -1990,7 +1866,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should preserve names in NFEs",
+    "should preserve names in named function expressions",
     `
     function method() {
       var removeListeners = function removeListeners() {
@@ -2009,8 +1885,9 @@ describe("dce-plugin", () => {
   );
 
   // https://github.com/babel/babili/issues/130
+  // https://github.com/babel/babili/pull/132
   thePlugin(
-    "should not convert expression to expression during replace issue#130",
+    "should not regress on #130",
     `
     function outer() {
       const inner = (d) => d.x;
@@ -2026,46 +1903,35 @@ describe("dce-plugin", () => {
 
   // https://github.com/babel/babili/issues/151
   thePlugin(
-    "should fix issue#151 - array patterns and object patterns",
+    "should not regress on issue #151 - array patterns and object patterns",
     `
     const me = lyfe => {
       const [swag] = lyfe;
       return swag;
     };
-  `
-  );
 
-  // https://github.com/babel/babili/issues/151
-  thePlugin(
-    "should fix issue#151 - array patterns and object patterns 2",
-    `
-    const me = lyfe => {
+    const me2 = lyfe => {
       const [swag, yolo] = lyfe;
       return swag && yolo;
     };
   `
   );
 
-  // https://github.com/babel/babili/issues/232
-  thePlugin(
-    "should fix issue#232 - array patterns and object patterns with non constant init",
-    `
-    const a = {
-      lol: input => {
-        const [hello, world] = input.split('|');
-        if (hello === 't' || hello === 'top') {
-          return 'top';
-        }
-        return 'bottom';
-      }
-    };
-  `
-  );
 
   // https://github.com/babel/babili/issues/232
   thePlugin(
-    "should fix issue#232 - array & object patterns with non-constant init",
+    "should not regress on issue #232 - array patterns and object patterns with non constant init",
     `
+    const a = {
+      lol: input => {
+        const [hello, world] = input.split("|");
+        if (hello === "t" || hello === "top") {
+          return "top";
+        }
+        return "bottom";
+      }
+    };
+
     function foo() {
       const { bar1, bar2 } = baz();
       return bar1;
@@ -2074,7 +1940,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should preserve variabledeclarations(var) after completion statements",
+    "should preserve `var` statements after `return`s",
     `
     function foo() {
       a = 1;
@@ -2085,7 +1951,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should NOT preserve variabledeclarations(let) after completion statements",
+    "should NOT preserve `let` statements after `return`s",
     `
     function foo() {
       a = 1;
@@ -2104,7 +1970,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not remove var from for..in/for..of statements",
+    "should not remove `var` from `for...in`/`for...of` statements",
     `
     function foo() {
       for (var i in x) console.log("foo");
@@ -2114,7 +1980,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not remove var from for..await statements",
+    "should not remove `var` from `for await...of` statements",
     `
     async function foo() {
       for await (var x of y) console.log("bar");
@@ -2145,7 +2011,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should NOT remove fn params for setters",
+    "should NOT remove function params in setters",
     `
     function foo() {
       var x = {
@@ -2321,22 +2187,12 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should impure expressions in confidently evaluated if statements",
+    "should extract impure expressions from if statements with a static condition",
     `
     if (a.b(), true) {
       foo();
     }
-  `,
-    `
-    a.b();
 
-    foo();
-  `
-  );
-
-  thePlugin(
-    "should extract all necessary things from if statements",
-    `
     if (a.b(), false) {
       var foo = foo1;
       foo();
@@ -2350,6 +2206,10 @@ describe("dce-plugin", () => {
   `,
     `
     a.b();
+
+    foo();
+
+    a.b();
     b.c();
 
     var bar = bar1;
@@ -2360,45 +2220,39 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should not remove vars after return statement",
+    "should not remove `var` statements after a return statement",
     `
     function f() {
       return x;
       var x = 1;
+    }
+
+    var y = 0;
+    function f1(){
+      function f2(){
+        return y;
+      };
+      return f2();
+      var y = 1;
     }
   `,
     `
     function f() {
       return void 0;
     }
-  `
-  );
 
-  thePlugin(
-    "should not remove vars after return statement #2",
-    `
-    var x = 0;
-    function f1(){
-      function f2(){
-        return x;
-      };
-      return f2();
-      var x = 1;
-    }
-  `,
-    `
-    var x = 0;
+    var y = 0;
     function f1() {
       return function () {
-        return x;
+        return y;
       }();
-      var x = 1;
+      var y = 1;
     }
   `
   );
 
   thePlugin(
-    "should not remove vars after return statement #3",
+    "should not hoist `var` initializations",
     `
     function foo() {
       bar = x;
@@ -2413,7 +2267,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should deopt for impure tests",
+    "should bail on impure `if` conditions",
     `
     function foo() {
       do {
@@ -2430,7 +2284,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle confident do..while with break statements",
+    "should handle confident do...while loops with break statements",
     `
     function foo() {
       do {
@@ -2496,7 +2350,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle confident do..while with continue statements",
+    "should handle confident do...while loops with continue statements",
     `
     function foo() {
       do {
@@ -2566,7 +2420,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should remove unnecessary use strict directives",
+    "should remove unnecessary \"use strict\"; directives",
     `
     function foo() {
       "use strict";

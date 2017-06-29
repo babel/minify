@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("simplify-comparison-operators-plugin", () => {
   thePlugin(
-    "should simplify comparison",
+    "should simplify `typeof` comparisons",
     `
     'function' === typeof a;
   `,
@@ -16,53 +16,39 @@ describe("simplify-comparison-operators-plugin", () => {
   );
 
   thePlugin(
-    "should simplify comparison operations",
+    "should simplify `== null` comparison operations where possible",
     `
     null === null;
-  `,
-    `
-    null == null;
-  `
-  );
-
-  thePlugin(
-    "should comparison operations 2",
-    `
     var x = null;
     x === null;
   `,
     `
+    null == null;
     var x = null;
     x == null;
   `
   );
 
+
   thePlugin(
-    "should not simplify comparison",
+    "should not simplify comparisons where losing the third = would change the result",
     `
     var x;
     x === null;
-  `
-  );
-
-  thePlugin(
-    "should not simplify comparison 2",
-    `
-    var x;
     if (wow) x = foo();
     x === null;
   `
   );
 
   thePlugin(
-    "should not simplify comparison if already simplified",
+    "should not simplify comparison if it is already simplified",
     `
     typeof 1 == "number";
   `
   );
 
   thePlugin(
-    "should not simplify comparison if not equality check",
+    "should not simplify comparison if it is not an equality check",
     `
     a > b;
   `

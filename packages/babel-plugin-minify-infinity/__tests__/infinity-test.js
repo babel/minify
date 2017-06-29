@@ -4,9 +4,9 @@ const thePlugin = require("../../../utils/test-transform")(
   require("../src/index")
 );
 
-describe("boolean-plugin", () => {
+describe("minify-infinity", () => {
   thePlugin(
-    "should convert infinity to division over 0",
+    "should convert Infinity to division over 0",
     `
     Infinity;
   `,
@@ -16,7 +16,7 @@ describe("boolean-plugin", () => {
   );
 
   thePlugin(
-    "should not convert infinity when its a property",
+    "should not convert Infinity when it’s a property",
     `
     var x = { Infinity: 0 };
     x.Infinity;
@@ -24,14 +24,14 @@ describe("boolean-plugin", () => {
   );
 
   thePlugin(
-    "should not convert infinity if its a assignment expression",
+    "should not convert Infinity if it’s a assignment expression",
     `
     Infinity = 1;
   `
   );
 
   thePlugin(
-    "should not convert infinity when its destructed",
+    "should not convert Infinity when it’s destructed",
     `
     ({ Infinity } = 1);
     [Infinity] = foo;
@@ -40,7 +40,7 @@ describe("boolean-plugin", () => {
   );
 
   thePlugin(
-    "should not convert infinity when as a function params",
+    "should not convert Infinity when as a function params",
     `
     function a(Infinity) {}
     function a(...Infinity) {}

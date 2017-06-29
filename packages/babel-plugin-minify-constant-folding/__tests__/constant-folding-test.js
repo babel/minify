@@ -75,7 +75,7 @@ describe("constant-folding-plugin", () => {
   );
 
   thePlugin.skip(
-    "should handle html comment escape",
+    "should handle HTML comment escape",
     `
     "<!" + "--"
   `,
@@ -160,7 +160,7 @@ describe("constant-folding-plugin", () => {
   `
   );
   thePlugin(
-    "should ignore bad calls to array expression methods",
+    "should ignore bad calls to array literal methods",
     `
     [1, 2, 3][concat]([4, 5, 6]);
     [a, "b", "c"].join();
@@ -169,7 +169,7 @@ describe("constant-folding-plugin", () => {
   `
   );
   thePlugin(
-    "should ignore bad calls to string expression methods",
+    "should ignore bad calls to string literal methods",
     `
     "abc".something;
     "abc"["something"];

@@ -57,7 +57,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should be fine with shadowing",
+    "should handle shadowing properly",
     `
     var a = 1;
     function foo() {
@@ -117,7 +117,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should ignore labels",
+    "should not mangle labels",
     `
     function foo() {
       meh: for (;;) {
@@ -135,7 +135,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should not have labels conflicting with bindings",
+    "should mangle variables with the same name as labels",
     `
     function foo() {
       meh: for (;;) {
@@ -165,21 +165,7 @@ describe("mangle-names", () => {
       }
       return meh;
     }
-  `,
-    `
-    function foo() {
-      var a;
-      meh: for (;;) {
-        break meh;
-      }
-      return a;
-    }
-  `
-  );
 
-  thePlugin(
-    "labels should not shadow bindings 2",
-    `
     function f(a) {
       try {
         a: {
@@ -189,6 +175,14 @@ describe("mangle-names", () => {
     }
   `,
     `
+    function foo() {
+      var a;
+      meh: for (;;) {
+        break meh;
+      }
+      return a;
+    }
+
     function f(b) {
       try {
         a: {
@@ -212,6 +206,16 @@ describe("mangle-names", () => {
       }
       bar();
     }
+
+    function foo2() {
+      (function bar() {
+        bar();
+        return function() {
+          var bar = wow();
+          bar.woo();
+        };
+      })();
+    }
   `,
     `
     function foo() {
@@ -224,24 +228,8 @@ describe("mangle-names", () => {
       }
       a();
     }
-  `
-  );
 
-  thePlugin(
-    "should be order independent 2",
-    `
-    function foo() {
-      (function bar() {
-        bar();
-        return function() {
-          var bar = wow();
-          bar.woo();
-        };
-      })();
-    }
-  `,
-    `
-    function foo() {
+    function foo2() {
       (function a() {
         a();
         return function () {
@@ -370,7 +358,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should handle global name conflict",
+    "should handle global name conflicts",
     `
     function e() {
       function foo() {
@@ -390,7 +378,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should handle global name",
+    "should handle global names",
     `
     function foo() {
       var bar = 1;
@@ -449,7 +437,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should handle try/catch",
+    "should handle try...catch statements",
     `
     function xoo() {
       var e;
@@ -846,7 +834,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should work with redeclarations",
+    "should work with redefinitions",
     `
     (function () {
       var x = y;
@@ -1044,7 +1032,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should not mangle the name arguments",
+    "should not mangle the `arguments` variable",
     `
     (function () {
       var arguments = void 0;
@@ -1056,7 +1044,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should mangle topLevel when topLevel option is true",
+    "should mangle top-level variables when topLevel option is true",
     `
     function foo() {
       if (FOO_ENV === "production") {
@@ -1212,7 +1200,7 @@ describe("mangle-names", () => {
   );
 
   thePlugin(
-    "should work with if_return optimization changing fn scope",
+    "should work with if_return optimization changing function scope",
     `
     function foo() {
       if (x)

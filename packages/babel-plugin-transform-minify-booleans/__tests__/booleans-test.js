@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("boolean-plugin", () => {
   thePlugin(
-    "should shorten bool",
+    "should shorten `true` and `false` to `!0` and `!1`, repsectively",
     `
     true; false;
   `,

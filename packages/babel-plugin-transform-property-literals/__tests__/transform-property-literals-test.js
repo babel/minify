@@ -26,7 +26,7 @@ describe("transform-property-literals-plugin", () => {
   );
 
   thePlugin(
-    "should not strip necessaary quotes for numeric like things",
+    "should not strip necessaary quotes for numbers with leading zeroes",
     `
     var data = {
       "00": 1,
@@ -35,6 +35,8 @@ describe("transform-property-literals-plugin", () => {
   `
   );
 
+  // FIXME: The test name states that no transformation should take place,
+  // but the actual test specifies that the quotes should be stripped.
   thePlugin(
     "should not transform invalid identifiers",
     `
@@ -79,6 +81,8 @@ describe("transform-property-literals-plugin", () => {
   `
   );
 
+  // FIXME: The test name states that the property names should be transformed,
+  // but the `12e34` one isn’t transformed in the test
   thePlugin(
     "should transform valid ES5 unicodes as property names",
     `

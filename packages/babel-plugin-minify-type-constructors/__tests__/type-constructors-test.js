@@ -7,7 +7,7 @@ const thePlugin = require("../../../utils/test-transform")(plugin);
 
 describe("type-constructors-plugin", () => {
   thePlugin(
-    "should turn Boolean(x) to !!x",
+    "should turn `Boolean(x)` into `!!x`",
     `
     Boolean(x);
   `,
@@ -17,7 +17,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn Number(x) to +x",
+    "should turn `Number(x)` into `+x`",
     `
     Number(x);
   `,
@@ -27,7 +27,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn String(x) to x + ''",
+    "should turn `String(x)` into `x + ''`",
     `
     String(x);
   `,
@@ -37,7 +37,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn Array() to []",
+    "should turn `Array()` into `[]`",
     `
     Array();
   `,
@@ -47,7 +47,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn new Array() to []",
+    "should turn `new Array()` into `[]`",
     `
     new Array();
   `,
@@ -57,7 +57,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn Array(nonNumericValue) to [nonNumericValue]",
+    "should turn `Array(nonNumericValue)` into `[nonNumericValue]`",
     `
     Array("Rome");
     Array(false);
@@ -83,7 +83,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn Array(number) to [,] only if number is <=6",
+    "should turn `Array(number)` into `[,]` if and only if `number <= 6`",
     `
     Array(0);
     Array(1);
@@ -99,7 +99,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn new Array(number) to Array(number) if number is >6",
+    "should turn `new Array(number)` into `Array(number)` if `number > 6`",
     `
     new Array(6);
     new Array(7);
@@ -111,7 +111,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn Array(value, value) to [value, value]",
+    "should turn `Array(value, value)` into `[value, value]`",
     `
     Array("a", "b");
     new Array("0", "1", {});
@@ -125,7 +125,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn Object() to {}",
+    "should turn `Object()` into `{}`",
     `
     var x = Object();
   `,
@@ -135,7 +135,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should turn new Object() to {}",
+    "should turn `new Object()` into `{}`",
     `
     var x = new Object();
   `,
@@ -145,7 +145,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should change Object(null|undefined) to {}",
+    "should change `Object(null|undefined)` into `{}`",
     `
     [
       Object(null),
@@ -160,7 +160,7 @@ describe("type-constructors-plugin", () => {
 
   // TODO: add Object(Array())
   thePlugin(
-    "should change Object({a:b}) to {a:b}",
+    "should change `Object({a:b})` into `{a:b}`",
     `
     [
       Object({}),
@@ -175,7 +175,7 @@ describe("type-constructors-plugin", () => {
 
   // TODO: add Object(Array())
   thePlugin(
-    "should change Object([]) to []",
+    "should change `Object([])` into `[]`",
     `
     [
       Object([]),
@@ -190,7 +190,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should change Object(localFn) to localFn",
+    "should change `Object(localFn)` into `localFn`",
     `
     function a() {};
     [
@@ -206,7 +206,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "shouldn't change Object(value) for unrecognized values",
+    "shouldn't change `Object(value)` for unrecognized values",
     `
     [
       Object("undefined"),
@@ -222,7 +222,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should change new Object(value) to Object(value) for unrecognized values",
+    "should change `new Object(value)` into `Object(value)` for unrecognized values",
     `
     [
       new Object("function"),
@@ -238,7 +238,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should change Object() to ({}) in ambiguous contexts",
+    "should change `Object()` into `({})` in ambiguous contexts",
     `
     new Object();
     var foo = () => Object();
@@ -252,7 +252,7 @@ describe("type-constructors-plugin", () => {
   );
 
   thePlugin(
-    "shouldn't change referenced identifiers",
+    "shouldn't change overridden type constructors",
     `
     (function (Boolean, String, Number, Array, Object) {
       return Boolean(a), String(b), Number(c), Array(d), Object(d);
@@ -266,7 +266,7 @@ describe("type-constructors-plugin", () => {
   );
 
   // options tests
-  it("should not transform type for falsy option", () => {
+  it("should respect the options disabling optomizations", () => {
     const types = {
       boolean: "Boolean",
       number: "Number",
@@ -295,7 +295,7 @@ describe("type-constructors-plugin", () => {
 
   // https://github.com/babel/babili/issues/206
   thePlugin(
-    "should handle floating point numbers in Array()",
+    "should handle floating point numbers in `Array()`",
     `
     new Array(-0.01);
     new Array(-1);

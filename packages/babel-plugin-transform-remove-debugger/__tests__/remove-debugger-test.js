@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("remove-debugger-plugin", () => {
   thePlugin(
-    "should remove debugger",
+    "should remove `debugger` statements",
     `
     debugger;
   `,
@@ -15,7 +15,7 @@ describe("remove-debugger-plugin", () => {
   );
 
   thePlugin(
-    "should remove debugger only",
+    "should not remove non-`debugger` statements on the same line as the `debugger` statement",
     `
     debugger; 1;
   `,
@@ -25,7 +25,7 @@ describe("remove-debugger-plugin", () => {
   );
 
   thePlugin(
-    "statement no block",
+    "should add an empty block (`{}`) when the `debugger` statement was the only child of the block",
     `
     if (blah) debugger;
     for (;;) debugger;

@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("flip-comparisons", () => {
   thePlugin(
-    "should merge two conditionals if the same consequent",
+    "should merge two conditionals if they share the same consequent",
     `
     x === null ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
   `,
@@ -36,18 +36,12 @@ describe("flip-comparisons", () => {
   );
 
   thePlugin(
-    "should put pures first in binary expressions 2",
+    "should put pures first in binary expressions",
     `
     a === null;
-  `,
-    `
-    null === a;
-  `
-  );
 
-  thePlugin(
-    "should put pures first in binary expressions 3",
-    `
+    a === {};
+
     function foo() {
       if (foo !== null) {
         var bar;
@@ -58,6 +52,10 @@ describe("flip-comparisons", () => {
     }
   `,
     `
+    null === a;
+
+    ({}) === a;
+
     function foo() {
       if (null !== foo) {
         var bar;
@@ -70,17 +68,7 @@ describe("flip-comparisons", () => {
   );
 
   thePlugin(
-    "should put pures first in binary expressions 2",
-    `
-    a === {};
-  `,
-    `
-    ({}) === a;
-  `
-  );
-
-  thePlugin(
-    "should put constants first",
+    "should put constants first in binary expressions",
     `
     x * 100;
     x + 100;

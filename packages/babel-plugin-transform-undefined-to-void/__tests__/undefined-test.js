@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("undefined-plugin", () => {
   thePlugin(
-    "should turn undefined into void 0",
+    "should turn `undefined` into `void 0`",
     `
     var foo;foo === undefined;
   `,
@@ -16,7 +16,7 @@ describe("undefined-plugin", () => {
   );
 
   thePlugin(
-    "should turn undefined into void 0 in a MemberExpression",
+    "should turn `undefined` into `void 0` in a MemberExpression",
     `
     var foo;foo === undefined.foo;
   `,

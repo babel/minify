@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("transform-member-expressions-literals-plugin", () => {
   thePlugin(
-    "should work with string literals",
+    "should minify string literals to dot notation",
     `
     foo['bar'];
   `,
@@ -16,7 +16,7 @@ describe("transform-member-expressions-literals-plugin", () => {
   );
 
   thePlugin(
-    "should work with numbers",
+    "should minify numbers as strings to actual numbers",
     `
     foo['1'];
   `,
@@ -26,7 +26,7 @@ describe("transform-member-expressions-literals-plugin", () => {
   );
 
   thePlugin(
-    "should not strip necessaary quotes for numeric like things",
+    "should not strip necessaary quotes for numbers with leading zeroes",
     `
     data['00'] = 5;
   `

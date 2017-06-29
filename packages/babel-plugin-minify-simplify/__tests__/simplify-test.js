@@ -49,7 +49,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should turn for loop block to a single statement",
+    "should turn a for loop block to a single statement",
     `
     for (var x = 0; x < 10; x++) {
       console.log(x);
@@ -61,7 +61,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should turn block statements to sequence expr",
+    "should turn block statements into a comma expression",
     `
       for (var x = 0; x < 10; x++) {
         console.log(x);
@@ -74,7 +74,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should the program into as much sequence exprs",
+    "should merge lines of code into one comma expression where possible",
     `
     x();
     y();
@@ -98,7 +98,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should turn if to gaurded expression",
+    "should turn `if` statements into gaurded expressions",
     `
     function foo() {
       if (x) a();
@@ -112,7 +112,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should turn if statement to conditional",
+    "should turn if statements into a ternary",
     `
     function foo() {
       if (x) a();
@@ -127,7 +127,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should turn this into a conditional",
+    "should minify complex `if` statements",
     `
     function foo(a) {
       if (a && a.b != null) {
@@ -138,38 +138,8 @@ describe("simplify-plugin", () => {
       }
       return bar(a);
     }
-  `,
-    `
-    function foo(a) {
-      return a && a.b != null ? (a.c-- === 1 && delete a.c, a.b) : bar(a);
-    }
-  `
-  );
 
-  thePlugin(
-    "should turn this into a conditional",
-    `
-    function foo(a) {
-      if (a && a.b != null) {
-        if ((a.c--) === 1) {
-          delete a.c;
-        }
-        return a.b;
-      }
-      return bar(a);
-    }
-  `,
-    `
-    function foo(a) {
-      return a && a.b != null ? (a.c-- === 1 && delete a.c, a.b) : bar(a);
-    }
-  `
-  );
-
-  thePlugin(
-    "should turn this into a conditional",
-    `
-    function foo(a) {
+    function foo2(a) {
       if (a) {
         return a.b;
       } else {
@@ -179,13 +149,17 @@ describe("simplify-plugin", () => {
   `,
     `
     function foo(a) {
+      return a && a.b != null ? (a.c-- === 1 && delete a.c, a.b) : bar(a);
+    }
+
+    function foo2(a) {
       return a ? a.b : bar(a);
     }
   `
   );
 
   thePlugin.skip(
-    "should turn IIFE to negation",
+    "should convert (function () {...})() into !function () {}()",
     `
     (function() {
       x();
@@ -204,7 +178,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should remove the else block if early return",
+    "should remove the `else` block if there is an early return",
     `
     function foo() {
       if (1) {
@@ -223,7 +197,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should merge blocks into a return with sequence expr",
+    "should merge expressions into a comma expression in a `return` statement",
     `
     function foo() {
       y();
@@ -239,7 +213,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should merge blocks into a return with sequence expr",
+    "should merge blocks into a `return` statement with a comma expression",
     `
     function foo() {
       try {
@@ -267,7 +241,7 @@ describe("simplify-plugin", () => {
 
   // https://github.com/babel/babili/issues/208
   thePlugin(
-    "should handle empty blocks when merging to sequences",
+    "should not regresson #208 by handling empty blocks when merging lines into sequences",
     `
     !function () {
       var x;
@@ -284,7 +258,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should merge expressions into the init part of for",
+    "should merge expressions into the init part of a `for` loop",
     `
     function foo() {
       x();
@@ -300,7 +274,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should merge statements into the init part of for even when there are others",
+    "should merge statements into the init part of a `for` loop even when there are other expressions there",
     `
     function foo() {
       x();
@@ -316,7 +290,7 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
-    "should remove empty returns",
+    "should remove empty `return` statements",
     `
      function foo() {
        lol();

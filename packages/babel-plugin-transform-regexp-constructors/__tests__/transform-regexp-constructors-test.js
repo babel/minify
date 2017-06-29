@@ -16,7 +16,7 @@ describe("transform-regexp-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should transform newlines fine",
+    "should transform `\n` properly",
     String.raw`
     var x = new RegExp('\\n');
   `,
@@ -26,7 +26,7 @@ describe("transform-regexp-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should transform unicode newlines fine",
+    "should transform unicode newlines properly",
     String.raw`
     var x = new RegExp('\u2028\u2029');
   `,
@@ -83,7 +83,7 @@ describe("transform-regexp-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should transform empty RegExp constructor",
+    "should transform RegExp constructor with no arguments into `/(?:)/`",
     `
     var x = new RegExp();
   `,
@@ -93,7 +93,7 @@ describe("transform-regexp-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should transform RegExp constructor with empty string",
+    "should transform RegExp constructor with an empty string argument into `/(?:)/`",
     `
     var x = new RegExp('');
   `,
@@ -103,18 +103,18 @@ describe("transform-regexp-constructors-plugin", () => {
   );
 
   thePlugin(
-    "should resolve expressions and const references",
-    `
+    "should resolve expressions and const references in the constructor",
+    String.raw`
     const foo = "ab+";
-    const bar = "c\\\\w";
+    const bar = "c\\w";
     const flags = "g";
     const ret = new RegExp(foo + bar + "d", flags);
   `,
-    `
+    String.raw`
     const foo = "ab+";
-    const bar = "c\\\\w";
+    const bar = "c\\w";
     const flags = "g";
-    const ret = /ab+c\\wd/g;
+    const ret = /ab+c\wd/g;
   `
   );
 

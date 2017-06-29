@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("remove-console-plugin", () => {
   thePlugin(
-    "statement-nested",
+    "should remove `console.*` calls in nested statements",
     `
     function foo() {
       console.log("foo");
@@ -21,7 +21,7 @@ describe("remove-console-plugin", () => {
   );
 
   thePlugin(
-    "expression-nested",
+    "should remove `console.*` calls in nested expressions",
     `
     function foo() {
       true && console.log("foo");
@@ -37,7 +37,7 @@ describe("remove-console-plugin", () => {
   );
 
   thePlugin(
-    "expression-top-level",
+    "should remove `console.*` calls in top-level expressions",
     `
     true && console.log("foo");
     blah();
@@ -49,7 +49,7 @@ describe("remove-console-plugin", () => {
   );
 
   thePlugin(
-    "statement-top-level",
+    "should remove `console.*` calls in top-level statements",
     `
     console.log("foo");
     blah();
@@ -60,7 +60,7 @@ describe("remove-console-plugin", () => {
   );
 
   thePlugin(
-    "statement no block",
+    "should remove `console.*` calls in statements not surrounded by a block",
     `
     if (blah) console.log(blah);
     for (;;) console.log(blah);
@@ -80,7 +80,7 @@ describe("remove-console-plugin", () => {
   );
 
   thePlugin(
-    "should remove console.* assignments to other variables",
+    "should remove `console.*` assignments to other variables and replace them with empty functions",
     `
     const a = console.log;
     a();
@@ -108,7 +108,7 @@ describe("remove-console-plugin", () => {
   );
 
   thePlugin(
-    "should NOT remove local bindings of name console",
+    "should NOT remove local bindings of the name `console`",
     `
     function foo(console) {
       console.foo("hi");
@@ -125,7 +125,7 @@ describe("remove-console-plugin", () => {
   );
 
   thePlugin(
-    "should convert assigments to no-op",
+    "should convert assigments from `console` functions to a no-op",
     `
     function foo() {
       console.foo = function foo() {

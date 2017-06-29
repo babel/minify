@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("transform-merge-sibling-variables-plugin", () => {
   thePlugin(
-    "concat vars",
+    "should concat `var` declarations",
     `
     var i = 0;
     var x = 0;
@@ -20,7 +20,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "concat vars in for loops",
+    "should concat `var` declarations in for loops",
     `
     var i = 0;
     var j = 0;
@@ -32,7 +32,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "don't concat block-scoped variables in for loops",
+    "should not concat block-scoped variables in for loops",
     `
     let i = 0;
     for (let x = 0; x < 10; x++) console.log(i + x);
@@ -40,7 +40,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "don't concat constants in for loops",
+    "should not concat constants in for loops",
     `
     const j = 0;
     for (const x = 0;;) console.log(j + x);
@@ -48,7 +48,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "concat block-scoped vars next to, but not into for loops",
+    "should concat block-scoped variable declarations next to, but not into, for loops",
     `
     let i = 0;
     let y = 0;
@@ -63,7 +63,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "lift var declarations to loop intializer",
+    "lift `var` declarations to the loop intializer",
     `
     for (var i = 0; i < 0; i++) {
       var j = jj();
@@ -79,7 +79,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "lift let declarations to loop intializer",
+    "lift `let` declarations to the loop intializer",
     `
     for (let i = 0; i < 0; i++) {
       let j = jj();
@@ -93,7 +93,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "dont lift declarations on object/array pattern",
+    "should not lift declarations from array or object destructuring asignments",
     `
     for (var i = 0; i < 0; i++) {
       var [j] = jj();
@@ -105,7 +105,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "dont lift declarations when no body is present",
+    "should not lift declarations when no loop initializer is present",
     `
     for (;;) {}
     for (;;) var i = 0;
@@ -113,7 +113,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "dont lift when the declarations are of different kind",
+    "should not lift when the declarations are of different types",
     `
     for (let i = 0; i < 0; i++) {
       var i = 0;
@@ -122,7 +122,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "dont lift when the declarations are not initialized",
+    "should not lift when the declarations are not initialized",
     `
     for (var i = 0;;) {
       var i;
@@ -131,7 +131,7 @@ describe("transform-merge-sibling-variables-plugin", () => {
   );
 
   thePlugin(
-    "dont lift when there are multiple declarations",
+    "should not lift when there are multiple declarations",
     `
     for (var i = 0; i < 0; i++) {
       var i = 0, k = 0;

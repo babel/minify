@@ -6,7 +6,7 @@ const thePlugin = require("../../../utils/test-transform")(
 
 describe("numeric-literals", () => {
   thePlugin(
-    "should shorten properly",
+    "should shorten numeric literals properly",
     `
     [10, 100, 1000, 10000, -2, -30000];
     [1e3, -1e4, 1e-5, 1.5e12, 1.23456, .1];

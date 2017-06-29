@@ -12,7 +12,7 @@ describe("node-env-inline-plugin", () => {
   });
 
   thePlugin(
-    "should inline",
+    "should inline checks for `process.env.NODE_ENV = 'foo'`",
     `
     process.env.NODE_ENV === "development";
   `,
