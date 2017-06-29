@@ -43,7 +43,7 @@ function makeTester(
     });
   };
   thePlugin.skip = name => it.skip(name);
-  if (!excludeKeys.includes("inEachLine")) {
+  if (excludeKeys.indexOf("inEachLine") === -1) {
     thePlugin.inEachLine = makeTester(
       plugins,
       opts,

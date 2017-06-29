@@ -6,21 +6,6 @@ const deadcode = require("../src/index");
 const simplify = require("../../babel-plugin-minify-simplify/src/index");
 const thePlugin = require("../../../utils/test-transform")(deadcode);
 
-function transform(code, options, babelOpts) {
-  return babel
-    .transform(
-      code,
-      Object.assign(
-        {},
-        {
-          plugins: [[deadcode, options]]
-        },
-        babelOpts
-      )
-    )
-    .code.trim();
-}
-
 function transformWithSimplify(code) {
   return babel.transform(code, {
     plugins: [deadcode, simplify]
@@ -706,7 +691,8 @@ describe("dce-plugin", () => {
       foo();
     }
 
-  `);
+  `
+  );
 
   thePlugin(
     "should evaluate conditional expressions",
@@ -1008,7 +994,7 @@ describe("dce-plugin", () => {
   thePlugin(
     "should eval the following to false",
     `
-    function bar () {
+    function bar() {
       var x = foo || "boo";
       bar = x === "wow" ? " " + z : "";
     }
@@ -1917,7 +1903,6 @@ describe("dce-plugin", () => {
   `
   );
 
-
   // https://github.com/babel/babili/issues/232
   thePlugin(
     "should not regress on issue #232 - array patterns and object patterns with non constant init",
@@ -2208,7 +2193,6 @@ describe("dce-plugin", () => {
     a.b();
 
     foo();
-
     a.b();
     b.c();
 
@@ -2420,7 +2404,7 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should remove unnecessary \"use strict\"; directives",
+    'should remove unnecessary "use strict"; directives',
     `
     function foo() {
       "use strict";

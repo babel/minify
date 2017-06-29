@@ -29,7 +29,6 @@ describe("simplify-comparison-operators-plugin", () => {
   `
   );
 
-
   thePlugin(
     "should not simplify comparisons where losing the third = would change the result",
     `
