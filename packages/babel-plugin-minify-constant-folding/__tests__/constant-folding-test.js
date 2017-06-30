@@ -226,4 +226,16 @@ describe("constant-folding-plugin", () => {
     ({}).toString;
   `
   );
+
+  thePlugin(
+    "should bail for spread element in array",
+    `
+      function foo() {
+        return [...iter].length;
+      }
+      function bar() {
+        return [...iter][0];
+      }
+    `
+  );
 });
