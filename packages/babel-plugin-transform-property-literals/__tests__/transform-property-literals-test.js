@@ -1,113 +1,119 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const plugin = require("../src/index");
-const unpad = require("../../../utils/unpad");
-
-function transform(code) {
-  return babel.transform(code, {
-    plugins: [plugin]
-  }).code;
-}
+const thePlugin = require("../../../utils/test-transform")(
+  require("../src/index")
+);
 
 describe("transform-property-literals-plugin", () => {
-  it("should strip unnecessary property literal qoutes", () => {
-    const source = "var x = { 'foo': 'bar' };";
-    const expected = "var x = { foo: 'bar' };";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should strip unnecessary property literal qoutes",
+    `
+    var x = { 'foo': 'bar' };
+  `,
+    `
+    var x = { foo: 'bar' };
+  `
+  );
 
-  it("should strip unnecessary property literal qoutes for numbers", () => {
-    const source = "var x = { '1': 'bar' };";
-    const expected = "var x = { 1: 'bar' };";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should strip unnecessary property literal qoutes for numbers",
+    `
+    var x = { '1': 'bar' };
+  `,
+    `
+    var x = { 1: 'bar' };
+  `
+  );
 
-  it("should not strip necessaary quotes for numeric like things", () => {
-    const source = unpad(`
-      var data = {
-        "00": 1,
-        "01": 2
-      };
-    `);
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin(
+    "should not strip necessaary quotes for numbers with leading zeroes",
+    `
+    var data = {
+      "00": 1,
+      "01": 2
+    };
+  `
+  );
 
-  it("should not transform invalid identifiers", () => {
-    const source = unpad(`
-      ({
-        "default": null,
-        "import": null
-      });
-    `);
-    const expected = unpad(`
-      ({
-        default: null,
-        import: null
-      });
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  // FIXME: The test name states that no transformation should take place,
+  // but the actual test specifies that the quotes should be stripped.
+  thePlugin(
+    "should not transform invalid identifiers",
+    `
+    ({
+      "default": null,
+      "import": null
+    });
+  `,
+    `
+    ({
+      default: null,
+      import: null
+    });
+  `
+  );
 
-  it("should not transform non-string properties", () => {
-    const source = unpad(`
-      ({
-        foo: null
-      });
-    `);
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin(
+    "should not transform non-string properties",
+    `
+    ({
+      foo: null
+    });
+  `
+  );
 
-  it("should not transform propety keys that are computed", () => {
-    const source = unpad(`
-      ({
-        [a]: null
-      });
-    `);
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin(
+    "should not transform propety keys that are computed",
+    `
+    ({
+      [a]: null
+    });
+  `
+  );
 
-  it("should not transform invalid es5 property names", () => {
-    const source = unpad(`
-      ({
-        "\u2118": "wp",
-        "𐊧": "foo"
-      });
-    `);
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin(
+    "should not transform invalid es5 property names",
+    `
+    ({
+      "\u2118": "wp",
+      "𐊧": "foo"
+    });
+  `
+  );
 
-  it("should transform valid ES5 unicodes as property names", () => {
-    const source = unpad(`
-      ({
-        "ಠ_ಠ": "bar",
-        "12e34": "wut",
-        "\u01FC": "AE"
-      })
-    `);
-    const expected = unpad(`
-      ({
-        ಠ_ಠ: "bar",
-        "12e34": "wut",
-        \u01FC: "AE"
-      });
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  // FIXME: The test name states that the property names should be transformed,
+  // but the `12e34` one isn’t transformed in the test
+  thePlugin(
+    "should transform valid ES5 unicodes as property names",
+    `
+    ({
+      "ಠ_ಠ": "bar",
+      "12e34": "wut",
+      "\u01FC": "AE"
+    })
+  `,
+    `
+    ({
+      ಠ_ಠ: "bar",
+      "12e34": "wut",
+      \u01FC: "AE"
+    });
+  `
+  );
 
-  it("should transform computed properties which are strings", () => {
-    const source = unpad(`
-      ({
-        [ಠ_ಠ]: "foo",
-        ["ಠ_ಠ"]: "bar"
-      });
-    `);
-    const expected = unpad(`
-      ({
-        [ಠ_ಠ]: "foo",
-        ಠ_ಠ: "bar"
-      });
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should transform computed properties which are strings",
+    `
+    ({
+      [ಠ_ಠ]: "foo",
+      ["ಠ_ಠ"]: "bar"
+    });
+  `,
+    `
+    ({
+      [ಠ_ಠ]: "foo",
+      ಠ_ಠ: "bar"
+    });
+  `
+  );
 });

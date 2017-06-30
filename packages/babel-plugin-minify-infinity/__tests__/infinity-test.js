@@ -1,93 +1,50 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const plugin = require("../src/index");
-const unpad = require("../../../utils/unpad");
+const thePlugin = require("../../../utils/test-transform")(
+  require("../src/index")
+);
 
-function transform(code) {
-  return babel.transform(code, {
-    plugins: [plugin]
-  }).code;
-}
+describe("minify-infinity", () => {
+  thePlugin(
+    "should convert Infinity to division over 0",
+    `
+    Infinity;
+  `,
+    `
+    1 / 0;
+  `
+  );
 
-describe("boolean-plugin", () => {
-  it("should convert infinity to division over 0", () => {
-    const source = unpad(`
-      Infinity;
-    `);
+  thePlugin(
+    "should not convert Infinity when it’s a property",
+    `
+    var x = { Infinity: 0 };
+    x.Infinity;
+  `
+  );
 
-    const expected = unpad(`
-      1 / 0;
-    `);
+  thePlugin(
+    "should not convert Infinity if it’s a assignment expression",
+    `
+    Infinity = 1;
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should not convert Infinity when it’s destructed",
+    `
+    ({ Infinity } = 1);
+    [Infinity] = foo;
+    [...Infinity] = foo;
+  `
+  );
 
-  it("should not convert infinity when its a property", () => {
-    const source = unpad(`
-      var x = { Infinity: 0 };
-    `);
-
-    const expected = unpad(`
-      var x = { Infinity: 0 };
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not convert infinity when its a property", () => {
-    const source = unpad(`
-      x.Infinity;
-    `);
-
-    const expected = unpad(`
-      x.Infinity;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not convert infinity if its a assignment expression", () => {
-    const source = unpad(`
-      Infinity = 1;
-    `);
-
-    const expected = unpad(`
-      Infinity = 1;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not convert infinity when its destructed", () => {
-    const source = unpad(`
-      ({ Infinity } = 1);
-      [Infinity] = foo;
-      [...Infinity] = foo;
-    `);
-
-    const expected = unpad(`
-      ({ Infinity } = 1);
-      [Infinity] = foo;
-      [...Infinity] = foo;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not convert infinity when as a function params", () => {
-    const source = unpad(`
-      function a(Infinity) {}
-      function a(...Infinity) {}
-      function a({ Infinity }) {}
-    `);
-
-    const expected = unpad(`
-      function a(Infinity) {}
-      function a(...Infinity) {}
-      function a({ Infinity }) {}
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should not convert Infinity when as a function params",
+    `
+    function a(Infinity) {}
+    function a(...Infinity) {}
+    function a({ Infinity }) {}
+  `
+  );
 });

@@ -3,237 +3,270 @@ jest.autoMockOff();
 const babel = require("babel-core");
 const plugin = require("../src/index");
 const unpad = require("../../../utils/unpad");
-
-function transform(code, opts = {}) {
-  return babel.transform(code, {
-    plugins: [[plugin, opts]]
-  }).code;
-}
+const thePlugin = require("../../../utils/test-transform")(plugin);
 
 describe("type-constructors-plugin", () => {
-  it("should turn Boolean(x) to !!x", () => {
-    const source = "Boolean(x);";
-    const expected = "!!x;";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `Boolean(x)` into `!!x`",
+    `
+    Boolean(x);
+  `,
+    `
+    !!x;
+  `
+  );
 
-  it("should turn Number(x) to +x", () => {
-    const source = "Number(x);";
-    const expected = "+x;";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `Number(x)` into `+x`",
+    `
+    Number(x);
+  `,
+    `
+    +x;
+  `
+  );
 
-  it("should turn String(x) to x + ''", () => {
-    const source = "String(x);";
-    const expected = 'x + "";';
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `String(x)` into `x + ''`",
+    `
+    String(x);
+  `,
+    `
+    x + "";
+  `
+  );
 
-  it("should turn Array() to []", () => {
-    const source = "Array();";
-    const expected = "[];";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `Array()` into `[]`",
+    `
+    Array();
+  `,
+    `
+    [];
+  `
+  );
 
-  it("should turn new Array() to []", () => {
-    const source = "new Array();";
-    const expected = "[];";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `new Array()` into `[]`",
+    `
+    new Array();
+  `,
+    `
+    [];
+  `
+  );
 
-  it("should turn Array(nonNumericValue) to [nonNumericValue]", () => {
-    const source = unpad(`
-      Array("Rome");
-      Array(false);
-      Array(null);
-      new Array({});
-      new Array([a, b]);
-      Array([]);
-      Array(t);
-      new Array(a.b);
-      new Array((() => 5)());
-    `);
-    const expected = unpad(`
-      ["Rome"];
-      [false];
-      [null];
-      [{}];
-      [[a, b]];
-      [[]];
-      Array(t);
-      Array(a.b);
-      Array((() => 5)());
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `Array(nonNumericValue)` into `[nonNumericValue]`",
+    `
+    Array("Rome");
+    Array(false);
+    Array(null);
+    new Array({});
+    new Array([a, b]);
+    Array([]);
+    Array(t);
+    new Array(a.b);
+    new Array((() => 5)());
+  `,
+    `
+    ["Rome"];
+    [false];
+    [null];
+    [{}];
+    [[a, b]];
+    [[]];
+    Array(t);
+    Array(a.b);
+    Array((() => 5)());
+  `
+  );
 
-  it("should turn Array(number) to [,] only if number is <=6", () => {
-    const source = unpad(`
-      Array(0);
-      Array(1);
-      Array(2 + 4);
-      Array(7);
-    `);
-    const expected = unpad(`
-      [];
-      [,];
-      [,,,,,,];
-      Array(7);
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `Array(number)` into `[,]` if and only if `number <= 6`",
+    `
+    Array(0);
+    Array(1);
+    Array(2 + 4);
+    Array(7);
+  `,
+    `
+    [];
+    [,];
+    [,,,,,,];
+    Array(7);
+  `
+  );
 
-  it("should turn new Array(number) to Array(number) if number is >6", () => {
-    const source = unpad(`
-      new Array(6);
-      new Array(7);
-    `);
-    const expected = unpad(`
-      [,,,,,,];
-      Array(7);
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `new Array(number)` into `Array(number)` if `number > 6`",
+    `
+    new Array(6);
+    new Array(7);
+  `,
+    `
+    [,,,,,,];
+    Array(7);
+  `
+  );
 
-  it("should turn Array(value, value) to [value, value]", () => {
-    const source = unpad(`
-      Array("a", "b");
-      new Array("0", "1", {});
-      Array(10, Symbol(), foo());
-    `);
-    const expected = unpad(`
-      ["a", "b"];
-      ["0", "1", {}];
-      [10, Symbol(), foo()];
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `Array(value, value)` into `[value, value]`",
+    `
+    Array("a", "b");
+    new Array("0", "1", {});
+    Array(10, Symbol(), foo());
+  `,
+    `
+    ["a", "b"];
+    ["0", "1", {}];
+    [10, Symbol(), foo()];
+  `
+  );
 
-  it("should turn Object() to {}", () => {
-    const source = "var x = Object();";
-    const expected = "var x = {};";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `Object()` into `{}`",
+    `
+    var x = Object();
+  `,
+    `
+    var x = {};
+  `
+  );
 
-  it("should turn new Object() to {}", () => {
-    const source = "var x = new Object();";
-    const expected = "var x = {};";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should turn `new Object()` into `{}`",
+    `
+    var x = new Object();
+  `,
+    `
+    var x = {};
+  `
+  );
 
-  it("should change Object(null|undefined) to {}", () => {
-    const source = unpad(`
-      [
-        Object(null),
-        Object(undefined),
-        new Object(void 0)
-      ]
-    `);
-    const expected = "[{}, {}, {}];";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should change `Object(null|undefined)` into `{}`",
+    `
+    [
+      Object(null),
+      Object(undefined),
+      new Object(void 0)
+    ]
+  `,
+    `
+    [{}, {}, {}];
+  `
+  );
 
-  it("should change Object({a:b}) to {a:b}", () => {
-    const source = unpad(`
-      [
-        Object({}),
-        Object({a:b}),
-        Object({a:b, c:d}),
-      ]
-    `); // todo: add Object(Array())
-    const expected = "[{}, { a: b }, { a: b, c: d }];";
-    expect(transform(source)).toBe(expected);
-  });
+  // TODO: add Object(Array())
+  thePlugin(
+    "should change `Object({a:b})` into `{a:b}`",
+    `
+    [
+      Object({}),
+      Object({a:b}),
+      Object({a:b, c:d}),
+    ]
+  `,
+    `
+    [{}, { a: b }, { a: b, c: d }];
+  `
+  );
 
-  it("should change Object([]) to []", () => {
-    const source = unpad(`
-      [
-        Object([]),
-        Object([1]),
-        Object([1,2]),
-        new Object([null])
-      ]
-    `); // todo: add Object(Array())
-    const expected = "[[], [1], [1, 2], [null]];";
-    expect(transform(source)).toBe(expected);
-  });
+  // TODO: add Object(Array())
+  thePlugin(
+    "should change `Object([])` into `[]`",
+    `
+    [
+      Object([]),
+      Object([1]),
+      Object([1,2]),
+      new Object([null])
+    ]
+  `,
+    `
+    [[], [1], [1, 2], [null]];
+  `
+  );
 
-  it("should change Object(localFn) to localFn", () => {
-    const source = unpad(`
-      function a() {};
-      [
-        Object(function () {}),
-        new Object(a),
-        Object(Array)
-      ]
-    `);
-    const expected = unpad(`
-      function a() {};
-      [function () {}, a, Object(Array)];
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should change `Object(localFn)` into `localFn`",
+    `
+    function a() {};
+    [
+      Object(function () {}),
+      new Object(a),
+      Object(Array)
+    ]
+  `,
+    `
+    function a() {};
+    [function () {}, a, Object(Array)];
+  `
+  );
 
-  it("shouldn't change Object(value) for unrecognized values", () => {
-    const source = unpad(`
-      [
-        Object("undefined"),
-        Object(nulled),
-        Object(0),
-        Object(false),
-        Object(stuff())
-      ]
-    `);
-    const expected =
-      '[Object("undefined"), Object(nulled), Object(0), Object(false), Object(stuff())];';
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "shouldn't change `Object(value)` for unrecognized values",
+    `
+    [
+      Object("undefined"),
+      Object(nulled),
+      Object(0),
+      Object(false),
+      Object(stuff())
+    ]
+  `,
+    `
+    [Object("undefined"), Object(nulled), Object(0), Object(false), Object(stuff())];
+  `
+  );
 
-  it("should change new Object(value) to Object(value) for unrecognized values", () => {
-    const source = unpad(`
-      [
-        new Object("function"),
-        new Object(Symbol),
-        new Object(true),
-        new Object(1),
-        new Object(call({ me: true }))
-      ]
-    `);
-    const expected =
-      '[Object("function"), Object(Symbol), Object(true), Object(1), Object(call({ me: true }))];';
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should change `new Object(value)` into `Object(value)` for unrecognized values",
+    `
+    [
+      new Object("function"),
+      new Object(Symbol),
+      new Object(true),
+      new Object(1),
+      new Object(call({ me: true }))
+    ]
+  `,
+    `
+    [Object("function"), Object(Symbol), Object(true), Object(1), Object(call({ me: true }))];
+  `
+  );
 
-  it("should change Object() to ({}) in ambiguous contexts", () => {
-    const source = unpad(`
-      new Object();
-      var foo = () => Object();
-      var bar = () => Object({ baz: 3 });
-    `);
-    const expected = unpad(`
-      ({});
-      var foo = () => ({});
-      var bar = () => ({ baz: 3 });
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should change `Object()` into `({})` in ambiguous contexts",
+    `
+    new Object();
+    var foo = () => Object();
+    var bar = () => Object({ baz: 3 });
+  `,
+    `
+    ({});
+    var foo = () => ({});
+    var bar = () => ({ baz: 3 });
+  `
+  );
 
-  it("shouldn't change referenced identifiers", () => {
-    const source = unpad(`
-      (function (Boolean, String, Number, Array, Object) {
-        return Boolean(a), String(b), Number(c), Array(d), Object(d);
-      })(MyBoolean, MyString, MyNumber, MyArray, MyObject);
-    `);
-    const expected = unpad(`
-      (function (Boolean, String, Number, Array, Object) {
-        return Boolean(a), String(b), Number(c), Array(d), Object(d);
-      })(MyBoolean, MyString, MyNumber, MyArray, MyObject);
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "shouldn't change overridden type constructors",
+    `
+    (function (Boolean, String, Number, Array, Object) {
+      return Boolean(a), String(b), Number(c), Array(d), Object(d);
+    })(MyBoolean, MyString, MyNumber, MyArray, MyObject);
+  `,
+    `
+    (function (Boolean, String, Number, Array, Object) {
+      return Boolean(a), String(b), Number(c), Array(d), Object(d);
+    })(MyBoolean, MyString, MyNumber, MyArray, MyObject);
+  `
+  );
 
   // options tests
-  it("should not transform type for falsy option", () => {
+  it("should respect the options disabling optomizations", () => {
     const types = {
       boolean: "Boolean",
       number: "Number",
@@ -252,21 +285,24 @@ describe("type-constructors-plugin", () => {
         })();
       `
       );
-      const expected = source;
-      expect(transform(source, { [names[i]]: false })).toBe(expected);
+      expect(
+        babel.transform(source, {
+          plugins: [[plugin, { [names[i]]: false }]]
+        }).code
+      ).toBe(source);
     }
   });
 
   // https://github.com/babel/babili/issues/206
-  it("should handle floating point numbers in Array()", () => {
-    const source = unpad(`
-      new Array(-0.01);
-      new Array(-1);
-    `);
-    const expected = unpad(`
-      Array(-0.01);
-      Array(-1);
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should handle floating point numbers in `Array()`",
+    `
+    new Array(-0.01);
+    new Array(-1);
+  `,
+    `
+    Array(-0.01);
+    Array(-1);
+  `
+  );
 });
