@@ -23,9 +23,15 @@ module.exports = ({ types: t }) => {
     ArrayExpression: {
       members: {
         length() {
+          if (this.elements.some(el => t.isSpreadElement(el))) {
+            return;
+          }
           return t.numericLiteral(this.elements.length);
         },
         [FALLBACK_HANDLER](i) {
+          if (this.elements.some(el => t.isSpreadElement(el))) {
+            return;
+          }
           if (typeof i === "number" || i.match(/^\d+$/)) {
             return this.elements[i] || undef;
           }
