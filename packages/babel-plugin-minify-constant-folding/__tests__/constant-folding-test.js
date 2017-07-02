@@ -106,6 +106,7 @@ describe("constant-folding-plugin", () => {
     [null, 1].join("/");
     [/xyz/im, true].join("abc");
     [\`a\${xyz}\`].join("1");
+    [\`a\`, \`c\`].join('b');
 
     [1, 2, 3].length;
     [1, 2, 3][1];
@@ -140,6 +141,7 @@ describe("constant-folding-plugin", () => {
     "/1";
     "/xyz/imabctrue";
     [\`a\${xyz}\`].join("1");
+    "abc";
 
     3;
     2;

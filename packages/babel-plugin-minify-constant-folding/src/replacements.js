@@ -56,6 +56,9 @@ module.exports = ({ types: t }) => {
               ) {
                 return el.value;
               }
+              if (t.isTemplateLiteral(el) && el.expressions.length === 0) {
+                return el.quasis[0].value.cooked;
+              }
               bad = true;
               return;
             })
