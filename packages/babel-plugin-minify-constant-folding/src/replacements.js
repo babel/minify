@@ -43,11 +43,21 @@ module.exports = ({ types: t }) => {
           let bad = false;
           const str = this.elements
             .map(el => {
-              if (!t.isLiteral(el)) {
-                bad = true;
-                return;
+              if (t.isRegExpLiteral(el)) {
+                return `/${el.pattern}/${el.flags}`;
               }
-              return el.value;
+              if (t.isNullLiteral(el)) {
+                return null;
+              }
+              if (
+                t.isStringLiteral(el) ||
+                t.isBooleanLiteral(el) ||
+                t.isNumericLiteral(el)
+              ) {
+                return el.value;
+              }
+              bad = true;
+              return;
             })
             .join(sep.value);
           return bad ? undefined : t.stringLiteral(str);
