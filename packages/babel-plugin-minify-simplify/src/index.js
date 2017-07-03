@@ -780,6 +780,17 @@ module.exports = ({ types: t }) => {
         exit(path) {
           const { node, parent } = path;
 
+          if (
+            t.isArrowFunctionExpression(parent) &&
+            node.body &&
+            node.body.length === 1 &&
+            t.isReturnStatement(node.body[0]) &&
+            node.body[0].argument !== null
+          ) {
+            path.replaceWith(node.body[0].argument);
+            return;
+          }
+
           if (needsBlock(node, parent)) {
             return;
           }

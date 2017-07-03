@@ -2488,4 +2488,28 @@ describe("simplify-plugin", () => {
     }
   `
   );
+
+  thePlugin(
+    "should convert simple arrow block to expression",
+    `
+    const a = () => {return (3, 4);};
+    const b = () => {return 3;};
+  `,
+    `
+    const a = () => (3, 4);
+    const b = () => 3;
+  `
+  );
+
+  thePlugin(
+    "should NOT convert empty arrow block to expression",
+    `
+    const a = () => {};
+    const b = () => {return;};
+  `,
+    `
+    const a = () => {};
+    const b = () => {};
+  `
+  );
 });
