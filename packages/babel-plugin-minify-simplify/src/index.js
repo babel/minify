@@ -782,7 +782,6 @@ module.exports = ({ types: t }) => {
 
           if (
             t.isArrowFunctionExpression(parent) &&
-            node.body &&
             node.body.length === 1 &&
             t.isReturnStatement(node.body[0]) &&
             node.body[0].argument !== null
