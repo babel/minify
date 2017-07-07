@@ -316,9 +316,10 @@ function run() {
 
   DEBUG = !program.quiet;
 
-  const prepare = files.length > 0
-    ? Promise.resolve(files)
-    : new AssetsManager(DEFAULT_ASSETS, ASSETS_DIR).updateCache();
+  const prepare =
+    files.length > 0
+      ? Promise.resolve(files)
+      : new AssetsManager(DEFAULT_ASSETS, ASSETS_DIR).updateCache();
 
   prepare
     .then(files => {

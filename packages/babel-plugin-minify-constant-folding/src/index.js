@@ -77,9 +77,10 @@ module.exports = babel => {
           return;
         }
 
-        const value = literal.key === "right"
-          ? relevant.node.value + literal.node.value
-          : literal.node.value + relevant.node.value;
+        const value =
+          literal.key === "right"
+            ? relevant.node.value + literal.node.value
+            : literal.node.value + relevant.node.value;
 
         relevant.replaceWith(t.stringLiteral(value));
         path.replaceWith(bin.node);

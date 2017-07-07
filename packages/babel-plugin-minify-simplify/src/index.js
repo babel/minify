@@ -694,9 +694,10 @@ module.exports = ({ types: t }) => {
 
           rest.push(...statements.slice(i + 1));
 
-          const test = breakAt === "consequent"
-            ? t.unaryExpression("!", ifStatement.test, true)
-            : ifStatement.test;
+          const test =
+            breakAt === "consequent"
+              ? t.unaryExpression("!", ifStatement.test, true)
+              : ifStatement.test;
           let expr;
           if (exprs.length === 1) {
             expr = t.sequenceExpression([exprs[0], test]);
@@ -1196,9 +1197,8 @@ module.exports = ({ types: t }) => {
 
             exprs.push(test);
 
-            const expr = exprs.length === 1
-              ? exprs[0]
-              : t.sequenceExpression(exprs);
+            const expr =
+              exprs.length === 1 ? exprs[0] : t.sequenceExpression(exprs);
 
             const replacement = t.logicalExpression("&&", node.test, expr);
 
