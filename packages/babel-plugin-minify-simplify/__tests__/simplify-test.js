@@ -2512,4 +2512,24 @@ describe("simplify-plugin", () => {
     const b = () => {};
   `
   );
+
+  thePlugin(
+    "should NOT remove block for early continue transforms - fix issue#560",
+    `
+      function foo() {
+        while (true) {
+          const {x} = a;
+          const {y} = b;
+        }
+      }
+    `,
+    `
+      function foo() {
+        for (; true;) {
+          const { x } = a;
+          const { y } = b;
+        }
+      }
+    `
+  );
 });
