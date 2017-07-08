@@ -1519,7 +1519,8 @@ module.exports = ({ types: t }) => {
       t.isTryStatement(parent) ||
       t.isCatchClause(parent) ||
       t.isSwitchStatement(parent) ||
-      (isSingleBlockScopeDeclaration(node) && t.isIfStatement(parent))
+      (isSingleBlockScopeDeclaration(node) &&
+        (t.isIfStatement(parent) || t.isLoop(parent)))
     );
   }
 
@@ -1581,7 +1582,7 @@ module.exports = ({ types: t }) => {
     }
 
     // We may have reduced the body to a single statement.
-    if (node.body.body.length === 1) {
+    if (node.body.body.length === 1 && !needsBlock(node.body, node)) {
       path.get("body").replaceWith(node.body.body[0]);
     }
   }
