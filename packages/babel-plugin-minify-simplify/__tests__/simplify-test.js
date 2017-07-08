@@ -2525,9 +2525,9 @@ describe("simplify-plugin", () => {
     `,
     `
       function foo() {
-        for (;;) {
-          const { x: c } = a,
-                { y: d } = b;
+        for (; true;) {
+          const { x } = a;
+          const { y } = b;
         }
       }
     `
