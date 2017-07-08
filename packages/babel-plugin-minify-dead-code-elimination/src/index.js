@@ -228,21 +228,29 @@ module.exports = ({ types: t, traverse }) => {
               continue;
             }
 
-            if (
-              binding.path.isVariableDeclarator() &&
-              binding.path.node.init &&
-              !scope.isPure(binding.path.node.init) &&
-              binding.path.parentPath.node.declarations
-            ) {
-              if (binding.path.parentPath.node.declarations.length !== 1) {
-                continue;
-              }
-              // Bail out for ArrayPattern and ObjectPattern
+            if (binding.path.isVariableDeclarator()) {
               if (!binding.path.get("id").isIdentifier()) {
+                // deopt for object and array pattern
                 continue;
               }
 
-              binding.path.parentPath.replaceWith(binding.path.node.init);
+              // if declarator has some impure init expression
+              // var x = foo();
+              // => foo();
+              if (
+                binding.path.node.init &&
+                !scope.isPure(binding.path.node.init) &&
+                binding.path.parentPath.node.declarations
+              ) {
+                // binding path has more than one declarations
+                if (binding.path.parentPath.node.declarations.length !== 1) {
+                  continue;
+                }
+                binding.path.parentPath.replaceWith(binding.path.node.init);
+              } else {
+                updateReferences(binding.path, this);
+                removeOrVoid(binding.path);
+              }
             } else {
               updateReferences(binding.path, this);
               removeOrVoid(binding.path);
@@ -403,7 +411,7 @@ module.exports = ({ types: t, traverse }) => {
               }
             }
           }
-        }
+        } // end-for-of
       }
     },
 

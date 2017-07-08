@@ -2426,4 +2426,26 @@ describe("dce-plugin", () => {
     }
   `
   );
+
+  thePlugin(
+    "should bail out for Array and Object Pattern - fix issue#617",
+    `
+      function foo(arr) {
+        let [a, b] = arr;
+        console.log(a);
+      }
+    `
+  );
+
+  thePlugin(
+    "should bail out for Array and Object Pattern - fix issue#617",
+    `
+      function foo() {
+        return getPromise().then(arr => {
+          let { a, b } = arr;
+          console.log(a);
+        });
+      }
+    `
+  );
 });
