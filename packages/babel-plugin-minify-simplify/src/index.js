@@ -1,8 +1,5 @@
 "use strict";
 
-const PatternMatch = require("./pattern-match");
-const h = require("./helpers");
-
 module.exports = ({ types: t }) => {
   const flipExpressions = require("babel-helper-flip-expressions")(t);
   const toMultipleSequenceExpressions = require("babel-helper-to-multiple-sequence-expressions")(
@@ -10,21 +7,12 @@ module.exports = ({ types: t }) => {
   );
   const ifStatement = require("./if-statement")(t);
   const conditionalExpression = require("./conditional-expression")(t);
+  const logicalExpression = require("./logical-expression")(t);
 
   const VOID_0 = t.unaryExpression("void", t.numericLiteral(0), true);
   const condExprSeen = Symbol("condExprSeen");
   const seqExprSeen = Symbol("seqExprSeen");
   const shouldRevisit = Symbol("shouldRevisit");
-
-  // Types as symbols for comparisions
-  const types = {};
-  t.TYPES.forEach(type => {
-    types[type] = Symbol.for(type);
-  });
-  const isNodeOfType = (node, typeSymbol) => {
-    if (typeof typeSymbol !== "symbol") return false;
-    return t["is" + Symbol.keyFor(typeSymbol)](node);
-  };
 
   const operators = new Set([
     "+",
@@ -86,8 +74,6 @@ module.exports = ({ types: t }) => {
 
     return propNames;
   }
-  const OP_AND = input => input === "&&";
-  const OP_OR = input => input === "||";
 
   return {
     name: "minify-simplify",
@@ -194,77 +180,7 @@ module.exports = ({ types: t }) => {
       },
 
       LogicalExpression: {
-        exit(path) {
-          // cache of path.evaluate()
-          const evaluateMemo = new Map();
-
-          const TRUTHY = input => {
-            // !NaN and !undefined are truthy
-            // separate check here as they are considered impure by babel
-            if (
-              input.isUnaryExpression() &&
-              input.get("argument").isIdentifier()
-            ) {
-              if (
-                input.node.argument.name === "NaN" ||
-                input.node.argument.name === "undefined"
-              ) {
-                return true;
-              }
-            }
-            const evalResult = input.evaluate();
-            evaluateMemo.set(input, evalResult);
-            return evalResult.confident && input.isPure() && evalResult.value;
-          };
-
-          const FALSY = input => {
-            // NaN and undefined are falsy
-            // separate check here as they are considered impure by babel
-            if (input.isIdentifier()) {
-              if (
-                input.node.name === "NaN" ||
-                input.node.name === "undefined"
-              ) {
-                return true;
-              }
-            }
-            const evalResult = input.evaluate();
-            evaluateMemo.set(input, evalResult);
-            return evalResult.confident && input.isPure() && !evalResult.value;
-          };
-
-          const { Expression: EX } = types;
-
-          // Convention:
-          // [left, operator, right, handler(leftNode, rightNode)]
-          const matcher = new PatternMatch([
-            [TRUTHY, OP_AND, EX, (l, r) => r],
-            [FALSY, OP_AND, EX, l => l],
-            [TRUTHY, OP_OR, EX, l => l],
-            [FALSY, OP_OR, EX, (l, r) => r]
-          ]);
-
-          const left = path.get("left");
-          const right = path.get("right");
-          const operator = path.node.operator;
-
-          const result = matcher.match(
-            [left, operator, right],
-            h.isPatternMatchesPath(t)
-          );
-
-          if (result.match) {
-            // here we are sure that left.evaluate is always confident becuase
-            // it satisfied one of TRUTHY/FALSY paths
-            let value;
-            if (evaluateMemo.has(left)) {
-              value = evaluateMemo.get(left).value;
-            } else {
-              value = left.evaluate().value;
-            }
-            path.replaceWith(result.value(t.valueToNode(value), right.node));
-          }
-        }
+        exit: logicalExpression.simplifyPatterns
       },
 
       AssignmentExpression(path) {
