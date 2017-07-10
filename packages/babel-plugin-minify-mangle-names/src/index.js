@@ -75,7 +75,7 @@ module.exports = babel => {
      * the scope objects
      */
     crawlScope() {
-      traverse.clearCache();
+      (traverse.clearCache || traverse.cache.clear)();
       this.program.scope.crawl();
     }
 
