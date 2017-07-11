@@ -400,7 +400,8 @@ module.exports = ({ types: t, traverse }) => {
               const replaced = replace(binding.referencePaths[0], {
                 binding,
                 scope,
-                replacement
+                replacement,
+                replacementPath
               });
 
               if (replaced) {
@@ -936,7 +937,7 @@ module.exports = ({ types: t, traverse }) => {
   }
 
   function replace(path, options) {
-    const { replacement, scope, binding } = options;
+    const { replacement, replacementPath, scope, binding } = options;
 
     // Same name, different binding.
     if (scope.getBinding(path.node.name) !== binding) {
@@ -974,6 +975,20 @@ module.exports = ({ types: t, traverse }) => {
     // Avoid recursion.
     if (path.find(({ node }) => node === replacement)) {
       return;
+    }
+
+    // https://github.com/babel/babili/issues/611
+    // this is valid only for FunctionDeclaration where we convert
+    // function declaration to expression in the next step
+    if (replacementPath.isFunctionDeclaration()) {
+      const id = replacementPath.get("id");
+      if (id.isIdentifier()) {
+        for (let name in replacementPath.scope.bindings) {
+          if (name === id.node.name) {
+            return;
+          }
+        }
+      }
     }
 
     // https://github.com/babel/babili/issues/130

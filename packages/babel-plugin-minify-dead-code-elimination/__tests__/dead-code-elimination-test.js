@@ -2448,4 +2448,18 @@ describe("dce-plugin", () => {
       }
     `
   );
+
+  thePlugin(
+    "should fix issue#611 - transforming fn decl to expr",
+    `
+      function foo() {
+        function count() {
+          let count = 1;
+          bar(count);
+          return count;
+        }
+        return count;
+      }
+    `
+  );
 });
