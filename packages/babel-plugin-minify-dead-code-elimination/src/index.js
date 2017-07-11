@@ -981,12 +981,10 @@ module.exports = ({ types: t, traverse }) => {
     // this is valid only for FunctionDeclaration where we convert
     // function declaration to expression in the next step
     if (replacementPath.isFunctionDeclaration()) {
-      const id = replacementPath.get("id");
-      if (id.isIdentifier()) {
-        for (let name in replacementPath.scope.bindings) {
-          if (name === id.node.name) {
-            return;
-          }
+      const fnName = replacementPath.get("id").node.name;
+      for (let name in replacementPath.scope.bindings) {
+        if (name === fnName) {
+          return;
         }
       }
     }
