@@ -11,7 +11,7 @@ Things required:
 
 For a bug:
 
-1. A minimal code to reproduce the bug
+1. Minimal code to reproduce the bug
 2. Stack Trace if there is an Error thrown during minification
 3. Configuration - babili configuration or babelrc
 4. Whether you used it with other presets/plugins - like es2015 or env
@@ -31,7 +31,7 @@ For an enhancement:
 ```
 
 #### Actual Output
-<!-- If it's an Error thrown, please add the StackTrace here in this section -->
+<!-- If an error is thrown, please provide the stack trace here -->
 
 ```js
 
