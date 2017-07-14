@@ -60,6 +60,10 @@ function hasViolation(declarator, scope, start) {
   const scopeParent = declarator.getFunctionParent();
 
   const violation = binding.constantViolations.some(v => {
+    // https://github.com/babel/babili/issues/630
+    if (!v.node) {
+      return false;
+    }
     // return 'true' if we cannot guarantee the violation references
     // the initialized identifier after
     const violationStart = v.node.start;
