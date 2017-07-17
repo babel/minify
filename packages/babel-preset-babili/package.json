@@ -8,9 +8,7 @@
   "author": "amasad",
   "license": "MIT",
   "main": "lib/index.js",
-  "keywords": [
-    "babel-preset"
-  ],
+  "keywords": ["babel-preset"],
   "dependencies": {
     "babel-plugin-minify-builtins": "^0.1.3",
     "babel-plugin-minify-constant-folding": "^0.1.3",
@@ -35,8 +33,5 @@
     "babel-plugin-transform-simplify-comparison-operators": "^6.8.4",
     "babel-plugin-transform-undefined-to-void": "^6.8.2",
     "lodash.isplainobject": "^4.0.6"
-  },
-  "devDependencies": {
-    "babel-preset-es2015": "^6.24.1"
   }
 }
