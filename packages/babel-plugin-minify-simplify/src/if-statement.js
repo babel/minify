@@ -276,7 +276,18 @@ module.exports = t => {
         (consequent.isBlockStatement() &&
           t.isReturnStatement(
             consequent.node.body[consequent.node.body.length - 1]
-          )))
+          ))) &&
+      // don't hoist declarations
+      // TODO: validate declarations after fixing scope issues
+      (alternate.isBlockStatement()
+        ? !alternate
+            .get("body")
+            .some(
+              stmt =>
+                stmt.isVariableDeclaration({ kind: "let" }) ||
+                stmt.isVariableDeclaration({ kind: "const" })
+            )
+        : true)
     ) {
       path.insertAfter(
         alternate.isBlockStatement()
