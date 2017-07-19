@@ -2532,4 +2532,29 @@ describe("simplify-plugin", () => {
       }
     `
   );
+
+  // TODO: issue-637
+  thePlugin(
+    "should NOT remove else block when ",
+    `
+      function test(a) {
+        const clash = () => {};
+        if (a) {
+          return clash();
+        } else {
+          const clash = () => {};
+          return clash();
+        }
+      }
+    `,
+    `
+      function test(a) {
+        const clash = () => {};
+        if (a) return clash();else {
+          const clash = () => {};
+          return clash();
+        }
+      }
+    `
+  );
 });
