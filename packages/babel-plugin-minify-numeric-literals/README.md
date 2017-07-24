@@ -1,4 +1,4 @@
-# babel-plugin-minify-mangle-names
+# babel-plugin-minify-numeric-literals
 
 Shortening of numeric literals via scientific notation
 
