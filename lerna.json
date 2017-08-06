@@ -1,6 +1,8 @@
 {
   "lerna": "2.0.0",
   "version": "independent",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
   "commands": {
     "publish": {
       "ignore": [
