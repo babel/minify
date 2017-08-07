@@ -3,6 +3,7 @@
 const some = require("lodash.some");
 const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
 const removeUseStrict = require("./remove-use-strict");
+const evaluate = require("babel-helper-evaluate-path");
 
 function prevSiblings(path) {
   const parentPath = path.parentPath;
@@ -771,40 +772,8 @@ module.exports = ({ types: t, traverse }) => {
           const alternate = path.get("alternate");
           const test = path.get("test");
 
-          const evalResult = test.evaluate();
+          const evalResult = evaluate(test);
           const isPure = test.isPure();
-
-          const binding = path.scope.getBinding(test.node.name);
-
-          // Ref - https://github.com/babel/babili/issues/574
-          // deopt if var is declared in other scope
-          // if (a) { var b = blahl;} if (b) { //something }
-          if (
-            binding &&
-            binding.path.parentPath.isVariableDeclaration({ kind: "var" })
-          ) {
-            let ifStatementParent = null;
-
-            const fnParent =
-              binding.path.getFunctionParent() ||
-              binding.path.getProgramParent();
-
-            forEachAncestor(binding.path.parentPath, parent => {
-              if (fnParent === parent) return;
-              if (parent.isIfStatement()) {
-                ifStatementParent = parent;
-              }
-            });
-
-            if (
-              ifStatementParent &&
-              binding.referencePaths.some(
-                ref => !ref.isDescendant(ifStatementParent)
-              )
-            ) {
-              return;
-            }
-          }
 
           const replacements = [];
           if (evalResult.confident && !isPure && test.isSequenceExpression()) {
