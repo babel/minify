@@ -22,10 +22,6 @@ function forEachAncestor(path, callback) {
   }
 }
 
-function isDifferentScope(varDeclarationPath, ifStatementPath) {
-  return varDeclarationPath.parentPath.isDescendant(ifStatementPath.parentPath);
-}
-
 module.exports = ({ types: t, traverse }) => {
   const removeOrVoid = require("babel-helper-remove-or-void")(t);
   const shouldRevisit = Symbol("shouldRevisit");
@@ -191,13 +187,15 @@ module.exports = ({ types: t, traverse }) => {
             ) {
               continue;
             } else if (binding.path.isVariableDeclarator()) {
-              const parentPath = binding.path.parentPath.parentPath;
+              const declaration = binding.path.parentPath;
+              const maybeBlockParent = declaration.parentPath;
               if (
-                parentPath &&
-                (parentPath.isForXStatement() || parentPath.isIfStatement())
+                maybeBlockParent &&
+                maybeBlockParent.isForXStatement({
+                  left: declaration.node
+                })
               ) {
                 // Can't remove if in a for-in/for-of/for-await statement `for (var x in wat)`.
-                // Can't remove if (true) {var a = 10};
                 continue;
               }
             } else if (!scope.isPure(binding.path.node)) {
@@ -784,7 +782,7 @@ module.exports = ({ types: t, traverse }) => {
           if (
             binding &&
             binding.path.parentPath.isVariableDeclaration() &&
-            isDifferentScope(binding.path.parentPath, path)
+            binding.path.parentPath.parentPath.isDescendant(path.parentPath)
           ) {
             return;
           }
