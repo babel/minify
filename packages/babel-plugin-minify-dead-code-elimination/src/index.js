@@ -781,10 +781,29 @@ module.exports = ({ types: t, traverse }) => {
           // if (a) { var b = blahl;} if (b) { //something }
           if (
             binding &&
-            binding.path.parentPath.isVariableDeclaration() &&
-            binding.path.parentPath.parentPath.isDescendant(path.parentPath)
+            binding.path.parentPath.isVariableDeclaration({ kind: "var" })
           ) {
-            return;
+            let ifStatementParent = null;
+
+            const fnParent =
+              binding.path.getFunctionParent() ||
+              binding.path.getProgramParent();
+
+            forEachAncestor(binding.path.parentPath, parent => {
+              if (fnParent === parent) return;
+              if (parent.isIfStatement()) {
+                ifStatementParent = parent;
+              }
+            });
+
+            if (
+              ifStatementParent &&
+              binding.referencePaths.some(
+                ref => !ref.isDescendant(ifStatementParent)
+              )
+            ) {
+              return;
+            }
           }
 
           const replacements = [];
