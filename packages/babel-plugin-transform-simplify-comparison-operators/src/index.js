@@ -7,6 +7,14 @@ module.exports = function({ types: t }) {
     );
   }
 
+  function undefinedToNull(path) {
+    if (t.isIdentifier(path.node, { name: "undefined" }) || isPureVoid(path)) {
+      path.replaceWith(t.nullLiteral());
+      return true;
+    }
+    return false;
+  }
+
   return {
     name: "transform-simplify-comparison-operators",
     visitor: {
@@ -17,12 +25,8 @@ module.exports = function({ types: t }) {
         const op = node.operator;
 
         if (["!=", "=="].indexOf(node.operator) !== -1) {
-          if (
-            t.isIdentifier(node.right, { name: "undefined" }) ||
-            isPureVoid(path.get("right"))
-          ) {
-            path.get("right").replaceWith(t.nullLiteral());
-          }
+          undefinedToNull(path.get("left"));
+          undefinedToNull(path.get("right"));
         }
 
         if (op !== "===" && op !== "!==") {
