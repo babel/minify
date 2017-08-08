@@ -8,10 +8,9 @@
   "author": "amasad",
   "license": "MIT",
   "main": "lib/index.js",
-  "keywords": [
-    "babel-plugin"
-  ],
+  "keywords": ["babel-plugin"],
   "dependencies": {
+    "babel-helper-evaluate-path": "^0.1.0",
     "babel-helper-mark-eval-scopes": "^0.1.1",
     "babel-helper-remove-or-void": "^0.1.1",
     "lodash.some": "^4.6.0"

@@ -3,6 +3,7 @@
 const some = require("lodash.some");
 const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
 const removeUseStrict = require("./remove-use-strict");
+const evaluate = require("babel-helper-evaluate-path");
 
 function prevSiblings(path) {
   const parentPath = path.parentPath;
@@ -508,7 +509,7 @@ module.exports = ({ types: t, traverse }) => {
 
     SwitchStatement: {
       exit(path) {
-        const evaluated = path.get("discriminant").evaluate();
+        const evaluated = evaluate(path.get("discriminant"));
 
         if (!evaluated.confident) return;
 
@@ -527,7 +528,7 @@ module.exports = ({ types: t, traverse }) => {
             continue;
           }
 
-          const testResult = test.evaluate();
+          const testResult = evaluate(test);
 
           // if we are not able to deternine a test during
           // compile time, we terminate immediately
@@ -613,7 +614,7 @@ module.exports = ({ types: t, traverse }) => {
 
     WhileStatement(path) {
       const test = path.get("test");
-      const result = test.evaluate();
+      const result = evaluate(test);
       if (result.confident && test.isPure() && !result.value) {
         path.remove();
       }
@@ -623,7 +624,7 @@ module.exports = ({ types: t, traverse }) => {
       const test = path.get("test");
       if (!test.isPure()) return;
 
-      const result = test.evaluate();
+      const result = evaluate(test);
       if (result.confident) {
         if (result.value) {
           test.remove();
@@ -635,7 +636,7 @@ module.exports = ({ types: t, traverse }) => {
 
     DoWhileStatement(path) {
       const test = path.get("test");
-      const result = test.evaluate();
+      const result = evaluate(test);
       if (result.confident && test.isPure() && !result.value) {
         const body = path.get("body");
 
@@ -771,40 +772,8 @@ module.exports = ({ types: t, traverse }) => {
           const alternate = path.get("alternate");
           const test = path.get("test");
 
-          const evalResult = test.evaluate();
+          const evalResult = evaluate(test);
           const isPure = test.isPure();
-
-          const binding = path.scope.getBinding(test.node.name);
-
-          // Ref - https://github.com/babel/babili/issues/574
-          // deopt if var is declared in other scope
-          // if (a) { var b = blahl;} if (b) { //something }
-          if (
-            binding &&
-            binding.path.parentPath.isVariableDeclaration({ kind: "var" })
-          ) {
-            let ifStatementParent = null;
-
-            const fnParent =
-              binding.path.getFunctionParent() ||
-              binding.path.getProgramParent();
-
-            forEachAncestor(binding.path.parentPath, parent => {
-              if (fnParent === parent) return;
-              if (parent.isIfStatement()) {
-                ifStatementParent = parent;
-              }
-            });
-
-            if (
-              ifStatementParent &&
-              binding.referencePaths.some(
-                ref => !ref.isDescendant(ifStatementParent)
-              )
-            ) {
-              return;
-            }
-          }
 
           const replacements = [];
           if (evalResult.confident && !isPure && test.isSequenceExpression()) {

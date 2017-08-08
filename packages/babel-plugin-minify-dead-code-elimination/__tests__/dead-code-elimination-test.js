@@ -518,59 +518,41 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
-    "should handle orpahaned returns",
+    "should handle orphaned returns",
     `
-    var a = true;
-    function foo() {
-      if (a) return;
-      x();
-    }
-  `,
+      var a = true;
+      function foo() {
+        if (a) return;
+        x();
+      }
     `
-    var a = true;
-    function foo() {}
-  `
   );
 
   thePlugin(
     "should handle orpahaned returns with a value",
     `
-    var a = true;
-    function foo() {
-      if (a) return 1;
-      x();
-    }
-  `,
+      var a = true;
+      function foo() {
+        if (a) return 1;
+        x();
+      }
     `
-    var a = true;
-    function foo() {
-      return 1;
-    }
-  `
   );
 
   thePlugin(
     "should handle orphaned, redundant returns",
     `
-    var x = true;
-    function foo() {
-      if (b) {
-        if (x) {
-          z();
-          return;
+      var x = true;
+      function foo() {
+        if (b) {
+          if (x) {
+            z();
+            return;
+          }
+          y();
         }
-        y();
       }
-    }
-  `,
     `
-    var x = true;
-    function foo() {
-      if (b) {
-        z();
-      }
-    }
-  `
   );
 
   thePlugin(
@@ -2469,6 +2451,37 @@ describe("dce-plugin", () => {
       function foo(v) {
         if (v) var w = 10;
         if (w) console.log("hello", v);
+      }
+    `
+  );
+
+  thePlugin.skip(
+    "should optimize to void 0 for lets referenced before init declarations",
+    `
+      function foo() {
+        bar(a); // Should be a ReferenceError
+        let a = 1;
+      }
+    `
+  );
+
+  thePlugin(
+    "should optimize lets referenced before init declarations - 2",
+    `
+      function foo() {
+        function bar() {
+          if (a) console.log(a);
+        }
+        let a = 1;
+        return bar;
+      }
+    `,
+    `
+      function foo() {
+        let a = 1;
+        return function () {
+          if (a) console.log(a);
+        };
       }
     `
   );

@@ -40,7 +40,7 @@ describe("minify-builtins", () => {
     "should collect and minify no matter any depth",
     `
     function a (){
-      Math.max(b, a);
+      Math.max(c, a);
       const b = () => {
         const a = Math.floor(c);
         Math.min(b, a) * Math.floor(b);
@@ -68,8 +68,8 @@ describe("minify-builtins", () => {
     `
     class Test {
       foo() {
-        Math.max(c, d)
-        Math.max(c, d)
+        Math.max(a, d)
+        Math.max(a, d)
         const c = function() {
           Math.max(c, d)
           Math.floor(m);
