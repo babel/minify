@@ -85,7 +85,7 @@ new A();",
 exports[`minify-builtins should collect and minify no matter any depth 1`] = `
 Object {
   "_source": "function a (){
-  Math.max(b, a);
+  Math.max(c, a);
   const b = () => {
     const a = Math.floor(c);
     Math.min(b, a) * Math.floor(b);
@@ -95,7 +95,7 @@ Object {
   }
 }",
   "expected": "function a() {
-  Math.max(b, a);
+  Math.max(c, a);
   const b = () => {
     var _Mathmin = Math.min;
     var _Mathfloor = Math.floor;
@@ -170,8 +170,8 @@ exports[`minify-builtins should minify builtins to method scope for class declar
 Object {
   "_source": "class Test {
   foo() {
-    Math.max(c, d)
-    Math.max(c, d)
+    Math.max(a, d)
+    Math.max(a, d)
     const c = function() {
       Math.max(c, d)
       Math.floor(m);
@@ -187,8 +187,8 @@ Object {
   foo() {
     var _Mathmax = Math.max;
 
-    _Mathmax(c, d);
-    _Mathmax(c, d);
+    _Mathmax(a, d);
+    _Mathmax(a, d);
     const c = function () {
       var _Mathfloor = Math.floor;
 
@@ -220,7 +220,7 @@ Object {
 
   let a = 10;
   const d = false;
-  _Mathmax(a, b) + _Mathmax(b, a);
+  _Mathmax(10, b) + _Mathmax(b, 10);
   return d && true;
 }",
 }

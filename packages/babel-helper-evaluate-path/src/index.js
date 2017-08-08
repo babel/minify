@@ -25,8 +25,8 @@ module.exports = function evaluate(path, t) {
 
       const evalResult = evaluateIdentifier(idPath);
       if (evalResult.confident) {
-        idPath.replaceWith(t.valueToNode(evalResult.value));
         deref(idPath, binding);
+        idPath.replaceWith(t.valueToNode(evalResult.value));
       } else {
         state.confident = evalResult.confident;
         state.deoptPath = evalResult.deoptPath;
