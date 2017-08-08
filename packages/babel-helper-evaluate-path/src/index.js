@@ -122,30 +122,16 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       ? fnParent.get("body")
       : fnParent.get("body").get("body");
 
-    const state = {
-      binding: null,
-      reference: null
-    };
+    const compareResult = compareBindingAndReference({
+      binding,
+      refPath,
+      stmts
+    });
 
-    for (const [idx, stmt] of stmts.entries()) {
-      if (stmt.isAncestor(binding.path)) {
-        state.binding = { idx };
-      }
-      for (const ref of binding.referencePaths) {
-        if (ref === refPath && stmt.isAncestor(ref)) {
-          state.reference = {
-            idx,
-            scope: binding.path.scope === ref.scope ? "current" : "other"
-          };
-          break;
-        }
-      }
-    }
-
-    if (state.reference && state.binding) {
+    if (compareResult.reference && compareResult.binding) {
       if (
-        state.reference.scope === "current" &&
-        state.reference.idx < state.binding.idx
+        compareResult.reference.scope === "current" &&
+        compareResult.reference.idx < compareResult.binding.idx
       ) {
         return { confident: true, value: void 0 };
       }
@@ -155,9 +141,7 @@ function evaluateBasedOnControlFlow(binding, refPath) {
   } else if (binding.kind === "let" || binding.kind === "const") {
     // binding.path is the declarator
     const declarator = binding.path;
-
     let scopePath = declarator.scope.path;
-
     if (scopePath.isFunction()) {
       scopePath = scopePath.get("body");
     }
@@ -165,43 +149,53 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     // Detect Usage before Init
     const stmts = scopePath.get("body");
 
-    const state = {
-      binding: null,
-      reference: null
-    };
+    const compareResult = compareBindingAndReference({
+      binding,
+      refPath,
+      stmts
+    });
 
-    for (const [idx, stmt] of stmts.entries()) {
-      if (stmt.isAncestor(binding.path)) {
-        state.binding = { idx };
-      }
-      for (const ref of binding.referencePaths) {
-        if (ref === refPath && stmt.isAncestor(ref)) {
-          state.reference = {
-            idx,
-            scope: binding.path.scope === ref.scope ? "current" : "other"
-          };
-          break;
-        }
-      }
-    }
-
-    if (state.reference && state.binding) {
+    if (compareResult.reference && compareResult.binding) {
       if (
-        state.reference.scope === "current" &&
-        state.reference.idx < state.binding.idx
+        compareResult.reference.scope === "current" &&
+        compareResult.reference.idx < compareResult.binding.idx
       ) {
         throw new Error(
           `ReferenceError: Used ${refPath.node.name}: ` +
             `${binding.kind} binding before declaration`
         );
       }
-      if (state.reference.scope === "other") {
+      if (compareResult.reference.scope === "other") {
         return { shouldDeopt: true };
       }
     }
   }
 
   return { confident: false, shouldDeopt: false };
+}
+
+function compareBindingAndReference({ binding, refPath, stmts }) {
+  const state = {
+    binding: null,
+    reference: null
+  };
+
+  for (const [idx, stmt] of stmts.entries()) {
+    if (stmt.isAncestor(binding.path)) {
+      state.binding = { idx };
+    }
+    for (const ref of binding.referencePaths) {
+      if (ref === refPath && stmt.isAncestor(ref)) {
+        state.reference = {
+          idx,
+          scope: binding.path.scope === ref.scope ? "current" : "other"
+        };
+        break;
+      }
+    }
+  }
+
+  return state;
 }
 
 function deopt(deoptPath) {
