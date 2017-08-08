@@ -2474,12 +2474,20 @@ describe("dce-plugin", () => {
     "should optimize lets referenced before init declarations - 2",
     `
       function foo() {
-        if (a) console.log(a);
+        function bar() {
+          if (a) console.log(a);
+        }
         let a = 1;
+        return bar;
       }
     `,
     `
-      function foo() {}
+      function foo() {
+        let a = 1;
+        return function () {
+          if (a) console.log(a);
+        };
+      }
     `
   );
 });

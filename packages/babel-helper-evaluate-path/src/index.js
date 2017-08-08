@@ -117,7 +117,7 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       if (!fnParent.isProgram()) blockParent = blockParent.get("body");
     }
 
-    //detect Usage Outside Init Scope
+    // detect Usage Outside Init Scope
     if (!blockParent.get("body").some(stmt => stmt.isAncestor(refPath))) {
       return { shouldDeopt: true };
     }
@@ -127,23 +127,34 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       ? fnParent.get("body")
       : fnParent.get("body").get("body");
 
-    const state = stmts.map(stmt => {
+    const state = {
+      binding: null,
+      reference: null
+    };
+
+    for (const [idx, stmt] of stmts.entries()) {
       if (stmt.isAncestor(binding.path)) {
-        return { type: "binding" };
+        state.binding = { idx };
       }
       for (const ref of binding.referencePaths) {
-        if (stmt.isAncestor(ref)) {
-          return {
-            type: ref === refPath ? "current-ref" : "other-ref"
+        if (ref === refPath && stmt.isAncestor(ref)) {
+          state.reference = {
+            idx,
+            scope: binding.path.scope === ref.scope ? "current" : "other"
           };
+          break;
         }
       }
-      return { type: "neither" };
-    });
+    }
 
-    const types = state.map(s => s.type);
+    if (state.reference && state.binding) {
+      if (
+        state.reference.scope === "current" &&
+        state.reference.idx < state.binding.idx
+      ) {
+        return { confident: true, value: void 0 };
+      }
 
-    if (types.indexOf("current-ref") < types.indexOf("binding")) {
       return { shouldDeopt: true };
     }
   } else if (binding.kind === "let" || binding.kind === "const") {
@@ -184,10 +195,14 @@ function evaluateBasedOnControlFlow(binding, refPath) {
         state.reference.scope === "current" &&
         state.reference.idx < state.binding.idx
       ) {
-        return { confident: true, value: void 0 };
+        throw new Error(
+          `ReferenceError: Used ${refPath.node.name}: ` +
+            `${binding.kind} binding before declaration`
+        );
       }
-
-      return { shouldDeopt: true };
+      if (state.reference.scope === "other") {
+        return { shouldDeopt: true };
+      }
     }
   }
 

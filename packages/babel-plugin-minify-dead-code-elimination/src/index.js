@@ -509,7 +509,7 @@ module.exports = ({ types: t, traverse }) => {
 
     SwitchStatement: {
       exit(path) {
-        const evaluated = path.get("discriminant").evaluate();
+        const evaluated = evaluate(path.get("discriminant"), t);
 
         if (!evaluated.confident) return;
 
@@ -528,7 +528,7 @@ module.exports = ({ types: t, traverse }) => {
             continue;
           }
 
-          const testResult = test.evaluate();
+          const testResult = evaluate(test, t);
 
           // if we are not able to deternine a test during
           // compile time, we terminate immediately
@@ -614,7 +614,7 @@ module.exports = ({ types: t, traverse }) => {
 
     WhileStatement(path) {
       const test = path.get("test");
-      const result = test.evaluate();
+      const result = evaluate(test, t);
       if (result.confident && test.isPure() && !result.value) {
         path.remove();
       }
@@ -624,7 +624,7 @@ module.exports = ({ types: t, traverse }) => {
       const test = path.get("test");
       if (!test.isPure()) return;
 
-      const result = test.evaluate();
+      const result = evaluate(test, t);
       if (result.confident) {
         if (result.value) {
           test.remove();
@@ -636,7 +636,7 @@ module.exports = ({ types: t, traverse }) => {
 
     DoWhileStatement(path) {
       const test = path.get("test");
-      const result = test.evaluate();
+      const result = evaluate(test, t);
       if (result.confident && test.isPure() && !result.value) {
         const body = path.get("body");
 
