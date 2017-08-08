@@ -772,7 +772,7 @@ module.exports = ({ types: t, traverse }) => {
           const alternate = path.get("alternate");
           const test = path.get("test");
 
-          const evalResult = evaluate(test);
+          const evalResult = evaluate(test, t);
           const isPure = test.isPure();
 
           const replacements = [];

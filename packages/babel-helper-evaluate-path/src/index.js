@@ -1,13 +1,15 @@
 "use strict";
 
-module.exports = function evaluate(path) {
-  if (path.isIdentifier()) {
+module.exports = function evaluate(path, t) {
+  if (!t) {
+    throw new Error("Expected babel-types");
+  }
+  if (path.isReferencedIdentifier()) {
     return evaluateIdentifier(path);
   }
 
   const state = {
-    deoptPath: null,
-    confident: false
+    confident: true
   };
 
   // prepare
@@ -16,10 +18,15 @@ module.exports = function evaluate(path) {
       scopePath.skip();
     },
     ReferencedIdentifier(idPath) {
+      const binding = idPath.scope.getBinding(idPath.node.name);
+      // don't deopt globals
+      // let babel take care of it
+      if (!binding) return;
+
       const evalResult = evaluateIdentifier(idPath);
       if (evalResult.confident) {
-        idPath.replaceWith(evalResult.value);
-        deref(idPath);
+        idPath.replaceWith(t.valueToNode(evalResult.value));
+        deref(idPath, binding);
       } else {
         state.confident = evalResult.confident;
         state.deoptPath = evalResult.deoptPath;
@@ -61,19 +68,38 @@ function evaluateIdentifier(path) {
     return deopt(binding.path);
   }
 
+  // referenced in a different scope - deopt
+  if (shouldDeoptBasedOnScope(binding, path)) {
+    return deopt(path);
+  }
+
   // let/var/const referenced before init
   // or "var" referenced in an outer scope
-  if (shouldDeoptBasedOnFlow(binding, path)) {
+  const flowEvalResult = evaluateBasedOnControlFlow(binding, path);
+
+  if (flowEvalResult.confident) {
+    return flowEvalResult;
+  }
+
+  if (flowEvalResult.shouldDeopt) {
     return deopt(path);
   }
 
   return path.evaluate();
 }
 
-function shouldDeoptBasedOnFlow(binding, refPath) {
-  const decl = binding.path;
-  const refs = binding.referencePaths;
+// check if referenced in a different fn scope
+// we can't determine if this function is called sync or async
+// if the binding is in program scope
+// all it's references inside a different function should be deopted
+function shouldDeoptBasedOnScope(binding, refPath) {
+  if (binding.scope.path.isProgram() && refPath.scope !== binding.scope) {
+    return true;
+  }
+  return false;
+}
 
+function evaluateBasedOnControlFlow(binding, refPath) {
   if (binding.kind === "var") {
     // early-exit
     const declaration = binding.path.parentPath;
@@ -81,49 +107,91 @@ function shouldDeoptBasedOnFlow(binding, refPath) {
       declaration.parentPath.isIfStatement() ||
       declaration.parentPath.isLoop()
     ) {
-      return true;
+      return { shouldDeopt: true };
     }
 
     let blockParent = binding.path.scope.getBlockParent().path;
     const fnParent = binding.path.getFunctionParent();
 
     if (blockParent === fnParent) {
-      blockParent = blockParent.get("body");
+      if (!fnParent.isProgram()) blockParent = blockParent.get("body");
     }
 
-    detectUsageOutsideInitScope: {
-      if (!blockParent.get("body").some(stmt => stmt.isAncestor(refPath))) {
-        return true;
+    //detect Usage Outside Init Scope
+    if (!blockParent.get("body").some(stmt => stmt.isAncestor(refPath))) {
+      return { shouldDeopt: true };
+    }
+
+    // Detect usage before init
+    const stmts = fnParent.isProgram()
+      ? fnParent.get("body")
+      : fnParent.get("body").get("body");
+
+    const state = stmts.map(stmt => {
+      if (stmt.isAncestor(binding.path)) {
+        return { type: "binding" };
       }
-    }
-
-    detectUsageBeforeInit: {
-      const stmts = fnParent.get("body").get("body");
-
-      const state = stmts.map(stmt => {
-        if (stmt.isAncestor(binding.path)) {
-          return { type: "binding" };
-        } else {
-          for (const ref of binding.referencePaths) {
-            if (stmt.isAncestor(ref)) {
-              return {
-                type: "ref"
-              };
-            }
-          }
-          return { type: "neither" };
+      for (const ref of binding.referencePaths) {
+        if (stmt.isAncestor(ref)) {
+          return {
+            type: ref === refPath ? "current-ref" : "other-ref"
+          };
         }
-      });
-
-      if (state[0].type === "ref") {
-        return true;
       }
+      return { type: "neither" };
+    });
+
+    const types = state.map(s => s.type);
+
+    if (types.indexOf("current-ref") < types.indexOf("binding")) {
+      return { shouldDeopt: true };
     }
   } else if (binding.kind === "let" || binding.kind === "const") {
-    throw "not implemented";
+    // binding.path is the declarator
+    const declarator = binding.path;
+
+    let scopePath = declarator.scope.path;
+
+    if (scopePath.isFunction()) {
+      scopePath = scopePath.get("body");
+    }
+
+    // Detect Usage before Init
+    const stmts = scopePath.get("body");
+
+    const state = {
+      binding: null,
+      reference: null
+    };
+
+    for (const [idx, stmt] of stmts.entries()) {
+      if (stmt.isAncestor(binding.path)) {
+        state.binding = { idx };
+      }
+      for (const ref of binding.referencePaths) {
+        if (ref === refPath && stmt.isAncestor(ref)) {
+          state.reference = {
+            idx,
+            scope: binding.path.scope === ref.scope ? "current" : "other"
+          };
+          break;
+        }
+      }
+    }
+
+    if (state.reference && state.binding) {
+      if (
+        state.reference.scope === "current" &&
+        state.reference.idx < state.binding.idx
+      ) {
+        return { confident: true, value: void 0 };
+      }
+
+      return { shouldDeopt: true };
+    }
   }
 
-  return false;
+  return { confident: false, shouldDeopt: false };
 }
 
 function deopt(deoptPath) {
@@ -133,12 +201,10 @@ function deopt(deoptPath) {
   };
 }
 
-function deref(refPath) {
+function deref(refPath, binding) {
   if (!refPath.isReferencedIdentifier()) {
     throw new Error(`Expected ReferencedIdentifier. Got ${refPath.type}`);
   }
-
-  const binding = refPath.scope.getBinding(refPath.node.name);
 
   if (binding.references > 0) {
     binding.references--;
@@ -152,5 +218,5 @@ function deref(refPath) {
     throw new Error("Unexpected Error. Scope not updated properly");
   }
 
-  binding.referecePaths.splice(idx, 1);
+  binding.referencePaths.splice(idx, 1);
 }

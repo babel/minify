@@ -48,7 +48,7 @@ module.exports = function({ types: t }) {
             // computed property should be not optimized
             // Math[max]() -> Math.max()
             if (!isComputed(callee) && isBuiltin(callee)) {
-              const result = evaluate(path);
+              const result = evaluate(path, t);
               // deopt when we have side effecty evaluate-able arguments
               // Math.max(foo(), 1) --> untouched
               // Math.floor(1) --> 1
