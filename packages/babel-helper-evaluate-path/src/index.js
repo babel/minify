@@ -24,10 +24,7 @@ module.exports = function evaluate(path, t) {
       if (!binding) return;
 
       const evalResult = evaluateIdentifier(idPath);
-      if (evalResult.confident) {
-        deref(idPath, binding);
-        idPath.replaceWith(t.valueToNode(evalResult.value));
-      } else {
+      if (!evalResult.confident) {
         state.confident = evalResult.confident;
         state.deoptPath = evalResult.deoptPath;
       }
@@ -105,7 +102,8 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     const declaration = binding.path.parentPath;
     if (
       declaration.parentPath.isIfStatement() ||
-      declaration.parentPath.isLoop()
+      declaration.parentPath.isLoop() ||
+      declaration.parentPath.isSwitchCase()
     ) {
       return { shouldDeopt: true };
     }
