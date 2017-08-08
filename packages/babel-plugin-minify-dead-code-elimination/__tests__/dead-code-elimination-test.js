@@ -2455,17 +2455,12 @@ describe("dce-plugin", () => {
     `
   );
 
-  thePlugin(
+  thePlugin.skip(
     "should optimize to void 0 for lets referenced before init declarations",
     `
       function foo() {
-        bar(a);
+        bar(a); // Should be a ReferenceError
         let a = 1;
-      }
-    `,
-    `
-      function foo() {
-        bar(void 0);
       }
     `
   );
