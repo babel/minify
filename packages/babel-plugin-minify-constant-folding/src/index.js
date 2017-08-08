@@ -143,7 +143,7 @@ module.exports = babel => {
           return;
         }
 
-        const res = evaluate(path, t);
+        const res = evaluate(path);
         if (res.confident) {
           // Avoid fractions because they can be longer than the original expression.
           // There is also issues with number percision?

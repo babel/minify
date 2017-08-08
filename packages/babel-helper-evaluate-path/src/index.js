@@ -1,9 +1,6 @@
 "use strict";
 
-module.exports = function evaluate(path, t) {
-  if (!t) {
-    throw new Error("Expected babel-types");
-  }
+module.exports = function evaluate(path) {
   if (path.isReferencedIdentifier()) {
     return evaluateIdentifier(path);
   }
@@ -212,24 +209,4 @@ function deopt(deoptPath) {
     confident: false,
     deoptPath
   };
-}
-
-function deref(refPath, binding) {
-  if (!refPath.isReferencedIdentifier()) {
-    throw new Error(`Expected ReferencedIdentifier. Got ${refPath.type}`);
-  }
-
-  if (binding.references > 0) {
-    binding.references--;
-  }
-  if (binding.references === 0) {
-    binding.referenced = false;
-  }
-  const idx = binding.referencePaths.indexOf(refPath);
-
-  if (idx < 0) {
-    throw new Error("Unexpected Error. Scope not updated properly");
-  }
-
-  binding.referencePaths.splice(idx, 1);
 }
