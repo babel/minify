@@ -1,4 +1,4 @@
-# # babel-helper-evaluate-path
+# babel-helper-evaluate-path
 
 A wrapper for babel's `path.evaluate`
 
