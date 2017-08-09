@@ -27,8 +27,13 @@
       ".*": "<rootDir>/node_modules/babel-jest"
     },
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", "/fixtures/"],
-    "roots": ["packages"],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/fixtures/"
+    ],
+    "roots": [
+      "packages"
+    ],
     "coverageDirectory": "./coverage/"
   },
   "devDependencies": {
@@ -57,11 +62,17 @@
     "lerna": "^2.0.0",
     "lerna-changelog": "^0.6.0",
     "markdown-table": "^1.1.1",
-    "output-file-sync": "^2.0.0",
     "prettier": "^1.5.3",
     "request": "^2.81.0",
+    "rimraf": "^2.6.1",
     "through2": "^2.0.3",
     "uglify-js": "^3.0.27"
   },
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "util.promisify": "^1.0.0"
+  }
 }

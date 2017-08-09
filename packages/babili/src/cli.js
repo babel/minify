@@ -1,7 +1,7 @@
 const yargsParser = require("yargs-parser");
 const optionsParser = require("./options-parser");
 const { version } = require("../package.json");
-const { processFiles } = require("./fs");
+const { handleStdin, handleFile, handleArgs, isFile } = require("./fs");
 
 const plugins = [
   "booleans",
@@ -53,7 +53,7 @@ const typeConsOpts = [
   "typeConstructors.string"
 ];
 
-const cliBooleanOpts = ["stdin", "help", "version"];
+const cliBooleanOpts = ["help", "version"];
 const cliOpts = ["out-file", "out-dir"];
 const alias = {
   outFile: "o",
@@ -68,7 +68,7 @@ function aliasArr(obj) {
   return r;
 }
 
-function printHelpInfo() {
+function printHelpInfo({ exitCode = 0 } = {}) {
   const msg = `
   Usage: babili index.js [options]
 
@@ -104,33 +104,20 @@ function printHelpInfo() {
     --undefinedToVoid       Transforms undefined into void 0
     --version, -V           Prints the current version number
   `;
-  log(msg);
+  log(msg, exitCode);
 }
 
-function log(msg) {
+function log(msg, exitCode = 0) {
   process.stdout.write(msg + "\n");
-  process.exit(0);
+  process.exit(exitCode);
 }
 
-function validate(opts) {
-  const allOpts = [
-    ...plugins,
-    ...proxies,
-    ...dceBooleanOpts,
-    ...mangleBooleanOpts,
-    ...typeConsOpts,
-    ...mangleArrayOpts,
-    ...cliBooleanOpts,
-    ...cliOpts,
-    ...aliasArr(alias)
-  ];
-
-  return Object.keys(opts).filter(
-    opt => opt !== "_" && allOpts.indexOf(opt) === -1
-  );
+function error(err) {
+  process.stderr.write(err + "\n");
+  process.exit(1);
 }
 
-function run(args) {
+function getArgv(args) {
   const presetOpts = [...plugins, ...proxies];
 
   const booleanOpts = [
@@ -159,7 +146,7 @@ function run(args) {
     {}
   );
 
-  const argv = yargsParser(args, {
+  return yargsParser(args, {
     boolean: booleanOpts,
     array: mangleArrayOpts,
     default: Object.assign({}, arrayDefaults, booleanDefaults),
@@ -168,28 +155,12 @@ function run(args) {
       "dot-notation": false
     }
   });
+}
 
-  const files = argv["_"];
-  argv["stdin"] = argv["stdin"] || (!files.length && !process.stdin.isTTY);
-  const errors = [];
-
-  if (argv.help) {
-    printHelpInfo();
-  }
-
-  if (argv.V) {
-    log(version);
-  }
-
-  if (argv.outFile && argv.outDir) {
-    errors.push("Cannot have both out-file and out-dir");
-  }
-
+function getBabiliOpts(argv) {
   const inputOpts = Object.keys(argv)
     .filter(key => {
-      if (Array.isArray(argv[key])) {
-        return argv[key].length > 0;
-      }
+      if (Array.isArray(argv[key])) return argv[key].length > 0;
       return argv[key] !== void 0;
     })
     .reduce((acc, cur) => Object.assign(acc, { [cur]: argv[cur] }), {});
@@ -197,11 +168,7 @@ function run(args) {
   const invalidOpts = validate(inputOpts);
 
   if (invalidOpts.length > 0) {
-    errors.push("Invalid Options passed: " + invalidOpts.join(","));
-  }
-
-  if (errors.length > 0) {
-    log(errors.join("\n"));
+    throw new Error("Invalid Options passed: " + invalidOpts.join(","));
   }
 
   const options = optionsParser(inputOpts);
@@ -213,7 +180,71 @@ function run(args) {
   delete options.o;
   delete options["out-file"];
 
-  processFiles(files, options);
+  return options;
 }
 
-run(process.argv.slice(2));
+function validate(opts) {
+  const allOpts = [
+    ...plugins,
+    ...proxies,
+    ...dceBooleanOpts,
+    ...mangleBooleanOpts,
+    ...typeConsOpts,
+    ...mangleArrayOpts,
+    ...cliBooleanOpts,
+    ...cliOpts,
+    ...aliasArr(alias)
+  ];
+
+  return Object.keys(opts).filter(
+    opt => opt !== "_" && allOpts.indexOf(opt) === -1
+  );
+}
+
+function runStdin(argv, options) {
+  if (argv._.length > 0) {
+    throw new Error("Reading input from STDIN. Cannot take file params");
+  }
+
+  return handleStdin(argv.outFile, options);
+}
+
+function runFile(argv, options) {
+  const file = argv._[0];
+
+  // prefer outFile
+  if (argv.outFile) {
+    return handleFile(file, argv.outFile, options);
+  } else if (argv.outDir) {
+    return handleArgs([file], argv.outDir, options);
+  } else {
+    // prints to STDOUT
+    return handleFile(file, void 0, options);
+  }
+}
+
+function runArgs(argv, options) {
+  return handleArgs(argv._, argv.outDir, options);
+}
+
+async function run(args) {
+  const argv = getArgv(args);
+
+  // early exits
+  if (argv.help) printHelpInfo();
+  if (argv.V) log(version);
+
+  const options = getBabiliOpts(argv);
+
+  if (!process.stdin.isTTY) {
+    return runStdin(argv, options);
+  } else if (argv._.length <= 0) {
+    return printHelpInfo({ exitCode: 1 });
+  } else if (argv._.length === 1 && (await isFile(argv._[0]))) {
+    return runFile(argv, options);
+  } else {
+    return runArgs(argv, options);
+  }
+}
+
+run(process.argv.slice(2)).catch(e => error(e));

@@ -16,10 +16,9 @@
     "babel-core": "^6.24.1",
     "babel-preset-babili": "^0.0.12",
     "fs-readdir-recursive": "^1.0.0",
+    "mkdirp": "^0.5.1",
     "output-file-sync": "^2.0.0",
+    "util.promisify": "^1.0.0",
     "yargs-parser": "^5.0.0"
-  },
-  "devDependencies": {
-    "rimraf": "^2.6.1"
   }
 }

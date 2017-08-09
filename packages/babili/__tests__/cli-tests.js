@@ -29,7 +29,7 @@ describe("Babili CLI", () => {
 
   it("should show version for --vevrsion", () => {
     const { version } = require("../package");
-    expect(exec("", "--version")).toEqual(version);
+    expect(exec("", "--version").trim()).toEqual(version);
   });
 
   it("should throw on all invalid options", () => {
