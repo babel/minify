@@ -141,6 +141,16 @@ function evaluateBasedOnControlFlow(binding, refPath) {
   } else if (binding.kind === "let" || binding.kind === "const") {
     // binding.path is the declarator
     const declarator = binding.path;
+    const declaration = declarator.parentPath;
+
+    if (
+      declaration.parentPath.isIfStatement() ||
+      declaration.parentPath.isLoop() ||
+      declaration.parentPath.isSwitchCase()
+    ) {
+      return { shouldDeopt: true };
+    }
+
     let scopePath = declarator.scope.path;
     if (scopePath.isFunction()) {
       scopePath = scopePath.get("body");
