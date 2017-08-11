@@ -2,10 +2,14 @@
 
 ### Setup
 ```sh
-$ git clone https://github.com/babel/minify
-$ cd minify
-$ npm install
-$ npm run bootstrap
+git clone https://github.com/babel/minify
+cd minify
+```
+
+### Install
+
+```sh
+yarn
 ```
 
 #### Build
@@ -13,13 +17,13 @@ $ npm run bootstrap
 To build **once**:
 
 ```sh
-npm run build
+yarn build
 ```
 
 Or to do an incremental build in watch mode:
 
 ```sh
-npm run watch
+yarn watch
 ```
 
 #### Lint
@@ -29,17 +33,17 @@ This project uses [prettier](https://github.com/prettier/prettier) for formattin
 To check both:
 
 ```sh
-npm run lint
+yarn lint
 ```
 
 You can also run them each individually:
 
  ```sh
 # prettier
-npm run format-check
+yarn format-check
 
 # eslint
-npm run eslint
+yarn eslint
 ```
 
 ##### Lint Fix
@@ -47,14 +51,14 @@ npm run eslint
 To fix formatting and auto-fixable eslint errors,
 
 ```sh
-npm run fix
+yarn fix
 ```
 
 You can also run them each individually:
 
 ```sh
 # prettier
-npm run format
+yarn format
 
 # eslint
 npm run eslint-fix
@@ -65,13 +69,13 @@ npm run eslint-fix
 To run all tests,
 
 ```sh
-npm test
+yarn test
 ```
 
 To run tests for a specific package,
 
 ```sh
-npm test packages/babel-preset-minify
+yarn test packages/babel-preset-minify
 ```
 
 #### Smoke Tests
