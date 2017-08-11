@@ -23,4 +23,9 @@ describe("Babili Node API", () => {
     const babiliOpts = { mangle: false };
     expect(babili(sampleInput, babiliOpts).code).toMatchSnapshot();
   });
+
+  it("override nested babili options", () => {
+    const babiliOpts = { mangle: { keepFnName: false } };
+    expect(babili(sampleInput, babiliOpts).code).toMatchSnapshot();
+  });
 });
