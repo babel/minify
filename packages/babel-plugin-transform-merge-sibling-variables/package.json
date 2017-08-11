@@ -2,13 +2,13 @@
   "name": "babel-plugin-transform-merge-sibling-variables",
   "version": "6.8.5",
   "description": "Merge sibling variables into one.",
-  "homepage": "https://github.com/babel/babili#readme",
-  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-merge-sibling-variables",
-  "bugs": "https://github.com/babel/babili/issues",
-  "author": "amasad",
-  "license": "MIT",
-  "main": "lib/index.js",
   "keywords": [
     "babel-plugin"
-  ]
+  ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "amasad",
+  "main": "lib/index.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-transform-merge-sibling-variables"
 }

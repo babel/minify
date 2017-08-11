@@ -2,16 +2,16 @@
   "name": "babel-helper-evaluate-path",
   "version": "0.1.0",
   "description": "path.evaluate wrapped in a try catch",
-  "homepage": "https://github.com/babel/babili#readme",
-  "repository": "https://github.com/babel/babili/tree/master/packages/babel-helper-evaluate-path",
-  "bugs": "https://github.com/babel/babili/issues",
-  "author": "boopathi",
-  "license": "MIT",
-  "main": "lib/index.js",
   "keywords": [
-    "babel-plugin",
-    "babili"
+    "babel-minify",
+    "babel-plugin"
   ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "boopathi",
+  "main": "lib/index.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-helper-evaluate-path",
   "dependencies": {},
   "devDependencies": {}
 }

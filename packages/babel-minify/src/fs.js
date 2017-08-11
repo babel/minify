@@ -4,7 +4,7 @@ const readdir = require("fs-readdir-recursive");
 const promisify = require("util.promisify");
 const mkdirp = promisify(require("mkdirp"));
 
-const babili = require("./");
+const minify = require("./");
 const EXTENSIONS = [".js", ".mjs"];
 
 const readFileAsync = promisify(fs.readFile);
@@ -54,7 +54,7 @@ async function readStdin() {
 }
 
 async function handleStdin(outputFilename, options) {
-  const { code } = babili(await readStdin(), options);
+  const { code } = minify(await readStdin(), options);
   if (outputFilename) {
     await writeFile(outputFilename, code);
   } else {
@@ -63,7 +63,7 @@ async function handleStdin(outputFilename, options) {
 }
 
 async function handleFile(filename, outputFilename, options) {
-  const { code } = babili(await readFile(filename), options);
+  const { code } = minify(await readFile(filename), options);
   if (outputFilename) {
     await writeFile(outputFilename, code);
   } else {

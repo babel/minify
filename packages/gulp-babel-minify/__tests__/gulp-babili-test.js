@@ -2,15 +2,15 @@ jest.autoMockOff();
 
 const gutil = require("gulp-util");
 const babelCore = require("babel-core");
-const babiliPreset = require("babel-preset-babili");
+const minifyPreset = require("babel-preset-minify");
 
 const unpad = require("../../../utils/unpad");
-const gulpBabili = require("../src/index");
+const gulpBabelMinify = require("../src/index");
 
-describe("gulp-babili", () => {
+describe("gulp-babel-minify", () => {
   it("should work with a good default", () => {
     return new Promise((resolve, reject) => {
-      const stream = gulpBabili();
+      const stream = gulpBabelMinify();
 
       const source = unpad(`
         function foo() {
@@ -35,9 +35,9 @@ describe("gulp-babili", () => {
     });
   });
 
-  it("should take options and pass them to babili", () => {
+  it("should take options and pass them to babel-minify", () => {
     return new Promise((resolve, reject) => {
-      const stream = gulpBabili({
+      const stream = gulpBabelMinify({
         mangle: {
           blacklist: {
             bar: true
@@ -67,7 +67,7 @@ describe("gulp-babili", () => {
     });
   });
 
-  it("should take custom babel and babili", () => {
+  it("should take custom babel and babel-minify", () => {
     return new Promise((resolve, reject) => {
       const babel = Object.assign({}, babelCore);
 
@@ -80,16 +80,16 @@ describe("gulp-babili", () => {
       });
 
       let usedPreset = false;
-      const babili = function(...args) {
+      const minify = function(...args) {
         usedPreset = true;
-        return babiliPreset(...args);
+        return minifyPreset(...args);
       };
 
-      const stream = gulpBabili(
+      const stream = gulpBabelMinify(
         {},
         {
           babel,
-          babili
+          minifyPreset: minify
         }
       );
 
@@ -135,7 +135,7 @@ describe("gulp-babili", () => {
 
     it("should remove comments by default except license and preserve", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili();
+        const stream = gulpBabelMinify();
         stream.on("data", function(file) {
           expect(file.contents.toString()).toMatchSnapshot();
           resolve();
@@ -147,7 +147,7 @@ describe("gulp-babili", () => {
 
     it("should remove all comments when false", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili(
+        const stream = gulpBabelMinify(
           {},
           {
             comments: false
@@ -164,7 +164,7 @@ describe("gulp-babili", () => {
 
     it("should take a custom function", () => {
       return new Promise((resolve, reject) => {
-        const stream = gulpBabili(
+        const stream = gulpBabelMinify(
           {},
           {
             comments(contents) {
@@ -184,7 +184,7 @@ describe("gulp-babili", () => {
 
   it("should remove comments while doing DCE and simplify", () => {
     return new Promise((resolve, reject) => {
-      const stream = gulpBabili(
+      const stream = gulpBabelMinify(
         {},
         {
           comments(contents) {

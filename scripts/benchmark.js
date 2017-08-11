@@ -55,7 +55,7 @@ class Benchmark {
       gzipped,
       filename,
       items: [
-        this.test(this.babili, code),
+        this.test(this.babelMinify, code),
         this.test(this.uglify, code),
         this.test(this.closureCompiler, filename, false),
         this.test(this.closureCompilerJs, code),
@@ -100,10 +100,10 @@ class Benchmark {
       time: delta[0] * 1e3 + delta[1] / 1e6
     };
   }
-  babili(code) {
+  babelMinify(code) {
     return babel.transform(code, {
       sourceType: "script",
-      presets: [require("../packages/babel-preset-babili")],
+      presets: [require("../packages/babel-preset-minify")],
       comments: false
     }).code;
   }

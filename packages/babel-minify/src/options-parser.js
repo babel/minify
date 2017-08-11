@@ -8,7 +8,7 @@ module.exports = function parseOpts(argv) {
 
 /**
  * Converts and Object of the form - {key<dot-notation>: value} to deep object
- * following rules of babili preset options
+ * following rules of minify preset options
  *
  * A preset option can be `true` | `object` which enables the particular plugin
  * `false` disables the plugin

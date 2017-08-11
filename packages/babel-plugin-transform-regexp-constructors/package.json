@@ -2,15 +2,15 @@
   "name": "babel-plugin-transform-regexp-constructors",
   "version": "0.1.1",
   "description": "This changes RegExp constructors into literals if the RegExp arguments are strings.",
-  "homepage": "https://github.com/babel/babili#readme",
-  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-transform-regexp-constructors",
-  "bugs": "https://github.com/babel/babili/issues",
-  "author": "shinew",
-  "license": "MIT",
-  "main": "lib/index.js",
   "keywords": [
     "babel-plugin"
   ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "shinew",
+  "main": "lib/index.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-transform-regexp-constructors",
   "dependencies": {},
   "devDependencies": {}
 }

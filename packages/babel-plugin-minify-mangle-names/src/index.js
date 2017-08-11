@@ -12,7 +12,7 @@ const {
   hasEval
 } = require("babel-helper-mark-eval-scopes");
 
-const newIssueUrl = "https://github.com/babel/babili/issues/new";
+const newIssueUrl = "https://github.com/babel/minify/issues/new";
 
 module.exports = babel => {
   const { types: t, traverse } = babel;
@@ -183,7 +183,7 @@ module.exports = babel => {
            * We have already captured the bindings when traversing through
            * Scopables, if a binding identifier doesn't have a binding, it
            * probably means that another transformation created a new binding,
-           * refer https://github.com/babel/babili/issues/549 for example -
+           * refer https://github.com/babel/minify/issues/549 for example -
            * binding created by plugin transform-es2015-function-name
            *
            * So we just don't care about bindings that do not exist
@@ -444,7 +444,7 @@ module.exports = babel => {
           // This is a bug in babel
           // https://github.com/babel/babel/pull/3629
           // case 2: Replacements in other plugins
-          // eg: https://github.com/babel/babili/issues/122
+          // eg: https://github.com/babel/minify/issues/122
           // replacement in dce from `x` to `!x` gives referencePath as `!x`
           path.traverse({
             ReferencedIdentifier(refPath) {

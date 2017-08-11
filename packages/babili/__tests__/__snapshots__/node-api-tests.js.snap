@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Babili Node API override default babili options 1`] = `"function foo(){const bar=x(1),baz=y(2);return z(bar,baz)}"`;
-
-exports[`Babili Node API override nested babili options 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;
-
-exports[`Babili Node API simple usage 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;

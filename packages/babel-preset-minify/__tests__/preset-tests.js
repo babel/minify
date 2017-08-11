@@ -7,7 +7,7 @@ const thePlugin = require("../../../utils/test-transform")(null, {
 });
 
 describe("preset", () => {
-  // https://github.com/babel/babili/issues/122
+  // https://github.com/babel/minify/issues/122
   thePlugin(
     "should fix issue#122",
     `

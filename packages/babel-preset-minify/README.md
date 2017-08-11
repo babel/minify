@@ -1,4 +1,4 @@
-# babel-preset-babili
+# babel-preset-minify
 
 Babel preset for all minify plugins.
 
@@ -9,7 +9,7 @@ Babel preset for all minify plugins.
 ## Install
 
 ```sh
-npm install --save-dev babel-preset-babili
+npm install --save-dev babel-preset-minify
 ```
 
 ## Usage
@@ -20,7 +20,7 @@ npm install --save-dev babel-preset-babili
 
 ```json
 {
-  "presets": ["babili"]
+  "presets": ["minify"]
 }
 ```
 
@@ -28,7 +28,7 @@ or pass in options -
 
 ```json
 {
-  "presets": [["babili", {
+  "presets": [["minify", {
     "mangle": {
       "blacklist": ["MyCustomError"]
     },
@@ -43,14 +43,14 @@ or pass in options -
 ### Via CLI
 
 ```sh
-babel script.js --presets babili
+babel script.js --presets minify
 ```
 
 ### Via Node API
 
 ```javascript
 require("babel-core").transform("code", {
-  presets: ["babili"]
+  presets: ["minify"]
 });
 ```
 
@@ -105,7 +105,7 @@ keepClassName       | Passed to [mangle][mangle] & [deadcode][deadcode]
 
 ```json
 {
-  "presets": [["babili", {
+  "presets": [["minify", {
     "evaluate": false,
     "mangle": true
   }]]
@@ -114,7 +114,7 @@ keepClassName       | Passed to [mangle][mangle] & [deadcode][deadcode]
 
 ```json
 {
-  "presets": [["babili", {
+  "presets": [["minify", {
     "mangle": {
       "blacklist": ["ParserError", "NetworkError"]
     }
@@ -124,13 +124,13 @@ keepClassName       | Passed to [mangle][mangle] & [deadcode][deadcode]
 
 ```json
 {
-  "presets": [["babili", {
+  "presets": [["minify", {
     "keepFnName": true
   }]]
 }
 // is the same as
 {
-  "presets": [["babili", {
+  "presets": [["minify", {
     "mangle": {
       "keepFnName": true
     },

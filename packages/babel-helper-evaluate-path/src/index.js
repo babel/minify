@@ -44,7 +44,7 @@ module.exports = function evaluate(path) {
 
 // Original Source:
 // https://github.com/babel/babel/blob/master/packages/babel-traverse/src/path/evaluation.js
-// modified for Babili use
+// modified for Babel-minify use
 function evaluateIdentifier(path) {
   if (!path.isReferencedIdentifier()) {
     throw new Error(`Expected ReferencedIdentifier. Got ${path.type}`);

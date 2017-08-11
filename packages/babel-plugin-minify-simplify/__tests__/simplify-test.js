@@ -239,7 +239,7 @@ describe("simplify-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/208
+  // https://github.com/babel/minify/issues/208
   thePlugin(
     "should not regresson #208 by handling empty blocks when merging lines into sequences",
     `
@@ -421,7 +421,7 @@ describe("simplify-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/198
+  // https://github.com/babel/minify/issues/198
   thePlugin(
     "should convert while->for and NOT merge let/const if any is refereced outside the loop",
     `
@@ -2116,7 +2116,7 @@ describe("simplify-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/115
+  // https://github.com/babel/minify/issues/115
   thePlugin(
     "should transform impure conditional statements correctly - issue#115",
     `

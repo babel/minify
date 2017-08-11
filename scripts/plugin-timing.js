@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const babel = require("babel-core");
-const preset = require("../packages/babel-preset-babili");
+const preset = require("../packages/babel-preset-minify");
 const fs = require("fs");
 const Table = require("cli-table");
 

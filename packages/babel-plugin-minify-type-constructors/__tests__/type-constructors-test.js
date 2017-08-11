@@ -293,7 +293,7 @@ describe("type-constructors-plugin", () => {
     }
   });
 
-  // https://github.com/babel/babili/issues/206
+  // https://github.com/babel/minify/issues/206
   thePlugin(
     "should handle floating point numbers in `Array()`",
     `

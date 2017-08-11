@@ -2,16 +2,16 @@
   "name": "babel-plugin-minify-numeric-literals",
   "version": "0.1.1",
   "description": "Shortens numeric literals using scientific notation",
-  "homepage": "https://github.com/babel/babili#readme",
-  "repository": "https://github.com/babel/babili/tree/master/packages/babel-plugin-minify-numeric-literals",
-  "bugs": "https://github.com/babel/babili/issues",
-  "author": "kangax",
-  "license": "MIT",
-  "main": "lib/index.js",
   "keywords": [
-    "babel-plugin",
-    "babili"
+    "babel-minify",
+    "babel-plugin"
   ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "kangax",
+  "main": "lib/index.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-numeric-literals",
   "dependencies": {},
   "devDependencies": {}
 }

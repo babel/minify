@@ -467,7 +467,7 @@ module.exports = ({ types: t, traverse }) => {
       let noNext = true;
       let parentPath = path.parentPath;
       while (parentPath && !parentPath.isFunction() && noNext) {
-        // https://github.com/babel/babili/issues/265
+        // https://github.com/babel/minify/issues/265
         if (hasLoopParent(parentPath)) {
           noNext = false;
           break;
@@ -977,7 +977,7 @@ module.exports = ({ types: t, traverse }) => {
       return;
     }
 
-    // https://github.com/babel/babili/issues/611
+    // https://github.com/babel/minify/issues/611
     // this is valid only for FunctionDeclaration where we convert
     // function declaration to expression in the next step
     if (replacementPath.isFunctionDeclaration()) {
@@ -989,7 +989,7 @@ module.exports = ({ types: t, traverse }) => {
       }
     }
 
-    // https://github.com/babel/babili/issues/130
+    // https://github.com/babel/minify/issues/130
     if (!t.isExpression(replacement)) {
       t.toExpression(replacement);
     }
