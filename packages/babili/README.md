@@ -44,6 +44,13 @@ babili(input, babiliOptions, overrides)
 
 Refer [babel-preset-babili options](../babel-preset-babili#options)
 
+### overrides
+
++ `babel`: Custom babel
++ `babiliPreset`: Custom babili preset
++ `inputSourceMap`: Input Sourcemap
++ `sourceMaps`: [Boolean]
+
 ## CLI Options
 
 ```
@@ -54,7 +61,7 @@ babili input.js [options]
 
 For simple options, use `--optionName` in CLI
 
-Refer [preset's 1-1 options](../packages/babel-preset-babili#1-1-mapping-with-plugin) for the list of options
+Refer [preset's 1-1 options](../babel-preset-babili#1-1-mapping-with-plugin) for the list of options
 
 Example:
 
