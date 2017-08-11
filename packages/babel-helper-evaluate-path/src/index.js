@@ -152,7 +152,7 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     }
 
     let scopePath = declarator.scope.path;
-    if (scopePath.isFunction()) {
+    if (scopePath.isFunction() || scopePath.isCatchClause()) {
       scopePath = scopePath.get("body");
     }
 
