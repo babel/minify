@@ -2,7 +2,6 @@ jest.autoMockOff();
 
 const { spawn } = require("child_process");
 const path = require("path");
-const { Readable } = require("stream");
 const fs = require("fs");
 const promisify = require("util.promisify");
 const rimraf = require("rimraf");
@@ -20,10 +19,7 @@ function runCli(args = [], stdin) {
     });
 
     if (stdin) {
-      const s = new Readable();
-      s.push(stdin);
-      s.push(null);
-      s.pipe(child.stdin);
+      child.stdin.end(stdin);
     }
 
     let stdout = "";

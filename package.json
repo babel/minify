@@ -70,9 +70,5 @@
   },
   "workspaces": [
     "packages/*"
-  ],
-  "dependencies": {
-    "mkdirp": "^0.5.1",
-    "util.promisify": "^1.0.0"
-  }
+  ]
 }

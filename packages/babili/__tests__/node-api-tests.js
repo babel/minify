@@ -18,4 +18,9 @@ describe("Babili Node API", () => {
   it("throw on invalid options", () => {
     expect(() => babili(sampleInput, { foo: false, bar: true }).code).toThrow();
   });
+
+  it("override default babili options", () => {
+    const babiliOpts = { mangle: false };
+    expect(babili(sampleInput, babiliOpts).code).toMatchSnapshot();
+  });
 });
