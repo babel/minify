@@ -23,8 +23,6 @@ function runCli(args = [], stdin) {
       const s = new Readable();
       s.push(stdin);
       s.push(null);
-
-      child.stdin.isTTY = true;
       s.pipe(child.stdin);
     }
 

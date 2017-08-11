@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Babili Node API simple usage 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;

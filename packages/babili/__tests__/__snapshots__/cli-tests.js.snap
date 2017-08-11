@@ -26,6 +26,6 @@ exports[`Babili CLI stdin + outFile 1`] = `"function foo(){const a=x(1),b=y(2);r
 exports[`Babili CLI stdin + stdout 1`] = `
 Object {
   "stderr": "",
-  "stdout": "function a(){const b=x(1),c=y(2);return z(b,c)}",
+  "stdout": "function a(){const a=x(1),b=y(2);return z(a,b)}",
 }
 `;

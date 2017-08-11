@@ -179,6 +179,8 @@ function getBabiliOpts(argv) {
   delete options["out-dir"];
   delete options.o;
   delete options["out-file"];
+  delete options.outFile;
+  delete options.outDir;
 
   return options;
 }
