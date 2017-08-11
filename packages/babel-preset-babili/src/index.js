@@ -19,7 +19,7 @@ const PLUGINS = [
   ["memberExpressions",   require("babel-plugin-transform-member-expression-literals"),    true],
   ["mergeVars",           require("babel-plugin-transform-merge-sibling-variables"),       true],
   ["numericLiterals",     require("babel-plugin-minify-numeric-literals"),                 true],
-  ["propertyLiterals",    require("babel-plugin-transform-property-literals"),             true],
+  ["propertyLiterals",    require("babel-plugin-transform-property-literals"),             false],
   ["regexpConstructors",  require("babel-plugin-transform-regexp-constructors"),           true],
   ["removeConsole",       require("babel-plugin-transform-remove-console"),                false],
   ["removeDebugger",      require("babel-plugin-transform-remove-debugger"),               false],
