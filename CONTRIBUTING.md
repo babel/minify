@@ -2,14 +2,14 @@
 
 ### Setup
 ```sh
-git clone https://github.com/babel/minify
-cd minify
+git clone https://github.com/babel/minify babel-minify
+cd babel-minify
 ```
 
 ### Install
 
 ```sh
-yarn
+yarn bootstrap
 ```
 
 #### Build
