@@ -1,59 +1,109 @@
 jest.autoMockOff();
 
-const { spawnSync } = require("child_process");
-const { join } = require("path");
+const { spawn } = require("child_process");
+const path = require("path");
+const { Readable } = require("stream");
 const fs = require("fs");
+const promisify = require("util.promisify");
 const rimraf = require("rimraf");
-const babili = require.resolve("../bin/babili");
+const babiliCli = require.resolve("../bin/babili");
 
-function spawn(stdin, ...opts) {
-  let options = { encoding: "utf-8" };
-  if (stdin !== "") {
-    options = Object.assign(options, { input: stdin });
-  }
-  return spawnSync(`${babili}`, [].concat(opts), options);
+const readFileAsync = promisify(fs.readFile);
+const readFile = file => readFileAsync(file).then(out => out.toString());
+const unlink = promisify(rimraf);
+
+function runCli(args = [], stdin) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(babiliCli, args, {
+      stdio: [stdin ? "pipe" : "inherit", "pipe", "pipe"],
+      shell: true
+    });
+
+    if (stdin) {
+      const s = new Readable();
+      s.push(stdin);
+      s.push(null);
+
+      child.stdin.isTTY = true;
+      s.pipe(child.stdin);
+    }
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", data => (stdout += data));
+    child.stderr.on("data", data => (stderr += data));
+    child.on(
+      "close",
+      code =>
+        code === 0 ? resolve({ stdout, stderr }) : reject({ code, stderr })
+    );
+  });
 }
 
-function testFile(input, output, ...opts) {
-  spawn("", "--mangle.topLevel", input, ...opts);
-  expect(fs.readFileSync(output, "utf-8")).toEqual("let a=10;");
-  rimraf.sync(output); // delete the file
+let tempSource = `
+function foo() {
+  const bar = x(1);
+  const baz = y(2);
+  return z(bar, baz);
 }
+`;
+
+const sampleInputFile = path.join(__dirname, "fixtures/out-file/foo.js");
+const sampleInputDir = path.join(__dirname, "fixtures/out-dir/a");
+
+const tempOutFile = path.join(__dirname, "fixtures/out-file/foo.min.js");
+const tempOutDir = path.join(__dirname, "fixtures/out-dir/min");
+const tempOutDirFile = path.join(__dirname, "fixtures/out-dir/min/foo.js");
 
 describe("Babili CLI", () => {
+  afterEach(async () => {
+    await unlink(tempOutDir);
+    await unlink(tempOutFile);
+  });
+
   it("should show help for --help", () => {
-    expect(spawn("", "--help")).toBeDefined();
+    return expect(runCli(["--help"])).resolves.toBeDefined();
   });
 
   it("should show version for --version", () => {
     const { version } = require("../package");
-    expect(spawn("", "--version").stdout.trim()).toEqual(version);
+    return expect(
+      runCli(["--version"]).then(({ stdout }) => stdout.trim())
+    ).resolves.toBe(version);
   });
 
   it("should throw on all invalid options", () => {
-    expect(spawn("", "--foo", "--bar").stderr).toMatchSnapshot();
+    return expect(runCli(["--foo", "--bar"])).rejects.toMatchSnapshot();
   });
 
-  it("should read from stdin and o/p to stdout", () => {
-    const source = "let abcd = 10, bcdsa = 20";
-    expect(spawn(source, "--mangle.topLevel").stdout).toMatchSnapshot();
+  it("stdin + stdout", () => {
+    return expect(
+      runCli(["--mangle.topLevel"], tempSource)
+    ).resolves.toMatchSnapshot();
   });
 
-  xit("should handle input file and --out-file option", () => {
-    const inputPath = join(__dirname, "/fixtures/out-file/foo.js");
-    const outFilePath = join(__dirname, "/fixtures/out-file/bar.js");
-    testFile(inputPath, outFilePath, "--out-file", outFilePath);
+  it("stdin + outFile", async () => {
+    await runCli(["--out-file", tempOutFile], tempSource);
+    expect(await readFile(tempOutFile)).toMatchSnapshot();
   });
 
-  xit("should handle directory and  --out-dir option", () => {
-    const inputPath = join(__dirname, "/fixtures/out-dir");
-    //creates <filename>.min.js in the src directory by default
-    const outputPath = join(__dirname, "/fixtures/out-dir/a/foo.min.js");
-    testFile(inputPath, outputPath);
-    // creates <filename>.min.js in --out-dir
-    const outDir = join(__dirname, "/fixtures/out-dir/bar");
-    const checkFilePath = join(outDir, "/a/foo.min.js");
-    testFile(inputPath, checkFilePath, "--out-dir", outDir);
-    rimraf.sync(outDir);
+  it("input file + stdout", async () => {
+    return expect(runCli([sampleInputFile])).resolves.toMatchSnapshot();
+  });
+
+  it("input file + outFile", async () => {
+    await runCli([sampleInputFile, "--out-file", tempOutFile]);
+    expect(await readFile(tempOutFile)).toMatchSnapshot();
+  });
+
+  it("input file + outDir", async () => {
+    await runCli([sampleInputFile, "--out-dir", tempOutDir]);
+    expect(await readFile(tempOutDirFile)).toMatchSnapshot();
+  });
+
+  it("input dir + outdir", async () => {
+    await runCli([sampleInputDir, "--out-dir", tempOutDir]);
+    expect(await readFile(tempOutDirFile)).toMatchSnapshot();
   });
 });
