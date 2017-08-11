@@ -27,11 +27,12 @@
       ".*": "<rootDir>/node_modules/babel-jest"
     },
     "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/fixtures/"
+    ],
     "roots": [
       "packages"
-    ],
-    "transformIgnorePatterns": [
-      "/node_modules/"
     ],
     "coverageDirectory": "./coverage/"
   },
@@ -51,6 +52,7 @@
     "codecov": "^2.3.0",
     "commander": "^2.11.0",
     "eslint": "^4.4.0",
+    "fs-readdir-recursive": "^1.0.0",
     "google-closure-compiler-js": "^20170626.0.0",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-babel": "^6.1.2",
@@ -62,6 +64,7 @@
     "markdown-table": "^1.1.1",
     "prettier": "^1.5.3",
     "request": "^2.81.0",
+    "rimraf": "^2.6.1",
     "through2": "^2.0.3",
     "uglify-js": "^3.0.27"
   },
