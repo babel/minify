@@ -95,7 +95,7 @@ module.exports = babel => {
       },
 
       // TODO: look into evaluating binding too (could result in more code, but gzip?)
-      Expression(path) {
+      Expression(path, { opts: { tdz = false } = {} }) {
         const { node } = path;
 
         if (node[seen]) {
@@ -143,7 +143,7 @@ module.exports = babel => {
           return;
         }
 
-        const res = evaluate(path);
+        const res = evaluate(path, { tdz });
         if (res.confident) {
           // Avoid fractions because they can be longer than the original expression.
           // There is also issues with number percision?

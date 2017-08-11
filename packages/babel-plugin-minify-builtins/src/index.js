@@ -8,8 +8,9 @@ const INVALID_METHODS = ["random"];
 
 module.exports = function({ types: t }) {
   class BuiltInReplacer {
-    constructor(program) {
+    constructor(program, { tdz }) {
       this.program = program;
+      this.tdz = tdz;
       // map<expr_name, path[]>;
       this.pathsToUpdate = new Map();
     }
@@ -48,7 +49,7 @@ module.exports = function({ types: t }) {
             // computed property should be not optimized
             // Math[max]() -> Math.max()
             if (!isComputed(callee) && isBuiltin(callee)) {
-              const result = evaluate(path);
+              const result = evaluate(path, { tdz: context.tdz });
               // deopt when we have side effecty evaluate-able arguments
               // Math.max(foo(), 1) --> untouched
               // Math.floor(1) --> 1
@@ -96,8 +97,8 @@ module.exports = function({ types: t }) {
   return {
     name: "minify-builtins",
     visitor: {
-      Program(path) {
-        const builtInReplacer = new BuiltInReplacer(path);
+      Program(path, { opts: { tdz = false } = {} }) {
+        const builtInReplacer = new BuiltInReplacer(path, { tdz });
         builtInReplacer.run();
       }
     }

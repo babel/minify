@@ -28,7 +28,7 @@ const plugins = [
   "undefinedToVoid"
 ];
 
-const proxies = ["keepFnName", "keepClassName"];
+const proxies = ["keepFnName", "keepClassName", "tdz"];
 
 const dceBooleanOpts = [
   "deadcode.keepFnName",
@@ -72,9 +72,11 @@ function printHelpInfo({ exitCode = 0 } = {}) {
   const msg = `
   Usage: minify index.js [options]
 
-  Options:
+  IO Options:
     --out-file, -o          Output to a specific file
     --out-dir, -d           Output to a specific directory
+
+  Transform Options:
     --mangle                Context and scope aware variable renaming
     --simplify              Simplifies code for minification by reducing statements into
                             expressions
@@ -102,7 +104,12 @@ function printHelpInfo({ exitCode = 0 } = {}) {
                             to be the same
     --typeConstructors      Minify constructors to equivalent version
     --undefinedToVoid       Transforms undefined into void 0
-    --version, -V           Prints the current version number
+
+  Other Options:
+    --keepFnName            Preserve Function Name (useful for code depending on fn.name)
+    --keepClassName         Preserve Class Name (useful for code depending on c.name)
+    --keepFnArgs            Don't remove unused fn arguments (useful for code depending on fn.length)
+    --tdz                   Detect usages of variables in the Temporal Dead Zone
 
   Nested Options:
     To use nested options (plugin specfic options) simply use the pattern
