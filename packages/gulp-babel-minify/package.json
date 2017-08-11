@@ -1,0 +1,19 @@
+{
+  "name": "gulp-babel-minify",
+  "version": "0.1.4",
+  "description": "Babel Minify plugin for Gulp",
+  "homepage": "https://github.com/babel/minify#readme",
+  "repository": "https://github.com/babel/minify/tree/master/packages/gulp-babel-minify",
+  "bugs": "https://github.com/babel/minify/issues",
+  "author": "boopathi",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": ["babel-preset", "babel-minify"],
+  "dependencies": {
+    "babel-core": "^6.25.0",
+    "babel-preset-minify": "^0.1.4",
+    "gulp-util": "^3.0.8",
+    "through2": "^2.0.3",
+    "vinyl-sourcemaps-apply": "^0.2.1"
+  }
+}

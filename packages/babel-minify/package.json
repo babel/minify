@@ -1,0 +1,24 @@
+{
+  "name": "babel-minify",
+  "version": "0.1.4",
+  "description": "✂️ An ES6+ aware minifier based on the Babel toolchain (beta)",
+  "homepage": "https://github.com/babel/minify#readme",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-minify",
+  "bugs": "https://github.com/babel/minify/issues",
+  "author": "amasad",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "bin": {
+    "minify": "./bin/minify.js",
+    "babel-minify": "./bin/minify.js"
+  },
+  "keywords": ["babel-preset", "minify", "babel-minify"],
+  "dependencies": {
+    "babel-core": "^6.24.1",
+    "babel-preset-minify": "^0.1.4",
+    "fs-readdir-recursive": "^1.0.0",
+    "mkdirp": "^0.5.1",
+    "util.promisify": "^1.0.0",
+    "yargs-parser": "^5.0.0"
+  }
+}

@@ -492,7 +492,7 @@ module.exports = ({ types: t }) => {
         node.body = statements;
 
         // this additional traversal is horrible but it's done to fix
-        // https://github.com/babel/babili/issues/323
+        // https://github.com/babel/minify/issues/323
         // in which type annotation somehow gets messed up
         // during sequence expression transformation
         path.traverse({

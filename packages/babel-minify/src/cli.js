@@ -70,7 +70,7 @@ function aliasArr(obj) {
 
 function printHelpInfo({ exitCode = 0 } = {}) {
   const msg = `
-  Usage: babili index.js [options]
+  Usage: minify index.js [options]
 
   Options:
     --out-file, -o          Output to a specific file
@@ -109,7 +109,7 @@ function printHelpInfo({ exitCode = 0 } = {}) {
     --pluginName.featureName.
 
     For example,
-    babili index.js --mangle.keepClassName --deadcode.keepFnArgs --outFile index.min.js
+    minify index.js --mangle.keepClassName --deadcode.keepFnArgs --outFile index.min.js
   `;
   log(msg, exitCode);
 }
@@ -164,7 +164,7 @@ function getArgv(args) {
   });
 }
 
-function getBabiliOpts(argv) {
+function getMinifyOpts(argv) {
   const inputOpts = Object.keys(argv)
     .filter(key => {
       if (Array.isArray(argv[key])) return argv[key].length > 0;
@@ -180,7 +180,7 @@ function getBabiliOpts(argv) {
 
   const options = optionsParser(inputOpts);
 
-  // delete unncessary options to babili preset
+  // delete unncessary options to minify preset
   delete options["_"];
   delete options.d;
   delete options["out-dir"];
@@ -243,7 +243,7 @@ async function run(args) {
   if (argv.help) printHelpInfo();
   if (argv.V) log(version);
 
-  const options = getBabiliOpts(argv);
+  const options = getMinifyOpts(argv);
 
   if (!process.stdin.isTTY) {
     return runStdin(argv, options);

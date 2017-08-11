@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`babel-minify Node API override default minify options 1`] = `"function foo(){const bar=x(1),baz=y(2);return z(bar,baz)}"`;
+
+exports[`babel-minify Node API override nested minify options 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;
+
+exports[`babel-minify Node API simple usage 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;

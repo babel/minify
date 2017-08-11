@@ -3,7 +3,7 @@
 const CountedSet = require("./counted-set");
 const isLabelIdentifier = require("./is-label-identifier");
 
-const newIssueUrl = "https://github.com/babel/babili/issues/new";
+const newIssueUrl = "https://github.com/babel/minify/issues/new";
 
 /**
  * ScopeTracker
@@ -123,7 +123,7 @@ module.exports = class ScopeTracker {
 
     // Safari raises a syntax error for a `let` or `const` declaration in a
     // `for` loop initialization that shadows a parent function's parameter.
-    // https://github.com/babel/babili/issues/559
+    // https://github.com/babel/minify/issues/559
     // https://bugs.webkit.org/show_bug.cgi?id=171041
     // https://trac.webkit.org/changeset/217200/webkit/trunk/Source
     const maybeDecl = binding.path.parentPath;

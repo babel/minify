@@ -60,7 +60,7 @@ function hasViolation(declarator, scope, start) {
   const scopeParent = declarator.getFunctionParent();
 
   const violation = binding.constantViolations.some(v => {
-    // https://github.com/babel/babili/issues/630
+    // https://github.com/babel/minify/issues/630
     if (!v.node) {
       return false;
     }

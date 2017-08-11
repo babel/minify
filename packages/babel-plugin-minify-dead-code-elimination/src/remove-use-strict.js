@@ -2,7 +2,7 @@
 
 module.exports = removeUseStrict;
 
-const newIssueUrl = "https://github.com/babel/babili/issues/new";
+const newIssueUrl = "https://github.com/babel/minify/issues/new";
 
 const useStrict = "use strict";
 

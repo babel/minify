@@ -2,19 +2,19 @@ const babelCore = require("babel-core");
 const through2 = require("through2");
 const gutil = require("gulp-util");
 const applySourceMap = require("vinyl-sourcemaps-apply");
-const babiliPreset = require("babel-preset-babili");
+const babelPresetMinify = require("babel-preset-minify");
 
 const { PluginError } = gutil;
 
-const NAME = "gulp-babili";
+const NAME = "gulp-babel-minify";
 
-module.exports = gulpBabili;
+module.exports = gulpBabelMinify;
 
-function gulpBabili(
-  babiliOpts = {},
+function gulpBabelMinify(
+  minifyOpts = {},
   {
     babel = babelCore,
-    babili = babiliPreset,
+    minifyPreset = babelPresetMinify,
     comments = /preserve|licen(s|c)e/
   } = {}
 ) {
@@ -38,7 +38,7 @@ function gulpBabili(
       ast: false,
 
       /* preset */
-      presets: [[babili, babiliOpts]],
+      presets: [[minifyPreset, minifyOpts]],
 
       /* sourcemaps */
       sourceMaps: !!file.sourceMap,

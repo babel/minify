@@ -1852,8 +1852,8 @@ describe("dce-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/130
-  // https://github.com/babel/babili/pull/132
+  // https://github.com/babel/minify/issues/130
+  // https://github.com/babel/minify/pull/132
   thePlugin(
     "should not regress on #130",
     `
@@ -1869,7 +1869,7 @@ describe("dce-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/151
+  // https://github.com/babel/minify/issues/151
   thePlugin(
     "should not regress on issue #151 - array patterns and object patterns",
     `
@@ -1885,7 +1885,7 @@ describe("dce-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/232
+  // https://github.com/babel/minify/issues/232
   thePlugin(
     "should not regress on issue #232 - array patterns and object patterns with non constant init",
     `
@@ -1994,7 +1994,7 @@ describe("dce-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/265
+  // https://github.com/babel/minify/issues/265
   thePlugin(
     "should not remove return void 0; statement if inside a loop",
     `
@@ -2015,7 +2015,7 @@ describe("dce-plugin", () => {
   `
   );
 
-  // https://github.com/babel/babili/issues/265
+  // https://github.com/babel/minify/issues/265
   it("should integrate with simplify plugin changing scopes", () => {
     const source = unpad(`
       function getParentConditionalPath(path) {

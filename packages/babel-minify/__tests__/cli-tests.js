@@ -5,7 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const promisify = require("util.promisify");
 const rimraf = require("rimraf");
-const babiliCli = require.resolve("../bin/babili");
+const minifyCli = require.resolve("../bin/minify");
 
 const readFileAsync = promisify(fs.readFile);
 const readFile = file => readFileAsync(file).then(out => out.toString());
@@ -13,7 +13,7 @@ const unlink = promisify(rimraf);
 
 function runCli(args = [], stdin) {
   return new Promise((resolve, reject) => {
-    const child = spawn(babiliCli, args, {
+    const child = spawn(minifyCli, args, {
       stdio: [stdin ? "pipe" : "inherit", "pipe", "pipe"],
       shell: true
     });
@@ -50,7 +50,7 @@ const tempOutFile = path.join(__dirname, "fixtures/out-file/foo.min.js");
 const tempOutDir = path.join(__dirname, "fixtures/out-dir/min");
 const tempOutDirFile = path.join(__dirname, "fixtures/out-dir/min/foo.js");
 
-describe("Babili CLI", () => {
+describe("babel-minify CLI", () => {
   afterEach(async () => {
     await unlink(tempOutDir);
     await unlink(tempOutFile);
