@@ -509,7 +509,7 @@ module.exports = ({ types: t, traverse }) => {
 
     SwitchStatement: {
       exit(path) {
-        const evaluated = evaluate(path.get("discriminant"));
+        const evaluated = evaluate(path.get("discriminant"), { tdz: this.tdz });
 
         if (!evaluated.confident) return;
 
@@ -528,7 +528,7 @@ module.exports = ({ types: t, traverse }) => {
             continue;
           }
 
-          const testResult = evaluate(test);
+          const testResult = evaluate(test, { tdz: this.tdz });
 
           // if we are not able to deternine a test during
           // compile time, we terminate immediately
@@ -614,7 +614,7 @@ module.exports = ({ types: t, traverse }) => {
 
     WhileStatement(path) {
       const test = path.get("test");
-      const result = evaluate(test);
+      const result = evaluate(test, { tdz: this.tdz });
       if (result.confident && test.isPure() && !result.value) {
         path.remove();
       }
@@ -624,7 +624,7 @@ module.exports = ({ types: t, traverse }) => {
       const test = path.get("test");
       if (!test.isPure()) return;
 
-      const result = evaluate(test);
+      const result = evaluate(test, { tdz: this.tdz });
       if (result.confident) {
         if (result.value) {
           test.remove();
@@ -636,7 +636,7 @@ module.exports = ({ types: t, traverse }) => {
 
     DoWhileStatement(path) {
       const test = path.get("test");
-      const result = evaluate(test);
+      const result = evaluate(test, { tdz: this.tdz });
       if (result.confident && test.isPure() && !result.value) {
         const body = path.get("body");
 
@@ -767,12 +767,12 @@ module.exports = ({ types: t, traverse }) => {
         }
       },
       IfStatement: {
-        exit(path) {
+        exit(path, { opts: { tdz = false } = {} }) {
           const consequent = path.get("consequent");
           const alternate = path.get("alternate");
           const test = path.get("test");
 
-          const evalResult = evaluate(test);
+          const evalResult = evaluate(test, { tdz });
           const isPure = test.isPure();
 
           const replacements = [];
@@ -864,7 +864,8 @@ module.exports = ({ types: t, traverse }) => {
               optimizeRawSize = false,
               keepFnName = false,
               keepClassName = false,
-              keepFnArgs = false
+              keepFnArgs = false,
+              tdz = false
             } = {}
           } = {}
         ) {
@@ -879,7 +880,8 @@ module.exports = ({ types: t, traverse }) => {
             optimizeRawSize,
             keepFnName,
             keepClassName,
-            keepFnArgs
+            keepFnArgs,
+            tdz
           });
         }
       }

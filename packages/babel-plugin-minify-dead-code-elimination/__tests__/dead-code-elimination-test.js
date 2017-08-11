@@ -525,7 +525,10 @@ describe("dce-plugin", () => {
         if (a) return;
         x();
       }
-    `
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
   );
 
   thePlugin(
@@ -536,7 +539,10 @@ describe("dce-plugin", () => {
         if (a) return 1;
         x();
       }
-    `
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
   );
 
   thePlugin(
@@ -552,7 +558,10 @@ describe("dce-plugin", () => {
           y();
         }
       }
-    `
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
   );
 
   thePlugin(
@@ -2452,7 +2461,10 @@ describe("dce-plugin", () => {
         if (v) var w = 10;
         if (w) console.log("hello", v);
       }
-    `
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
   );
 
   thePlugin.skip(
@@ -2462,7 +2474,10 @@ describe("dce-plugin", () => {
         bar(a); // Should be a ReferenceError
         let a = 1;
       }
-    `
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
   );
 
   thePlugin(
@@ -2483,6 +2498,9 @@ describe("dce-plugin", () => {
           if (a) console.log(a);
         };
       }
-    `
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
   );
 });

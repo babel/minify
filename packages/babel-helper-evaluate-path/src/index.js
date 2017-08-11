@@ -1,6 +1,10 @@
 "use strict";
 
-module.exports = function evaluate(path) {
+module.exports = function evaluate(path, { tdz = false } = {}) {
+  if (!tdz) {
+    return baseEvaluate(path);
+  }
+
   if (path.isReferencedIdentifier()) {
     return evaluateIdentifier(path);
   }
@@ -32,6 +36,10 @@ module.exports = function evaluate(path) {
     return state;
   }
 
+  return baseEvaluate(path);
+};
+
+function baseEvaluate(path) {
   try {
     return path.evaluate();
   } catch (e) {
@@ -40,7 +48,7 @@ module.exports = function evaluate(path) {
       error: e
     };
   }
-};
+}
 
 // Original Source:
 // https://github.com/babel/babel/blob/master/packages/babel-traverse/src/path/evaluation.js

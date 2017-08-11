@@ -100,6 +100,7 @@ OptionName          | Plugins
 ----------          | -------
 keepFnName          | Passed to [mangle][mangle] & [deadcode][deadcode]
 keepClassName       | Passed to [mangle][mangle] & [deadcode][deadcode]
+tdz                 | Passed to [builtIns][builtIns], [evaluate][evaluate] & [deadcode][deadcode]
 
 **Examples**
 
