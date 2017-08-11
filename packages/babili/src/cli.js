@@ -103,6 +103,13 @@ function printHelpInfo({ exitCode = 0 } = {}) {
     --typeConstructors      Minify constructors to equivalent version
     --undefinedToVoid       Transforms undefined into void 0
     --version, -V           Prints the current version number
+
+  Nested Options:
+    To use nested options (plugin specfic options) simply use the pattern
+    --pluginName.featureName.
+
+    For example,
+    babili index.js --mangle.keepClassName --deadcode.keepFnArgs --outFile index.min.js
   `;
   log(msg, exitCode);
 }
