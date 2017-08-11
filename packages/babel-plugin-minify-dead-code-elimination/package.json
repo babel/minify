@@ -2,13 +2,15 @@
   "name": "babel-plugin-minify-dead-code-elimination",
   "version": "0.1.7",
   "description": "",
+  "keywords": [
+    "babel-plugin"
+  ],
   "homepage": "https://github.com/babel/minify#readme",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-dead-code-elimination",
   "bugs": "https://github.com/babel/minify/issues",
-  "author": "amasad",
   "license": "MIT",
+  "author": "amasad",
   "main": "lib/index.js",
-  "keywords": ["babel-plugin"],
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-dead-code-elimination",
   "dependencies": {
     "babel-helper-evaluate-path": "^0.1.0",
     "babel-helper-mark-eval-scopes": "^0.1.1",

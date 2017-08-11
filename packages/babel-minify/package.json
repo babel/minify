@@ -2,17 +2,21 @@
   "name": "babel-minify",
   "version": "0.1.4",
   "description": "✂️ An ES6+ aware minifier based on the Babel toolchain (beta)",
+  "keywords": [
+    "babel-minify",
+    "babel-preset",
+    "minify"
+  ],
   "homepage": "https://github.com/babel/minify#readme",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-minify",
   "bugs": "https://github.com/babel/minify/issues",
-  "author": "amasad",
   "license": "MIT",
+  "author": "amasad",
   "main": "lib/index.js",
   "bin": {
-    "minify": "./bin/minify.js",
-    "babel-minify": "./bin/minify.js"
+    "babel-minify": "./bin/minify.js",
+    "minify": "./bin/minify.js"
   },
-  "keywords": ["babel-preset", "minify", "babel-minify"],
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-minify",
   "dependencies": {
     "babel-core": "^6.24.1",
     "babel-preset-minify": "^0.1.4",

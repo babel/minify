@@ -2,15 +2,15 @@
   "name": "babel-helper-to-multiple-sequence-expressions",
   "version": "0.1.1",
   "description": "",
-  "homepage": "https://github.com/babel/minify#readme",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-helper-to-multiple-sequence-expressions",
-  "bugs": "https://github.com/babel/minify/issues",
-  "author": "amasad",
-  "license": "MIT",
-  "main": "lib/index.js",
   "keywords": [
     "babel-plugin"
   ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "amasad",
+  "main": "lib/index.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-helper-to-multiple-sequence-expressions",
   "dependencies": {},
   "devDependencies": {}
 }
