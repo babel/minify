@@ -84,3 +84,7 @@ require("babel-core").transform("code", {
   plugins: ["minify-constant-folding"]
 });
 ```
+
+## Options
+
++ `tdz` - Account for TDZ (Temporal Dead Zone)
