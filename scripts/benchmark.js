@@ -55,11 +55,11 @@ class Benchmark {
       gzipped,
       filename,
       items: [
-        this.test(this.babelMinify, code),
-        this.test(this.uglify, code),
-        this.test(this.closureCompiler, filename, false),
-        this.test(this.closureCompilerJs, code),
-        this.test(this.butternut, code)
+        this.test(this["babel-minify"], code),
+        this.test(this["uglify"], code),
+        this.test(this["closure-compiler"], filename, false),
+        this.test(this["closure-compiler-js"], code),
+        this.test(this["butternut"], code)
       ]
     };
 
@@ -100,7 +100,7 @@ class Benchmark {
       time: delta[0] * 1e3 + delta[1] / 1e6
     };
   }
-  babelMinify(code) {
+  "babel-minify"(code) {
     return babel.transform(code, {
       sourceType: "script",
       presets: [require("../packages/babel-preset-minify")],
@@ -110,7 +110,7 @@ class Benchmark {
   uglify(code) {
     return uglify.minify(code).code;
   }
-  closureCompiler(filename) {
+  "closure-compiler"(filename) {
     return child
       .execSync(
         "java -jar " +
@@ -120,7 +120,7 @@ class Benchmark {
       )
       .toString();
   }
-  closureCompilerJs(code) {
+  "closure-compiler-js"(code) {
     const flags = {
       jsCode: [{ src: code }],
       env: "CUSTOM"
