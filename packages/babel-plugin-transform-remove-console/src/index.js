@@ -4,26 +4,29 @@ module.exports = function({ types: t }) {
   return {
     name: "transform-remove-console",
     visitor: {
-      CallExpression(path) {
+      CallExpression(path, state) {
         const callee = path.get("callee");
 
         if (!callee.isMemberExpression()) return;
 
-        if (isConsole(callee)) {
+        if (isIncludedConsole(callee, state)) {
           // console.log()
           if (path.parentPath.isExpressionStatement()) {
             path.remove();
           } else {
             path.replaceWith(createVoid0());
           }
-        } else if (isConsoleBind(callee)) {
+        } else if (isIncludedConsoleBind(callee, state)) {
           // console.log.bind()
           path.replaceWith(createNoop());
         }
       },
       MemberExpression: {
-        exit(path) {
-          if (isConsole(path) && !path.parentPath.isMemberExpression()) {
+        exit(path, state) {
+          if (
+            isIncludedConsole(path, state) &&
+            !path.parentPath.isMemberExpression()
+          ) {
             if (
               path.parentPath.isAssignmentExpression() &&
               path.parentKey === "left"
@@ -47,11 +50,26 @@ module.exports = function({ types: t }) {
     );
   }
 
-  function isConsole(memberExpr) {
+  function isExcluded(property, state) {
+    let exclude = false;
+    if (state.opts.exclude) {
+      state.opts.exclude.forEach(excluded => {
+        if (property.isIdentifier({ name: excluded })) {
+          exclude = true;
+        }
+      });
+    }
+    return exclude;
+  }
+
+  function isIncludedConsole(memberExpr, state) {
     const object = memberExpr.get("object");
+    const property = memberExpr.get("property");
+
+    if (isExcluded(property, state)) return false;
+
     if (isGlobalConsoleId(object)) return true;
 
-    const property = memberExpr.get("property");
     return (
       isGlobalConsoleId(object.get("object")) &&
       (property.isIdentifier({ name: "call" }) ||
@@ -59,10 +77,13 @@ module.exports = function({ types: t }) {
     );
   }
 
-  function isConsoleBind(memberExpr) {
+  function isIncludedConsoleBind(memberExpr, state) {
     const object = memberExpr.get("object");
+
+    if (!object.isMemberExpression()) return false;
+    if (isExcluded(object.get("property"), state)) return false;
+
     return (
-      object.isMemberExpression() &&
       isGlobalConsoleId(object.get("object")) &&
       memberExpr.get("property").isIdentifier({ name: "bind" })
     );

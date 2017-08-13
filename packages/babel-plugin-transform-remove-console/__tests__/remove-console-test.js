@@ -1,8 +1,9 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform")(
-  require("../src/index")
-);
+const babel = require("babel-core");
+const plugin = require("../src/index");
+const unpad = require("../../../utils/unpad");
+const thePlugin = require("../../../utils/test-transform")(plugin);
 
 describe("remove-console-plugin", () => {
   thePlugin(
@@ -143,4 +144,66 @@ describe("remove-console-plugin", () => {
     }
   `
   );
+});
+
+describe("remove-console-plugin with excludes argument", () => {
+  const options = {
+    exclude: ["error", "info"]
+  };
+
+  it("should not remove excluded options", () => {
+    const source = unpad(
+      `
+      function foo() {
+        console.log("foo");
+        console.error("bar");
+        blah();
+        console.info("blah");
+      }
+    `
+    );
+    const output = unpad(
+      `
+      function foo() {
+        console.error("bar");
+        blah();
+        console.info("blah");
+      }
+    `
+    );
+    expect(
+      babel.transform(source, {
+        plugins: [[plugin, options]]
+      }).code
+    ).toBe(output);
+  });
+  it("should not remove bound excluded options", () => {
+    const source = unpad(
+      `
+      function foo() {
+        const a = console.log;
+        a();
+        const b = console.error.bind(console);
+        b("asdf");
+        blah();
+      }
+    `
+    );
+    const output = unpad(
+      `
+      function foo() {
+        const a = function () {};
+        a();
+        const b = console.error.bind(console);
+        b("asdf");
+        blah();
+      }
+    `
+    );
+    expect(
+      babel.transform(source, {
+        plugins: [[plugin, options]]
+      }).code
+    ).toBe(output);
+  });
 });
