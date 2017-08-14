@@ -47,7 +47,7 @@ module.exports = function(t) {
         if (t.isExpression(node)) {
           exprs.push(node);
         } else if (t.isExpressionStatement(node)) {
-          exprs.push(node.expression);
+          if (node.expression) exprs.push(node.expression);
         } else if (t.isIfStatement(node)) {
           let consequent;
           if (node.consequent) {

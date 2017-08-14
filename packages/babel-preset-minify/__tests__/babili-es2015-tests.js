@@ -26,4 +26,20 @@ describe("preset along with es2015", () => {
     cat = _obj.cat, _obj;
   `
   );
+
+  thePlugin(
+    "should fix simplify with es2015 - issue#632",
+    `
+      let obj, key;
+      if (1) ({k: key} = obj);
+      foo();
+    `,
+    `
+      "use strict";
+
+      var obj,
+          key = void 0;
+      key = obj.k, foo();
+    `
+  );
 });
