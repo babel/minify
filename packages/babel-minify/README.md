@@ -2,7 +2,7 @@
 
 Node API and CLI
 
-[`babel-minify`](/packages/babel-minify) [![npm](https://img.shields.io/npm/v/babel-minify.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-minify)
+[![npm](https://img.shields.io/npm/v/babel-minify.svg?maxAge=2592000)](https://www.npmjs.com/package/babel-minify)
 
 Use `babel-minify` if you don't already use babel (as a preset) or want to run it standalone.
 
@@ -42,7 +42,7 @@ minify(input, minifyOptions, overrides)
 
 ### minifyOptions
 
-Refer [babel-preset-minify options](../babel-preset-minify#options)
+Refer [babel-preset-minify options](https://github.com/babel/minify/tree/master/packages/babel-preset-minify#options)
 
 ### overrides
 
@@ -61,7 +61,7 @@ minify input.js [options]
 
 For simple options, use `--optionName` in CLI
 
-Refer [preset's 1-1 options](../babel-preset-minify#1-1-mapping-with-plugin) for the list of options
+Refer [preset's 1-1 options](https://github.com/babel/minify/tree/master/packages/babel-preset-minify#1-1-mapping-with-plugin) for the list of options
 
 Example:
 
