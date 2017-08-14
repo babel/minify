@@ -34,7 +34,7 @@ const PLUGINS = [
 const PROXIES = {
   keepFnName: ["mangle", "deadcode"],
   keepClassName: ["mangle", "deadcode"],
-  tdz: ["builtIns", "evaluate", "deadcode"]
+  tdz: ["builtIns", "evaluate", "deadcode", "removeUndefined"]
 };
 
 module.exports = preset;

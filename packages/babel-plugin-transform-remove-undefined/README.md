@@ -57,3 +57,7 @@ require("babel-core").transform("code", {
   plugins: ["babel-plugin-transform-remove-undefined"]
 });
 ```
+
+## Options
+
++ `tdz` - Detect usages before declaration/initialization in let/const(throws) and var(void 0)
