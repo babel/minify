@@ -5,23 +5,53 @@
 + Babili has been renamed to `babel-minify` based on stats from - [#124](https://github.com/babel/minify/issues/124)
 + New babel-minify CLI and Node API
 
+### Updated packages
+
+- babel-helper-evaluate-path@0.2.0
+- babel-helper-flip-expressions@0.2.0
+- babel-helper-is-void-0@0.2.0
+- babel-helper-mark-eval-scopes@0.2.0
+- babel-helper-remove-or-void@0.2.0
+- babel-helper-to-multiple-sequence-expressions@0.2.0
+- babel-minify@0.2.0
+- babel-plugin-minify-builtins@0.2.0
+- babel-plugin-minify-constant-folding@0.2.0
+- babel-plugin-minify-dead-code-elimination@0.2.0
+- babel-plugin-minify-flip-comparisons@0.2.0
+- babel-plugin-minify-guarded-expressions@0.2.0
+- babel-plugin-minify-infinity@0.2.0
+- babel-plugin-minify-mangle-names@0.2.0
+- babel-plugin-minify-numeric-literals@0.2.0
+- babel-plugin-minify-replace@0.2.0
+- babel-plugin-minify-simplify@0.2.0
+- babel-plugin-minify-type-constructors@0.2.0
+- babel-plugin-transform-inline-consecutive-adds@0.2.0
+- babel-plugin-transform-inline-environment-variables@0.2.0
+- babel-plugin-transform-member-expression-literals@6.8.5
+- babel-plugin-transform-merge-sibling-variables@6.8.6
+- babel-plugin-transform-minify-booleans@6.8.3
+- babel-plugin-transform-node-env-inline@0.2.0
+- babel-plugin-transform-property-literals@6.8.5
+- babel-plugin-transform-regexp-constructors@0.2.0
+- babel-plugin-transform-remove-console@6.8.5
+- babel-plugin-transform-remove-debugger@6.8.5
+- babel-plugin-transform-remove-undefined@0.2.0
+- babel-plugin-transform-simplify-comparison-operators@6.8.5
+- babel-plugin-transform-undefined-to-void@6.8.3
+- babel-preset-minify@0.2.0
+- gulp-babel-minify@0.2.0
+
 #### :boom: Breaking Change
-* `babel-helper-evaluate-path`, `babel-helper-flip-expressions`, `babel-helper-is-void-0`, `babel-helper-mark-eval-scopes`, `babel-helper-remove-or-void`, `babel-helper-to-multiple-sequence-expressions`, `babel-minify`, `babel-plugin-minify-builtins`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-replace`, `babel-plugin-minify-simplify`, `babel-plugin-minify-type-constructors`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-minify-booleans`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-regexp-constructors`, `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`, `babel-preset-minify`, `babili`, `gulp-babel-minify`, `gulp-babili`
-  * [#654](https://github.com/babel/minify/pull/654) The rename. ([@boopathi](https://github.com/boopathi))
-* `babili`
-  * [#507](https://github.com/babel/minify/pull/507) Node API and CLI. ([@boopathi](https://github.com/boopathi))
+* [#654](https://github.com/babel/minify/pull/654) The rename. ([@boopathi](https://github.com/boopathi))
+* [#507](https://github.com/babel/minify/pull/507) Node API and CLI. ([@boopathi](https://github.com/boopathi))
 
 #### :rocket: New Feature
-* `babel-plugin-transform-remove-undefined`, `babel-preset-minify`
-  * [#662](https://github.com/babel/minify/pull/662) Use evaluate helper in removeUndefined transform. ([@boopathi](https://github.com/boopathi))
-* `babel-helper-evaluate-path`, `babel-minify`, `babel-plugin-minify-builtins`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-preset-minify`
-  * [#658](https://github.com/babel/minify/pull/658) Make tdz optional in helper evaluate. ([@boopathi](https://github.com/boopathi))
-* `babel-helper-evaluate-path`, `babel-helper-flip-expressions`, `babel-helper-is-void-0`, `babel-helper-mark-eval-scopes`, `babel-helper-remove-or-void`, `babel-helper-to-multiple-sequence-expressions`, `babel-minify`, `babel-plugin-minify-builtins`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-replace`, `babel-plugin-minify-simplify`, `babel-plugin-minify-type-constructors`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-minify-booleans`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-regexp-constructors`, `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`, `babel-preset-minify`, `babili`, `gulp-babel-minify`, `gulp-babili`
-  * [#654](https://github.com/babel/minify/pull/654) The rename. ([@boopathi](https://github.com/boopathi))
-* `babili`
-  * [#507](https://github.com/babel/minify/pull/507) Node API and CLI. ([@boopathi](https://github.com/boopathi))
-* `babel-plugin-minify-simplify`
-  * [#616](https://github.com/babel/minify/pull/616) Convert simple arrow function body to expression. ([@ashsearle](https://github.com/ashsearle))
+
+* [#662](https://github.com/babel/minify/pull/662) Use evaluate helper in removeUndefined transform. ([@boopathi](https://github.com/boopathi))
+* [#658](https://github.com/babel/minify/pull/658) Make tdz optional in helper evaluate. ([@boopathi](https://github.com/boopathi))
+* [#654](https://github.com/babel/minify/pull/654) The rename. ([@boopathi](https://github.com/boopathi))
+* [#507](https://github.com/babel/minify/pull/507) Node API and CLI. ([@boopathi](https://github.com/boopathi))
+* [#616](https://github.com/babel/minify/pull/616) Convert simple arrow function body to expression. ([@ashsearle](https://github.com/ashsearle))
 
 #### :bug: Bug Fix
 * `babel-plugin-transform-remove-undefined`, `babel-preset-minify`
@@ -68,7 +98,7 @@
   * [#625](https://github.com/babel/minify/pull/625) Support babel 7. ([@boopathi](https://github.com/boopathi))
 * `babel-plugin-minify-simplify`
   * [#624](https://github.com/babel/minify/pull/624) Split simplify plugin to multiple files. ([@boopathi](https://github.com/boopathi))
-* `babel-plugin-minify-builtins`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-replace`, `babel-plugin-minify-simplify`, `babel-plugin-minify-type-constructors`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-minify-booleans`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-regexp-constructors`, `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`, `babel-preset-babili`
+* Multiple packages
   * [#606](https://github.com/babel/minify/pull/606) Refactor the test suite. ([@j-f1](https://github.com/j-f1))
 
 #### Committers: 6
