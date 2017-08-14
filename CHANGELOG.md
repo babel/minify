@@ -49,8 +49,6 @@
 
 * [#662](https://github.com/babel/minify/pull/662) Use evaluate helper in removeUndefined transform. ([@boopathi](https://github.com/boopathi))
 * [#658](https://github.com/babel/minify/pull/658) Make tdz optional in helper evaluate. ([@boopathi](https://github.com/boopathi))
-* [#654](https://github.com/babel/minify/pull/654) The rename. ([@boopathi](https://github.com/boopathi))
-* [#507](https://github.com/babel/minify/pull/507) Node API and CLI. ([@boopathi](https://github.com/boopathi))
 * [#616](https://github.com/babel/minify/pull/616) Convert simple arrow function body to expression. ([@ashsearle](https://github.com/ashsearle))
 
 #### :bug: Bug Fix
@@ -59,7 +57,6 @@
 * `babel-helper-to-multiple-sequence-expressions`, `babel-preset-minify`
   * [#660](https://github.com/babel/minify/pull/660) Fix helper toMultipleSeqExpr with es2015. ([@boopathi](https://github.com/boopathi))
 * `babel-helper-evaluate-path`
-  * [#656](https://github.com/babel/minify/pull/656) Fix evaluate helper. ([@boopathi](https://github.com/boopathi))
   * [#651](https://github.com/babel/minify/pull/651) Add deopt paths for let/const bindings in evaluate helper. ([@boopathi](https://github.com/boopathi))
 * `babel-helper-evaluate-path`, `babel-plugin-minify-builtins`, `babel-plugin-minify-dead-code-elimination`
   * [#645](https://github.com/babel/minify/pull/645) Helper evaluate path. ([@boopathi](https://github.com/boopathi))
