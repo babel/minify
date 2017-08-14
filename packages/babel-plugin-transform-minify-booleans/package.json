@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-minify-booleans",
-  "version": "6.8.2",
+  "version": "6.8.3",
   "description": "Turn boolean literals into !0 for true and !1 for false.",
   "keywords": [
     "babel-plugin"
@@ -10,7 +10,5 @@
   "license": "MIT",
   "author": "amasad",
   "main": "lib/index.js",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-transform-minify-booleans",
-  "dependencies": {},
-  "devDependencies": {}
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-transform-minify-booleans"
 }

@@ -1,6 +1,6 @@
 {
   "name": "babel-helper-evaluate-path",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "path.evaluate wrapped in a try catch",
   "keywords": [
     "babel-minify",
@@ -11,7 +11,5 @@
   "license": "MIT",
   "author": "boopathi",
   "main": "lib/index.js",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-helper-evaluate-path",
-  "dependencies": {},
-  "devDependencies": {}
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-helper-evaluate-path"
 }
