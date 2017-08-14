@@ -10,5 +10,8 @@
   "license": "MIT",
   "author": "shinew",
   "main": "lib/index.js",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-transform-remove-undefined"
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-transform-remove-undefined",
+  "dependencies": {
+    "babel-helper-evaluate-path": "^0.1.0"
+  }
 }

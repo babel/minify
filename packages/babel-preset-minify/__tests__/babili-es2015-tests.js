@@ -42,4 +42,26 @@ describe("preset along with es2015", () => {
       key = obj.k, foo();
     `
   );
+
+  thePlugin(
+    "should fix issue#614",
+    `
+      function a() {
+        var c = 1
+        class B {}
+        return B
+      }
+    `,
+    `
+      "use strict";
+
+      function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
+
+      function a() {
+        return function a() {
+          _classCallCheck(this, a);
+        };
+      }
+    `
+  );
 });
