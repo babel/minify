@@ -9,14 +9,14 @@ module.exports = function({ types: t }) {
 
         if (!callee.isMemberExpression()) return;
 
-        if (isIncludedConsole(callee, state)) {
+        if (isIncludedConsole(callee, state.opts.exclude)) {
           // console.log()
           if (path.parentPath.isExpressionStatement()) {
             path.remove();
           } else {
             path.replaceWith(createVoid0());
           }
-        } else if (isIncludedConsoleBind(callee, state)) {
+        } else if (isIncludedConsoleBind(callee, state.opts.exclude)) {
           // console.log.bind()
           path.replaceWith(createNoop());
         }
@@ -24,7 +24,7 @@ module.exports = function({ types: t }) {
       MemberExpression: {
         exit(path, state) {
           if (
-            isIncludedConsole(path, state) &&
+            isIncludedConsole(path, state.opts.exclude) &&
             !path.parentPath.isMemberExpression()
           ) {
             if (
@@ -50,10 +50,10 @@ module.exports = function({ types: t }) {
     );
   }
 
-  function isExcluded(property, state) {
+  function isExcluded(property, excludeArray) {
     let exclude = false;
-    if (state.opts.exclude) {
-      state.opts.exclude.forEach(excluded => {
+    if (excludeArray) {
+      excludeArray.forEach(excluded => {
         if (property.isIdentifier({ name: excluded })) {
           exclude = true;
         }
@@ -62,11 +62,11 @@ module.exports = function({ types: t }) {
     return exclude;
   }
 
-  function isIncludedConsole(memberExpr, state) {
+  function isIncludedConsole(memberExpr, excludeArray) {
     const object = memberExpr.get("object");
     const property = memberExpr.get("property");
 
-    if (isExcluded(property, state)) return false;
+    if (isExcluded(property, excludeArray)) return false;
 
     if (isGlobalConsoleId(object)) return true;
 
@@ -77,11 +77,11 @@ module.exports = function({ types: t }) {
     );
   }
 
-  function isIncludedConsoleBind(memberExpr, state) {
+  function isIncludedConsoleBind(memberExpr, excludeArray) {
     const object = memberExpr.get("object");
 
     if (!object.isMemberExpression()) return false;
-    if (isExcluded(object.get("property"), state)) return false;
+    if (isExcluded(object.get("property"), excludeArray)) return false;
 
     return (
       isGlobalConsoleId(object.get("object")) &&
