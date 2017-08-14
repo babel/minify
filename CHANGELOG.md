@@ -2,8 +2,8 @@
 
 ### Highlights
 
-+ Babili has been renamed to `babel-minify` based on stats from - [#124](https://github.com/babel/minify/issues/124)
-+ New babel-minify CLI and Node API
++ [#124](https://github.com/babel/minify/issues/124): Babili has been renamed to `babel-minify`
++ New babel-minify CLI and Node API. [Docs](https://github.com/babel/minify/tree/master/packages/babel-minify)
 
 ### Updated packages
 
