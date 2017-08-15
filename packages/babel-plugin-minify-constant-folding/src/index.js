@@ -19,7 +19,7 @@ function getName(member) {
 }
 
 function swap(path, member, handlers, ...args) {
-  const key = getName(member);
+  const key = getName(member.node);
   if (key === undefined) return;
   let handler = handlers[key];
   if (
@@ -27,12 +27,12 @@ function swap(path, member, handlers, ...args) {
     !Object.hasOwnProperty.call(handlers, key)
   ) {
     if (typeof handlers[FALLBACK_HANDLER] === "function") {
-      handler = handlers[FALLBACK_HANDLER].bind(member.object, key);
+      handler = handlers[FALLBACK_HANDLER].bind(member.get('object'), key);
     } else {
       return false;
     }
   }
-  const replacement = handler.apply(member.object, args);
+  const replacement = handler.apply(member.get('object'), args);
   if (replacement) {
     path.replaceWith(replacement);
     return true;
@@ -168,18 +168,18 @@ module.exports = babel => {
       },
       CallExpression(path) {
         const { node } = path;
-        const { callee: member } = node;
+        const member = path.get('callee');
         if (t.isMemberExpression(member)) {
-          const helpers = replacements[member.object.type];
+          const helpers = replacements[member.node.object.type];
           if (!helpers || !helpers.calls) return;
           swap(path, member, helpers.calls, ...node.arguments);
         }
       },
       MemberExpression(path) {
-        const { node: member } = path;
-        const helpers = replacements[member.object.type];
+        const { node } = path;
+        const helpers = replacements[node.object.type];
         if (!helpers || !helpers.members) return;
-        swap(path, member, helpers.members);
+        swap(path, path, helpers.members);
       }
     }
   };

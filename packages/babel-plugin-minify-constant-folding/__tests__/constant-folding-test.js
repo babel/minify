@@ -139,7 +139,7 @@ describe("constant-folding-plugin", () => {
     "a,b,c";
     "a@b@c";
     "/1";
-    "/xyz/imabctrue";
+    [/xyz/im, true].join("abc");
     [\`a\${xyz}\`].join("1");
     "abc";
 
