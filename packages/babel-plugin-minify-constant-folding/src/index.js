@@ -27,12 +27,12 @@ function swap(path, member, handlers, ...args) {
     !Object.hasOwnProperty.call(handlers, key)
   ) {
     if (typeof handlers[FALLBACK_HANDLER] === "function") {
-      handler = handlers[FALLBACK_HANDLER].bind(member.get('object'), key);
+      handler = handlers[FALLBACK_HANDLER].bind(member.get("object"), key);
     } else {
       return false;
     }
   }
-  const replacement = handler.apply(member.get('object'), args);
+  const replacement = handler.apply(member.get("object"), args);
   if (replacement) {
     path.replaceWith(replacement);
     return true;
@@ -168,7 +168,7 @@ module.exports = babel => {
       },
       CallExpression(path) {
         const { node } = path;
-        const member = path.get('callee');
+        const member = path.get("callee");
         if (t.isMemberExpression(member)) {
           const helpers = replacements[member.node.object.type];
           if (!helpers || !helpers.calls) return;

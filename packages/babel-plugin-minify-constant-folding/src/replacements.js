@@ -41,7 +41,7 @@ module.exports = ({ types: t }) => {
         join(sep = t.stringLiteral(",")) {
           if (!t.isStringLiteral(sep)) return;
           let bad = false;
-          const str = this.get('elements')
+          const str = this.get("elements")
             .map(el => {
               const evaled = el.evaluate();
               if (!evaled.confident) {
