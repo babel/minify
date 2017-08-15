@@ -103,6 +103,10 @@ describe("constant-folding-plugin", () => {
     [1, 2, 3].join();
     ["a", "b", "c"].join();
     ["a", "b", "c"].join("@");
+    [null, 1].join("/");
+    [/xyz/im, true].join("abc");
+    [\`a\${xyz}\`].join("1");
+    [\`a\`, \`c\`].join('b');
 
     [1, 2, 3].length;
     [1, 2, 3][1];
@@ -134,6 +138,10 @@ describe("constant-folding-plugin", () => {
     "1,2,3";
     "a,b,c";
     "a@b@c";
+    "/1";
+    [/xyz/im, true].join("abc");
+    [\`a\${xyz}\`].join("1");
+    "abc";
 
     3;
     2;

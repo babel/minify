@@ -14,7 +14,7 @@ module.exports = ({ types: t }) => {
   function defaultZero(cb) {
     return function(i = t.numericLiteral(0), ...args) {
       if (t.isNumericLiteral(i)) {
-        return cb.call(this, this, i.value, ...args);
+        return cb.call(this.node, this.node, i.value, ...args);
       }
     };
   }
@@ -23,17 +23,17 @@ module.exports = ({ types: t }) => {
     ArrayExpression: {
       members: {
         length() {
-          if (this.elements.some(el => t.isSpreadElement(el))) {
+          if (this.node.elements.some(el => t.isSpreadElement(el))) {
             return;
           }
-          return t.numericLiteral(this.elements.length);
+          return t.numericLiteral(this.node.elements.length);
         },
         [FALLBACK_HANDLER](i) {
-          if (this.elements.some(el => t.isSpreadElement(el))) {
+          if (this.node.elements.some(el => t.isSpreadElement(el))) {
             return;
           }
           if (typeof i === "number" || i.match(/^\d+$/)) {
-            return this.elements[i] || undef;
+            return this.node.elements[i] || undef;
           }
         }
       },
@@ -41,39 +41,40 @@ module.exports = ({ types: t }) => {
         join(sep = t.stringLiteral(",")) {
           if (!t.isStringLiteral(sep)) return;
           let bad = false;
-          const str = this.elements
+          const str = this.get("elements")
             .map(el => {
-              if (!t.isLiteral(el)) {
+              const evaled = el.evaluate();
+              if (!evaled.confident) {
                 bad = true;
                 return;
               }
-              return el.value;
+              return evaled.value;
             })
             .join(sep.value);
           return bad ? undefined : t.stringLiteral(str);
         },
         push(...args) {
-          return t.numericLiteral(this.elements.length + args.length);
+          return t.numericLiteral(this.node.elements.length + args.length);
         },
         shift() {
-          if (this.elements.length === 0) {
+          if (this.node.elements.length === 0) {
             return undef;
           }
-          return t.numericLiteral(this.elements.length - 1);
+          return t.numericLiteral(this.node.elements.length - 1);
         },
         slice(start = t.numericLiteral(0), end) {
           if (!t.isNumericLiteral(start) || (end && !t.isNumericLiteral(end))) {
             return;
           }
           return t.arrayExpression(
-            this.elements.slice(start.value, end && end.value)
+            this.node.elements.slice(start.value, end && end.value)
           );
         },
         pop() {
-          return this.elements[this.elements.length - 1] || undef;
+          return this.node.elements[this.node.elements.length - 1] || undef;
         },
         reverse() {
-          return t.arrayExpression(this.elements.reverse());
+          return t.arrayExpression(this.node.elements.reverse());
         },
         splice(start, end, ...args) {
           if (!t.isNumericLiteral(start) || (end && !t.isNumericLiteral(end))) {
@@ -83,7 +84,7 @@ module.exports = ({ types: t }) => {
             args.unshift(end.value);
           }
           return t.arrayExpression(
-            this.elements.slice().splice(start.value, ...args)
+            this.node.elements.slice().splice(start.value, ...args)
           );
         }
       }
@@ -91,11 +92,11 @@ module.exports = ({ types: t }) => {
     StringLiteral: {
       members: {
         length() {
-          return t.numericLiteral(this.value.length);
+          return t.numericLiteral(this.node.value.length);
         },
         [FALLBACK_HANDLER](i) {
           if (typeof i === "number" || i.match(/^\d+$/)) {
-            const ch = this.value[i];
+            const ch = this.node.value[i];
             return ch ? t.stringLiteral(ch) : undef;
           }
         }
@@ -111,7 +112,7 @@ module.exports = ({ types: t }) => {
           }
           if (realSep !== null) {
             return t.arrayExpression(
-              this.value.split(realSep).map(str => t.stringLiteral(str))
+              this.node.value.split(realSep).map(str => t.stringLiteral(str))
             );
           }
         },
