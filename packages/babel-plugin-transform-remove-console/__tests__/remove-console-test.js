@@ -166,7 +166,7 @@ describe("remove-console-plugin with exclude argument", () => {
       console.info("blah");
     }
   `,
-  options
+    options
   );
   thePlugin(
     "should not remove bound excluded options",
