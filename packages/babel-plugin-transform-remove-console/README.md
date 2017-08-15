@@ -38,7 +38,7 @@ npm install babel-plugin-transform-remove-console
 ```json
 // with options
 {
-  "plugins": ["transform-remove-console", { "exclude": [ "error", "warn"] }]
+  "plugins": [ ["transform-remove-console", { "exclude": [ "error", "warn"] }] ]
 }
 ```
 
