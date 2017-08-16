@@ -30,11 +30,18 @@ npm install babel-plugin-transform-inline-environment-variables
 **.babelrc**
 
 ```json
+// without options
 {
   "plugins": ["transform-inline-environment-variables"]
 }
 ```
 
+```json
+// with options
+{
+  "plugins": ["transform-inline-environment-variables", { "whitelist": ["NODE_ENV", "CI"] }]
+}
+```
 ### Via CLI
 
 ```sh
@@ -48,3 +55,7 @@ require("babel-core").transform("code", {
   plugins: ["transform-inline-environment-variables"]
 });
 ```
+
+## Options
+
++ `whitelist` - A plain JS Array indicating which inline environment variables you want to inline
