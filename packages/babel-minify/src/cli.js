@@ -252,10 +252,12 @@ async function run(args) {
 
   const options = getMinifyOpts(argv);
 
-  if (!process.stdin.isTTY) {
-    return runStdin(argv, options);
-  } else if (argv._.length <= 0) {
-    return printHelpInfo({ exitCode: 1 });
+  if (argv._.length <= 0) {
+    if (!process.stdin.isTTY) {
+      return runStdin(argv, options);
+    } else {
+      return printHelpInfo({ exitCode: 1 });
+    }
   } else if (argv._.length === 1 && (await isFile(argv._[0]))) {
     return runFile(argv, options);
   } else {
