@@ -7,8 +7,13 @@ module.exports = function({ types: t }) {
     );
   }
 
+  function isRealUndefined(path) {
+    return path.isIdentifier({ name: "undefined" }) &&
+          !path.scope.getBinding("undefined")
+  }
+
   function undefinedToNull(path) {
-    if (t.isIdentifier(path.node, { name: "undefined" }) || isPureVoid(path)) {
+    if (isRealUndefined(path) || isPureVoid(path)) {
       path.replaceWith(t.nullLiteral());
       return true;
     }
