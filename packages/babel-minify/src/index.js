@@ -5,26 +5,50 @@ module.exports = function babelMinify(
   input,
   // Minify options passed to minifyPreset
   // defaults are handled in preset
-  options = {},
+  minifyOpts = {},
   // overrides and other options
   {
     minified = true,
     inputSourceMap = null,
     sourceMaps = false,
+    comments = /^\**!|@preserve|@license|@cc_on/,
 
     // to override the default babelCore used
     babel = babelCore,
 
     // to override the default minify preset used
-    minifyPreset = babelPresetMinify
+    minifyPreset = babelPresetMinify,
+
+    filename,
+    filenameRelative
   } = {}
 ) {
   return babel.transform(input, {
+    minified,
     babelrc: false,
-    presets: [[minifyPreset, options]],
-    comments: false,
-    inputSourceMap,
+    ast: false,
+
+    presets: [[minifyPreset, minifyOpts]],
+
     sourceMaps,
-    minified
+    inputSourceMap,
+
+    shouldPrintComment(contents) {
+      return shouldPrintComment(contents, comments);
+    },
+
+    filename,
+    filenameRelative
   });
 };
+
+function shouldPrintComment(contents, predicate) {
+  switch (typeof predicate) {
+    case "function":
+      return predicate(contents);
+    case "object":
+      return predicate.test(contents);
+    default:
+      return !!predicate;
+  }
+}

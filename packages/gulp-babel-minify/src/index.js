@@ -15,7 +15,7 @@ function gulpBabelMinify(
   {
     babel = babelCore,
     minifyPreset = babelPresetMinify,
-    comments = /preserve|licen(s|c)e/
+    comments = /^\*\*\!|@preserve|@license|@cc_on/
   } = {}
 ) {
   return through2.obj(function(file, enc, callback) {
