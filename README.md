@@ -75,8 +75,6 @@ class a{constructor(b){this.program=b}}new a;
 |--------|-------|------------|
 | [`babel-minify`](/packages/babel-minify) | [![npm](https://img.shields.io/npm/v/babel-minify.svg?maxAge=86400)](https://www.npmjs.com/package/babel-minify) | [![Dependency Status](https://david-dm.org/babel/babel-minify.svg?path=packages/babel-minify)](https://david-dm.org/babel/babel-minify?path=packages/babel-minify) |
 
-This is simple wrapper around the regular `babel-cli` and thus takes in the same [cli options](http://babeljs.io/docs/usage/cli/#options) as running babel on its own. You can use this if you don't already use babel or want to run it standalone.
-
 ### Install
 
 ```sh
