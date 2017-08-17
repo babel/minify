@@ -51,7 +51,9 @@ module.exports = function({ types: t }) {
   }
 
   function isExcluded(property, excludeArray) {
-    return excludeArray && excludeArray.some(name => property.isIdentifier({ name }));
+    return (
+      excludeArray && excludeArray.some(name => property.isIdentifier({ name }))
+    );
   }
 
   function isIncludedConsole(memberExpr, excludeArray) {
