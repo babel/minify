@@ -2,14 +2,14 @@
 
 module.exports = function({ types: t }) {
   function isPureVoid(path) {
-    return (
-      path.isUnaryExpression({ operator: "void" }) && path.isPure()
-    );
+    return path.isUnaryExpression({ operator: "void" }) && path.isPure();
   }
 
   function isRealUndefined(path) {
-    return path.isIdentifier({ name: "undefined" }) &&
-          !path.scope.getBinding("undefined")
+    return (
+      path.isIdentifier({ name: "undefined" }) &&
+      !path.scope.getBinding("undefined")
+    );
   }
 
   function undefinedToNull(path) {
