@@ -1,8 +1,7 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform")(
-  require("../src/index")
-);
+const plugin = require("../src/index");
+const thePlugin = require("../../../utils/test-transform")(plugin);
 
 describe("remove-console-plugin", () => {
   thePlugin(
@@ -142,5 +141,53 @@ describe("remove-console-plugin", () => {
       console.error = function () {};
     }
   `
+  );
+});
+
+describe("remove-console-plugin with exclude argument", () => {
+  const options = {
+    plugins: [[plugin, { exclude: ["error", "info"] }]]
+  };
+
+  thePlugin(
+    "should not remove excluded options",
+    `
+    function foo() {
+      console.log("foo");
+      console.error("bar");
+      blah();
+      console.info("blah");
+    }
+  `,
+    `
+    function foo() {
+      console.error("bar");
+      blah();
+      console.info("blah");
+    }
+  `,
+    options
+  );
+  thePlugin(
+    "should not remove bound excluded options",
+    `
+    function foo() {
+      const a = console.log;
+      a();
+      const b = console.error.bind(console);
+      b("asdf");
+      blah();
+    }
+  `,
+    `
+    function foo() {
+      const a = function () {};
+      a();
+      const b = console.error.bind(console);
+      b("asdf");
+      blah();
+    }
+    `,
+    options
   );
 });

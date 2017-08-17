@@ -29,8 +29,16 @@ npm install babel-plugin-transform-remove-console
 **.babelrc**
 
 ```json
+// without options
 {
   "plugins": ["transform-remove-console"]
+}
+```
+
+```json
+// with options
+{
+  "plugins": [ ["transform-remove-console", { "exclude": [ "error", "warn"] }] ]
 }
 ```
 
@@ -47,3 +55,7 @@ require("babel-core").transform("code", {
   plugins: ["transform-remove-console"]
 });
 ```
+
+## Options
+
++ `exclude` - An array of console methods to exclude from removal.
