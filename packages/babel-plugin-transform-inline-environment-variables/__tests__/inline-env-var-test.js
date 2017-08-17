@@ -1,8 +1,7 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform")(
-  require("../src/index")
-);
+const envInliner = require("../src/index");
+const thePlugin = require("../../../utils/test-transform")(envInliner);
 
 describe("inline-env-plugin", () => {
   let prev;
@@ -19,6 +18,39 @@ describe("inline-env-plugin", () => {
     `
     "development";
   `
+  );
+
+  thePlugin(
+    "should inline environment variables in the include when provided",
+    `
+    process.env.NODE_ENV
+  `,
+    `
+    "development";
+  `,
+    {
+      plugins: [[envInliner, { include: ["NODE_ENV"] }]]
+    }
+  );
+
+  thePlugin(
+    "should not inline environment variables if not present in the include when provided",
+    `
+    process.env.NODE_ENV;
+  `,
+    {
+      plugins: [[envInliner, { include: ["CI"] }]]
+    }
+  );
+
+  thePlugin(
+    "should not inline environment variables if present in the exclude",
+    `
+      process.env.NODE_ENV;
+    `,
+    {
+      plugins: [[envInliner, { exclude: ["NODE_ENV"] }]]
+    }
   );
 
   afterAll(() => {
