@@ -1,18 +1,17 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const plugin = require("../src/index");
-
-function transform(code) {
-  return babel.transform(code, {
-    plugins: [plugin]
-  }).code;
-}
+const thePlugin = require("../../../utils/test-transform")(
+  require("../src/index")
+);
 
 describe("boolean-plugin", () => {
-  it("should shorten bool", () => {
-    const source = "true; false;";
-    const expected = "!0;!1;";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should shorten `true` and `false` to `!0` and `!1`, repsectively",
+    `
+    true; false;
+  `,
+    `
+    !0;!1;
+  `
+  );
 });

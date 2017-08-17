@@ -49,3 +49,7 @@ require("babel-core").transform("code", {
   plugins: ["minify-builtins"]
 });
 ```
+
+## Options
+
++ `tdz` - Account for TDZ (Temporal Dead Zone)

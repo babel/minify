@@ -1,6 +1,8 @@
 {
-  "lerna": "2.0.0-rc.4",
+  "lerna": "2.0.0",
   "version": "independent",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
   "commands": {
     "publish": {
       "ignore": [
@@ -10,7 +12,7 @@
     }
   },
   "changelog": {
-    "repo": "babel/babili",
+    "repo": "babel/minify",
     "labels": {
       "Tag: Spec Compliancy": ":eyeglasses: Spec Compliancy",
       "Tag: Breaking Change": ":boom: Breaking Change",

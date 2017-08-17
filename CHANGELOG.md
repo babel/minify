@@ -1,3 +1,153 @@
+## babel-minify@0.2.0 (2017-08-14)
+
+### Highlights
+
++ [#124](https://github.com/babel/minify/issues/124): Babili has been renamed to `babel-minify`
++ New babel-minify CLI and Node API. [Docs](https://github.com/babel/minify/tree/master/packages/babel-minify)
+
+### Updated packages
+
+- babel-helper-evaluate-path@0.2.0
+- babel-helper-flip-expressions@0.2.0
+- babel-helper-is-void-0@0.2.0
+- babel-helper-mark-eval-scopes@0.2.0
+- babel-helper-remove-or-void@0.2.0
+- babel-helper-to-multiple-sequence-expressions@0.2.0
+- babel-minify@0.2.0
+- babel-plugin-minify-builtins@0.2.0
+- babel-plugin-minify-constant-folding@0.2.0
+- babel-plugin-minify-dead-code-elimination@0.2.0
+- babel-plugin-minify-flip-comparisons@0.2.0
+- babel-plugin-minify-guarded-expressions@0.2.0
+- babel-plugin-minify-infinity@0.2.0
+- babel-plugin-minify-mangle-names@0.2.0
+- babel-plugin-minify-numeric-literals@0.2.0
+- babel-plugin-minify-replace@0.2.0
+- babel-plugin-minify-simplify@0.2.0
+- babel-plugin-minify-type-constructors@0.2.0
+- babel-plugin-transform-inline-consecutive-adds@0.2.0
+- babel-plugin-transform-inline-environment-variables@0.2.0
+- babel-plugin-transform-member-expression-literals@6.8.5
+- babel-plugin-transform-merge-sibling-variables@6.8.6
+- babel-plugin-transform-minify-booleans@6.8.3
+- babel-plugin-transform-node-env-inline@0.2.0
+- babel-plugin-transform-property-literals@6.8.5
+- babel-plugin-transform-regexp-constructors@0.2.0
+- babel-plugin-transform-remove-console@6.8.5
+- babel-plugin-transform-remove-debugger@6.8.5
+- babel-plugin-transform-remove-undefined@0.2.0
+- babel-plugin-transform-simplify-comparison-operators@6.8.5
+- babel-plugin-transform-undefined-to-void@6.8.3
+- babel-preset-minify@0.2.0
+- gulp-babel-minify@0.2.0
+
+#### :boom: Breaking Change
+* [#654](https://github.com/babel/minify/pull/654) The rename. ([@boopathi](https://github.com/boopathi))
+* [#507](https://github.com/babel/minify/pull/507) Node API and CLI. ([@boopathi](https://github.com/boopathi))
+
+#### :rocket: New Feature
+
+* [#662](https://github.com/babel/minify/pull/662) Use evaluate helper in removeUndefined transform. ([@boopathi](https://github.com/boopathi))
+* [#658](https://github.com/babel/minify/pull/658) Make tdz optional in helper evaluate. ([@boopathi](https://github.com/boopathi))
+* [#616](https://github.com/babel/minify/pull/616) Convert simple arrow function body to expression. ([@ashsearle](https://github.com/ashsearle))
+
+#### :bug: Bug Fix
+* `babel-plugin-transform-remove-undefined`, `babel-preset-minify`
+  * [#662](https://github.com/babel/minify/pull/662) Use evaluate helper in removeUndefined transform. ([@boopathi](https://github.com/boopathi))
+* `babel-helper-to-multiple-sequence-expressions`, `babel-preset-minify`
+  * [#660](https://github.com/babel/minify/pull/660) Fix helper toMultipleSeqExpr with es2015. ([@boopathi](https://github.com/boopathi))
+* `babel-helper-evaluate-path`
+  * [#651](https://github.com/babel/minify/pull/651) Add deopt paths for let/const bindings in evaluate helper. ([@boopathi](https://github.com/boopathi))
+* `babel-helper-evaluate-path`, `babel-plugin-minify-builtins`, `babel-plugin-minify-dead-code-elimination`
+  * [#645](https://github.com/babel/minify/pull/645) Helper evaluate path. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#597](https://github.com/babel/minify/pull/597) [Closes [#574](https://github.com/babel/minify/issues/574)] deopt when binding is present in diff scope. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+  * [#626](https://github.com/babel/minify/pull/626) Detect duplicate declaration during one-use replacement. ([@boopathi](https://github.com/boopathi))
+  * [#622](https://github.com/babel/minify/pull/622) [DCE] Fix removal of ArrayPattern. ([@boopathi](https://github.com/boopathi))
+  * [#602](https://github.com/babel/minify/pull/602) fix(minify-dead-code): Closes [#601](https://github.com/babel/minify/issues/601). ([@postspectacular](https://github.com/postspectacular))
+* `babel-plugin-minify-simplify`
+  * [#638](https://github.com/babel/minify/pull/638) Don't remove else with blockscoped decl. ([@boopathi](https://github.com/boopathi))
+  * [#623](https://github.com/babel/minify/pull/623) Fix block removal during early continue transform. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-remove-undefined`, `babel-preset-babili`
+  * [#633](https://github.com/babel/minify/pull/633) binding voilations check during es2015 transform[Closes [#630](https://github.com/babel/minify/issues/630)]. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-minify-constant-folding`
+  * [#610](https://github.com/babel/minify/pull/610) Fix folding Array literals (Closes [#608](https://github.com/babel/minify/issues/608)) (Closes [#609](https://github.com/babel/minify/issues/609)). ([@boopathi](https://github.com/boopathi))
+
+#### :memo: Documentation
+* Other
+  * [#659](https://github.com/babel/minify/pull/659) Update benchmarks. ([@boopathi](https://github.com/boopathi))
+  * [#655](https://github.com/babel/minify/pull/655) Update Contributing.md. ([@boopathi](https://github.com/boopathi))
+* `babili`
+  * [#653](https://github.com/babel/minify/pull/653) Add docs for NodeAPI and CLI. ([@boopathi](https://github.com/boopathi))
+* `babel-helper-evaluate-path`
+  * [#649](https://github.com/babel/minify/pull/649) Add helper evaluate docs [skip ci]. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-numeric-literals`
+  * [#639](https://github.com/babel/minify/pull/639) Update babel-plugin-minify-numeric-literals README. ([@benbrandt](https://github.com/benbrandt))
+
+#### :house: Internal
+* `babili`
+  * [#652](https://github.com/babel/minify/pull/652) test for nested options in node api. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* Other
+  * [#648](https://github.com/babel/minify/pull/648) Remove draft-js from smoktests dir. ([@boopathi](https://github.com/boopathi))
+  * [#643](https://github.com/babel/minify/pull/643) Use yarn workspaces. ([@boopathi](https://github.com/boopathi))
+  * [#631](https://github.com/babel/minify/pull/631) Add ISSUE_TEMPLATE and CODEOWNERS . ([@boopathi](https://github.com/boopathi))
+* `babel-helper-mark-eval-scopes`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-mangle-names`
+  * [#625](https://github.com/babel/minify/pull/625) Support babel 7. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#624](https://github.com/babel/minify/pull/624) Split simplify plugin to multiple files. ([@boopathi](https://github.com/boopathi))
+* Multiple packages
+  * [#606](https://github.com/babel/minify/pull/606) Refactor the test suite. ([@j-f1](https://github.com/j-f1))
+
+#### Committers: 6
+- Ash ([ashsearle](https://github.com/ashsearle))
+- Ben Brandt ([benbrandt](https://github.com/benbrandt))
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Jed Fox ([j-f1](https://github.com/j-f1))
+- Karsten Schmidt ([postspectacular](https://github.com/postspectacular))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+## babili@0.1.4 (2017-06-20)
+
+> Just some various bug fixes!
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-constant-folding`
+  * [#587](https://github.com/babel/babili/pull/587) Closes [#576](https://github.com/babel/babili/issues/576). ([@j-f1](https://github.com/j-f1))
+  * [#578](https://github.com/babel/babili/pull/578) Remove folding Array.prototype.concat (Closes [#577](https://github.com/babel/babili/issues/577)). ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-builtins`, `babel-preset-babili`
+  * [#579](https://github.com/babel/babili/pull/579) replace paths with cloned nodes in builtins transform. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### Committers: 3
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Jed Fox ([j-f1](https://github.com/j-f1))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+## babili@0.1.3 (2017-06-13)
+
+#### :rocket: New Feature
+* `babel-plugin-minify-constant-folding`
+  * [#505](https://github.com/babel/babili/pull/505) Evaluate some String and Array instance methods at compile time. ([@j-f1](https://github.com/j-f1))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#553](https://github.com/babel/babili/pull/553) Remove redundant use strict (Closes [#542](https://github.com/babel/babili/issues/542)). ([@boopathi](https://github.com/boopathi))
+
+#### :bug: Bug Fix
+* `babel-plugin-transform-property-literals`
+  * [#543](https://github.com/babel/babili/pull/543) Fix removal of quotes from property names. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-mangle-names`
+  * [#567](https://github.com/babel/babili/pull/567) Add workaround for Safari for loop lexical scope bug. ([@btmills](https://github.com/btmills))
+
+#### :house: Internal
+* `babel-helper-flip-expressions`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-simplify`, `babel-plugin-transform-inline-consecutive-adds`
+  * [#573](https://github.com/babel/babili/pull/573) Upgrade deps, formatting, node 8 in Travis. ([@boopathi](https://github.com/boopathi))
+* Other
+  * [#557](https://github.com/babel/babili/pull/557) Clean up before every run to avoid working on already minified file. ([@buunguyen](https://github.com/buunguyen))
+
+#### Committers: 4
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Brandon Mills ([btmills](https://github.com/btmills))
+- Buu Nguyen ([buunguyen](https://github.com/buunguyen))
+- Jed Fox ([j-f1](https://github.com/j-f1))
+
 ## babili@0.1.2 (2017-05-23)
 
 - babel-plugin-minify-mangle-names@0.1.2

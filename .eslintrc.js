@@ -3,7 +3,7 @@ const OFF = "off";
 module.exports = {
   extends: "eslint:recommended",
   parserOptions: {
-    ecmaVersion: 7,
+    ecmaVersion: 2017,
     sourceType: "module"
   },
   env: {

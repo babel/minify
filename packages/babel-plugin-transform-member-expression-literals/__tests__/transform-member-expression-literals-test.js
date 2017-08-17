@@ -1,48 +1,56 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const plugin = require("../src/index");
-const unpad = require("../../../utils/unpad");
-
-function transform(code) {
-  return babel.transform(code, {
-    plugins: [plugin]
-  }).code;
-}
+const thePlugin = require("../../../utils/test-transform")(
+  require("../src/index")
+);
 
 describe("transform-member-expressions-literals-plugin", () => {
-  it("should work with string literals", () => {
-    const source = "foo['bar'];";
-    const expected = "foo.bar;";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should minify string literals to dot notation",
+    `
+    foo['bar'];
+  `,
+    `
+    foo.bar;
+  `
+  );
 
-  it("should work with numbers", () => {
-    const source = "foo['1'];";
-    const expected = "foo[1];";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should minify numbers as strings to actual numbers",
+    `
+    foo['1'];
+  `,
+    `
+    foo[1];
+  `
+  );
 
-  it("should not strip necessaary quotes for numeric like things", () => {
-    const source = "data['00'] = 5;";
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin(
+    "should not strip necessaary quotes for numbers with leading zeroes",
+    `
+    data['00'] = 5;
+  `
+  );
 
-  it("should not transform invalid identifiers", () => {
-    const source = unpad(`
+  thePlugin(
+    "should not transform invalid identifiers",
+    `
       foo["default"];
       foo["import"];
-    `);
-    expect(transform(source)).toBe(source);
-  });
+    `
+  );
 
-  it("should not transform non-string properties", () => {
-    const source = "foo[a];";
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin(
+    "should not transform non-string properties",
+    `
+    foo[a];
+  `
+  );
 
-  it("should not transform literals that are not computed", () => {
-    const source = "foo.bar;";
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin(
+    "should not transform literals that are not computed",
+    `
+    foo.bar;
+  `
+  );
 });

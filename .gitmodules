@@ -2,10 +2,6 @@
 	path = smoke/assets/jquery
 	url = https://github.com/jquery/jquery
 	ignore = dirty
-[submodule "smoke/assets/draft-js"]
-	path = smoke/assets/draft-js
-	url = https://github.com/facebook/draft-js
-	ignore = dirty
 [submodule "smoke/assets/html-minifier"]
 	path = smoke/assets/html-minifier
 	url = https://github.com/kangax/html-minifier

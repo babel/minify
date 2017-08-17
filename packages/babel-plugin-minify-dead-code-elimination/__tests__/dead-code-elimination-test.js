@@ -4,21 +4,7 @@ const babel = require("babel-core");
 const unpad = require("../../../utils/unpad");
 const deadcode = require("../src/index");
 const simplify = require("../../babel-plugin-minify-simplify/src/index");
-
-function transform(code, options, babelOpts) {
-  return babel
-    .transform(
-      code,
-      Object.assign(
-        {},
-        {
-          plugins: [[deadcode, options]]
-        },
-        babelOpts
-      )
-    )
-    .code.trim();
-}
+const thePlugin = require("../../../utils/test-transform")(deadcode);
 
 function transformWithSimplify(code) {
   return babel.transform(code, {
@@ -27,624 +13,541 @@ function transformWithSimplify(code) {
 }
 
 describe("dce-plugin", () => {
-  it("should remove bindings with no references", () => {
-    const source = "function foo() {var x = 1;}";
-    const expected = "function foo() {}";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should remove bindings with no references",
+    `
+    function foo() {var x = 1;}
+  `,
+    `
+    function foo() {}
+  `
+  );
 
-  it("should keep bindings in the global namespace ", () => {
-    const source = "var x = 1;";
-    const expected = "var x = 1;";
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should keep bindings in the global namespace",
+    `
+    var x = 1;
+  `,
+    `
+    var x = 1;
+  `
+  );
 
-  it("should handle impure right-hands", () => {
-    const source = "function foo() { var x = f(); }";
-    const expected = unpad(`
-      function foo() {
-        f();
+  thePlugin(
+    "should handle impure right-hands",
+    `
+    function foo() { var x = f(); }
+  `,
+    `
+    function foo() {
+      f();
+    }
+  `
+  );
+
+  thePlugin(
+    "should remove unused params",
+    `
+    _(function bar(p) {
+      return 1;
+    });
+    function foo(w) {
+      return 1;
+    }
+    foo();
+    foo();
+    var bar = function (a) {
+      return a;
+    };
+    bar();
+    bar();
+
+    class A {
+      foo(p) {
       }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    }
+    new A();
+  `,
+    `
+    _(function () {
+      return 1;
+    });
+    function foo() {
+      return 1;
+    }
+    foo();
+    foo();
+    var bar = function (a) {
+      return a;
+    };
+    bar();
+    bar();
 
-  it("should remove unused params", () => {
-    const source = unpad(`
-      _(function bar(p) {
+    class A {
+      foo() {}
+    }
+    new A();
+  `
+  );
+
+  thePlugin(
+    "should NOT remove params when keepFnArgs is true, preserving Function#length",
+    `
+    function foo(p) {
+      return 1;
+    }
+    function bar(q) {
+      return q + 1;
+    }
+    class A {
+      foo(p) {
+        return p;
+      }
+      bar(q) {
         return 1;
+      }
+    }
+    foo();
+    bar();
+    new A();
+  `,
+    {
+      plugins: [[deadcode, { keepFnArgs: true }]]
+    }
+  );
+
+  thePlugin(
+    "should remove unused parameters, except ones with side effects",
+    `
+    function a(foo, bar, baz) {
+      return foo;
+    }
+    function b(foo, bar, baz) {
+      return baz;
+    }
+    function c(foo, {bar}, baz) {
+      return bar;
+    }
+    function d({foo}, {bar}, baz) {
+      return foo;
+    }
+    function e({foo}, bar = sideEffect(), baz) {
+      return foo;
+    }
+    function e({foo}, bar = {}, baz) {
+      return foo;
+    }
+  `,
+    `
+    function a(foo) {
+      return foo;
+    }
+    function b(foo, bar, baz) {
+      return baz;
+    }
+    function c(foo, { bar }) {
+      return bar;
+    }
+    function d({ foo }, { bar }) {
+      return foo;
+    }
+    function e({ foo }, bar = sideEffect()) {
+      return foo;
+    }
+    function e({ foo }, bar = {}) {
+      return foo;
+    }
+  `
+  );
+
+  thePlugin(
+    "should inline bindings with only one reference",
+    `
+    function foo() {
+      var x = 1;
+      console.log(x);
+    }
+  `,
+    `
+    function foo() {
+      console.log(1);
+    }
+  `
+  );
+
+  // This isn’t considered pure. (it should be)
+  thePlugin(
+    "should inline binding with one reference in an object literal",
+    `
+    function foo() {
+      var y = 1, x = { y: y };
+      foo.exports = x;
+    }
+  `,
+    `
+    function foo() {
+      foo.exports = { y: 1 };
+    }
+  `
+  );
+
+  thePlugin(
+    "should not inline object literals in loops",
+    `
+    function foo() {
+      var x = { y: 1 };
+      while (true) foo(x);
+      var y = { y: 1 };
+      for (;;) foo(y);
+      var z = ["foo"];
+      while (true) foo(z);
+      var bar = function () {};
+      while (true) foo(bar);
+    }
+  `
+  );
+
+  thePlugin(
+    "should not inline object literals in expressions in loops",
+    `
+    function a(p) {
+      var w = p || [];
+      f(function (foo) {
+        return w.concat(foo);
       });
-      function foo(w) {
-        return 1;
-      }
-      foo();
-      foo();
-      var bar = function (a) {
-        return a;
-      };
-      bar();
-      bar();
+    }
+  `
+  );
 
-      class A {
-        foo(p) {
-        }
-      }
-      new A();
-    `);
+  thePlugin(
+    "should inline object literals in if statements",
+    `
+    function foo() {
+      var x = { y: 1 }, y = ["foo"], z = function () {};
+      if (wat) foo(x, y, z);
+    }
+  `,
+    `
+    function foo() {
+      if (wat) foo({ y: 1 }, ["foo"], function () {});
+    }
+  `
+  );
 
-    const expected = unpad(`
-      _(function () {
-        return 1;
+  thePlugin(
+    "should not inline object literals in functions",
+    `
+    function foo() {
+      var x = { y: 1 },
+          y = ["foo"],
+          z = function () {};
+      f(function () {
+        foo(x, y, z);
       });
-      function foo() {
-        return 1;
-      }
-      foo();
-      foo();
-      var bar = function (a) {
-        return a;
-      };
-      bar();
-      bar();
+    }
+  `
+  );
 
-      class A {
-        foo() {}
-      }
-      new A();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should remove side effectless statements",
+    `
+    function foo() {
+      1;
+    }
+  `,
+    `
+    function foo() {}
+  `
+  );
 
-  it("should NOT remove params when keepFnArgs is true (preserve fn.length)", () => {
-    const source = unpad(`
-      function foo(p) {
-        return 1;
+  thePlugin(
+    "should work with multiple scopes",
+    `
+    function x() {
+      var i = 1;
+      function y() {
+        console.log(i);
       }
-      function bar(q) {
-        return q + 1;
-      }
-      class A {
-        foo(p) {
-          return p;
-        }
-        bar(q) {
-          return 1;
-        }
-      }
-      foo();
-      bar();
-      new A();
-    `);
-
-    const expected = source;
-
-    expect(transform(source, { keepFnArgs: true })).toBe(expected);
-  });
-
-  it("should handle all cases of parameter list - and remove unused ones", () => {
-    const source = unpad(`
-      function a(foo, bar, baz) {
-        return foo;
-      }
-      function b(foo, bar, baz) {
-        return baz;
-      }
-      function c(foo, {bar}, baz) {
-        return bar;
-      }
-      function d({foo}, {bar}, baz) {
-        return foo;
-      }
-      function e({foo}, bar = sideEffect(), baz) {
-        return foo;
-      }
-      function e({foo}, bar = {}, baz) {
-        return foo;
-      }
-    `);
-    const expected = unpad(`
-      function a(foo) {
-        return foo;
-      }
-      function b(foo, bar, baz) {
-        return baz;
-      }
-      function c(foo, { bar }) {
-        return bar;
-      }
-      function d({ foo }, { bar }) {
-        return foo;
-      }
-      function e({ foo }, bar = sideEffect()) {
-        return foo;
-      }
-      function e({ foo }, bar = {}) {
-        return foo;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should inline binding with one reference", () => {
-    const source = unpad(`
-      function foo() {
-        var x = 1;
-        console.log(x);
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
+      y();
+      y();
+    }
+  `,
+    `
+    function x() {
+      function y() {
         console.log(1);
       }
-    `);
+      y();
+      y();
+    }
+  `
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  // This isn't considered pure. (it should)
-  it("should inline binding with one reference 2", () => {
-    const source = unpad(`
-      function foo() {
-        var y = 1, x = { y: y };
-        foo.exports = x;
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        foo.exports = { y: 1 };
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should not inline objects literals in loops", () => {
-    const source = unpad(`
-      function foo() {
-        var x = { y: 1 };
-        while (true) foo(x);
-        var y = { y: 1 };
-        for (;;) foo(y);
-        var z = ['foo'];
-        while (true) foo(z);
-        var bar = function () {};
-        while (true) foo(bar);
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var x = { y: 1 };
-        while (true) foo(x);
-        var y = { y: 1 };
-        for (;;) foo(y);
-        var z = ['foo'];
-        while (true) foo(z);
-        var bar = function () {};
-        while (true) foo(bar);
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should not inline object literals in exprs in loops", () => {
-    const source = unpad(`
-      function a(p) {
-        var w = p || [];
-        f(function (foo) {
-          return w.concat(foo);
-        });
-      }
-    `);
-
-    const expected = unpad(`
-      function a(p) {
-        var w = p || [];
-        f(function (foo) {
-          return w.concat(foo);
-        });
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should inline objects in if statements", () => {
-    const source = unpad(`
-      function foo() {
-        var x = { y: 1 }, y = ['foo'], z = function () {};
-        if (wat) foo(x, y, z);
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        if (wat) foo({ y: 1 }, ['foo'], function () {});
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should not inline objects in functions", () => {
-    const source = unpad(`
-      function foo() {
-        var x = { y: 1 },
-            y = ['foo'],
-            z = function () {};
-        f(function () {
-          foo(x, y , z);
-        });
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var x = { y: 1 },
-            y = ['foo'],
-            z = function () {};
-        f(function () {
-          foo(x, y, z);
-        });
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove side effectless statements", () => {
-    const source = unpad(`
-      function foo() {
-        1;
-      }
-    `);
-    const expected = unpad(`
-      function foo() {}
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should work with multiple scopes", () => {
-    const source = unpad(`
+  thePlugin(
+    "should inline function declarations if they’re only called once",
+    `
+    function foo() {
       function x() {
-        var i = 1;
-        function y() {
-          console.log(i);
+        return 1;
+      }
+      x();
+    }
+  `,
+    `
+    function foo() {
+      (function () {
+        return 1;
+      })();
+    }
+  `
+  );
+
+  thePlugin(
+    "should inline function expressions",
+    `
+    function foo() {
+      var x = function() {
+        return 1;
+      };
+      x();
+    }
+  `,
+    `
+    function foo() {
+      (function () {
+        return 1;
+      })();
+    }
+  `
+  );
+
+  thePlugin(
+    "should not inline in a different scope",
+    `
+    function foo() {
+      var x = function (a) {
+        return a;
+      };
+      while (1) x(1);
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle recursion",
+    `
+    function test1() {
+      var bar = function foo(config) {
+        return foo;
+      };
+      exports.foo = bar;
+    }
+    function test2() {
+      var foo = function foo(config) {
+        return foo;
+      };
+      exports.foo = foo;
+    }
+  `,
+    `
+    function test1() {
+      exports.foo = function foo() {
+        return foo;
+      };
+    }
+    function test2() {
+      exports.foo = function foo() {
+        return foo;
+      };
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle mutual recursion",
+    `
+    function baz() {
+      function foo() {
+        return bar();
+      }
+      function bar() {
+        return foo();
+      }
+    }
+  `
+  );
+
+  thePlugin(
+    "should not inline vars with multiple references",
+    `
+    function foo() {
+      var x = function() {
+       if (!y) {
+          y = 1;
+       }
+      };
+      x();
+      x();
+      var y = null;
+    }
+  `,
+    `
+    function foo() {
+      var x = function () {
+        if (!y) {
+          y = 1;
         }
-        y();
-        y();
-      }
-    `);
-    const expected = unpad(`
-      function x() {
-        function y() {
-          console.log(1);
-        }
-        y();
-        y();
-      }
-    `);
+      };
+      x();
+      x();
+      var y = null;
+    }
+  `
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should inline function decl", () => {
-    const source = unpad(`
-      function foo() {
-        function x() {
-          return 1;
-        }
-        x();
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        (function () {
-          return 1;
-        })();
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should inline function expressions", () => {
-    const source = unpad(`
-      function foo() {
-        var x = function() {
-          return 1;
-        };
-        x();
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        (function () {
-          return 1;
-        })();
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should not inline in a different scope", () => {
-    const source = unpad(`
-      function foo() {
-        var x = function (a) {
-          return a;
-        };
-        while (1) x(1);
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        var x = function (a) {
-          return a;
-        };
-        while (1) x(1);
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should handle recursion", () => {
-    const source = unpad(`
-      function baz() {
-        var bar = function foo(config) {
-          return foo;
-        };
-        exports.foo = bar;
-      }
-    `);
-    const expected = unpad(`
-      function baz() {
-        exports.foo = function foo() {
-          return foo;
-        };
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should handle recursion 2", () => {
-    const source = unpad(`
-      function baz() {
-        var foo = function foo(config) {
-          return foo;
-        };
-        exports.foo = foo;
-      }
-    `);
-    const expected = unpad(`
-      function baz() {
-        exports.foo = function foo() {
-          return foo;
-        };
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should handle mutual recursion", () => {
-    const source = unpad(`
-      function baz() {
-        function foo() {
-          return bar();
-        }
-        function bar() {
-          return foo();
-        }
-      }
-    `);
-    const expected = unpad(`
-      function baz() {
-        function foo() {
-          return bar();
-        }
-        function bar() {
-          return foo();
-        }
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should not inline vars with multiple references", () => {
-    const source = unpad(`
-      function foo() {
-        var x = function() {
-         if (!y) {
-            y = 1;
-         }
-        };
-        x();
-        x();
-        var y = null;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        var x = function () {
-          if (!y) {
-            y = 1;
-          }
-        };
-        x();
-        x();
-        var y = null;
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove redundant returns", () => {
-    const source = unpad(`
-      function foo() {
-        if (a) {
-          y();
-          return;
-        }
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        if (a) {
-          y();
-        }
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove redundant returns part 2", () => {
-    const source = unpad(`
-      function foo() {
+  thePlugin(
+    "should remove redundant returns",
+    `
+    function foo() {
+      if (a) {
         y();
         return;
       }
-    `);
-    const expected = unpad(`
-      function foo() {
+    }
+    function bar() {
+      y();
+      return;
+    }
+  `,
+    `
+    function foo() {
+      if (a) {
         y();
       }
-    `);
+    }
+    function bar() {
+      y();
+    }
+  `
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove redundant returns (complex)", () => {
-    const source = unpad(`
-      function foo() {
-        if (a) {
-          y();
-          if (b) {
-            return;
-          }
+  thePlugin(
+    "should remove complex redundant returns",
+    `
+    function foo() {
+      if (a) {
+        y();
+        if (b) {
           return;
         }
         return;
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        if (a) {
-          y();
-          if (b) {}
-        }
+      return;
+    }
+  `,
+    `
+    function foo() {
+      if (a) {
+        y();
+        if (b) {}
       }
-    `);
+    }
+  `
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should keep needed returns", () => {
-    const source = unpad(`
-      function foo() {
-        if (a) {
-          y();
-          return;
-        }
-        x();
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        if (a) {
-          y();
-          return;
-        }
-        x();
-      }
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove code unreachable after return", () => {
-    const source = unpad(`
-      function foo() {
-        z();
+  thePlugin(
+    "should keep non-redundant returns",
+    `
+    function foo() {
+      if (a) {
+        y();
         return;
-        x();
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        z();
+      x();
+    }
+  `,
+    `
+    function foo() {
+      if (a) {
+        y();
+        return;
       }
-    `);
+      x();
+    }
+  `
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
+  thePlugin(
+    "should remove unreachable code after a return statement",
+    `
+    function foo() {
+      z();
+      return;
+      x();
+    }
+  `,
+    `
+    function foo() {
+      z();
+    }
+  `
+  );
 
-  it("should be fine with fun decl after return", () => {
-    const source = unpad(`
-      function foo() {
-        z();
-        z();
-        return 22;
-        function z() {
-          wow();
-        }
+  thePlugin(
+    "should keep function declarations after a return statement",
+    `
+    function foo() {
+      z();
+      z();
+      return 22;
+      function z() {
+        wow();
       }
-    `);
-    const expected = unpad(`
-      function foo() {
-        z();
-        z();
-        return 22;
-        function z() {
-          wow();
-        }
+    }
+  `,
+    `
+    function foo() {
+      z();
+      z();
+      return 22;
+      function z() {
+        wow();
       }
-    `);
+    }
+  `
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should handle returns that were orphaned", () => {
-    const source = unpad(`
+  thePlugin(
+    "should handle orphaned returns",
+    `
       var a = true;
       function foo() {
         if (a) return;
         x();
       }
-    `);
-    const expected = unpad(`
-      var a = true;
-      function foo() {}
-    `);
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should handle returns that were orphaned 2", () => {
-    const source = unpad(`
+  thePlugin(
+    "should handle orpahaned returns with a value",
+    `
       var a = true;
       function foo() {
         if (a) return 1;
         x();
       }
-    `);
-    const expected = unpad(`
-      var a = true;
-      function foo() {
-        return 1;
-      }
-    `);
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should handle orphaned + redundant returns", () => {
-    const source = unpad(`
+  thePlugin(
+    "should handle orphaned, redundant returns",
+    `
       var x = true;
       function foo() {
         if (b) {
@@ -655,731 +558,624 @@ describe("dce-plugin", () => {
           y();
         }
       }
-    `);
-    const expected = unpad(`
-      var x = true;
-      function foo() {
-        if (b) {
-          z();
-        }
-      }
-    `);
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove functions only called in themselves", () => {
-    const source = unpad(`
-      function foo() {
-        function baz() {
-          function bar() {
-            baz();
-          }
-          bar();
-          bar();
-        }
-      }
-    `);
-    const expected = "function foo() {}";
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove functions only called in themselves 2", () => {
-    const source = unpad(`
-      function foo() {
-        var baz = function () {
-          function bar() {
-            baz();
-          }
-          bar();
-          bar();
-        };
-      }
-    `);
-    const expected = "function foo() {}";
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove functions only called in themselves 3", () => {
-    const source = unpad(`
-      function foo() {
-        function boo() {}
-        function baz() {
-          function bar() {
-            baz();
-          }
-          bar();
-          bar();
-          boo();
-        }
-      }
-    `);
-    const expected = "function foo() {}";
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove functions only called in themselves 3", () => {
-    const source = unpad(`
-      (function () {
-        function foo () {
-          console.log( 'this function was included!' );
-        }
-
-        function bar () {
-          console.log( 'this function was not' );
+  thePlugin(
+    "should remove functions only called in themselves",
+    `
+    function test1() {
+      function baz() {
+        function bar() {
           baz();
         }
-
-        function baz () {
-          console.log( 'neither was this' );
-        }
-
-        foo();
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-
-        (function () {
-          console.log('this function was included!');
-        })();
-      })();
-    `);
-
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should remove dead if statements", () => {
-    const source = unpad(`
-      if (1) {
-        foo();
-      }
-      if (false) {
-        foo();
-      } else {
+        bar();
         bar();
       }
-    `);
-    const expected = unpad(`
+    }
+    function test2() {
+      var baz = function () {
+        function bar() {
+          baz();
+        }
+        bar();
+        bar();
+      };
+    }
+    function test3() {
+      function boo() {}
+      function baz() {
+        function bar() {
+          baz();
+        }
+        bar();
+        bar();
+        boo();
+      }
+    }
+  `,
+    `
+    function test1() {}
+    function test2() {}
+    function test3() {}
+  `
+  );
+
+  thePlugin(
+    "should leave externally called functions alone",
+    `
+    (function () {
+      function foo () {
+        console.log( "this function was included!" );
+      }
+
+      function bar () {
+        console.log( "this function was not" );
+        baz();
+      }
+
+      function baz () {
+        console.log( "neither was this" );
+      }
+
+      foo();
+    })();
+  `,
+    `
+    (function () {
+
+      (function () {
+        console.log("this function was included!");
+      })();
+    })();
+  `
+  );
+
+  thePlugin(
+    "should remove dead if statements",
+    `
+    if (1) {
+      foo();
+    }
+    if (false) {
+      foo();
+    } else {
+      bar();
+    }
+  `,
+    `
+    foo();
+
+    bar();
+  `
+  );
+
+  thePlugin(
+    "should negate the if block if it’s empty",
+    `
+    if (a) {
+    } else {
+      foo();
+    }
+  `,
+    `
+    if (!a) {
+      foo();
+    }
+  `
+  );
+
+  thePlugin(
+    "should remove empty else blocks",
+    `
+    if (a) {
+      foo();
+    } else {
+
+    }
+  `,
+    `
+    if (a) {
+      foo();
+    }
+
+  `
+  );
+
+  thePlugin(
+    "should evaluate conditional expressions",
+    `
+    true ? a() : b();
+    false ? a() : b();
+    "foo" ? a() : b();
+    null ? a() : b();
+    "foo" === "foo" ? a() : b();
+    "foo" !== "bar" ? a() : b();
+  `,
+    `
+    a();
+    b();
+    a();
+    b();
+    a();
+    a();
+  `
+  );
+
+  thePlugin(
+    "should not remove used expressions",
+    `
+    var n = 1;
+    if (foo) n;
+    console.log(n);
+
+    function bar(a) {
+      var a = a ? a : a;
+    }
+  `,
+    `
+    var n = 1;
+    if (foo) ;
+    console.log(n);
+
+    function bar(a) {
+      var a = a ? a : a;
+    }
+  `
+  );
+
+  thePlugin(
+    "should join variable declaration and assignment",
+    `
+    var x;
+    x = 1;
+  `,
+    `
+    var x = 1;
+  `
+  );
+
+  thePlugin(
+    "should perform correct replacements",
+    `
+    function foo() {
+      var n = 1;
+      wow(n);
+      function wat() {
+        var n = 2;
+        wow(n);
+      }
+      return wat;
+    }
+  `,
+    `
+    function foo() {
+      wow(1);
+
+      return function () {
+        wow(2);
+      };
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle case blocks ",
+    `
+    function a() {
+      switch (foo) {
+        case 6:
+          return bar;
+          break;
+      }
+    }
+  `,
+    `
+    function a() {
+      switch (foo) {
+        case 6:
+          return bar;
+          break;
+      }
+    }
+  `
+  );
+
+  // TODO: Handle this (blocks that have no semantic meaning).
+  thePlugin.skip(
+    "should understand extraneous blocks",
+    `
+    function a() {
+      var f = 25;
+      function b() {
+        {
+          var f = "wow";
+        }
+        function c() {
+          f.bar();
+        }
+        c();
+        c();
+      }
+      function d() {
+        bar(f);
+      }
+      d();
+      d();
+      b();
+      b();
+    }
+  `,
+    `
+    function a() {
+      function b() {
+        {}
+        function c() {
+          "wow".bar();
+        }
+        c();
+        c();
+      }
+      function d() {
+        bar(25);
+      }
+      d();
+      d();
+      b();
+      b();
+    }
+  `
+  );
+
+  thePlugin(
+    "should understand closures",
+    `
+    function a() {
+      var f = 25;
+      function b() {
+        var f = "wow";
+        function c() {
+          f.bar();
+        }
+        c();
+        c();
+      }
+      function d() {
+        bar(f);
+      }
+      d();
+      d();
+      b();
+      b();
+    }
+  `,
+    `
+    function a() {
+      function b() {
+        function c() {
+          "wow".bar();
+        }
+        c();
+        c();
+      }
+      function d() {
+        bar(25);
+      }
+      d();
+      d();
+      b();
+      b();
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle variable declarations in if statements",
+    `
+    function a() {
+      if (x()) {
+        var foo = 1;
+      }
+      bar(foo);
+    }
+
+    function b() {
+      if (x()) var foo = 1;
+      bar(foo);
+    }
+  `,
+    `
+    function a() {
+      if (x()) {
+        var foo = 1;
+      }
+      bar(foo);
+    }
+
+    function b() {
+      if (x()) var foo = 1;
+      bar(foo);
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle variable declarations in for statements",
+    `
+    function a() {
+      for (;;) var foo = 1;
+      bar(foo);
+    }
+
+    function b() {
+      for (;;) {
+        var foo = 1;
+        bar(foo);
+      }
+    }
+  `,
+    `
+    function a() {
+      for (;;) var foo = 1;
+      bar(foo);
+    }
+
+    function b() {
+      for (;;) {
+        bar(1);
+      }
+    }
+  `
+  );
+
+  thePlugin(
+    "should remove unused variable declarations and assignments",
+    `
+    function a() {
+      var a, b, c;
+      a = 1;
+      b = 2;
+    }
+  `,
+    `
+    function a() {}
+  `
+  );
+
+  thePlugin(
+    "should not remove varibale declaration and assignment if the variable is used",
+    `
+    function a() {
+      var x = 1;
+      while (a) wow = x += 1;
+    }
+  `
+  );
+
+  thePlugin(
+    "should keep side-effectful assignment values",
+    `
+    function a() {
+      var x;
+      x = wow();
+    }
+  `,
+    `
+    function a() {
+      wow();
+    }
+  `
+  );
+
+  thePlugin(
+    "should not evaluate this binary expression to truthy",
+    `
+    function boo() {
+      var bar = foo || [];
+      if (!bar || baz.length === 0) {
+        return "wow";
+      }
+    }
+  `
+  );
+
+  thePlugin(
+    "should eval the following to false",
+    `
+    function bar() {
+      var x = foo || "boo";
+      bar = x === "wow" ? " " + z : "";
+    }
+  `
+  );
+
+  thePlugin(
+    "should get rid of the constant violations",
+    `
+    function bar () {
+      var x = foo();
+      x = bar();
+    }
+  `,
+    `
+    function bar() {
       foo();
 
       bar();
-    `);
+    }
+  `
+  );
 
-    expect(transform(source).trim()).toBe(expected);
-  });
+  thePlugin(
+    "should remove names from named function expressions",
+    `
+    function bar() {
+      return function wow() {
+        return boo();
+      };
+    }
+  `,
+    `
+    function bar() {
+      return function () {
+        return boo();
+      };
+    }
+  `
+  );
 
-  it("should remove empty if statements block", () => {
-    const source = unpad(`
-      if (a) {
-      } else {
-        foo();
-      }
-      if (a) {
-        foo();
-      } else {
+  thePlugin(
+    "should not remove names from named function expressions when the names are used",
+    `
+    function bar() {
+      return function wow() {
+        return wow();
+      };
+    }
+  `
+  );
 
-      }
-    `);
-    const expected = unpad(`
-      if (!a) {
-        foo();
-      }
-      if (a) {
-        foo();
-      }
-    `);
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should evaluate conditional expressions", () => {
-    const source = "true ? a() : b();";
-    const expected = "a();";
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should evaluate conditional expressions 2", () => {
-    const source = "false ? a() : b();";
-    const expected = "b();";
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should evaluate conditional expressions 3", () => {
-    const source = "'foo' ? a() : b();";
-    const expected = "a();";
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should evaluate conditional expressions 4", () => {
-    const source = "null ? a() : b();";
-    const expected = "b();";
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should evaluate conditional expressions 5", () => {
-    const source = "'foo' === 'foo' ? a() : b();";
-    const expected = "a();";
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should evaluate conditional expressions 6", () => {
-    const source = "'foo' !== 'bar' ? a() : b();";
-    const expected = "a();";
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should not remove needed expressions", () => {
-    const source = unpad(`
-      var n = 1;
-      if (foo) n;
-      console.log(n);
-    `);
-    const expected = unpad(`
-      var n = 1;
-      if (foo) ;
-      console.log(n);
-    `);
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should not remove needed expressions", () => {
-    const source = unpad(`
-      function foo(a) {
-        var a = a ? a : a;
-      }
-    `);
-    const expected = unpad(`
-      function foo(a) {
-        var a = a ? a : a;
-      }
-    `);
-    expect(transform(source).trim()).toBe(expected);
-  });
-
-  it("should join the assignment and def", () => {
-    const source = unpad(`
-      var x;
-      x = 1;
-    `);
-
-    const expected = unpad(`
-      var x = 1;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not replace the wrong things", () => {
-    const source = unpad(`
-      function foo() {
-        var n = 1;
-        wow(n);
-        function wat() {
-          var n = 2;
-          wow(n);
-        }
-        return wat;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        wow(1);
-
-        return function () {
-          wow(2);
-        };
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle case blocks ", () => {
-    const source = unpad(`
-      function a() {
-        switch (foo) {
-          case 6:
-            return bar;
-            break;
-        }
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        switch (foo) {
-          case 6:
-            return bar;
-            break;
-        }
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  // TODO: Handle this (blocks that have no semantic meaning).
-  xit("should understand extraneous blocks", () => {
-    const source = unpad(`
-      function a() {
-        var f = 25;
-        function b() {
-          {
-            var f = "wow";
-          }
-          function c() {
-            f.bar();
-          }
-          c();
-          c();
-        }
-        function d() {
-          bar(f);
-        }
-        d();
-        d();
-        b();
-        b();
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        function b() {
-          {}
-          function c() {
-            "wow".bar();
-          }
-          c();
-          c();
-        }
-        function d() {
-          bar(25);
-        }
-        d();
-        d();
-        b();
-        b();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should understand closures", () => {
-    const source = unpad(`
-      function a() {
-        var f = 25;
-        function b() {
-          var f = "wow";
-          function c() {
-            f.bar();
-          }
-          c();
-          c();
-        }
-        function d() {
-          bar(f);
-        }
-        d();
-        d();
-        b();
-        b();
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        function b() {
-          function c() {
-            "wow".bar();
-          }
-          c();
-          c();
-        }
-        function d() {
-          bar(25);
-        }
-        d();
-        d();
-        b();
-        b();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle vars in if statements", () => {
-    const source = unpad(`
-      function a() {
-        if (x()) {
-          var foo = 1;
-        }
-        bar(foo);
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        if (x()) {
-          var foo = 1;
-        }
-        bar(foo);
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle vars in if statements 2", () => {
-    const source = unpad(`
-      function a() {
-        if (x()) var foo = 1;
-        bar(foo);
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        if (x()) var foo = 1;
-        bar(foo);
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle vars in for statements", () => {
-    const source = unpad(`
-      function a() {
-        for (;;) var foo = 1;
-        bar(foo);
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        for (;;) var foo = 1;
-        bar(foo);
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle for statements 2", () => {
-    const source = unpad(`
-      function a() {
-        for (;;) {
-          var foo = 1;
-          bar(foo);
-        }
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        for (;;) {
-          bar(1);
-        }
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should remove binding and assignment", () => {
-    const source = unpad(`
-      function a() {
-        var a, b, c;
-        a = 1;
-        b = 2;
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {}
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should nore remove binding and assignment if the value is used", () => {
-    const source = unpad(`
-      function a() {
-        var x = 1;
-        while (a) wow = x += 1;
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
-        var x = 1;
-        while (a) wow = x += 1;
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should keep side-effectful assignment values", () => {
-    const source = unpad(`
-      function a() {
-        var x;
-        x = wow();
-      }
-    `);
-
-    const expected = unpad(`
-      function a() {
+  thePlugin(
+    "should remove names from named function expressions when the names are shadowed",
+    `
+    function bar() {
+      return function wow() {
+        var wow = foo;
         wow();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not evaluate this binary expression to truthy", () => {
-    const source = unpad(`
-      function boo() {
-        var bar = foo || [];
-        if (!bar || baz.length === 0) {
-          return 'wow';
-        }
-      }
-    `);
-
-    const expected = unpad(`
-      function boo() {
-        var bar = foo || [];
-        if (!bar || baz.length === 0) {
-          return 'wow';
-        }
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("eval the following to false", () => {
-    const source = unpad(`
-      function bar () {
-        var x = foo || 'boo';
-        bar = x === 'wow' ? ' ' + z : '';
-      }
-    `);
-
-    const expected = unpad(`
-      function bar() {
-        var x = foo || 'boo';
-        bar = x === 'wow' ? ' ' + z : '';
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should get rid of the constant violations", () => {
-    const source = unpad(`
-      function bar () {
-        var x = foo();
-        x = bar();
-      }
-    `);
-
-    const expected = unpad(`
-      function bar() {
-        foo();
-
-        bar();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should remove names from NFE", () => {
-    const source = unpad(`
-      function bar() {
-        return function wow() {
-          return boo();
-        };
-      }
-    `);
-
-    const expected = unpad(`
-      function bar() {
-        return function () {
-          return boo();
-        };
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not remove names from NFE when referenced", () => {
-    const source = unpad(`
-      function bar() {
-        return function wow() {
-          return wow();
-        };
-      }
-    `);
-
-    const expected = unpad(`
-      function bar() {
-        return function wow() {
-          return wow();
-        };
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should remove name from NFE when shadowed", () => {
-    const source = unpad(`
-      function bar() {
-        return function wow() {
-          var wow = foo;
-          wow();
-          return wow;
-        };
-      }
-    `);
-
-    const expected = unpad(`
-      function bar() {
-        return function () {
-          var wow = foo;
-          wow();
-          return wow;
-        };
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
+        return wow;
+      };
+    }
+  `,
+    `
+    function bar() {
+      return function () {
+        var wow = foo;
+        wow();
+        return wow;
+      };
+    }
+  `
+  );
 
   // issue#81
-  it("should NOT remove name from NFE when referenced - issue#81", () => {
-    const source = unpad(`
-      (function (require, module, exports) {
-        var Hub = function Hub(file, options) {
-          (0, _classCallCheck3.default)(this, Hub);
-        };
-        module.exports = Hub;
-      })(require, module, exports);
-    `);
-    const expected = unpad(`
-      (function (require, module) {
-        module.exports = function Hub() {
-          (0, _classCallCheck3.default)(this, Hub);
-        };
-      })(require, module, exports);
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should not regress on #81",
+    `
+    (function (require, module, exports) {
+      var Hub = function Hub(file, options) {
+        (0, _classCallCheck3.default)(this, Hub);
+      };
+      module.exports = Hub;
+    })(require, module, exports);
 
-  it("should remove name from NFE when replaced - issue#81", () => {
-    const source = unpad(`
-      (function () {
-        var x = function foo() {};
-        module.exports = x;
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        module.exports = function () {};
-      })();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
 
-  it("should preserve fn names when keepFnName is true", () => {
-    const source = unpad(`
-      (function () {
-        function A() {}
-        exports.A = A;
-        var B = function B() {};
-        exports.B = B;
-        onClick(function C() {});
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        exports.A = function A() {};
+    (function () {
+      var x = function foo() {};
+      module.exports = x;
+    })();
+  `,
+    `
+    (function (require, module) {
+      module.exports = function Hub() {
+        (0, _classCallCheck3.default)(this, Hub);
+      };
+    })(require, module, exports);
 
-        exports.B = function B() {};
-        onClick(function C() {});
-      })();
-    `);
-    expect(transform(source, { keepFnName: true })).toBe(expected);
-  });
+    (function () {
+      module.exports = function () {};
+    })();
+  `
+  );
 
-  it("should preserve class names when keepClassName is true", () => {
-    const source = unpad(`
-      (function () {
-        class A {}
-        exports.A = A;
-        var B = class B {};
-        exports.B = B;
-        class AA {} new AA()
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        exports.A = class A {};
+  thePlugin(
+    "should preserve function names when keepFnName is true",
+    `
+    (function () {
+      function A() {}
+      exports.A = A;
+      var B = function B() {};
+      exports.B = B;
+      onClick(function C() {});
+    })();
+  `,
+    `
+    (function () {
+      exports.A = function A() {};
 
-        exports.B = class B {};
-        new class AA {}();
-      })();
-    `);
-    expect(transform(source, { keepClassName: true })).toBe(expected);
-  });
+      exports.B = function B() {};
+      onClick(function C() {});
+    })();
+  `,
+    {
+      plugins: [[deadcode, { keepFnName: true }]]
+    }
+  );
+
+  thePlugin(
+    "should preserve class names when keepClassName is true",
+    `
+    (function () {
+      class A {}
+      exports.A = A;
+      var B = class B {};
+      exports.B = B;
+      class AA {} new AA()
+    })();
+  `,
+    `
+    (function () {
+      exports.A = class A {};
+
+      exports.B = class B {};
+      new class AA {}();
+    })();
+  `,
+    {
+      plugins: [[deadcode, { keepClassName: true }]]
+    }
+  );
 
   // NCE = Named Class Expressions
-  it("should remove name from NCE", () => {
-    const source = unpad(`
-      var Foo = class Bar {};
-    `);
-    const expected = unpad(`
-      var Foo = class {};
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should remove names from named class expressions",
+    `
+    var Foo = class Bar {};
+  `,
+    `
+    var Foo = class {};
+  `
+  );
 
-  it("should not remove referenced name from NCE", () => {
-    const source = unpad(`
-      var Foo = class Bar {
-        constructor() {
-          console.log(Bar);
-        }
-      };
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should not remove names from named class expressions when the name is used",
+    `
+    var Foo = class Bar {
+      constructor() {
+        console.log(Bar);
+      }
+    };
+  `
+  );
 
   // issue#78
-  it("should not replace NCE with void 0 - issue#78", () => {
-    const source = unpad(`
-      (function() {
-        var B = class A {
-          constructor(x) {
-            console.log(x);
-          }
+  thePlugin(
+    "should not replace named class expressions with void 0 - issue#78",
+    `
+    (function() {
+      var B = class A {
+        constructor(x) {
+          console.log(x);
         }
-        self.addEventListener(function (event) {
-          new B(event);
-        });
-      })();
-    `);
-    const expected = unpad(`
+      }
+      self.addEventListener(function (event) {
+        new B(event);
+      });
+    })();
+  `,
+    `
     (function () {
       var B = class {
         constructor(x) {
@@ -1390,909 +1186,845 @@ describe("dce-plugin", () => {
         new B(event);
       });
     })();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  `
+  );
 
-  it("should handle var decl with same name as class expr name", () => {
-    const source = unpad(`
-      (function () {
-        var A = class A {
-          constructor() {
-            this.class = A;
-          }
+  thePlugin(
+    "should handle variable declarations with same name as the class expression name",
+    `
+    (function () {
+      var A = class A {
+        constructor() {
+          this.class = A;
         }
-        var B = class B {};
-        exports.A = A;
-        exports.B = B;
-      })();
-    `);
-    const expected = unpad(`
-      (function () {
-        exports.A = class A {
-          constructor() {
-            this.class = A;
-          }
-        };
-        exports.B = class {};
-      })();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+      }
+      var B = class B {};
+      exports.A = A;
+      exports.B = B;
+    })();
+  `,
+    `
+    (function () {
+      exports.A = class A {
+        constructor() {
+          this.class = A;
+        }
+      };
+      exports.B = class {};
+    })();
+  `
+  );
 
-  it("should track purity", () => {
-    const source = unpad(`
-     function x(a) {
-       var l = a;
-       var x = l
+  thePlugin(
+    "should track purity",
+    `
+   function x(a) {
+     var l = a;
+     var x = l
+     foo(x);
+   }
+  `,
+    `
+    function x(a) {
+      foo(a);
+    }
+  `
+  );
+
+  thePlugin(
+    "should latch on to exisiting vars",
+    `
+   function x(a) {
+     if (a) {
+       var x = a.wat;
        foo(x);
      }
-    `);
+     var z = a.foo, b = b.bar;
+     return z + b;
+   }
+  `,
+    `
+    function x(a) {
+      if (a) {
+        x = a.wat;
 
-    const expected = unpad(`
-      function x(a) {
-        foo(a);
+        foo(x);
       }
-    `);
+      var z = a.foo,
+          b = b.bar,
+          x;
+      return z + b;
+    }
+  `,
+    {
+      plugins: [[deadcode, { optimizeRawSize: true }]]
+    }
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should put the variable declaration in the header of the for...in loop",
+    `
+   function x(a) {
+     var x;
+     wow();
+     for (x in a) wow();
+   }
+  `,
+    `
+   function x(a) {
+     wow();
+     for (var x in a) wow();
+   }
+  `
+  );
 
-  it("should latch on to exisiting vars", () => {
-    const source = unpad(`
-     function x(a) {
-       if (a) {
-         var x = a.wat;
-         foo(x);
-       }
-       var z = a.foo, b = b.bar;
-       return z + b;
-     }
-    `);
+  thePlugin(
+    "should put the variable declaration in the header of the for...in loop only when the var is alone",
+    `
+   function x(a) {
+     var x, y;
+     wow(y);
+     for (x in a) wow(y);
+   }
+  `,
+    `
+   function x(a) {
+     var x, y;
+     wow(y);
+     for (x in a) wow(y);
+   }
+  `
+  );
 
-    const expected = unpad(`
-      function x(a) {
-        if (a) {
-          x = a.wat;
-
-          foo(x);
-        }
-        var z = a.foo,
-            b = b.bar,
-            x;
-        return z + b;
-      }
-    `);
-
-    expect(transform(source, { optimizeRawSize: true })).toBe(expected);
-  });
-
-  it("should put the var in the for in", () => {
-    const source = unpad(`
-     function x(a) {
-       var x;
-       wow();
-       for (x in a) wow();
-     }
-    `);
-
-    const expected = unpad(`
-     function x(a) {
-       wow();
-       for (var x in a) wow();
-     }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should put the var in the for in only when the var is alone", () => {
-    const source = unpad(`
-     function x(a) {
-       var x, y;
-       wow(y);
-       for (x in a) wow(y);
-     }
-    `);
-
-    const expected = unpad(`
-     function x(a) {
-       var x, y;
-       wow(y);
-       for (x in a) wow(y);
-     }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("inlining should check name collision", () => {
-    const source = unpad(`
-     function foo() {
-       var a = 1;
-       var b = a;
-       function x(a) {
-         return a + b;
-       }
-       x();
-       x();
-       return a;
-     }
-  `);
-
-    const expected = unpad(`
-      function foo() {
-        var a = 1;
-        var b = a;
-        function x(a) {
-          return a + b;
-        }
-        x();
-        x();
-        return a;
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("inlining should check name collision for expressions", () => {
-    const source = unpad(`
-     function foo() {
-       var a = c + d;
-       function x(c, d) {
-         return a + c + d;
-       }
-       x();
-       x();
-     }
-  `);
-
-    const expected = unpad(`
-      function foo() {
-        var a = c + d;
-        function x(c, d) {
-          return a + c + d;
-        }
-        x();
-        x();
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should replace with empty statement if in body position 1", () => {
-    const source = unpad(`
-      function foo() {
-        var a = 0;
-        while (wat()) a += 1;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        while (wat());
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should replace with empty statement if in body position 2", () => {
-    const source = unpad(`
-      function foo() {
-        while (wat()) 1;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        while (wat());
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should replace with empty statement if in body position 3", () => {
-    const source = unpad(`
-      function foo() {
-        while (wat()) var x;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        while (wat());
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("it should update binding path", () => {
-    const source = unpad(`
-      function foo() {
-        var key;
-        for (key in o);
-        for (key in o2);
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        for (var key in o);
-        for (key in o2);
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  xit("it should evaluate and remove falsy code", () => {
-    const source = unpad(`
-      foo(0 && bar());
-    `);
-    const expected = unpad(`
-      foo(0);
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not move functions into other scopes", () => {
-    const source = unpad(`
-      function foo() {
-        var a = 1;
-        var bar = { x: {z: a, v: a} };
-        var wow = { x: 1 };
-        var baz = { x: function() {} };
-        var boo = { x: { y: function () {} } };
-
-        function moo() {
-          var a = 2;
-          maa(wow, bar, baz, boo, a, a);
-        }
-
-        return moo;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        var a = 1;
-        var bar = { x: { z: a, v: a } };
-        var wow = { x: 1 };
-        var baz = { x: function () {} };
-        var boo = { x: { y: function () {} } };
-
-        return function () {
-          var a = 2;
-          maa(wow, bar, baz, boo, a, a);
-        };
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should preserve vars from the removed block", () => {
-    const source = unpad(`
-      if (0) {var a = foo()}
-      if (0) var b = foo();
-      if (1) { } else { var c = foo() }
-      if (0) var d = bar(); else { }
-    `);
-    const expected = unpad(`
-      var a;
-      var b;
-      var c;
-      var d;
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should optimize alternate when empty consequent is replaced with alternate", () => {
-    const source = unpad(`
-      if (baz) {
-      } else {
-        let foo = 'bar';
-        function foobar() {}
-        console.log('foo' + foo);
-      }
-    `);
-    const expected = unpad(`
-      if (!baz) {
-        console.log('foo' + 'bar');
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should transform simple switch statement", () => {
-    const source = unpad(`
-      switch (0) {
-        case 0: foo(); break;
-        case 1: bar(); break;
-      }
-    `);
-    const expected = unpad(`
-      foo();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should NOT optimize when one of the cases is not evaluate-able", () => {
-    const source = unpad(`
-      switch (a) {
-        case 1:
-          break;
-      }
-      switch (100) {
-        default:
-          foo();
-        case a:
-          foo();
-          break;
-      }
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle cases where there is no break", () => {
-    const source = unpad(`
-      switch (1) {
-        case 1: foo();
-        case 2: bar();
-        case 3: baz(); break;
-        case 4: foobarbaz();
-      }
-    `);
-    const expected = unpad(`
-      foo();
-      bar();
-      baz();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle defaults", () => {
-    const source = unpad(`
-      switch (10) {
-        default:
-          foo();
-          break;
-        case 1:
-          bar();
-          break;
-        case 2:
-          baz();
-      }
-      switch (5) {
-        case 1:
-          baz();
-          break;
-        case 2:
-          bar();
-          break;
-        default:
-          foo();
-      }
-    `);
-    const expected = unpad(`
-      foo();
-
-      foo();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should predict break statement within blocks", () => {
-    const source = unpad(`
-      switch (1) {
-        case 1:
-          foo();
-          if (true) break;
-        case 2:
-          bar();
-      }
-      switch (1) {
-        case 1:
-          for(var i in x) { break }
-        case 2:
-          while(true) { break }
-        case 3:
-          foo();
-      }
-    `);
-
-    const expected = unpad(`
-      foo();
-      var i;
-
-      for (var i in x) {
-        break;
-      }
-
-      while (true) {
-        break;
-      }
-
-      foo();
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should bail out when break label is above switch's scope", () => {
-    const source = unpad(`
-      x: switch (1) {
-        case 1:
-          break x;
-      }
-      y: switch (0) {
-        case 0:
-          while (true) {
-            break y;
-          }
-      }
-      z: switch (2) {
-        case 2:
-          {
-            break z;
-          }
-      }
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should NOT bail out when break label is under switch's scope", () => {
-    const source = unpad(`
-      switch (1) {
-        case 1:
-          x: while (true) {
-            break x;
-          }
-      }
-    `);
-    const expected = unpad(`
-      x: while (true) {
-        break x;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle nested switch statements", () => {
-    const source = unpad(`
-      switch (1) {
-        case 1:
-          foo();
-          switch (2) {
-            case 2:
-              bar();
-              break;
-          }
-          break;
-        case 2:
-          baz();
-      }
-    `);
-    const expected = unpad(`
-      foo();
-
-      bar();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should break correctly when there is a break statement after break", () => {
-    const source = unpad(`
-      switch (0) {
-        case 0:
-          foo();
-          break;
-          bar();
-          break;
-      }
-    `);
-    const expected = unpad(`
-      foo();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should break correctly for the correct break statement", () => {
-    const source = unpad(`
-      switch (0) {
-        case 0:
-          foo();
-          {
-            if (true) break;
-            bar();
-            if (a) break;
-          }
-        case 1:
-          baz();
-      }
-    `);
-    const expected = unpad(`
-      foo();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should bail out for runtime evaluated if(x) break", () => {
-    const source = unpad(`
-      switch (0) {
-        case 0:
-          foo();
-          if (a) break;
-        case 1:
-          bar();
-      }
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should NOT bail out for runtime evaluated if(x) break inside loop", () => {
-    const source = unpad(`
-      switch (0) {
-        case 0:
-          foo();
-          while (1) { if (x) break; }
-        case 1:
-          bar();
-      }
-    `);
-    const expected = unpad(`
-      foo();
-      while (1) {
-        if (x) break;
-      }
-
-      bar();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should optimize While statements", () => {
-    const source = unpad(`
-      while (false) {
-        foo();
-      }
-      while (true) {
-        bar();
-      }
-      while (x) {
-        baz();
-      }
-    `);
-    const expected = unpad(`
-      while (true) {
-        bar();
-      }
-      while (x) {
-        baz();
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should optimize For statements", () => {
-    const source = unpad(`
-      for (var i = 0; i < 8; i++) {
-        foo();
-      }
-      for (; true;) {
-        bar();
-      }
-      for (; false;) {
-        baz();
-      }
-    `);
-    const expected = unpad(`
-      for (var i = 0; i < 8; i++) {
-        foo();
-      }
-      for (;;) {
-        bar();
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should optimize dowhile statements", () => {
-    const source = unpad(`
-      do {
-        foo();
-      } while (1);
-      do {
-        bar()
-      } while (0);
-      do {
-        baz();
-      } while (a);
-    `);
-    const expected = unpad(`
-      do {
-        foo();
-      } while (1);
-      {
-        bar();
-      }
-      do {
-        baz();
-      } while (a);
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not evaluate to false and remove conditional", () => {
-    const source = unpad(`
-      function foo(obj) {
-        return obj && typeof obj === 'object' ? x() : obj;
-      }
-    `);
-    const expected = unpad(`
-      function foo(obj) {
-        return obj && typeof obj === 'object' ? x() : obj;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should extract vars from the removed switch statement", () => {
-    const source = unpad(`
-      switch (0) {
-        case 1:
-          var a = 5;
-          var b = 6;
-      }
-      switch (0) {
-        default:
-          var a = 1;
-          var b = 2;
-      }
-    `);
-    const expected = unpad(`
-      var a, b;
-      var a, b;
-
+  thePlugin(
+    "inlining should avoid name collision",
+    `
+    function foo() {
       var a = 1;
-      var b = 2;
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle side-effecty things in cases", () => {
-    const source = unpad(`
-      let i = 0;
-      let bar = () => console.log('foo');
-      switch (1) {
-        case ++i:
-          foo();
-          break;
-        case bar():
-          baz();
+      var b = a;
+      function x(a) {
+        return a + b;
       }
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should preserve names in NFEs", () => {
-    const source = unpad(`
-      function method() {
-        var removeListeners = function removeListeners() {
-          log(removeListeners);
-        };
-        removeListeners();
+      x();
+      x();
+      return a;
+    }
+  `,
+    `
+    function foo() {
+      var a = 1;
+      var b = a;
+      function x(a) {
+        return a + b;
       }
-    `);
+      x();
+      x();
+      return a;
+    }
+  `
+  );
 
-    const expected = unpad(`
-      function method() {
-        (function removeListeners() {
-          log(removeListeners);
-        })();
+  thePlugin(
+    "inlining should avoid name collision in expressions",
+    `
+    function foo() {
+      var a = c + d;
+      function x(c, d) {
+        return a + c + d;
       }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  // https://github.com/babel/babili/issues/130
-  it("should not convert expression to expression during replace issue#130", () => {
-    const source = unpad(`
-      function outer() {
-        const inner = (d) => d.x;
-        return inner;
+      x();
+      x();
+    }
+  `,
+    `
+    function foo() {
+      var a = c + d;
+      function x(c, d) {
+        return a + c + d;
       }
-    `);
-    const expected = unpad(`
-      function outer() {
-        return d => d.x;
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+      x();
+      x();
+    }
+  `
+  );
 
-  // https://github.com/babel/babili/issues/151
-  it("should fix issue#151 - array patterns and object patterns", () => {
-    const source = unpad(`
-      const me = lyfe => {
-        const [swag] = lyfe;
-        return swag;
+  thePlugin(
+    "should replace with empty statement if the statement is the only one in a block",
+    `
+    function foo() {
+      var a = 0;
+      while (wat()) a += 1;
+    }
+
+    function bar() {
+      while (wat()) 1;
+    }
+
+    function baz() {
+      while (wat()) var x;
+    }
+  `,
+    `
+    function foo() {
+      while (wat());
+    }
+
+    function bar() {
+      while (wat());
+    }
+
+    function baz() {
+      while (wat());
+    }
+  `
+  );
+
+  thePlugin(
+    "should update binding paths",
+    `
+    function foo() {
+      var key;
+      for (key in o);
+      for (key in o2);
+    }
+  `,
+    `
+    function foo() {
+      for (var key in o);
+      for (key in o2);
+    }
+  `
+  );
+
+  thePlugin.skip(
+    "should evaluate and remove falsy code",
+    `
+    foo(0 && bar());
+  `,
+    `
+    foo(0);
+  `
+  );
+
+  thePlugin(
+    "should not move functions into other scopes",
+    `
+    function foo() {
+      var a = 1;
+      var bar = { x: {z: a, v: a} };
+      var wow = { x: 1 };
+      var baz = { x: function() {} };
+      var boo = { x: { y: function () {} } };
+
+      function moo() {
+        var a = 2;
+        maa(wow, bar, baz, boo, a, a);
+      }
+
+      return moo;
+    }
+  `,
+    `
+    function foo() {
+      var a = 1;
+      var bar = { x: { z: a, v: a } };
+      var wow = { x: 1 };
+      var baz = { x: function () {} };
+      var boo = { x: { y: function () {} } };
+
+      return function () {
+        var a = 2;
+        maa(wow, bar, baz, boo, a, a);
       };
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
+    }
+  `
+  );
 
-  // https://github.com/babel/babili/issues/151
-  it("should fix issue#151 - array patterns and object patterns 2", () => {
-    const source = unpad(`
-      const me = lyfe => {
-        const [swag, yolo] = lyfe;
-        return swag && yolo;
-      };
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should preserve vars from removed blocks",
+    `
+    if (0) {var a = foo()}
+    if (0) var b = foo();
+    if (1) { } else { var c = foo() }
+    if (0) var d = bar(); else { }
+  `,
+    `
+    var a;
+    var b;
+    var c;
+    var d;
+  `
+  );
 
-  // https://github.com/babel/babili/issues/232
-  it("should fix issue#232 - array patterns and object patterns with non constant init", () => {
-    const source = unpad(`
-      const a = {
-        lol: input => {
-          const [hello, world] = input.split('|');
-          if (hello === 't' || hello === 'top') {
-            return 'top';
-          }
-          return 'bottom';
+  thePlugin(
+    "should optimize the alternate when an empty consequent is replaced with the alternate",
+    `
+    if (baz) {
+    } else {
+      let foo = "bar";
+      function foobar() {}
+      console.log("foo" + foo);
+    }
+  `,
+    `
+    if (!baz) {
+      console.log("foo" + "bar");
+    }
+  `
+  );
+
+  thePlugin(
+    "should transform simple switch statements",
+    `
+    switch (0) {
+      case 0: foo(); break;
+      case 1: bar(); break;
+    }
+  `,
+    `
+    foo();
+  `
+  );
+
+  thePlugin(
+    "should bail when one of the cases is not evaluatable",
+    `
+    switch (a) {
+      case 1:
+        break;
+    }
+    switch (100) {
+      default:
+        foo();
+      case a:
+        foo();
+        break;
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle cases where there is no break",
+    `
+    switch (1) {
+      case 1: foo();
+      case 2: bar();
+      case 3: baz(); break;
+      case 4: foobarbaz();
+    }
+  `,
+    `
+    foo();
+    bar();
+    baz();
+  `
+  );
+
+  thePlugin(
+    "should handle `default`s",
+    `
+    switch (10) {
+      default:
+        foo();
+        break;
+      case 1:
+        bar();
+        break;
+      case 2:
+        baz();
+    }
+    switch (5) {
+      case 1:
+        baz();
+        break;
+      case 2:
+        bar();
+        break;
+      default:
+        foo();
+    }
+  `,
+    `
+    foo();
+
+    foo();
+  `
+  );
+
+  thePlugin(
+    "should predict break statements within blocks",
+    `
+    switch (1) {
+      case 1:
+        foo();
+        if (true) break;
+      case 2:
+        bar();
+    }
+    switch (1) {
+      case 1:
+        for(var i in x) { break }
+      case 2:
+        while(true) { break }
+      case 3:
+        foo();
+    }
+  `,
+    `
+    foo();
+    var i;
+
+    for (var i in x) {
+      break;
+    }
+
+    while (true) {
+      break;
+    }
+
+    foo();
+  `
+  );
+
+  thePlugin(
+    "should bail out when break label is above the switch’s scope",
+    `
+    x: switch (1) {
+      case 1:
+        break x;
+    }
+    y: switch (0) {
+      case 0:
+        while (true) {
+          break y;
         }
-      };
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
-
-  // https://github.com/babel/babili/issues/232
-  it("should fix issue#232 - array & object patterns with non-constant init", () => {
-    const source = unpad(`
-      function foo() {
-        const { bar1, bar2 } = baz();
-        return bar1;
-      }
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should preserve variabledeclarations(var) after completion statements", () => {
-    const source = unpad(`
-      function foo() {
-        a = 1;
-        return a;
-        var a;
-      }
-    `);
-
-    const expected = source;
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should NOT preserve variabledeclarations(let) after completion statements", () => {
-    const source = unpad(`
-      function foo() {
-        a = 1;
-        b = 2;
-        return a + b;
-        let a, b;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        a = 1;
-        b = 2;
-        return a + b;
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not remove var from for..in/for..of statements", () => {
-    const source = unpad(`
-      function foo() {
-        for (var i in x) console.log("foo");
-        for (var j of y) console.log("foo");
-      }
-    `);
-    const expected = source;
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not remove var from for..await statements", () => {
-    const source = unpad(`
-      async function foo() {
-        for await (var x of y) console.log("bar");
-      }
-    `);
-    const expected = source;
-    expect(
-      transform(
-        source,
-        {},
+    }
+    z: switch (2) {
+      case 2:
         {
-          parserOpts: {
-            plugins: ["asyncGenerators"]
-          }
+          break z;
         }
-      )
-    ).toBe(expected);
-  });
-  it("should remove empty statements when children of block", () => {
-    const source = unpad(`
-      (function () {
-        function foo() {};
-        function bar() {};
-        function baz() {};
-        function ban() {};
-        function quux() {};
-        function cake() {};
+    }
+  `
+  );
+
+  thePlugin(
+    "should NOT bail out when break label is inside the switch’s scope",
+    `
+    switch (1) {
+      case 1:
+        x: while (true) {
+          break x;
+        }
+    }
+  `,
+    `
+    x: while (true) {
+      break x;
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle nested switch statements",
+    `
+    switch (1) {
+      case 1:
+        foo();
+        switch (2) {
+          case 2:
+            bar();
+            break;
+        }
+        break;
+      case 2:
+        baz();
+    }
+  `,
+    `
+    foo();
+
+    bar();
+  `
+  );
+
+  thePlugin(
+    "should break correctly when there is a repeated break statement",
+    `
+    switch (0) {
+      case 0:
+        foo();
+        break;
+        bar();
+        break;
+    }
+  `,
+    `
+    foo();
+  `
+  );
+
+  thePlugin(
+    "should break correctly for the correct break statement",
+    `
+    switch (0) {
+      case 0:
+        foo();
+        {
+          if (true) break;
+          bar();
+          if (a) break;
+        }
+      case 1:
+        baz();
+    }
+  `,
+    `
+    foo();
+  `
+  );
+
+  thePlugin(
+    "should bail out for `break` statements inside a non-pure conditional",
+    `
+    switch (0) {
+      case 0:
+        foo();
+        if (a) break;
+      case 1:
+        bar();
+    }
+  `
+  );
+
+  thePlugin(
+    "should NOT bail out for `break` statements inside a non-pure conditional inside a loop",
+    `
+    switch (0) {
+      case 0:
+        foo();
+        while (1) { if (x) break; }
+      case 1:
+        bar();
+    }
+  `,
+    `
+    foo();
+    while (1) {
+      if (x) break;
+    }
+
+    bar();
+  `
+  );
+
+  thePlugin(
+    "should optimize `while` statements",
+    `
+    while (false) {
+      foo();
+    }
+    while (true) {
+      bar();
+    }
+    while (x) {
+      baz();
+    }
+  `,
+    `
+    while (true) {
+      bar();
+    }
+    while (x) {
+      baz();
+    }
+  `
+  );
+
+  thePlugin(
+    "should optimize `for` statements",
+    `
+    for (var i = 0; i < 8; i++) {
+      foo();
+    }
+    for (; true;) {
+      bar();
+    }
+    for (; false;) {
+      baz();
+    }
+  `,
+    `
+    for (var i = 0; i < 8; i++) {
+      foo();
+    }
+    for (;;) {
+      bar();
+    }
+  `
+  );
+
+  thePlugin(
+    "should optimize do...while statements",
+    `
+    do {
+      foo();
+    } while (1);
+    do {
+      bar()
+    } while (0);
+    do {
+      baz();
+    } while (a);
+  `,
+    `
+    do {
+      foo();
+    } while (1);
+    {
+      bar();
+    }
+    do {
+      baz();
+    } while (a);
+  `
+  );
+
+  thePlugin(
+    "should not evaluate to false and remove conditional",
+    `
+    function foo(obj) {
+      return obj && typeof obj === "object" ? x() : obj;
+    }
+  `,
+    `
+    function foo(obj) {
+      return obj && typeof obj === "object" ? x() : obj;
+    }
+  `
+  );
+
+  thePlugin(
+    "should extract `var`s from a removed switch statement",
+    `
+    switch (0) {
+      case 1:
+        var a = 5;
+        var b = 6;
+    }
+    switch (0) {
+      default:
+        var a = 1;
+        var b = 2;
+    }
+  `,
+    `
+    var a, b;
+    var a, b;
+
+    var a = 1;
+    var b = 2;
+  `
+  );
+
+  thePlugin(
+    "should bail on non-pure expressions in cases",
+    `
+    let i = 0;
+    let bar = () => console.log("foo");
+    switch (1) {
+      case ++i:
+        foo();
+        break;
+      case bar():
+        baz();
+    }
+  `
+  );
+
+  thePlugin(
+    "should preserve names in named function expressions",
+    `
+    function method() {
+      var removeListeners = function removeListeners() {
+        log(removeListeners);
+      };
+      removeListeners();
+    }
+  `,
+    `
+    function method() {
+      (function removeListeners() {
+        log(removeListeners);
       })();
-    `);
-    const expected = unpad(`
-      (function () {})();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    }
+  `
+  );
 
-  it("should NOT remove fn params for setters", () => {
-    const source = unpad(`
-      function foo() {
-        var x = {
-          set a(b) {}
-        };
-        class A {
-          set c(d) {
-            x.a = 5;
-          }
+  // https://github.com/babel/minify/issues/130
+  // https://github.com/babel/minify/pull/132
+  thePlugin(
+    "should not regress on #130",
+    `
+    function outer() {
+      const inner = (d) => d.x;
+      return inner;
+    }
+  `,
+    `
+    function outer() {
+      return d => d.x;
+    }
+  `
+  );
+
+  // https://github.com/babel/minify/issues/151
+  thePlugin(
+    "should not regress on issue #151 - array patterns and object patterns",
+    `
+    const me = lyfe => {
+      const [swag] = lyfe;
+      return swag;
+    };
+
+    const me2 = lyfe => {
+      const [swag, yolo] = lyfe;
+      return swag && yolo;
+    };
+  `
+  );
+
+  // https://github.com/babel/minify/issues/232
+  thePlugin(
+    "should not regress on issue #232 - array patterns and object patterns with non constant init",
+    `
+    const a = {
+      lol: input => {
+        const [hello, world] = input.split("|");
+        if (hello === "t" || hello === "top") {
+          return "top";
         }
-        return new A();
+        return "bottom";
       }
-    `);
-    expect(transform(source)).toBe(source);
-  });
+    };
 
-  // https://github.com/babel/babili/issues/265
-  it("should not remove return void 0; statement if inside a loop", () => {
-    const source = unpad(`
-      function getParentConditionalPath(path) {
-        let parentPath;
-        while (parentPath = path.parentPath) {
-          if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
-            if (path.key === "test") {
-              return;
-            } else {
-              return parentPath;
-            }
+    function foo() {
+      const { bar1, bar2 } = baz();
+      return bar1;
+    }
+  `
+  );
+
+  thePlugin(
+    "should preserve `var` statements after `return`s",
+    `
+    function foo() {
+      a = 1;
+      return a;
+      var a;
+    }
+  `
+  );
+
+  thePlugin(
+    "should NOT preserve `let` statements after `return`s",
+    `
+    function foo() {
+      a = 1;
+      b = 2;
+      return a + b;
+      let a, b;
+    }
+  `,
+    `
+    function foo() {
+      a = 1;
+      b = 2;
+      return a + b;
+    }
+  `
+  );
+
+  thePlugin(
+    "should not remove `var` from `for...in`/`for...of` statements",
+    `
+    function foo() {
+      for (var i in x) console.log("foo");
+      for (var j of y) console.log("foo");
+    }
+  `
+  );
+
+  thePlugin(
+    "should not remove `var` from `for await...of` statements",
+    `
+    async function foo() {
+      for await (var x of y) console.log("bar");
+    }
+  `,
+    {
+      parserOpts: {
+        plugins: ["asyncGenerators"]
+      }
+    }
+  );
+
+  thePlugin(
+    "should remove empty statements when children of block",
+    `
+    (function () {
+      function foo() {};
+      function bar() {};
+      function baz() {};
+      function ban() {};
+      function quux() {};
+      function cake() {};
+    })();
+  `,
+    `
+    (function () {})();
+  `
+  );
+
+  thePlugin(
+    "should NOT remove function params in setters",
+    `
+    function foo() {
+      var x = {
+        set a(b) {}
+      };
+      class A {
+        set c(d) {
+          x.a = 5;
+        }
+      }
+      return new A();
+    }
+  `
+  );
+
+  // https://github.com/babel/minify/issues/265
+  thePlugin(
+    "should not remove return void 0; statement if inside a loop",
+    `
+    function getParentConditionalPath(path) {
+      let parentPath;
+      while (parentPath = path.parentPath) {
+        if (parentPath.isIfStatement() || parentPath.isConditionalExpression()) {
+          if (path.key === "test") {
+            return;
           } else {
-            path = parentPath;
+            return parentPath;
           }
+        } else {
+          path = parentPath;
         }
       }
-    `);
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(source);
-  });
-
-  // https://github.com/babel/babili/issues/265
+  // https://github.com/babel/minify/issues/265
   it("should integrate with simplify plugin changing scopes", () => {
     const source = unpad(`
       function getParentConditionalPath(path) {
@@ -2321,393 +2053,454 @@ describe("dce-plugin", () => {
     expect(transformWithSimplify(source)).toBe(expected);
   });
 
-  it("should not remove params from functions containing direct eval", () => {
-    const source = unpad(`
-      function a(b, c, d) {
-        eval(";");
-        return b;
-      }
-      function b(c, d, e) {
-        (1, eval)(";");
-        return c;
-      }
-    `);
+  thePlugin(
+    "should not remove params from functions containing direct eval",
+    `
+    function a(b, c, d) {
+      eval(";");
+      return b;
+    }
+    function b(c, d, e) {
+      (1, eval)(";");
+      return c;
+    }
+  `,
+    `
+    function a(b, c, d) {
+      eval(";");
+      return b;
+    }
+    function b(c) {
+      (1, eval)(";");
+      return c;
+    }
+  `
+  );
 
-    const expected = unpad(`
-      function a(b, c, d) {
-        eval(";");
-        return b;
-      }
-      function b(c) {
-        (1, eval)(";");
-        return c;
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not remove params/vars from functions containing direct eval", () => {
-    const source = unpad(`
-      function foo(bar, baz) {
-        function foox(a, b, c) {
-          x.then((data, unused) => {
-            let unused1;
-            eval(data);
-            foox1();
-            {
-              var unused2;
-            }
-          });
-
-          function foox1(unused) {
-            console.log("foox1");
+  thePlugin(
+    "should not remove params/vars from functions containing direct eval",
+    `
+    function foo(bar, baz) {
+      function foox(a, b, c) {
+        x.then((data, unused) => {
+          let unused1;
+          eval(data);
+          foox1();
+          {
+            var unused2;
           }
-        }
-        function fooy(unused1, unused2) {
-          console.log("fooy");
+        });
+
+        function foox1(unused) {
+          console.log("foox1");
         }
       }
-    `);
-
-    const expected = unpad(`
-      function foo(bar, baz) {
-        function foox(a, b, c) {
-          x.then((data, unused) => {
-            let unused1;
-            eval(data);
-            foox1();
-            {
-              var unused2;
-            }
-          });
-
-          function foox1() {
-            console.log("foox1");
+      function fooy(unused1, unused2) {
+        console.log("fooy");
+      }
+    }
+  `,
+    `
+    function foo(bar, baz) {
+      function foox(a, b, c) {
+        x.then((data, unused) => {
+          let unused1;
+          eval(data);
+          foox1();
+          {
+            var unused2;
           }
-        }
-        function fooy() {
-          console.log("fooy");
+        });
+
+        function foox1() {
+          console.log("foox1");
         }
       }
-    `);
+      function fooy() {
+        console.log("fooy");
+      }
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should not optimize/remove vars from functions containing direct eval",
+    `
+    function foo() {
+      bar();
 
-  it("should not optimize/remove vars from functions containing direct eval", () => {
-    const source = unpad(`
-      function foo() {
-        bar();
+      var x = 5;
+      return x;
 
-        var x = 5;
+      function bar() {
+        eval(";");
+        return 5;
+      }
+
+      function baz() {
+        let x = 10;
         return x;
-
-        function bar() {
-          eval(";");
-          return 5;
-        }
-
-        function baz() {
-          let x = 10;
-          return x;
-        }
       }
-    `);
+    }
+  `,
+    `
+    function foo() {
+      bar();
 
-    const expected = unpad(`
-      function foo() {
-        bar();
+      var x = 5;
+      return x;
 
-        var x = 5;
-        return x;
-
-        function bar() {
-          eval(";");
-          return 5;
-        }
-
-        function baz() {
-          return 10;
-        }
+      function bar() {
+        eval(";");
+        return 5;
       }
-    `);
 
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should impure expressions in confidently evaluated if statements", () => {
-    const source = unpad(`
-      if (a.b(), true) {
-        foo();
+      function baz() {
+        return 10;
       }
-    `);
-    const expected = unpad(`
-      a.b();
+    }
+  `
+  );
 
+  thePlugin(
+    "should extract impure expressions from if statements with a static condition",
+    `
+    if (a.b(), true) {
       foo();
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    }
 
-  it("should extract all necessary things from if statements", () => {
-    const source = unpad(`
-      if (a.b(), false) {
-        var foo = foo1;
-        foo();
-      } else if (b.c(), true) {
-        var bar = bar1;
-        bar();
-      } else {
-        var baz = baz1;
-        baz();
-      }
-    `);
-    const expected = unpad(`
-      a.b();
-      b.c();
-
+    if (a.b(), false) {
+      var foo = foo1;
+      foo();
+    } else if (b.c(), true) {
       var bar = bar1;
       bar();
-      var baz;
-      var foo;
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    } else {
+      var baz = baz1;
+      baz();
+    }
+  `,
+    `
+    a.b();
 
-  it("should not remove vars after return statement", () => {
-    const source = unpad(`
-      function f() {
-        return x;
-        var x = 1;
+    foo();
+    a.b();
+    b.c();
+
+    var bar = bar1;
+    bar();
+    var baz;
+    var foo;
+  `
+  );
+
+  thePlugin(
+    "should not remove `var` statements after a return statement",
+    `
+    function f() {
+      return x;
+      var x = 1;
+    }
+
+    var y = 0;
+    function f1(){
+      function f2(){
+        return y;
+      };
+      return f2();
+      var y = 1;
+    }
+  `,
+    `
+    function f() {
+      return void 0;
+    }
+
+    var y = 0;
+    function f1() {
+      return function () {
+        return y;
+      }();
+      var y = 1;
+    }
+  `
+  );
+
+  thePlugin(
+    "should not hoist `var` initializations",
+    `
+    function foo() {
+      bar = x;
+      var x = 1;
+    }
+  `,
+    `
+    function foo() {
+      bar = void 0;
+    }
+  `
+  );
+
+  thePlugin(
+    "should bail on impure `if` conditions",
+    `
+    function foo() {
+      do {
+        bar();
+      } while ((bar(), false));
+      for (; bar(), false;) {
+        bar();
       }
-    `);
-
-    const expected = unpad(`
-      function f() {
-        return void 0;
+      while (bar(), false) {
+        bar();
       }
-    `);
+    }
+  `
+  );
 
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should handle confident do...while loops with break statements",
+    `
+    function foo() {
+      do {
+        if (x) break;
+      } while (false);
 
-  it("should not remove vars after return statement #2", () => {
-    const source = unpad(`
-      var x = 0;
-      function f1(){
-        function f2(){
-          return x;
-        };
-        return f2();
-        var x = 1;
+      do break; while (false);
+
+      bar0: do break; while (false);
+
+      bar1: do break bar1; while (false);
+
+      bar2: do {
+        if (y) break;
+      } while (false);
+
+      bar3: do {
+        if (y) break bar3;
+      } while (false);
+
+      bar4: do {
+        while (baz()) {
+          if (x) break;
+        }
+      } while (false);
+
+      bar5: do {
+        while (baz()) {
+          if (x) break bar5;
+        }
+      } while (false);
+    }
+  `,
+    `
+    function foo() {
+      do {
+        if (x) break;
+      } while (false);
+
+      bar1: do break bar1; while (false);
+
+      bar2: do {
+        if (y) break;
+      } while (false);
+
+      bar3: do {
+        if (y) break bar3;
+      } while (false);
+
+      bar4: {
+        while (baz()) {
+          if (x) break;
+        }
       }
-    `);
 
-    const expected = unpad(`
-      var x = 0;
-      function f1() {
+      bar5: do {
+        while (baz()) {
+          if (x) break bar5;
+        }
+      } while (false);
+    }
+  `
+  );
+
+  thePlugin(
+    "should handle confident do...while loops with continue statements",
+    `
+    function foo() {
+      do {
+        if (x) continue;
+      } while (false);
+
+      do continue; while (false);
+
+      bar0: do continue; while (false);
+
+      bar1: do continue bar1; while (false);
+
+      bar2: do {
+        if (y) continue;
+      } while (false);
+
+      bar3: do {
+        if (y) continue bar3;
+      } while (false);
+
+      bar4: do {
+        while (baz()) {
+          if (x) continue;
+        }
+      } while (false);
+
+      bar5: do {
+        while (baz()) {
+          if (x) continue bar5;
+        }
+      } while (false);
+    }
+  `,
+    `
+    function foo() {
+      do {
+        if (x) continue;
+      } while (false);
+
+      do continue; while (false);
+
+      bar0: do continue; while (false);
+
+      bar1: do continue bar1; while (false);
+
+      bar2: do {
+        if (y) continue;
+      } while (false);
+
+      bar3: do {
+        if (y) continue bar3;
+      } while (false);
+
+      bar4: {
+        while (baz()) {
+          if (x) continue;
+        }
+      }
+
+      bar5: do {
+        while (baz()) {
+          if (x) continue bar5;
+        }
+      } while (false);
+    }
+  `
+  );
+
+  thePlugin(
+    'should remove unnecessary "use strict"; directives',
+    `
+    function foo() {
+      "use strict";
+      function bar() {
+        "use strict";
+        bar();
+      }
+      bar.call();
+    }
+  `,
+    `
+    function foo() {
+      "use strict";
+
+      function bar() {
+        bar();
+      }
+      bar.call();
+    }
+  `
+  );
+
+  thePlugin(
+    "should bail out for Array and Object Pattern - fix issue#617",
+    `
+      function foo(arr) {
+        let [a, b] = arr;
+        console.log(a);
+      }
+    `
+  );
+
+  thePlugin(
+    "should bail out for Array and Object Pattern - fix issue#617",
+    `
+      function foo() {
+        return getPromise().then(arr => {
+          let { a, b } = arr;
+          console.log(a);
+        });
+      }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#611 - transforming fn decl to expr",
+    `
+      function foo() {
+        function count() {
+          let count = 1;
+          bar(count);
+          return count;
+        }
+        return count;
+      }
+    `
+  );
+
+  thePlugin(
+    "should deopt when binding is on different scope - issue #574",
+    `
+      function foo(v) {
+        if (v) var w = 10;
+        if (w) console.log("hello", v);
+      }
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
+  );
+
+  thePlugin.skip(
+    "should optimize to void 0 for lets referenced before init declarations",
+    `
+      function foo() {
+        bar(a); // Should be a ReferenceError
+        let a = 1;
+      }
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
+  );
+
+  thePlugin(
+    "should optimize lets referenced before init declarations - 2",
+    `
+      function foo() {
+        function bar() {
+          if (a) console.log(a);
+        }
+        let a = 1;
+        return bar;
+      }
+    `,
+    `
+      function foo() {
+        let a = 1;
         return function () {
-          return x;
-        }();
-        var x = 1;
+          if (a) console.log(a);
+        };
       }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should not remove vars after return statement #3", () => {
-    const source = unpad(`
-      function foo() {
-        bar = x;
-        var x = 1;
-      }
-    `);
-
-    const expected = unpad(`
-      function foo() {
-        bar = void 0;
-      }
-    `);
-
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should deopt for impure tests", () => {
-    const source = unpad(`
-      function foo() {
-        do {
-          bar();
-        } while ((bar(), false));
-        for (; bar(), false;) {
-          bar();
-        }
-        while (bar(), false) {
-          bar();
-        }
-      }
-    `);
-    expect(transform(source)).toBe(source);
-  });
-
-  it("should handle confident do..while with break statements", () => {
-    const source = unpad(`
-      function foo() {
-        do {
-          if (x) break;
-        } while (false);
-
-        do break; while (false);
-
-        bar0: do break; while (false);
-
-        bar1: do break bar1; while (false);
-
-        bar2: do {
-          if (y) break;
-        } while (false);
-
-        bar3: do {
-          if (y) break bar3;
-        } while (false);
-
-        bar4: do {
-          while (baz()) {
-            if (x) break;
-          }
-        } while (false);
-
-        bar5: do {
-          while (baz()) {
-            if (x) break bar5;
-          }
-        } while (false);
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        do {
-          if (x) break;
-        } while (false);
-
-        bar1: do break bar1; while (false);
-
-        bar2: do {
-          if (y) break;
-        } while (false);
-
-        bar3: do {
-          if (y) break bar3;
-        } while (false);
-
-        bar4: {
-          while (baz()) {
-            if (x) break;
-          }
-        }
-
-        bar5: do {
-          while (baz()) {
-            if (x) break bar5;
-          }
-        } while (false);
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should handle confident do..while with continue statements", () => {
-    const source = unpad(`
-      function foo() {
-        do {
-          if (x) continue;
-        } while (false);
-
-        do continue; while (false);
-
-        bar0: do continue; while (false);
-
-        bar1: do continue bar1; while (false);
-
-        bar2: do {
-          if (y) continue;
-        } while (false);
-
-        bar3: do {
-          if (y) continue bar3;
-        } while (false);
-
-        bar4: do {
-          while (baz()) {
-            if (x) continue;
-          }
-        } while (false);
-
-        bar5: do {
-          while (baz()) {
-            if (x) continue bar5;
-          }
-        } while (false);
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        do {
-          if (x) continue;
-        } while (false);
-
-        do continue; while (false);
-
-        bar0: do continue; while (false);
-
-        bar1: do continue bar1; while (false);
-
-        bar2: do {
-          if (y) continue;
-        } while (false);
-
-        bar3: do {
-          if (y) continue bar3;
-        } while (false);
-
-        bar4: {
-          while (baz()) {
-            if (x) continue;
-          }
-        }
-
-        bar5: do {
-          while (baz()) {
-            if (x) continue bar5;
-          }
-        } while (false);
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
-
-  it("should remove unnecessary use strict directives", () => {
-    const source = unpad(`
-      function foo() {
-        "use strict";
-        function bar() {
-          "use strict";
-          bar();
-        }
-        bar.call();
-      }
-    `);
-    const expected = unpad(`
-      function foo() {
-        "use strict";
-
-        function bar() {
-          bar();
-        }
-        bar.call();
-      }
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    `,
+    {
+      plugins: [[deadcode, { tdz: true }]]
+    }
+  );
 });

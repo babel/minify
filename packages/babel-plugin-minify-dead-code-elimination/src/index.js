@@ -3,6 +3,7 @@
 const some = require("lodash.some");
 const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
 const removeUseStrict = require("./remove-use-strict");
+const evaluate = require("babel-helper-evaluate-path");
 
 function prevSiblings(path) {
   const parentPath = path.parentPath;
@@ -187,9 +188,13 @@ module.exports = ({ types: t, traverse }) => {
             ) {
               continue;
             } else if (binding.path.isVariableDeclarator()) {
+              const declaration = binding.path.parentPath;
+              const maybeBlockParent = declaration.parentPath;
               if (
-                binding.path.parentPath.parentPath &&
-                binding.path.parentPath.parentPath.isForXStatement()
+                maybeBlockParent &&
+                maybeBlockParent.isForXStatement({
+                  left: declaration.node
+                })
               ) {
                 // Can't remove if in a for-in/for-of/for-await statement `for (var x in wat)`.
                 continue;
@@ -228,21 +233,29 @@ module.exports = ({ types: t, traverse }) => {
               continue;
             }
 
-            if (
-              binding.path.isVariableDeclarator() &&
-              binding.path.node.init &&
-              !scope.isPure(binding.path.node.init) &&
-              binding.path.parentPath.node.declarations
-            ) {
-              if (binding.path.parentPath.node.declarations.length !== 1) {
-                continue;
-              }
-              // Bail out for ArrayPattern and ObjectPattern
+            if (binding.path.isVariableDeclarator()) {
               if (!binding.path.get("id").isIdentifier()) {
+                // deopt for object and array pattern
                 continue;
               }
 
-              binding.path.parentPath.replaceWith(binding.path.node.init);
+              // if declarator has some impure init expression
+              // var x = foo();
+              // => foo();
+              if (
+                binding.path.node.init &&
+                !scope.isPure(binding.path.node.init) &&
+                binding.path.parentPath.node.declarations
+              ) {
+                // binding path has more than one declarations
+                if (binding.path.parentPath.node.declarations.length !== 1) {
+                  continue;
+                }
+                binding.path.parentPath.replaceWith(binding.path.node.init);
+              } else {
+                updateReferences(binding.path, this);
+                removeOrVoid(binding.path);
+              }
             } else {
               updateReferences(binding.path, this);
               removeOrVoid(binding.path);
@@ -285,14 +298,10 @@ module.exports = ({ types: t, traverse }) => {
               let replacementPath = binding.path;
               let isReferencedBefore = false;
 
-              if (binding.referencePaths.length > 1) {
-                throw new Error("Expected only one reference");
-              }
               const refPath = binding.referencePaths[0];
 
               if (t.isVariableDeclarator(replacement)) {
                 const _prevSiblings = prevSiblings(replacementPath);
-
                 // traverse ancestors of a reference checking if it's before declaration
                 forEachAncestor(refPath, ancestor => {
                   if (_prevSiblings.indexOf(ancestor) > -1) {
@@ -301,7 +310,7 @@ module.exports = ({ types: t, traverse }) => {
                 });
 
                 // deopt if reference is in different scope than binding
-                // since we don't know if it's sync or async execition
+                // since we don't know if it's sync or async execution
                 // (i.e. whether value has been assigned to a reference or not)
                 if (isReferencedBefore && refPath.scope !== binding.scope) {
                   continue;
@@ -392,7 +401,8 @@ module.exports = ({ types: t, traverse }) => {
               const replaced = replace(binding.referencePaths[0], {
                 binding,
                 scope,
-                replacement
+                replacement,
+                replacementPath
               });
 
               if (replaced) {
@@ -403,7 +413,7 @@ module.exports = ({ types: t, traverse }) => {
               }
             }
           }
-        }
+        } // end-for-of
       }
     },
 
@@ -457,7 +467,7 @@ module.exports = ({ types: t, traverse }) => {
       let noNext = true;
       let parentPath = path.parentPath;
       while (parentPath && !parentPath.isFunction() && noNext) {
-        // https://github.com/babel/babili/issues/265
+        // https://github.com/babel/minify/issues/265
         if (hasLoopParent(parentPath)) {
           noNext = false;
           break;
@@ -499,7 +509,7 @@ module.exports = ({ types: t, traverse }) => {
 
     SwitchStatement: {
       exit(path) {
-        const evaluated = path.get("discriminant").evaluate();
+        const evaluated = evaluate(path.get("discriminant"), { tdz: this.tdz });
 
         if (!evaluated.confident) return;
 
@@ -518,7 +528,7 @@ module.exports = ({ types: t, traverse }) => {
             continue;
           }
 
-          const testResult = test.evaluate();
+          const testResult = evaluate(test, { tdz: this.tdz });
 
           // if we are not able to deternine a test during
           // compile time, we terminate immediately
@@ -604,7 +614,7 @@ module.exports = ({ types: t, traverse }) => {
 
     WhileStatement(path) {
       const test = path.get("test");
-      const result = test.evaluate();
+      const result = evaluate(test, { tdz: this.tdz });
       if (result.confident && test.isPure() && !result.value) {
         path.remove();
       }
@@ -614,7 +624,7 @@ module.exports = ({ types: t, traverse }) => {
       const test = path.get("test");
       if (!test.isPure()) return;
 
-      const result = test.evaluate();
+      const result = evaluate(test, { tdz: this.tdz });
       if (result.confident) {
         if (result.value) {
           test.remove();
@@ -626,7 +636,7 @@ module.exports = ({ types: t, traverse }) => {
 
     DoWhileStatement(path) {
       const test = path.get("test");
-      const result = test.evaluate();
+      const result = evaluate(test, { tdz: this.tdz });
       if (result.confident && test.isPure() && !result.value) {
         const body = path.get("body");
 
@@ -757,16 +767,15 @@ module.exports = ({ types: t, traverse }) => {
         }
       },
       IfStatement: {
-        exit(path) {
+        exit(path, { opts: { tdz = false } = {} }) {
           const consequent = path.get("consequent");
           const alternate = path.get("alternate");
           const test = path.get("test");
 
-          const evalResult = test.evaluate();
+          const evalResult = evaluate(test, { tdz });
           const isPure = test.isPure();
 
           const replacements = [];
-
           if (evalResult.confident && !isPure && test.isSequenceExpression()) {
             replacements.push(
               t.expressionStatement(extractSequenceImpure(test))
@@ -855,11 +864,12 @@ module.exports = ({ types: t, traverse }) => {
               optimizeRawSize = false,
               keepFnName = false,
               keepClassName = false,
-              keepFnArgs = false
+              keepFnArgs = false,
+              tdz = false
             } = {}
           } = {}
         ) {
-          traverse.clearCache();
+          (traverse.clearCache || traverse.cache.clear)();
           path.scope.crawl();
 
           markEvalScopes(path);
@@ -870,7 +880,8 @@ module.exports = ({ types: t, traverse }) => {
             optimizeRawSize,
             keepFnName,
             keepClassName,
-            keepFnArgs
+            keepFnArgs,
+            tdz
           });
         }
       }
@@ -928,7 +939,7 @@ module.exports = ({ types: t, traverse }) => {
   }
 
   function replace(path, options) {
-    const { replacement, scope, binding } = options;
+    const { replacement, replacementPath, scope, binding } = options;
 
     // Same name, different binding.
     if (scope.getBinding(path.node.name) !== binding) {
@@ -968,7 +979,19 @@ module.exports = ({ types: t, traverse }) => {
       return;
     }
 
-    // https://github.com/babel/babili/issues/130
+    // https://github.com/babel/minify/issues/611
+    // this is valid only for FunctionDeclaration where we convert
+    // function declaration to expression in the next step
+    if (replacementPath.isFunctionDeclaration()) {
+      const fnName = replacementPath.get("id").node.name;
+      for (let name in replacementPath.scope.bindings) {
+        if (name === fnName) {
+          return;
+        }
+      }
+    }
+
+    // https://github.com/babel/minify/issues/130
     if (!t.isExpression(replacement)) {
       t.toExpression(replacement);
     }
@@ -1177,7 +1200,8 @@ module.exports = ({ types: t, traverse }) => {
   }
 
   function getLabel(name, _path) {
-    let label, path = _path;
+    let label,
+      path = _path;
     do {
       label = path.scope.getLabel(name);
       if (label) {

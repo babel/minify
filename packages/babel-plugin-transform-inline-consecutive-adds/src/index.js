@@ -70,7 +70,8 @@ function validateTopLevel(path) {
   }
 
   const declaration = declarations[0];
-  const id = declaration.get("id"), init = declaration.get("init");
+  const id = declaration.get("id"),
+    init = declaration.get("init");
   if (!id.isIdentifier()) {
     return;
   }

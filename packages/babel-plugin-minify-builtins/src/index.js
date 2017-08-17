@@ -8,8 +8,9 @@ const INVALID_METHODS = ["random"];
 
 module.exports = function({ types: t }) {
   class BuiltInReplacer {
-    constructor(program) {
+    constructor(program, { tdz }) {
       this.program = program;
+      this.tdz = tdz;
       // map<expr_name, path[]>;
       this.pathsToUpdate = new Map();
     }
@@ -48,7 +49,7 @@ module.exports = function({ types: t }) {
             // computed property should be not optimized
             // Math[max]() -> Math.max()
             if (!isComputed(callee) && isBuiltin(callee)) {
-              const result = evaluate(path);
+              const result = evaluate(path, { tdz: context.tdz });
               // deopt when we have side effecty evaluate-able arguments
               // Math.max(foo(), 1) --> untouched
               // Math.floor(1) --> 1
@@ -78,15 +79,13 @@ module.exports = function({ types: t }) {
           if (subpaths.length <= 1) {
             continue;
           }
-          const uniqueIdentifier = this.program.scope.generateUidIdentifier(
-            expName
-          );
+          const uniqueIdentifier = parent.scope.generateUidIdentifier(expName);
           const newNode = t.variableDeclaration("var", [
             t.variableDeclarator(uniqueIdentifier, subpaths[0].node)
           ]);
 
           for (const path of subpaths) {
-            path.replaceWith(uniqueIdentifier);
+            path.replaceWith(t.clone(uniqueIdentifier));
           }
           // hoist the created var to the top of the function scope
           parent.get("body").unshiftContainer("body", newNode);
@@ -98,8 +97,8 @@ module.exports = function({ types: t }) {
   return {
     name: "minify-builtins",
     visitor: {
-      Program(path) {
-        const builtInReplacer = new BuiltInReplacer(path);
+      Program(path, { opts: { tdz = false } = {} }) {
+        const builtInReplacer = new BuiltInReplacer(path, { tdz });
         builtInReplacer.run();
       }
     }

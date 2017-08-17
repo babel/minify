@@ -1,106 +1,249 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
-const unpad = require("../../../utils/unpad");
-
-function transform(code) {
-  return babel.transform(code, {
-    plugins: [require("../src/index")]
-  }).code;
-}
+const thePlugin = require("../../../utils/test-transform")(
+  require("../src/index")
+);
 
 describe("constant-folding-plugin", () => {
-  it("should evaluate some expressions", () => {
-    const source = unpad(`
-      "a" + "b"
-      2 * 3;
-      1/3;
-      4 | 3;
-      a(), b();
-      var x = 1;
-      foo(x);
-      "b" + a + "c" + "d" + g + z + "f" + "h" + "z"
-    `);
+  thePlugin(
+    "should evaluate some expressions",
+    `
+    "a" + "b"
+    2 * 3;
+    1/3;
+    4 | 3;
+    a(), b();
+    var x = 1;
+    foo(x);
+    "b" + a + "c" + "d" + g + z + "f" + "h" + "z"
+  `,
+    `
+    "ab";
+    6;
+    1 / 3;
+    7;
+    a(), b();
+    var x = 1;
+    foo(x);
+    "b" + a + "cd" + g + z + "fhz";
+  `
+  );
 
-    const expected = unpad(`
-      "ab";
-      6;
-      1 / 3;
-      7;
-      a(), b();
-      var x = 1;
-      foo(x);
-      "b" + a + "cd" + g + z + "fhz";
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should skip -0",
+    `
+    -0;
+    +-0;
+    +0;
+  `,
+    `
+    -0;
+    -0;
+    0;
+  `
+  );
 
-  it("should skip -0", () => {
-    const source = unpad(`
-      -0;
-      +-0;
-      +0;
-    `);
+  thePlugin(
+    "should handle runtime errors",
+    `
+    try {
+      x({
+        toString: 0
+      } + '');
+    } catch (e) {}
+  `
+  );
 
-    const expected = unpad(`
-      -0;
-      -0;
-      0;
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin.skip(
+    "should handle script escape",
+    `
+    "</" + "script"
+  `,
+    `
+    "<\\\\/script";
+  `
+  );
 
-  it("should handle runtime errors", () => {
-    const source = unpad(`
-      try {
-        x({
-          toString: 0
-        } + '');
-      } catch (e) {}
-    `);
-    expect(transform(source)).toBe(source);
-  });
+  thePlugin.skip(
+    "should handle style escape",
+    `
+    "</" + "style"
+  `,
+    `
+    "<\\\\/style";
+  `
+  );
 
-  xit("should handle script escape", () => {
-    const source = unpad(`
-      "</" + "script"
-    `);
+  thePlugin.skip(
+    "should handle HTML comment escape",
+    `
+    "<!" + "--"
+  `,
+    `
+    "\\\\x3C!--";
+  `
+  );
 
-    const expected = unpad(`
-      "<\\\\/script";
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+  thePlugin(
+    "should fix #440",
+    `
+    var x = "'cool'" + "test";
+  `,
+    `
+    var x = "'cool'test";
+  `
+  );
 
-  xit("should handle style escape", () => {
-    const source = unpad(`
-      "</" + "style"
-    `);
+  thePlugin(
+    "should handle Array methods on array literals",
+    `
+    [1, 2, 3].push([4, 5, 6]);
+    [1, 2, 3]["push"]([4, 5, 6]);
 
-    const expected = unpad(`
-      "<\\\\/style";
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    [1, 2, 3].join();
+    ["a", "b", "c"].join();
+    ["a", "b", "c"].join("@");
+    [null, 1].join("/");
+    [/xyz/im, true].join("abc");
+    [\`a\${xyz}\`].join("1");
+    [\`a\`, \`c\`].join('b');
 
-  xit("should handle html comment escape", () => {
-    const source = unpad(`
-      "<!" + "--"
-    `);
+    [1, 2, 3].length;
+    [1, 2, 3][1];
+    [1, 2, 3]["1"];
+    [1, 2, 3][4];
 
-    const expected = unpad(`
-      "\\\\x3C!--";
-    `);
-    expect(transform(source)).toBe(expected);
-  });
+    [].shift();
+    [1, 2, 3].shift();
 
-  it("should fix #440", () => {
-    const source = unpad(`
-      var x = "'cool'" + "test";
-      `);
-    const expected = unpad(`
-      var x = "'cool'test";
-      `);
-    expect(transform(source)).toBe(expected);
-  });
+    [1, 2, 3].slice();
+    [1, 2, 3].slice(1);
+    [1, 2, 3].slice(0, 2);
+    [1, 2, 3].slice(0, -1);
+
+    [1, 2, 3].pop();
+    [a, b, c].pop();
+    [].pop();
+
+    [a, b, c].reverse();
+    [1, 2, 3].reverse();
+
+    [1, 2, 3].splice(1);
+    [1, 2, 3, 4].splice(1, 2);
+  `,
+    `
+    4;
+    4;
+
+    "1,2,3";
+    "a,b,c";
+    "a@b@c";
+    "/1";
+    [/xyz/im, true].join("abc");
+    [\`a\${xyz}\`].join("1");
+    "abc";
+
+    3;
+    2;
+    2;
+    void 0;
+
+    void 0;
+    2;
+
+    [1, 2, 3];
+    [2, 3];
+    [1, 2];
+    [1, 2, 3].slice(0, -1);
+
+    3;
+    c;
+    void 0;
+
+    [c, b, a];
+    [3, 2, 1];
+
+    [2, 3];
+    [2, 3];
+  `
+  );
+  thePlugin(
+    "should ignore bad calls to array literal methods",
+    `
+    [1, 2, 3][concat]([4, 5, 6]);
+    [a, "b", "c"].join();
+    ["a", "b", "c"].join(a);
+    [1, 2, 3].splice("a");
+  `
+  );
+  thePlugin(
+    "should ignore bad calls to string literal methods",
+    `
+    "abc".something;
+    "abc"["something"];
+  `
+  );
+  thePlugin(
+    "should handle String methods on string literals",
+    `
+    "a,b,c".split(",");
+    "a,b,c".split("");
+    "a,b,c".split();
+    "abc"[0];
+    "abc"["0"];
+    "abc"[4];
+    "abc".charAt();
+    "abc".charAt(1);
+    "abc".charCodeAt();
+    "abc".charCodeAt(1);
+    "abc".length;
+
+    "\u{1f44d}".charCodeAt();
+    "\u{1f44d}".charCodeAt(1);
+    "\u{1f44d}".codePointAt();
+    "\u{1f44d}".codePointAt(1);
+  `,
+    `
+    ["a", "b", "c"];
+    ["a", ",", "b", ",", "c"];
+    ["a,b,c"];
+    "a";
+    "a";
+    void 0;
+    "a";
+    "b";
+    97;
+    98;
+    3;
+
+    ${0xd83d};
+    ${0xdc4d};
+    ${0x1f44d};
+    ${0xdc4d};
+  `
+  );
+
+  thePlugin(
+    "shouldn’t crash on toString() calls or accesses",
+    `
+    "foo".toString();
+    ["foo", "bar"].toString();
+    ({}).toString();
+    "foo".toString;
+    ["foo", "bar"].toString;
+    ({}).toString;
+  `
+  );
+
+  thePlugin(
+    "should bail for spread element in array",
+    `
+      function foo() {
+        return [...iter].length;
+      }
+      function bar() {
+        return [...iter][0];
+      }
+    `
+  );
 });

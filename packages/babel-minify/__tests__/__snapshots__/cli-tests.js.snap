@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`babel-minify CLI input dir + outdir 1`] = `"let foo=10;"`;
+
+exports[`babel-minify CLI input file + outDir 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;
+
+exports[`babel-minify CLI input file + outFile 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;
+
+exports[`babel-minify CLI input file + stdout 1`] = `
+Object {
+  "stderr": "",
+  "stdout": "function foo(){const a=x(1),b=y(2);return z(a,b)}",
+}
+`;
+
+exports[`babel-minify CLI should throw on all invalid options 1`] = `
+Object {
+  "code": 1,
+  "stderr": "Error: Invalid Options passed: foo,bar
+",
+}
+`;
+
+exports[`babel-minify CLI stdin + outFile 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;
+
+exports[`babel-minify CLI stdin + stdout 1`] = `
+Object {
+  "stderr": "",
+  "stdout": "function a(){const a=x(1),b=y(2);return z(a,b)}",
+}
+`;

@@ -4,7 +4,7 @@ const path = require("path");
 const babel = require("babel-core");
 const chalk = require("chalk");
 const glob = require("glob");
-const babiliPreset = require("../packages/babel-preset-babili");
+const minifyPreset = require("../packages/babel-preset-minify");
 const breakMeTransform = require("./break");
 
 const SMOKE_ASSETS_DIR = path.join(__dirname, "../smoke/assets");
@@ -121,7 +121,7 @@ class SmokeTest {
   minify(contents) {
     return babel.transform(contents, {
       minified: true,
-      presets: [[babiliPreset, this.options.babiliOptions]]
+      presets: [[minifyPreset, this.options.minifyOptions]]
     });
   }
 

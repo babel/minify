@@ -18,7 +18,7 @@ const TESTS = [
     dir: "lodash",
     files: "lodash.js",
     test: "npm run test:main",
-    babiliOptions: {
+    minifyOptions: {
       keepFnName: true
     }
   }
@@ -112,7 +112,7 @@ run();
 //     files: "dist/immutable.js",
 //     build: "npm run build:dist",
 //     test: "npm run testonly",
-//     babiliOptions: {
+//     minifyOptions: {
 //       keepFnName: true,
 //       unsafe: {
 //         typeConstructors: false

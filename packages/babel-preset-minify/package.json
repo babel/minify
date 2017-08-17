@@ -1,0 +1,41 @@
+{
+  "name": "babel-preset-minify",
+  "version": "0.2.0",
+  "description": "",
+  "keywords": [
+    "babel-minify",
+    "babel-preset",
+    "minify"
+  ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "amasad",
+  "main": "lib/index.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-preset-minify",
+  "dependencies": {
+    "babel-plugin-minify-builtins": "^0.2.0",
+    "babel-plugin-minify-constant-folding": "^0.2.0",
+    "babel-plugin-minify-dead-code-elimination": "^0.2.0",
+    "babel-plugin-minify-flip-comparisons": "^0.2.0",
+    "babel-plugin-minify-guarded-expressions": "^0.2.0",
+    "babel-plugin-minify-infinity": "^0.2.0",
+    "babel-plugin-minify-mangle-names": "^0.2.0",
+    "babel-plugin-minify-numeric-literals": "^0.2.0",
+    "babel-plugin-minify-replace": "^0.2.0",
+    "babel-plugin-minify-simplify": "^0.2.0",
+    "babel-plugin-minify-type-constructors": "^0.2.0",
+    "babel-plugin-transform-inline-consecutive-adds": "^0.2.0",
+    "babel-plugin-transform-member-expression-literals": "^6.8.5",
+    "babel-plugin-transform-merge-sibling-variables": "^6.8.6",
+    "babel-plugin-transform-minify-booleans": "^6.8.3",
+    "babel-plugin-transform-property-literals": "^6.8.5",
+    "babel-plugin-transform-regexp-constructors": "^0.2.0",
+    "babel-plugin-transform-remove-console": "^6.8.5",
+    "babel-plugin-transform-remove-debugger": "^6.8.5",
+    "babel-plugin-transform-remove-undefined": "^0.2.0",
+    "babel-plugin-transform-simplify-comparison-operators": "^6.8.5",
+    "babel-plugin-transform-undefined-to-void": "^6.8.3",
+    "lodash.isplainobject": "^4.0.6"
+  }
+}

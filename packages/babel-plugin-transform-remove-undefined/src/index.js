@@ -1,6 +1,11 @@
 "use strict";
 
-function isPureAndUndefined(rval, scope = { hasBinding: () => false }) {
+const evaluate = require("babel-helper-evaluate-path");
+
+function isPureAndUndefined(
+  rval,
+  { tdz, scope = { hasBinding: () => false } } = {}
+) {
   if (rval.isIdentifier() && rval.node.name === "undefined") {
     // deopt right away if undefined is a local binding
     if (scope.hasBinding(rval.node.name, true /* no globals */)) {
@@ -12,7 +17,7 @@ function isPureAndUndefined(rval, scope = { hasBinding: () => false }) {
   if (!rval.isPure()) {
     return false;
   }
-  const evaluation = rval.evaluate();
+  const evaluation = evaluate(rval, { tdz });
   return evaluation.confident === true && evaluation.value === undefined;
 }
 
@@ -60,6 +65,10 @@ function hasViolation(declarator, scope, start) {
   const scopeParent = declarator.getFunctionParent();
 
   const violation = binding.constantViolations.some(v => {
+    // https://github.com/babel/minify/issues/630
+    if (!v.node) {
+      return false;
+    }
     // return 'true' if we cannot guarantee the violation references
     // the initialized identifier after
     const violationStart = v.node.start;
@@ -92,12 +101,12 @@ module.exports = function() {
   return {
     name: "transform-remove-undefined",
     visitor: {
-      SequenceExpression(path) {
+      SequenceExpression(path, { opts: { tdz } = {} }) {
         const expressions = path.get("expressions");
 
         for (let i = 0; i < expressions.length; i++) {
           const expr = expressions[i];
-          if (!isPureAndUndefined(expr, path.scope)) continue;
+          if (!isPureAndUndefined(expr, { tdz, scope: path.scope })) continue;
 
           // last value
           if (i === expressions.length - 1) {
@@ -110,21 +119,26 @@ module.exports = function() {
         }
       },
 
-      ReturnStatement(path) {
+      ReturnStatement(path, { opts: { tdz } = {} }) {
         if (path.node.argument !== null) {
-          if (isPureAndUndefined(path.get("argument"), path.scope)) {
+          if (
+            isPureAndUndefined(path.get("argument"), {
+              tdz,
+              scope: path.scope
+            })
+          ) {
             path.node.argument = null;
           }
         }
       },
 
-      VariableDeclaration(path) {
+      VariableDeclaration(path, { opts: { tdz } = {} }) {
         switch (path.node.kind) {
           case "const":
             break;
           case "let":
             for (const declarator of path.get("declarations")) {
-              if (isPureAndUndefined(declarator.get("init"))) {
+              if (isPureAndUndefined(declarator.get("init"), { tdz })) {
                 declarator.node.init = null;
               }
             }
