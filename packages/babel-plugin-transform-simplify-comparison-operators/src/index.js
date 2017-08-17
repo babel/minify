@@ -15,9 +15,7 @@ module.exports = function({ types: t }) {
   function undefinedToNull(path) {
     if (isRealUndefined(path) || isPureVoid(path)) {
       path.replaceWith(t.nullLiteral());
-      return true;
     }
-    return false;
   }
 
   return {
