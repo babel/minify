@@ -11,13 +11,20 @@ const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 const lstat = promisify(fs.lstat);
 
+class MinifyFileError extends Error {
+  constructor(message, { file }) {
+    super(message);
+    this.file = file;
+  }
+}
+
 // set defaults
 const readFile = file => readFileAsync(file, { encoding: "utf-8" });
 const writeFile = (file, data) =>
   writeFileAsync(file, data, { encoding: "utf-8" });
 
 function isJsFile(file) {
-  return EXTENSIONS.some(ext => path.basename(file, ext) !== file);
+  return EXTENSIONS.some(ext => path.extname(file) === ext);
 }
 
 async function isDir(p) {
@@ -79,9 +86,9 @@ async function handleFiles(files, outputDir, options) {
   return Promise.all(
     files.map(file => {
       const outputFilename = path.join(outputDir, path.basename(file));
-      return mkdirp(path.dirname(outputFilename)).then(() =>
-        handleFile(file, outputFilename, options)
-      );
+      return mkdirp(path.dirname(outputFilename))
+        .then(() => handleFile(file, outputFilename, options))
+        .catch(e => Promise.reject(new MinifyFileError(e.message, { file })));
     })
   );
 }
@@ -99,9 +106,13 @@ async function handleDir(dir, outputDir, options) {
       const outputFilename = path.join(outputDir, file);
       const inputFilename = path.join(dir, file);
 
-      return mkdirp(path.dirname(outputFilename)).then(() =>
-        handleFile(inputFilename, outputFilename, options)
-      );
+      return mkdirp(path.dirname(outputFilename))
+        .then(() => handleFile(inputFilename, outputFilename, options))
+        .catch(e =>
+          Promise.reject(
+            new MinifyFileError(e.message, { file: inputFilename })
+          )
+        );
     })
   );
 }
