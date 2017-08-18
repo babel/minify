@@ -39,7 +39,7 @@ describe("gulp-babel-minify", () => {
     return new Promise((resolve, reject) => {
       const stream = gulpBabelMinify({
         mangle: {
-          blacklist: {
+          exclude: {
             bar: true
           }
         }

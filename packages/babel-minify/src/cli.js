@@ -43,7 +43,7 @@ const mangleBooleanOpts = [
   "mangle.keepClassName"
 ];
 
-const mangleArrayOpts = ["mangle.blacklist"];
+const mangleArrayOpts = ["mangle.exclude"];
 
 const typeConsOpts = [
   "typeConstructors.array",

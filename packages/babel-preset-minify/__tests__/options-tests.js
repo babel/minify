@@ -64,7 +64,7 @@ describe("preset-options", () => {
   it("should pass options to respective plugin when its an object", () => {
     testOpts({
       mangle: {
-        blacklist: ["foo", "bar"]
+        exclude: ["foo", "bar"]
       }
     });
   });
@@ -78,14 +78,14 @@ describe("preset-options", () => {
       keepFnName: true,
       keepClassName: true,
       mangle: {
-        blacklist: ["foo", "bar"]
+        exclude: ["foo", "bar"]
       }
     });
     testOpts({
       keepFnName: true,
       keepClassName: true,
       mangle: {
-        blacklist: ["baz"],
+        exclude: ["baz"],
         keepFnName: false,
         keepClassName: false
       }
