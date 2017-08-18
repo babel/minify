@@ -30,7 +30,7 @@ or pass in options -
 {
   "presets": [["minify", {
     "mangle": {
-      "blacklist": ["MyCustomError"]
+      "exclude": ["MyCustomError"]
     },
     "unsafe": {
       "typeConstructors": false
@@ -117,7 +117,7 @@ tdz                 | Passed to [builtIns][builtIns], [evaluate][evaluate], [dea
 {
   "presets": [["minify", {
     "mangle": {
-      "blacklist": ["ParserError", "NetworkError"]
+      "exclude": ["ParserError", "NetworkError"]
     }
   }]]
 }

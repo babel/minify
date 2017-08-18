@@ -396,7 +396,7 @@ describe("mangle-names", () => {
         [
           mangler,
           {
-            blacklist: { foo: false, bar: true },
+            exclude: { foo: false, bar: true },
             topLevel: true
           }
         ]
