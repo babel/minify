@@ -1,0 +1,20 @@
+{
+  "name": "babel-minify-standalone",
+  "version": "0.2.0",
+  "description": "✂️ An ES6+ aware minifier based on the Babel toolchain (beta)",
+  "keywords": [
+    "babel-minify",
+    "babel-preset",
+    "minify",
+    "babel-minify-standalone"
+  ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "boopathi",
+  "main": "lib/babel-preset-minify.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-minify-standalone",
+  "dependencies": {
+    "babel-preset-minify": "^0.2.0"
+  }
+}

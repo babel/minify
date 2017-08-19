@@ -1,10 +1,12 @@
-const through = require("through2");
-const chalk = require("chalk");
-const newer = require("gulp-newer");
-const babel = require("gulp-babel");
-const gutil = require("gulp-util");
-const gulp = require("gulp");
-const path = require("path");
+import through from "through2";
+import chalk from "chalk";
+import newer from "gulp-newer";
+import babel from "gulp-babel";
+import gutil from "gulp-util";
+import gulp from "gulp";
+import path from "path";
+import webpack from "webpack";
+import webpackConfig from "./utils/webpack.config";
 
 const scripts = "./packages/*/src/**/*.js";
 const dest = "packages";
@@ -43,5 +45,24 @@ export function build() {
 export const watch = gulp.series(build, () => {
   gulp.watch(scripts, { debounceDelay: 200 }, build).on("error", () => {});
 });
+
+export function bundle(done) {
+  webpack(webpackConfig).run((err, stats) => {
+    if (err) {
+      gutil.log("Error", err);
+      done(err);
+    } else {
+      gutil.log(
+        "Webpack:\n",
+        stats.toString({
+          modules: false,
+          assetsSort: "name",
+          colors: true
+        })
+      );
+      done();
+    }
+  });
+}
 
 export default build;
