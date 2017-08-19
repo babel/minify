@@ -30,8 +30,20 @@ npm install babel-plugin-transform-inline-environment-variables
 **.babelrc**
 
 ```json
+// without options
 {
   "plugins": ["transform-inline-environment-variables"]
+}
+
+// with options
+{
+  "plugins": [
+    ["transform-inline-environment-variables", {
+      "include": [
+        "NODE_ENV"
+      ]
+    }]
+  ]
 }
 ```
 
@@ -48,3 +60,8 @@ require("babel-core").transform("code", {
   plugins: ["transform-inline-environment-variables"]
 });
 ```
+
+## Options
+
++ `include` - array of environment variables to include
++ `exclude` - array of environment variables to exclude
