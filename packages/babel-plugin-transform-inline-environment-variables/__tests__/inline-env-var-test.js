@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const plugin = require("../src/index")
+const plugin = require("../src/index");
 const thePlugin = require("../../../utils/test-transform")(plugin);
 
 describe("inline-env-plugin", () => {
