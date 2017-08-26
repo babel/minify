@@ -4,3 +4,5 @@ coverage
 .test_gen_*
 lib/
 *.log
+packages/babel-minify-standalone/babel-minify\.min\.js
+packages/babel-minify-standalone/babel-minify\.js
