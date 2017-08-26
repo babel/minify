@@ -1,0 +1,58 @@
+{
+  "name": "babel-minify-standalone",
+  "version": "0.2.0",
+  "description": "Standalone build of Babili (babel-minify) for use in non-Node.js environments",
+  "main": "babili.js",
+  "files": [
+    "babili.js",
+    "babili.min.js",
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Daniel15/babel-standalone.git"
+  },
+  "keywords": [
+    "babel-preset",
+    "babel-standalone",
+    "babel",
+    "6to5",
+    "minify",
+    "uglify"
+  ],
+  "author": "Daniel Lo Nigro <daniel@dan.cx> (http://dan.cx/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Daniel15/babel-standalone/issues"
+  },
+  "homepage": "https://dl.vc/babili-standalone",
+  "devDependencies": {
+    "babel-core": "^7.0.0-alpha.19",
+    "babel-plugin-minify-builtins": "0.2.0",
+    "babel-plugin-minify-constant-folding": "0.2.0",
+    "babel-plugin-minify-dead-code-elimination": "0.2.0",
+    "babel-plugin-minify-flip-comparisons": "0.2.0",
+    "babel-plugin-minify-guarded-expressions": "0.2.0",
+    "babel-plugin-minify-infinity": "0.2.0",
+    "babel-plugin-minify-mangle-names": "0.2.0",
+    "babel-plugin-minify-numeric-literals": "0.2.0",
+    "babel-plugin-minify-replace": "0.2.0",
+    "babel-plugin-minify-simplify": "0.2.0",
+    "babel-plugin-minify-type-constructors": "0.2.0",
+    "babel-plugin-transform-inline-consecutive-adds": "0.2.0",
+    "babel-plugin-transform-inline-environment-variables": "0.2.0",
+    "babel-plugin-transform-member-expression-literals": "6.8.5",
+    "babel-plugin-transform-merge-sibling-variables": "6.8.6",
+    "babel-plugin-transform-minify-booleans": "6.8.3",
+    "babel-plugin-transform-node-env-inline": "0.2.0",
+    "babel-plugin-transform-property-literals": "6.8.5",
+    "babel-plugin-transform-regexp-constructors": "0.2.0",
+    "babel-plugin-transform-remove-console": "6.8.5",
+    "babel-plugin-transform-remove-debugger": "6.8.5",
+    "babel-plugin-transform-remove-undefined": "0.2.0",
+    "babel-plugin-transform-simplify-comparison-operators": "6.8.5",
+    "babel-plugin-transform-undefined-to-void": "6.8.3",
+    "babel-preset-minify": "0.2.0",
+    "babel-standalone": "7.0.0-alpha.19"
+  }
+}

@@ -11,7 +11,7 @@ node_js:
 - '4'
 
 before_script:
-- yarn run bootstrap && yarn run build
+- yarn run bootstrap && yarn run build && yarn run build-standalone
 
 script:
 - if [ -n "${LINT-}" ]; then yarn run lint ; fi
