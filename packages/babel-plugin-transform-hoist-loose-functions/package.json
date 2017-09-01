@@ -1,0 +1,14 @@
+{
+  "name": "babel-plugin-transform-hoist-loose-functions",
+  "version": "0.2.0",
+  "description": "This plugin hoists function declarations in loose mode to the beginning of their enclosing function scope",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "homepage": "https://github.com/babel/minify#readme",
+  "bugs": "https://github.com/babel/minify/issues",
+  "license": "MIT",
+  "author": "rossipedia",
+  "main": "lib/index.js",
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-transform-hoist-loose-functions"
+}

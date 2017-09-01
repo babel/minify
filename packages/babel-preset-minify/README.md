@@ -76,6 +76,7 @@ deadcode            | [minify-dead-code-elimination][deadcode]                  
 evaluate            | [minify-constant-folding][evaluate]                            | true
 flipComparisons     | [minify-flip-comparisons][flipComparisons]                     | true
 guards              | [minify-guarded-expressions][guards]                           | true
+hoistFunctions      | [transform-hoist-loose-functions][hoistFunctions]              | false
 infinity            | [minify-infinity][infinity]                                    | true
 mangle              | [minify-mangle-names][mangle]                                  | true
 memberExpressions   | [transform-member-expression-literals][memberExpressions]      | true
@@ -149,6 +150,7 @@ tdz                 | Passed to [builtIns][builtIns], [evaluate][evaluate], [dea
 [evaluate]: ../../packages/babel-plugin-minify-constant-folding
 [flipComparisons]: ../../packages/babel-plugin-minify-flip-comparisons
 [guards]: ../../packages/babel-plugin-minify-guarded-expressions
+[hoistFunctions]: ../../packages/babel-plugin-transform-hoist-loose-functions
 [infinity]: ../../packages/babel-plugin-minify-infinity
 [mangle]: ../../packages/babel-plugin-minify-mangle-names
 [memberExpressions]: ../../packages/babel-plugin-transform-member-expression-literals
