@@ -25,6 +25,7 @@
     "babel-plugin-minify-replace": "^0.2.0",
     "babel-plugin-minify-simplify": "^0.2.0",
     "babel-plugin-minify-type-constructors": "^0.2.0",
+    "babel-plugin-transform-hoist-loose-functions": "^0.2.0",
     "babel-plugin-transform-inline-consecutive-adds": "^0.2.0",
     "babel-plugin-transform-member-expression-literals": "^6.8.5",
     "babel-plugin-transform-merge-sibling-variables": "^6.8.6",

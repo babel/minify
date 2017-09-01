@@ -14,6 +14,7 @@ const PLUGINS = [
   ["evaluate",            require("babel-plugin-minify-constant-folding"),                 true],
   ["flipComparisons",     require("babel-plugin-minify-flip-comparisons"),                 true],
   ["guards",              require("babel-plugin-minify-guarded-expressions"),              true],
+  ["hoistFunctions",      require("babel-plugin-transform-hoist-loose-functions"),         false],
   ["infinity",            require("babel-plugin-minify-infinity"),                         true],
   ["mangle",              require("babel-plugin-minify-mangle-names"),                     true],
   ["memberExpressions",   require("babel-plugin-transform-member-expression-literals"),    true],
