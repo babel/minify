@@ -406,6 +406,28 @@ describe("dce-plugin", () => {
   );
 
   thePlugin(
+    "should not inline vars modified in different var statements - issue #685",
+    `
+    function f() {
+      var a = 1;
+      var b = a;
+      var a = 2;
+      console.log(a, b);
+    }
+    f();
+  `,
+    `
+    function f() {
+      var a = 1;
+      var b = a;
+      var a = 2;
+      console.log(a, b);
+    }
+    f();
+  `
+  );
+
+  thePlugin(
     "should remove redundant returns",
     `
     function foo() {
