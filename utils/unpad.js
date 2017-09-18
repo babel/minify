@@ -6,7 +6,10 @@ function unpad(str) {
     return str;
   }
   const spaces = m[0].length;
-  return lines.map(line => line.slice(spaces)).join("\n").trim();
+  return lines
+    .map(line => line.slice(spaces))
+    .join("\n")
+    .trim();
 }
 
 module.exports = unpad;

@@ -21,7 +21,8 @@ module.exports = function() {
             0,
             exponential.lastIndexOf("e") + 1
           ) +
-            (lastChar - subLength))
+            (lastChar - subLength)
+          )
             .replace(".", "")
             .replace(/e0/, "");
         }

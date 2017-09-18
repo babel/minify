@@ -23,6 +23,6 @@
     "fs-readdir-recursive": "^1.0.0",
     "mkdirp": "^0.5.1",
     "util.promisify": "^1.0.0",
-    "yargs-parser": "^5.0.0"
+    "yargs-parser": "^7.0.0"
   }
 }

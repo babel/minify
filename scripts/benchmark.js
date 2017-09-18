@@ -277,10 +277,12 @@ class AssetsManager {
     return new Promise((resolve, reject) => {
       const file = fs.createWriteStream(dest);
 
-      request(url).pipe(file).on("error", err => {
-        fs.unlink(dest);
-        reject(err);
-      });
+      request(url)
+        .pipe(file)
+        .on("error", err => {
+          fs.unlink(dest);
+          reject(err);
+        });
 
       file.on("finish", () => file.close(resolve));
     }).then(() => {
