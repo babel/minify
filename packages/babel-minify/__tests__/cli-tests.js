@@ -1,4 +1,5 @@
 jest.autoMockOff();
+jest.setTimeout(25000);
 
 const { spawn } = require("child_process");
 const path = require("path");
