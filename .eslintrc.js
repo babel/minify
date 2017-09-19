@@ -13,7 +13,7 @@ module.exports = {
   },
   plugins: ["prettier"],
   rules: {
-    "linebreak-style": process.platform === "win32" ? OFF : ["error", "unix"],
+    "linebreak-style": ["error", "unix"],
     "no-cond-assign": OFF,
     "no-case-declarations": OFF,
     "prettier/prettier": ["error", { printWidth: 80 }]
