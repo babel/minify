@@ -14,7 +14,7 @@ const unlink = promisify(rimraf);
 
 function runCli(args = [], stdin) {
   return new Promise((resolve, reject) => {
-    const child = spawn(minifyCli, args, {
+    const child = spawn("node", [minifyCli, ...args], {
       stdio: [stdin ? "pipe" : "inherit", "pipe", "pipe"],
       shell: true
     });
