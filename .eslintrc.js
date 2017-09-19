@@ -11,9 +11,11 @@ module.exports = {
     es6: true,
     node: true
   },
+  plugins: ["prettier"],
   rules: {
     "linebreak-style": ["error", "unix"],
     "no-cond-assign": OFF,
-    "no-case-declarations": OFF
+    "no-case-declarations": OFF,
+    "prettier/prettier": ["error", { printWidth: 80 }]
   }
 };
