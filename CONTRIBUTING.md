@@ -1,5 +1,10 @@
 ## Contributing
 
+### Requirements
+
++ node >= 4
++ [yarn](https://yarnpkg.com) >= 1.0.0 (with yarn workspaces support)
+
 ### Setup
 ```sh
 git clone https://github.com/babel/minify
@@ -30,38 +35,16 @@ yarn watch
 
 This project uses [prettier](https://github.com/prettier/prettier) for formatting code and [eslint](https://github.com/eslint/eslint) for other linting.
 
-To check both:
-
 ```sh
 yarn lint
 ```
 
-You can also run them each individually:
-
- ```sh
-# prettier
-yarn format-check
-
-# eslint
-yarn eslint
-```
-
 ##### Lint Fix
 
-To fix formatting and auto-fixable eslint errors,
+To fix formatting and other auto-fixable eslint errors,
 
 ```sh
 yarn fix
-```
-
-You can also run them each individually:
-
-```sh
-# prettier
-yarn format
-
-# eslint
-npm run eslint-fix
 ```
 
 #### Test
