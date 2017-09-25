@@ -246,4 +246,12 @@ describe("constant-folding-plugin", () => {
       }
     `
   );
+
+  thePlugin(
+    "should not fold array literals with spread element",
+    `
+      [...bar].reverse();
+      [...foo].join("a");
+    `
+  );
 });

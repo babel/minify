@@ -20,18 +20,17 @@ function getName(member) {
 
 function swap(path, member, handlers, ...args) {
   const key = getName(member.node);
-  if (key === undefined) return;
-  let handler = handlers[key];
-  if (
-    typeof handler !== "function" ||
-    !Object.hasOwnProperty.call(handlers, key)
-  ) {
-    if (typeof handlers[FALLBACK_HANDLER] === "function") {
-      handler = handlers[FALLBACK_HANDLER].bind(member.get("object"), key);
-    } else {
-      return false;
-    }
+  if (key === void 0) return false;
+
+  let handler;
+  if (hop(handlers, key) && typeof handlers[key] === "function") {
+    handler = handlers[key];
+  } else if (typeof handlers[FALLBACK_HANDLER] === "function") {
+    handler = handlers[FALLBACK_HANDLER].bind(member.get("object"), key);
+  } else {
+    return false;
   }
+
   const replacement = handler.apply(member.get("object"), args);
   if (replacement) {
     path.replaceWith(replacement);
@@ -172,6 +171,13 @@ module.exports = babel => {
         if (t.isMemberExpression(member)) {
           const helpers = replacements[member.node.object.type];
           if (!helpers || !helpers.calls) return;
+          // find if the input can be constant folded
+          if (
+            typeof helpers.canReplace === "function" &&
+            !helpers.canReplace.call(member.get("object"))
+          ) {
+            return;
+          }
           swap(path, member, helpers.calls, ...node.arguments);
         }
       },
@@ -184,3 +190,7 @@ module.exports = babel => {
     }
   };
 };
+
+function hop(o, key) {
+  return Object.prototype.hasOwnProperty.call(o, key);
+}
