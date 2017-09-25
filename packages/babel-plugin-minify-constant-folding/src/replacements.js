@@ -19,17 +19,24 @@ module.exports = ({ types: t }) => {
     };
   }
 
+  function hasSpread(node) {
+    return node.elements.some(el => t.isSpreadElement(el));
+  }
+
   return {
     ArrayExpression: {
+      canReplace() {
+        return !hasSpread(this.node);
+      },
       members: {
         length() {
-          if (this.node.elements.some(el => t.isSpreadElement(el))) {
+          if (hasSpread(this.node)) {
             return;
           }
           return t.numericLiteral(this.node.elements.length);
         },
         [FALLBACK_HANDLER](i) {
-          if (this.node.elements.some(el => t.isSpreadElement(el))) {
+          if (hasSpread(this.node)) {
             return;
           }
           if (typeof i === "number" || i.match(/^\d+$/)) {
@@ -51,7 +58,7 @@ module.exports = ({ types: t }) => {
               return evaled.value;
             })
             .join(sep.value);
-          return bad ? undefined : t.stringLiteral(str);
+          return bad ? void 0 : t.stringLiteral(str);
         },
         push(...args) {
           return t.numericLiteral(this.node.elements.length + args.length);
