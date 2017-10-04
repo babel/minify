@@ -2503,4 +2503,17 @@ describe("dce-plugin", () => {
       plugins: [[deadcode, { tdz: true }]]
     }
   );
+
+  thePlugin(
+    "should bail for binary `in` expressions - fix #691",
+    `
+      function foo(props) {
+        let bar = "width" in props;
+        delete props.width;
+        if (bar) {
+          console.log("foo");
+        }
+      }
+    `
+  );
 });
