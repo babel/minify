@@ -390,8 +390,7 @@ module.exports = ({ types: t, traverse }) => {
               const isObj = n =>
                 t.isFunction(n) ||
                 t.isObjectExpression(n) ||
-                t.isArrayExpression(n) ||
-                t.isBinaryExpression(n, { operator: "in" });
+                t.isArrayExpression(n);
 
               const isReplacementObj =
                 isObj(replacement) || some(replacement, isObj);
