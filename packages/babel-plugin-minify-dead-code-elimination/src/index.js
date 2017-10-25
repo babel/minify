@@ -948,7 +948,11 @@ module.exports = ({ types: t, traverse }) => {
 
     if (path.isVariableDeclaration({ kind: "var" })) {
       for (const decl of path.node.declarations) {
-        declarators.push(t.variableDeclarator(decl.id));
+        const bindingIds = Object.keys(t.getBindingIdentifiers(decl.id));
+
+        declarators.push(
+          ...bindingIds.map(name => t.variableDeclarator(t.identifier(name)))
+        );
       }
     } else {
       path.traverse({
@@ -957,7 +961,12 @@ module.exports = ({ types: t, traverse }) => {
           if (!isSameFunctionScope(varPath, path)) return;
 
           for (const decl of varPath.node.declarations) {
-            declarators.push(t.variableDeclarator(decl.id));
+            const bindingIds = Object.keys(t.getBindingIdentifiers(decl.id));
+            declarators.push(
+              ...bindingIds.map(name =>
+                t.variableDeclarator(t.identifier(name))
+              )
+            );
           }
         }
       });

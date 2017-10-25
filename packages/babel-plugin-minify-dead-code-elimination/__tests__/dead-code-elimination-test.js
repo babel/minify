@@ -2516,4 +2516,17 @@ describe("dce-plugin", () => {
       }
     `
   );
+
+  thePlugin(
+    "extractVars should extract only identifiers & ignore ObjectPattern/ArrayPattern",
+    `
+      if (false) {
+        var {x, y} = foo();
+        var [a, b] = bar();
+      }
+    `,
+    `
+      var x, y, a, b;
+    `
+  );
 });
