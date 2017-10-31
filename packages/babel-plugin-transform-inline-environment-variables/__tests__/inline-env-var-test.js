@@ -24,6 +24,16 @@ describe("inline-env-plugin", () => {
   );
 
   thePlugin(
+    "should inline environment vars in computed forms",
+    `
+      process.env["NODE_ENV"]
+    `,
+    `
+      "development";
+    `
+  );
+
+  thePlugin(
     "should only include whitelisted variables if include option is specified",
     "process.env.NODE_ENV",
     "process.env.NODE_ENV;",
