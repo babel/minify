@@ -90,10 +90,15 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            init.node.declarations = node.declarations.concat(
+            const declarations = node.declarations.concat(
               init.node.declarations
             );
+
+            // temporary workaround to forces babel recalculate scope,
+            // references and binding until babel/babel#4818 resolved
             path.remove();
+            init.remove();
+            next.node.init = t.variableDeclaration("var", declarations);
           }
         ]
       }
