@@ -1,6 +1,6 @@
 const babel = require("babel-core");
 
-const unpad = require("./unpad");
+const unpad = require("unpad");
 
 function _transform(source, options) {
   return babel.transform(unpad(source), options).code.trim();

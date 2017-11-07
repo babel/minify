@@ -35,7 +35,7 @@ jest.autoMockOff();
 const comparisonPlugin = require("../../babel-plugin-transform-simplify-comparison-operators/src");
 const plugin = require("../src/index");
 
-const thePlugin = require("../../../utils/test-transform")(plugin);
+const thePlugin = require("test-transform")(plugin);
 
 describe("simplify-plugin", () => {
   thePlugin(

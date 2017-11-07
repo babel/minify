@@ -2,8 +2,8 @@ jest.autoMockOff();
 
 const babel = require("babel-core");
 const plugin = require("../src/index");
-const unpad = require("../../../utils/unpad");
-const thePlugin = require("../../../utils/test-transform")(plugin);
+const unpad = require("unpad");
+const thePlugin = require("test-transform")(plugin);
 
 describe("type-constructors-plugin", () => {
   thePlugin(

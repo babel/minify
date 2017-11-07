@@ -1,8 +1,6 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform")(
-  require("../src/index")
-);
+const thePlugin = require("test-transform")(require("../src/index"));
 
 describe("transform-merge-sibling-variables-plugin", () => {
   thePlugin(
