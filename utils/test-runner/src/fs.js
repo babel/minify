@@ -1,5 +1,4 @@
 const fs = require("fs");
-const path = require("path");
 const promisify = require("util.promisify");
 
 async function _readFile(p, enc) {

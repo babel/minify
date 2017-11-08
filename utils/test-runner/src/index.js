@@ -1,17 +1,17 @@
-const unpad = require("unpad");
+/* eslint-disable no-console */
+
 const fs = require("./fs");
 const path = require("path");
 const babel = require("babel-core");
 const parseArgs = require("./argParser");
 
-function testRunner(dir, pkg) {
+function testRunner(dir) {
   const pkgDir = path.join(dir, "../");
   const packageJson = JSON.parse(
     fs.readFileSync(path.join(pkgDir, "package.json"))
   );
   const pkgName = packageJson.name;
 
-  const testFile = path.join(pkgDir, "__tests__/index.js");
   const fixturesDir = path.join(pkgDir, "__tests__/fixtures");
 
   const fixtures = fs
