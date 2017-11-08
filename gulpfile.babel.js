@@ -26,13 +26,13 @@ export function buildUtils() {
 
 export default build;
 
-function getBuildTask({ scripts, dest, srcEx, libFragment }) {
+function getBuildTask({ scripts, dest }) {
   return gulp
     .src(scripts)
     .pipe(
       through.obj((file, enc, callback) => {
         file._path = file.path;
-        file.path = file.path.replace(srcEx, libFragment);
+        file.path = path.resolve(file.base, swapSrcWithLib(file.relative));
         callback(null, file);
       })
     )
@@ -51,15 +51,11 @@ function getBuildConfig(dir) {
   const scripts = `./${dir}/*/src/**/*.js`;
   const dest = dir;
 
-  let srcEx, libFragment;
+  return { scripts, dest };
+}
 
-  if (path.win32 === path) {
-    srcEx = new RegExp(`(${dir}\\[^\\]+)\\src\\ `.trim());
-    libFragment = "$1\\lib\\";
-  } else {
-    srcEx = new RegExp(`(${dir}/[^/]+)/src/`);
-    libFragment = "$1/lib/";
-  }
-
-  return { scripts, dest, srcEx, libFragment };
+function swapSrcWithLib(srcPath) {
+  const parts = srcPath.split(path.sep);
+  parts[1] = "lib";
+  return parts.join(path.sep);
 }
