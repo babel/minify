@@ -35,8 +35,10 @@ function testRunner(dir) {
           options = JSON.parse(await fs.readFile(optionsFile));
         }
 
+        const pluginPath = path.join(pkgDir, "src/index.js");
+
         const actualTransformed = babel.transform(actual, {
-          plugins: [[pkgDir, options]]
+          plugins: [[pluginPath, options]]
         }).code;
 
         if (!await fs.isFile(expectedFile)) {
