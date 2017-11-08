@@ -2,5 +2,5 @@
   "name": "unpad",
   "version": "0.0.0",
   "private": true,
-  "main": "unpad.js"
+  "main": "lib/unpad.js"
 }

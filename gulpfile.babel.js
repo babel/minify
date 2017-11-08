@@ -6,20 +6,27 @@ const gutil = require("gulp-util");
 const gulp = require("gulp");
 const path = require("path");
 
-const scripts = "./packages/*/src/**/*.js";
-const dest = "packages";
+export const build = gulp.series(buildPackages, buildUtils);
 
-let srcEx, libFragment;
+export const watch = gulp.series(build, () => {
+  const scripts = [
+    getBuildConfig("packages").scripts,
+    getBuildConfig("utils").scripts
+  ];
+  gulp.watch(scripts, { debounceDelay: 200 }, build).on("error", () => {});
+});
 
-if (path.win32 === path) {
-  srcEx = /(packages\\[^\\]+)\\src\\/;
-  libFragment = "$1\\lib\\";
-} else {
-  srcEx = new RegExp("(packages/[^/]+)/src/");
-  libFragment = "$1/lib/";
+export function buildPackages() {
+  return getBuildTask(getBuildConfig("packages"));
 }
 
-export function build() {
+export function buildUtils() {
+  return getBuildTask(getBuildConfig("utils"));
+}
+
+export default build;
+
+function getBuildTask({ scripts, dest, srcEx, libFragment }) {
   return gulp
     .src(scripts)
     .pipe(
@@ -40,8 +47,19 @@ export function build() {
     .pipe(gulp.dest(dest));
 }
 
-export const watch = gulp.series(build, () => {
-  gulp.watch(scripts, { debounceDelay: 200 }, build).on("error", () => {});
-});
+function getBuildConfig(dir) {
+  const scripts = `./${dir}/*/src/**/*.js`;
+  const dest = dir;
 
-export default build;
+  let srcEx, libFragment;
+
+  if (path.win32 === path) {
+    srcEx = new RegExp(`(${dir}\\[^\\]+)\\src\\ `.trim());
+    libFragment = "$1\\lib\\";
+  } else {
+    srcEx = new RegExp(`(${dir}/[^/]+)/src/`);
+    libFragment = "$1/lib/";
+  }
+
+  return { scripts, dest, srcEx, libFragment };
+}

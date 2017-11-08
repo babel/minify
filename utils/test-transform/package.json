@@ -2,5 +2,5 @@
   "name": "test-transform",
   "version": "0.0.0",
   "private": true,
-  "main": "test-transform.js"
+  "main": "lib/test-transform.js"
 }

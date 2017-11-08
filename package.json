@@ -61,7 +61,8 @@
       "/fixtures/"
     ],
     "roots": [
-      "packages"
+      "packages",
+      "utils"
     ],
     "coverageDirectory": "./coverage/"
   },
