@@ -1,7 +1,7 @@
 jest.autoMockOff();
 
 const mangler = require("../src/index");
-const thePlugin = require("../../../utils/test-transform")(mangler);
+const thePlugin = require("test-transform")(mangler);
 
 describe("mangle-names", () => {
   thePlugin(

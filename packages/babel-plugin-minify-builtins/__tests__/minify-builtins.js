@@ -1,8 +1,6 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform").snapshot(
-  require("../src/index")
-);
+const thePlugin = require("test-transform").snapshot(require("../src/index"));
 
 describe("minify-builtins", () => {
   thePlugin(

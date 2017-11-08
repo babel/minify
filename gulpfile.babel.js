@@ -6,26 +6,33 @@ const gutil = require("gulp-util");
 const gulp = require("gulp");
 const path = require("path");
 
-const scripts = "./packages/*/src/**/*.js";
-const dest = "packages";
+export const build = gulp.series(buildPackages, buildUtils);
 
-let srcEx, libFragment;
+export const watch = gulp.series(build, () => {
+  const scripts = [
+    getBuildConfig("packages").scripts,
+    getBuildConfig("utils").scripts
+  ];
+  gulp.watch(scripts, { debounceDelay: 200 }, build).on("error", () => {});
+});
 
-if (path.win32 === path) {
-  srcEx = /(packages\\[^\\]+)\\src\\/;
-  libFragment = "$1\\lib\\";
-} else {
-  srcEx = new RegExp("(packages/[^/]+)/src/");
-  libFragment = "$1/lib/";
+export function buildPackages() {
+  return getBuildTask(getBuildConfig("packages"));
 }
 
-export function build() {
+export function buildUtils() {
+  return getBuildTask(getBuildConfig("utils"));
+}
+
+export default build;
+
+function getBuildTask({ scripts, dest }) {
   return gulp
     .src(scripts)
     .pipe(
       through.obj((file, enc, callback) => {
         file._path = file.path;
-        file.path = file.path.replace(srcEx, libFragment);
+        file.path = path.resolve(file.base, swapSrcWithLib(file.relative));
         callback(null, file);
       })
     )
@@ -40,8 +47,15 @@ export function build() {
     .pipe(gulp.dest(dest));
 }
 
-export const watch = gulp.series(build, () => {
-  gulp.watch(scripts, { debounceDelay: 200 }, build).on("error", () => {});
-});
+function getBuildConfig(dir) {
+  const scripts = `./${dir}/*/src/**/*.js`;
+  const dest = dir;
 
-export default build;
+  return { scripts, dest };
+}
+
+function swapSrcWithLib(srcPath) {
+  const parts = srcPath.split(path.sep);
+  parts[1] = "lib";
+  return parts.join(path.sep);
+}

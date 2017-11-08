@@ -4,7 +4,7 @@ const gutil = require("gulp-util");
 const babelCore = require("babel-core");
 const minifyPreset = require("babel-preset-minify");
 
-const unpad = require("../../../utils/unpad");
+const unpad = require("unpad");
 const gulpBabelMinify = require("../src/index");
 
 describe("gulp-babel-minify", () => {

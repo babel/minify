@@ -3,7 +3,7 @@ jest.autoMockOff();
 const es2015 = require("babel-preset-es2015");
 const minifyPreset = require("../src/index");
 
-const thePlugin = require("../../../utils/test-transform")(null, {
+const thePlugin = require("test-transform")(null, {
   plugins: [],
   minified: false,
   presets: [minifyPreset, es2015]

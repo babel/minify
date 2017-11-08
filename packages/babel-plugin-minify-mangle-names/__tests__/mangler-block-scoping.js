@@ -1,7 +1,7 @@
 jest.autoMockOff();
 
 const babel = require("babel-core");
-const unpad = require("../../../utils/unpad");
+const unpad = require("unpad");
 const traverse = require("babel-traverse").default;
 
 describe("mangler with block-scoping", () => {

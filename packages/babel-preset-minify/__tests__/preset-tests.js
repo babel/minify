@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform")(null, {
+const thePlugin = require("test-transform")(null, {
   plugins: [],
   minified: false,
   presets: [require("../src/index")]

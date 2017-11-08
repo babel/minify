@@ -1,10 +1,10 @@
 jest.autoMockOff();
 
 const babel = require("babel-core");
-const unpad = require("../../../utils/unpad");
+const unpad = require("unpad");
 const deadcode = require("../src/index");
 const simplify = require("../../babel-plugin-minify-simplify/src/index");
-const thePlugin = require("../../../utils/test-transform")(deadcode);
+const thePlugin = require("test-transform")(deadcode);
 
 function transformWithSimplify(code) {
   return babel.transform(code, {
