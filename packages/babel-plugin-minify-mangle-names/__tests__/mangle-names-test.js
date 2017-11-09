@@ -5,33 +5,6 @@ const thePlugin = require("test-transform")(mangler);
 
 describe("mangle-names", () => {
   thePlugin(
-    "should not mangle names in the global namespace",
-    `
-    var Foo = 1;
-  `
-  );
-
-  thePlugin(
-    "should mangle names",
-    `
-    function foo() {
-      var xxx = 1;
-      if (xxx) {
-        console.log(xxx);
-      }
-    }
-  `,
-    `
-    function foo() {
-      var a = 1;
-      if (a) {
-        console.log(a);
-      }
-    }
-  `
-  );
-
-  thePlugin(
     "should handle name collisions",
     `
     function foo() {
