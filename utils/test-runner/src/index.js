@@ -25,7 +25,13 @@ function testRunner(dir) {
     for (const fixture of fixtures) {
       const actualFile = path.join(fixturesDir, fixture, "actual.js");
       const expectedFile = path.join(fixturesDir, fixture, "expected.js");
+      const skipFile = path.join(fixturesDir, fixture, "skip");
       const optionsFile = path.join(fixturesDir, fixture, "options.json");
+
+      if (fs.isFileSync(skipFile)) {
+        test.skip(fixture, () => {});
+        continue;
+      }
 
       test(fixture, async () => {
         const actual = await fs.readFile(actualFile);

@@ -30,6 +30,14 @@ async function isFile(p) {
   }
 }
 
+function isFileSync(p) {
+  try {
+    return fs.statSync(p).isFile();
+  } catch (e) {
+    return false;
+  }
+}
+
 async function isDirectory(p) {
   try {
     return (await stat(p)).isDirectory();
@@ -55,6 +63,7 @@ module.exports = {
   writeFile,
   stat,
   isFile,
+  isFileSync,
   isDirectory,
   isDirectorySync,
   readdir
