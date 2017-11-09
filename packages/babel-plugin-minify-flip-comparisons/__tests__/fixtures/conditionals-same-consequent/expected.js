@@ -1,0 +1,1 @@
+null === x ? undefined : x === undefined ? undefined : x ? foo(x) : wat();
