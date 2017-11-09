@@ -44,11 +44,13 @@
     "lerna": "^2.0.0",
     "lerna-changelog": "^0.6.0",
     "markdown-table": "^1.1.1",
+    "minimist": "^1.2.0",
     "prettier": "^1.5.3",
     "request": "^2.81.0",
     "rimraf": "^2.6.1",
     "through2": "^2.0.3",
-    "uglify-js": "^3.0.27"
+    "uglify-js": "^3.0.27",
+    "util.promisify": "^1.0.0"
   },
   "private": true,
   "jest": {
