@@ -1,0 +1,7 @@
+{
+  "exclude": {
+    "foo": false,
+    "bar": true
+  },
+  "topLevel": true
+}
