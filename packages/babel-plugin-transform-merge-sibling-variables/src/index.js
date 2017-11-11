@@ -97,8 +97,7 @@ module.exports = function({ types: t }) {
             // temporary workaround to forces babel recalculate scope,
             // references and binding until babel/babel#4818 resolved
             path.remove();
-            init.remove();
-            next.node.init = t.variableDeclaration("var", declarations);
+            init.replaceWith(t.variableDeclaration("var", declarations));
           }
         ]
       }
