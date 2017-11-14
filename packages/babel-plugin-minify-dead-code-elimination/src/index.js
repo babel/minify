@@ -294,11 +294,15 @@ module.exports = ({ types: t, traverse }) => {
               binding.kind !== "module" &&
               binding.constant
             ) {
+              const refPath = binding.referencePaths[0];
+
+              // JSXIdentifiers can't be replaced with arbitrary expressions.
+              if (refPath.isJSXIdentifier())
+                continue;
+
               let replacement = binding.path.node;
               let replacementPath = binding.path;
               let isReferencedBefore = false;
-
-              const refPath = binding.referencePaths[0];
 
               if (t.isVariableDeclarator(replacement)) {
                 const _prevSiblings = prevSiblings(replacementPath);
