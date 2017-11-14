@@ -200,4 +200,25 @@ describe("dce-plugin", () => {
       plugins: [[deadcode, { tdz: true }]]
     }
   );
+
+  thePlugin(`should not inline into JSXIdentifiers`,
+      `
+    function foo(obj) {
+      var Element = obj || "";
+
+      return <Element />;
+    }
+  `,
+    `
+    function foo(obj) {
+      var Element = obj || "";
+
+      return <Element />;
+    }
+  `,
+    {
+      parserOpts: { plugins:["jsx"] },
+      plugins: [deadcode]
+    }
+  )
 });
