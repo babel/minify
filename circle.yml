@@ -4,7 +4,7 @@ machine:
   node:
     version: "node"
   environment:
-    PATH: $PATH:./node_modules/.bin
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin"
 
 checkout:
   post:
@@ -14,8 +14,10 @@ checkout:
 dependencies:
   override:
     - yarn
+  cache_directories:
+    - ~/.cache/yarn
   post:
-    - yarn run bootstrap && yarn run build
+    - yarn build
 
 test:
   override:

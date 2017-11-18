@@ -24,7 +24,7 @@ module.exports = babel => {
       charset,
       program,
       {
-        blacklist = {},
+        exclude = {},
         keepFnName = false,
         keepClassName = false,
         eval: _eval = false,
@@ -35,7 +35,7 @@ module.exports = babel => {
       this.program = program;
 
       // user passed options
-      this.blacklist = toObject(blacklist);
+      this.exclude = toObject(exclude);
       this.keepFnName = keepFnName;
       this.keepClassName = keepClassName;
       this.topLevel = topLevel;
@@ -59,11 +59,11 @@ module.exports = babel => {
     }
 
     /**
-     * Tells if a variable name is blacklisted
+     * Tells if a variable name is excluded
      * @param {String} name
      */
-    isBlacklist(name) {
-      return hop.call(this.blacklist, name) && this.blacklist[name];
+    isExcluded(name) {
+      return hop.call(this.exclude, name) && this.exclude[name];
     }
 
     /**
@@ -313,8 +313,8 @@ module.exports = babel => {
           //   1. The scope in which it is declared
           //   2. The class's own scope
           (binding.path.isClassDeclaration() && binding.path === scope.path) ||
-          // blacklisted
-          mangler.isBlacklist(oldName) ||
+          // excluded
+          mangler.isExcluded(oldName) ||
           // function names
           (mangler.keepFnName ? isFunction(binding.path) : false) ||
           // class names

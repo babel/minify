@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform")(null, {
+const thePlugin = require("test-transform")(null, {
   plugins: [],
   minified: false,
   presets: [require("../src/index")]
@@ -141,5 +141,16 @@ describe("preset", () => {
       return [a, a];
     })();
   `
+  );
+
+  thePlugin(
+    "should fix unicode",
+    `
+      function foo() {
+        module.exports = {
+          "\uD835\uDCB6": "ascr"
+        };
+      }
+    `
   );
 });

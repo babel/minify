@@ -4,3 +4,4 @@ coverage
 .test_gen_*
 lib/
 *.log
+*~

@@ -1,7 +1,7 @@
 jest.autoMockOff();
 
 const plugin = require("../src/index");
-const thePlugin = require("../../../utils/test-transform")(plugin);
+const thePlugin = require("test-transform")(plugin);
 
 describe("remove-console-plugin", () => {
   thePlugin(

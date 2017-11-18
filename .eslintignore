@@ -1,0 +1,6 @@
+node_modules
+lib/
+scripts/benchmark_cache
+smoke/assets
+coverage
+fixtures

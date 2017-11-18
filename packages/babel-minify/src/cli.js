@@ -43,7 +43,7 @@ const mangleBooleanOpts = [
   "mangle.keepClassName"
 ];
 
-const mangleArrayOpts = ["mangle.blacklist"];
+const mangleArrayOpts = ["mangle.exclude"];
 
 const typeConsOpts = [
   "typeConstructors.array",
@@ -127,6 +127,9 @@ function log(msg, exitCode = 0) {
 }
 
 function error(err) {
+  if (err.file) {
+    process.stderr.write("Error minifying file: " + err.file + "\n");
+  }
   process.stderr.write(err + "\n");
   process.exit(1);
 }

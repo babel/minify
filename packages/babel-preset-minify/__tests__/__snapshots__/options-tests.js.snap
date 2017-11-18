@@ -49,7 +49,7 @@ Object {
     "keepClassName": true,
     "keepFnName": true,
     "mangle": Object {
-      "blacklist": Array [
+      "exclude": Array [
         "foo",
         "bar",
       ],
@@ -75,7 +75,7 @@ Object {
     Array [
       "babel-plugin-minify-mangle-names",
       Object {
-        "blacklist": Array [
+        "exclude": Array [
           "foo",
           "bar",
         ],
@@ -104,7 +104,7 @@ Object {
     "keepClassName": true,
     "keepFnName": true,
     "mangle": Object {
-      "blacklist": Array [
+      "exclude": Array [
         "baz",
       ],
       "keepClassName": false,
@@ -129,7 +129,7 @@ Object {
     Array [
       "babel-plugin-minify-mangle-names",
       Object {
-        "blacklist": Array [
+        "exclude": Array [
           "baz",
         ],
         "keepClassName": false,
@@ -184,7 +184,7 @@ exports[`preset-options should pass options to respective plugin when its an obj
 Object {
   "input": Object {
     "mangle": Object {
-      "blacklist": Array [
+      "exclude": Array [
         "foo",
         "bar",
       ],
@@ -202,7 +202,7 @@ Object {
     Array [
       "babel-plugin-minify-mangle-names",
       Object {
-        "blacklist": Array [
+        "exclude": Array [
           "foo",
           "bar",
         ],

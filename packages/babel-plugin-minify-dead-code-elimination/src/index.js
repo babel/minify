@@ -391,10 +391,40 @@ module.exports = ({ types: t, traverse }) => {
                 t.isFunction(n) ||
                 t.isObjectExpression(n) ||
                 t.isArrayExpression(n);
+
               const isReplacementObj =
                 isObj(replacement) || some(replacement, isObj);
 
               if (!sharesRoot || (isReplacementObj && mayLoop)) {
+                continue;
+              }
+
+              // check if it's safe to replace
+              // To solve https://github.com/babel/minify/issues/691
+              // Here we bail for property checks using the "in" operator
+              // This is because - `in` is a side-effect-free operation but the property
+              // could be deleted between the replacementPath and referencePath
+              // It is expensive to compute the delete operation and we bail for
+              // all the binary "in" operations
+              let inExpression = replacementPath.isBinaryExpression({
+                operator: "in"
+              });
+
+              if (!inExpression) {
+                replacementPath.traverse({
+                  Function(path) {
+                    path.skip();
+                  },
+                  BinaryExpression(path) {
+                    if (path.node.operator === "in") {
+                      inExpression = true;
+                      path.stop();
+                    }
+                  }
+                });
+              }
+
+              if (inExpression) {
                 continue;
               }
 
@@ -918,7 +948,11 @@ module.exports = ({ types: t, traverse }) => {
 
     if (path.isVariableDeclaration({ kind: "var" })) {
       for (const decl of path.node.declarations) {
-        declarators.push(t.variableDeclarator(decl.id));
+        const bindingIds = Object.keys(t.getBindingIdentifiers(decl.id));
+
+        declarators.push(
+          ...bindingIds.map(name => t.variableDeclarator(t.identifier(name)))
+        );
       }
     } else {
       path.traverse({
@@ -927,7 +961,12 @@ module.exports = ({ types: t, traverse }) => {
           if (!isSameFunctionScope(varPath, path)) return;
 
           for (const decl of varPath.node.declarations) {
-            declarators.push(t.variableDeclarator(decl.id));
+            const bindingIds = Object.keys(t.getBindingIdentifiers(decl.id));
+            declarators.push(
+              ...bindingIds.map(name =>
+                t.variableDeclarator(t.identifier(name))
+              )
+            );
           }
         }
       });

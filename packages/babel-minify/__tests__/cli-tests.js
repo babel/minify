@@ -1,4 +1,5 @@
 jest.autoMockOff();
+jest.setTimeout(25000);
 
 const { spawn } = require("child_process");
 const path = require("path");
@@ -13,7 +14,7 @@ const unlink = promisify(rimraf);
 
 function runCli(args = [], stdin) {
   return new Promise((resolve, reject) => {
-    const child = spawn(minifyCli, args, {
+    const child = spawn("node", [minifyCli, ...args], {
       stdio: [stdin ? "pipe" : "inherit", "pipe", "pipe"],
       shell: true
     });
