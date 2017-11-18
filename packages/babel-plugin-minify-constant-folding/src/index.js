@@ -160,6 +160,15 @@ module.exports = babel => {
             }
           }
 
+          // this will convert object to object but
+          // t.valueToNode has other effects where property name
+          // is not treated for the respective environment.
+          // So we bail here for objects and let other plugins
+          // take care of converting String literal to Identifier
+          if (typeof res.value === "object") {
+            return;
+          }
+
           const node = t.valueToNode(res.value);
           node[seen] = true;
           path.replaceWith(node);
