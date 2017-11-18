@@ -1,23 +1,6 @@
 "use strict";
 
-module.exports = function({ types: t }) {
-  function isPureVoid(path) {
-    return path.isUnaryExpression({ operator: "void" }) && path.isPure();
-  }
-
-  function isRealUndefined(path) {
-    return (
-      path.isIdentifier({ name: "undefined" }) &&
-      !path.scope.getBinding("undefined")
-    );
-  }
-
-  function undefinedToNull(path) {
-    if (isRealUndefined(path) || isPureVoid(path)) {
-      path.replaceWith(t.nullLiteral());
-    }
-  }
-
+module.exports = function() {
   return {
     name: "transform-simplify-comparison-operators",
     visitor: {
@@ -26,11 +9,6 @@ module.exports = function({ types: t }) {
       BinaryExpression(path) {
         const { node } = path;
         const op = node.operator;
-
-        if (["!=", "=="].indexOf(node.operator) !== -1) {
-          undefinedToNull(path.get("left"));
-          undefinedToNull(path.get("right"));
-        }
 
         if (op !== "===" && op !== "!==") {
           return;

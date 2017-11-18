@@ -1,10 +1,8 @@
 jest.autoMockOff();
 
-const thePlugin = require("../../../utils/test-transform")(
-  require("../src/index")
-);
+const thePlugin = require("test-transform")(require("../src/index"));
 
-describe("simplify-comparison-operators-plugin", () => {
+describe("simplifying `foo == undefined`", () => {
   thePlugin(
     "should shorten `x == undefined`",
     `
