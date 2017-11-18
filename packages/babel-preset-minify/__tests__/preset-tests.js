@@ -142,4 +142,15 @@ describe("preset", () => {
     })();
   `
   );
+
+  thePlugin(
+    "should fix unicode",
+    `
+      function foo() {
+        module.exports = {
+          "\uD835\uDCB6": "ascr"
+        };
+      }
+    `
+  );
 });
