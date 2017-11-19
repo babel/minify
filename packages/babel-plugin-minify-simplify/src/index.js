@@ -5,6 +5,7 @@ module.exports = ({ types: t }) => {
   const toMultipleSequenceExpressions = require("babel-helper-to-multiple-sequence-expressions")(
     t
   );
+  const minifyBooleanValue = require("./boolean")(t);
   const ifStatement = require("./if-statement")(t);
   const conditionalExpression = require("./conditional-expression")(t);
   const logicalExpression = require("./logical-expression")(t);
@@ -120,13 +121,29 @@ module.exports = ({ types: t }) => {
       },
 
       LogicalExpression: {
-        exit: logicalExpression.simplifyPatterns
+        exit: [
+          path => {
+            if (
+              path.parentPath.isExpressionStatement() ||
+              path.parentPath.isIfStatement() ||
+              path.parentPath.isWhileStatement() ||
+              (path.parentPath.isSequenceExpression() &&
+                path.parent.expressions.indexOf(path.node) !==
+                  path.parent.expressions.length - 1)
+            ) {
+              minifyBooleanValue(path.get("left"));
+            }
+          },
+          logicalExpression.simplifyPatterns
+        ]
       },
 
       AssignmentExpression: assignmentExpression.simplify,
 
       ConditionalExpression: {
         enter: [
+          path => minifyBooleanValue(path.get("test")),
+
           // !foo ? 'foo' : 'bar' -> foo ? 'bar' : 'foo'
           // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
           function flipIfOrConditional(path) {
@@ -616,6 +633,7 @@ module.exports = ({ types: t }) => {
 
       // turn blocked ifs into single statements
       IfStatement: {
+        enter: [path => minifyBooleanValue(path.get("test"))],
         exit: [
           ifStatement.mergeNestedIfs,
           ifStatement.simplify,
