@@ -41,7 +41,7 @@ packages/
       - fixtures/
         - fixture-name/
           - actual.js                   # source
-          - expected.js                 # minify transforms applied (except whitespace)
+          - expected.js                 # minify transforms applied (except whitespace & comments)
 
         - a-skipped-test/
           - actual.js                   # source
