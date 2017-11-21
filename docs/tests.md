@@ -32,7 +32,7 @@ yarn test packages/babel-preset-minify
 
 ## Test files and directory structure
 
-We use [jest](https://github.com/facebook/jest) for testing and follow the following directory structure -
+We use [jest](https://github.com/facebook/jest) for testing and follow this directory structure -
 
 ```
 packages/
