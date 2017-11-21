@@ -1,6 +1,12 @@
-const isMinusOne = path =>
-  path.isUnaryExpression({ operator: "-" }) &&
-  path.get("argument").isNumericLiteral({ value: 1 });
+const isNumber = path =>
+  path.isNumericLiteral() ||
+  (path.isUnaryExpression({ operator: "-" }) &&
+    path.get("argument").isNumericLiteral());
+
+const isSpecificNumber = (path, number) =>
+  path.isNumericLiteral({ value: number }) ||
+  (path.isUnaryExpression({ operator: "-" }) &&
+    path.get("argument").isNumericLiteral({ value: -number }));
 
 module.exports = t => path => {
   const isTripleEquals = (p = path) =>
@@ -45,9 +51,9 @@ module.exports = t => path => {
   // if (foo !== -1) {} >-> if (~foo) {}
   if (isEquals()) {
     let comparator = null;
-    if (isMinusOne(path.get("left"))) {
+    if (isSpecificNumber(path.get("left"), -1)) {
       comparator = path.node.right;
-    } else if (isMinusOne(path.get("right"))) {
+    } else if (isSpecificNumber(path.get("right"), -1)) {
       comparator = path.node.left;
     }
 
@@ -61,8 +67,11 @@ module.exports = t => path => {
     }
   }
 
-  // if (foo != bar) {} >-> if (foo^bar) {}
-  if (path.isBinaryExpression({ operator: "!=" })) {
+  // if (foo != 1) {} >-> if (foo^1) {}
+  if (
+    path.isBinaryExpression({ operator: "!=" }) &&
+    (isNumber(path.get("left")) || isNumber(path.get("right")))
+  ) {
     path.node.operator = "^";
   }
 };

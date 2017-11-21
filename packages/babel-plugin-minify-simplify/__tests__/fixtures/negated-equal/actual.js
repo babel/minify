@@ -1,41 +1,41 @@
-if (!(foo === bar)) {
+if (!(foo === 2)) {
   const thisIs = aStatement;
 }
-if (!(foo !== bar)) {
-  const thisIs = aStatement;
-}
-
-if (!(foo == bar)) {
-  const thisIs = aStatement;
-}
-if (!(foo != bar)) {
+if (!(foo !== 2)) {
   const thisIs = aStatement;
 }
 
-if (!(myFoo({ bar: { baz: { quux() {} } } }) === my.bar(() => {}))) {
+if (!(foo == 2)) {
   const thisIs = aStatement;
 }
-if (!(myFoo({ bar: { baz: { quux() {} } } }) !== my.bar(() => {}))) {
+if (!(foo != 2)) {
   const thisIs = aStatement;
 }
 
-if (!(myFoo({ bar: { baz: { quux() {} } } }) == my.bar(() => {}))) {
+if (!(myFoo({ bar: { baz: { quux() {} } } }) === 2)) {
   const thisIs = aStatement;
 }
-if (!(myFoo({ bar: { baz: { quux() {} } } }) != my.bar(() => {}))) {
+if (!(myFoo({ bar: { baz: { quux() {} } } }) !== 2)) {
+  const thisIs = aStatement;
+}
+
+if (!(myFoo({ bar: { baz: { quux() {} } } }) == 2)) {
+  const thisIs = aStatement;
+}
+if (!(myFoo({ bar: { baz: { quux() {} } } }) != 2)) {
   const thisIs = aStatement;
 }
 
 // --------------------------------------
 
-!(foo === bar) && an.expression()
-!(foo !== bar) && an.expression()
+!(foo === 2) && an.expression()
+!(foo !== 2) && an.expression()
 
-!(foo == bar) && an.expression()
-!(foo != bar) && an.expression()
+!(foo == 2) && an.expression()
+!(foo != 2) && an.expression()
 
-!(myFoo({ bar: { baz: { quux() {} } } }) === my.bar(() => {})) && an.expression()
-!(myFoo({ bar: { baz: { quux() {} } } }) !== my.bar(() => {})) && an.expression()
+!(myFoo({ bar: { baz: { quux() {} } } }) === 2) && an.expression()
+!(myFoo({ bar: { baz: { quux() {} } } }) !== 2) && an.expression()
 
-!(myFoo({ bar: { baz: { quux() {} } } }) == my.bar(() => {})) && an.expression()
-!(myFoo({ bar: { baz: { quux() {} } } }) != my.bar(() => {})) && an.expression()
+!(myFoo({ bar: { baz: { quux() {} } } }) == 2) && an.expression()
+!(myFoo({ bar: { baz: { quux() {} } } }) != 2) && an.expression()
