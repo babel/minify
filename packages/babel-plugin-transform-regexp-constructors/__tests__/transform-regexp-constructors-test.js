@@ -135,4 +135,14 @@ describe("transform-regexp-constructors-plugin", () => {
     var x = /\/x\//;
   `
   );
+
+  thePlugin(
+    "should keep NUL",
+    String.raw`
+    var x = new RegExp('\0');
+  `,
+    String.raw`
+    var x = /\0/;
+  `
+  );
 });
