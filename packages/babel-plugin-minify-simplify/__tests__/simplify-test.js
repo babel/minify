@@ -1624,6 +1624,66 @@ describe("simplify-plugin", () => {
   );
 
   thePlugin(
+    "should ignore statements after return",
+    `
+    function bar(foo) {
+      switch (foo) {
+        case 'foo':
+          console.log('foo')
+          return 1;
+          console.log('bar')
+        case 'bar':
+          return 2;
+        default:
+          return 3;
+      }
+    }
+    `,
+    `
+    function bar(foo) {
+      return foo === 'foo' ? (console.log('foo'), 1) : foo === 'bar' ? 2 : 3;
+    }
+    `
+  );
+
+  thePlugin(
+    "should deoptimize if statement could not be converted to sequenceExpression",
+    `
+    function bar(foo) {
+      switch (foo) {
+        case 'foo':
+          var something = foo();
+          console.log('foo');
+          return 1;
+          console.log('ignore');
+
+        case 'bar':
+          return 2;
+        default:
+          return 3;
+      }
+    }
+    `,
+    `
+    function bar(foo) {
+      switch (foo) {
+        case 'foo':
+          var something = foo();
+
+          return console.log('foo'), 1;
+          console.log('ignore');
+
+
+        case 'bar':
+          return 2;
+        default:
+          return 3;
+      }
+    }
+    `
+  );
+
+  thePlugin(
     "should convert switch statements with next return as default to returns",
     `
     function bar() {
