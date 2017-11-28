@@ -26,7 +26,9 @@ stages:
   - lint
   - test
   - name: publish
-    if: (branch = master) AND (repo = babel/minify)
+    if: repo = babel/minify
+      AND branch = master
+      AND type = push
 
 jobs:
   include:
@@ -40,3 +42,5 @@ jobs:
         provider: script
         script: npm run publish-master
         skip_cleanup: true
+        on:
+          condition: '! $TRAVIS_COMMIT_MESSAGE =~ \[skip\ publish\]'
