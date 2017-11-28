@@ -11,3 +11,19 @@ The project structure is a [monorepo](https://github.com/babel/babel/blob/master
 1. [Benchmark Scripts](benchmarks.md)
 1. [Debugging Tips](debugging.md)
 1. [Releasing packages](releasing.md)
+
+## Canary Version
+
+The packages of babel-minify (commits to master branch) are auto-published to npm with the **`canary`** tag.
+
+To get the latest master branch of babel-minify,
+
+```sh
+yarn add "package-name"@canary
+
+# for example
+yarn add babel-minify@canary
+
+# or
+yarn add babel-preset-minify@canary
+```
