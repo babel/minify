@@ -1,6 +1,6 @@
 # Benchmarks
 
-## Comparision with other minifiers
+## Comparison with other minifiers
 
 [benchmark.js](https://github.com/babel/minify/blob/master/scripts/benchmark.js) compares BabelMinify with [Uglify](https://github.com/mishoo/UglifyJS2), [Closure Compiler](https://github.com/google/closure-compiler) and [Closure Compiler JS](https://github.com/google/closure-compiler-js)
 
