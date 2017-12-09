@@ -58,7 +58,7 @@ packages/
 
 ### Updating fixtures
 
-Fixtures are auto updateable like jest's snapshots. It is possible to either update all fixtures of a particular plugin or of all plugins using the `--update-fixtures` option. Updating a fixture means updating the `expected.js` file of a fixture.
+Fixtures are auto updatable like jest's snapshots. It is possible to either update all fixtures of a particular plugin or of all plugins using the `--update-fixtures` option. Updating a fixture means updating the `expected.js` file of a fixture.
 
 To update fixtures of a particular plugin,
 
