@@ -208,6 +208,14 @@ module.exports = ({ types: t, traverse }) => {
             ) {
               // `bar(function foo() {})` foo is not referenced but it's used.
               continue;
+            } else if (
+              // ClassDeclaration has binding in two scopes
+              //   1. The scope in which it is declared
+              //   2. The class's own scope
+              binding.path.isClassDeclaration() &&
+              binding.path === scope.path
+            ) {
+              continue;
             }
 
             const mutations = [];
