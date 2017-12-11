@@ -7,3 +7,10 @@ function loop() {
   }
 }
 loop();
+
+function bar() {
+  var x = 1;
+  var y = x + 2;
+  var x = 3;
+  return x + y;
+}
