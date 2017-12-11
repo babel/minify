@@ -31,7 +31,7 @@ module.exports = t => {
 
       [EX, EX, true, (e, c) => or(not(e), c)],
 
-      [LE, EX, false, (e, c) => and(e, c)],
+      [LE, EX, false, (e, c) => and(notnot(e), c)],
       [EX, EX, false, (e, c) => and(notnot(e), c)]
     ]);
 
