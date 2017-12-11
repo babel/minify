@@ -355,6 +355,7 @@ module.exports = ({ types: t, traverse }) => {
                 // ensure that the duplication of replacement is not affected
                 // https://github.com/babel/minify/issues/685
                 bail = !(
+                  binding &&
                   refPath.scope.getBinding(replacement.name) === binding &&
                   binding.constantViolations.length === 0
                 );
@@ -369,10 +370,12 @@ module.exports = ({ types: t, traverse }) => {
                       return;
                     }
                     const binding = scope.getBinding(node.name);
-                    bail = !(
-                      refPath.scope.getBinding(node.name) === binding ||
-                      binding.constantViolations.length === 0
-                    );
+                    if (
+                      binding &&
+                      refPath.scope.getBinding(node.name) === binding
+                    ) {
+                      bail = binding.constantViolations.length > 0;
+                    }
                   }
                 });
               }
