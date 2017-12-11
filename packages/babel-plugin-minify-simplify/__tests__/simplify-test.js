@@ -1969,6 +1969,36 @@ describe("simplify-plugin", () => {
   `
   );
 
+  thePlugin(
+    "should simplify common conditional operations 2",
+    `
+      function h1() { return a && b ? (foo(), true) : false }
+    `,
+    `
+      function h1() {
+        return !!(a && b) && (foo(), true);
+      }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#689",
+    `
+      function foo(object, property, value) {
+        if (object && property) {
+          object[property] = value;
+          return true;
+        }
+        return false;
+      }
+    `,
+    `
+      function foo(object, property, value) {
+        return !!(object && property) && (object[property] = value, true);
+      }
+    `
+  );
+
   // From UglifyJS
   thePlugin.inEachLine(
     "should simplify logical expression of the following forms of && by compressing to the right",
