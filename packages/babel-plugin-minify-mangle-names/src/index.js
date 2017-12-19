@@ -481,7 +481,9 @@ module.exports = babel => {
           } else {
             throw new Error(
               `Unexpected Rename Error: ` +
-                `Trying to replace "${node.name}": from "${oldName}" to "${newName}". ` +
+                `Trying to replace "${
+                  node.name
+                }": from "${oldName}" to "${newName}". ` +
                 `Please report it at ${newIssueUrl}`
             );
           }
