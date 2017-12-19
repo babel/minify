@@ -112,7 +112,8 @@ module.exports = babel => {
       /**
        * Same usage as in DCE, whichever runs first
        */
-      if (!isEvalScopesMarked(mangler.program.scope)) {
+
+      if (!isEvalScopesMarked(mangler.program)) {
         markEvalScopes(mangler.program);
       }
 
