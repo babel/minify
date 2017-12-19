@@ -10,7 +10,8 @@
     "coverage-ci": "codecov -f coverage/coverage-final.json",
     "fix": "eslint --fix .",
     "lint": "eslint .",
-    "publish": "git pull origin master --rebase && npm run build && npm test && lerna publish",
+    "publish":
+      "git pull origin master --rebase && npm run build && npm test && lerna publish",
     "publish-master": "lerna publish -c --yes -m 'chore(canary): publish %s'",
     "test": "jest --maxWorkers=4 --no-cache",
     "test-ci": "npm run bootstrap && npm run build && npm run coverage",
@@ -50,7 +51,9 @@
     "rimraf": "^2.6.1",
     "through2": "^2.0.3",
     "uglify-js": "^3.0.27",
-    "util.promisify": "^1.0.0"
+    "util.promisify": "^1.0.0",
+    "babel-generator": "^6.26.0",
+    "json5": "^0.5.1"
   },
   "private": true,
   "jest": {
@@ -58,18 +61,9 @@
       ".*": "<rootDir>/node_modules/babel-jest"
     },
     "testEnvironment": "node",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/fixtures/"
-    ],
-    "roots": [
-      "packages",
-      "utils"
-    ],
+    "testPathIgnorePatterns": ["/node_modules/", "/fixtures/"],
+    "roots": ["packages", "utils"],
     "coverageDirectory": "./coverage/"
   },
-  "workspaces": [
-    "packages/*",
-    "utils/*"
-  ]
+  "workspaces": ["packages/*", "utils/*"]
 }
