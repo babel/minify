@@ -1,4 +1,5 @@
 {
+  "private": true,
   "license": "MIT",
   "author": "amasad",
   "scripts": {
@@ -52,7 +53,10 @@
     "uglify-js": "^3.0.27",
     "util.promisify": "^1.0.0"
   },
-  "private": true,
+  "engines": {
+    "node": ">=6",
+    "yarn": ">=1"
+  },
   "jest": {
     "transform": {
       ".*": "<rootDir>/node_modules/babel-jest"
