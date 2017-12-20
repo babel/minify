@@ -18,11 +18,11 @@
   },
   "repository": "https://github.com/babel/minify/tree/master/packages/babel-minify",
   "dependencies": {
-    "babel-core": "^6.24.1",
+    "babel-core": "^6.26.0",
     "babel-preset-minify": "^0.2.0",
-    "fs-readdir-recursive": "^1.0.0",
+    "fs-readdir-recursive": "^1.1.0",
     "mkdirp": "^0.5.1",
     "util.promisify": "^1.0.0",
-    "yargs-parser": "^7.0.0"
+    "yargs-parser": "^8.0.0"
   }
 }
