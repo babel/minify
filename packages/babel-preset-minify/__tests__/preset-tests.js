@@ -153,4 +153,21 @@ describe("preset", () => {
       }
     `
   );
+
+  thePlugin(
+    "should fix issue#769 simplify + deadcode",
+    `
+      function fn(foo) {
+        if (foo && foo.length > 5) {
+          return true;
+        }
+        return false;
+      }
+    `,
+    `
+      function fn(a) {
+        return !!(a && 5 < a.length);
+      }
+    `
+  );
 });
