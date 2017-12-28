@@ -13,7 +13,7 @@ module.exports = t => {
     const consequent = path.get("consequent");
     const alternate = path.get("alternate");
 
-    const { Expression: EX } = h.typeSymbols(t);
+    const EX = Symbol("Expression");
 
     // Convention:
     // ===============

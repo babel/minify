@@ -40,7 +40,7 @@ module.exports = t => {
       return evalResult.confident && input.isPure() && !evalResult.value;
     };
 
-    const { Expression: EX } = h.typeSymbols(t);
+    const EX = Symbol("Expression");
 
     // Convention:
     // [left, operator, right, handler(leftNode, rightNode)]
