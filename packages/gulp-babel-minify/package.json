@@ -15,7 +15,7 @@
   "dependencies": {
     "babel-core": "^6.26.0",
     "babel-preset-minify": "^0.2.0",
-    "gulp-util": "^3.0.8",
+    "plugin-error": "^0.1.2",
     "through2": "^2.0.3",
     "vinyl-sourcemaps-apply": "^0.2.1"
   }
