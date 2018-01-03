@@ -123,14 +123,25 @@ module.exports = ({ types: t }) => {
       LogicalExpression: {
         exit: [
           path => {
-            if (
-              path.parentPath.isExpressionStatement() ||
-              path.parentPath.isIfStatement() ||
-              path.parentPath.isWhileStatement() ||
-              (path.parentPath.isSequenceExpression() &&
+            const parent = path.parentPath;
+            let ok = false;
+            if (parent.isExpressionStatement()) {
+              ok = true;
+            } else if (parent.get('test')) {
+              ok = true;
+            } else if (parent.isWhileStatement()) {
+              ok = true;
+            } else if (parent.isSequenceExpression()) {
+              if (
                 path.parent.expressions.indexOf(path.node) !==
-                  path.parent.expressions.length - 1)
-            ) {
+                path.parent.expressions.length - 1
+              ) {
+                ok = true;
+              } else if (parent.parentPath.isExpressionStatement()) {
+                ok = true;
+              }
+            }
+            if (ok) {
               minifyBooleanValue(path.get("left"));
             }
           },
