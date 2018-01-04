@@ -127,7 +127,7 @@ module.exports = ({ types: t }) => {
             let ok = false;
             if (parent.isExpressionStatement()) {
               ok = true;
-            } else if (parent.get('test')) {
+            } else if (parent.get("test")) {
               ok = true;
             } else if (parent.isWhileStatement()) {
               ok = true;
