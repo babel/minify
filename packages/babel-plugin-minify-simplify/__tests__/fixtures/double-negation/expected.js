@@ -10,4 +10,4 @@ if (some.complex({ expression: () => "obviously" })) {
 
 // --------------------------------------
 
-foo && an.expression(), foo && bar && an.expression(), some.complex({ expression: () => "obviously" }) && an.expression(), foo || an.expression(), foo && bar || an.expression(), some.complex({ expression: () => "obviously" }) || an.expression();
+foo && an.expression(), !!foo && bar && an.expression(), some.complex({ expression: () => "obviously" }) && an.expression(), foo || an.expression(), !!foo && bar || an.expression(), some.complex({ expression: () => "obviously" }) || an.expression();
