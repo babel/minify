@@ -2,8 +2,28 @@
 
 const VOID_0 = t => t.unaryExpression("void", t.numericLiteral(0), true);
 
-const isExpression = (t, node, typeSymbol) =>
-  typeof typeSymbol !== "symbol" ? false : t.isExpression(node);
+// Types as Symbols - for comparing types
+const types = {};
+// This is a test key which is used to avoid Object.keys check
+// Object.keys() check is really expensive
+// https://gist.github.com/vigneshshanmugam/c766550ecd02292dcdfbf0bf013b9d3d
+const testKey = "Expression";
+
+const typeSymbols = t => {
+  // don't recompute
+  if (types[testKey] !== undefined) {
+    return types;
+  }
+  t.TYPES.forEach(type => {
+    types[type] = Symbol.for(type);
+  });
+  return types;
+};
+
+const isNodeOfType = (t, node, typeSymbol) =>
+  typeof typeSymbol !== "symbol"
+    ? false
+    : t["is" + Symbol.keyFor(typeSymbol)](node);
 
 const isPatternMatchesPath = t =>
   function _isPatternMatchesPath(patternValue, inputPath) {
@@ -18,7 +38,7 @@ const isPatternMatchesPath = t =>
     if (typeof patternValue === "function") {
       return patternValue(inputPath);
     }
-    if (isExpression(t, inputPath.node, patternValue)) return true;
+    if (isNodeOfType(t, inputPath.node, patternValue)) return true;
     const evalResult = inputPath.evaluate();
     if (!evalResult.confident || !inputPath.isPure()) return false;
     return evalResult.value === patternValue;
@@ -26,5 +46,9 @@ const isPatternMatchesPath = t =>
 
 module.exports = {
   VOID_0,
+  // Types as Symbols
+  typeSymbols,
+  // This is required for resolving type aliases
+  isNodeOfType,
   isPatternMatchesPath
 };
