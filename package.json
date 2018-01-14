@@ -54,7 +54,7 @@
     "util.promisify": "^1.0.0"
   },
   "engines": {
-    "node": ">=6",
+    "node": ">=4",
     "yarn": ">=1"
   },
   "jest": {
