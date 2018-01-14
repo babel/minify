@@ -70,7 +70,11 @@
       "packages",
       "utils"
     ],
-    "coverageDirectory": "./coverage/"
+    "coverageDirectory": "./coverage/",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/lib/"
+    ]
   },
   "workspaces": [
     "packages/*",
