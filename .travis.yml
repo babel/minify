@@ -17,7 +17,7 @@ before_script:
   - yarn build
 
 script:
-  - yarn coverage --no-cache
+  - yarn coverage --ci --maxWorkers=4 --no-cache
 
 after_success:
   - yarn coverage-ci
