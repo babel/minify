@@ -17,7 +17,7 @@ before_script:
   - yarn build
 
 script:
-  - yarn coverage
+  - yarn coverage --no-cache
 
 after_success:
   - yarn coverage-ci
