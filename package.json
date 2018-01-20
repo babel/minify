@@ -44,6 +44,7 @@
     "jest-cli": "^22.0.3",
     "lerna": "^2.5.1",
     "lerna-changelog": "^0.7.0",
+    "lint-staged": "^6.0.1",
     "markdown-table": "^1.1.1",
     "minimist": "^1.2.0",
     "prettier": "^1.9.2",
@@ -74,6 +75,13 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/lib/"
+    ]
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "./scripts/test-files.sh",
+      "git add"
     ]
   },
   "workspaces": [
