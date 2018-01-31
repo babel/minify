@@ -1,3 +1,108 @@
+## babel-minify@0.3.0 (2018-01-31)
+
+#### :boom: Breaking Change
+* `babel-minify`, `babel-plugin-minify-mangle-names`, `babel-preset-minify`, `gulp-babel-minify`
+  * [#676](https://github.com/babel/minify/pull/676) [mangle] blacklist -> exclude. ([@boopathi](https://github.com/boopathi))
+
+#### :rocket: New Feature
+* `babel-plugin-minify-numeric-literals`
+  * [#349](https://github.com/babel/minify/pull/349) Refactor minify-numeric-literals.. ([@bardiharborow](https://github.com/bardiharborow))
+* `babel-plugin-transform-remove-console`
+  * [#661](https://github.com/babel/minify/pull/661) Add exclude option for transform-remove-console plugin. ([@kball](https://github.com/kball))
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-simplify`, `babel-preset-minify`
+  * [#770](https://github.com/babel/minify/pull/770) fix(simplify): remove redundant patterns. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-builtins`
+  * [#768](https://github.com/babel/minify/pull/768) fix builtins - bail on polyfilled members. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-minify-mangle-names`
+  * [#763](https://github.com/babel/minify/pull/763) fix(mangle) - mark the correct eval scope during mangling. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+  * [#761](https://github.com/babel/minify/pull/761) babel 7 compatibility change - mangle names: . ([@loborobo](https://github.com/loborobo))
+* `babel-plugin-minify-dead-code-elimination`
+  * [#755](https://github.com/babel/minify/pull/755) fix(dce): bail on non-constant replacement path. ([@boopathi](https://github.com/boopathi))
+  * [#753](https://github.com/babel/minify/pull/753) fix(dce): don't remove toplevel classes. ([@boopathi](https://github.com/boopathi))
+  * [#712](https://github.com/babel/minify/pull/712) fix(dce): extract only binding identifiers during block removal. ([@boopathi](https://github.com/boopathi))
+  * [#705](https://github.com/babel/minify/pull/705) Bail for binary 'in' expressions - Closes [#691](https://github.com/babel/minify/issues/691). ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#754](https://github.com/babel/minify/pull/754) fix(simplify): fix conditional expression pattern match transformation logic. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-regexp-constructors`
+  * [#733](https://github.com/babel/minify/pull/733) Bugfix Regex's containing (\0). ([@jogibear9988](https://github.com/jogibear9988))
+* `babel-plugin-minify-constant-folding`, `babel-preset-minify`
+  * [#730](https://github.com/babel/minify/pull/730) fix: property names minification - removal of quotes. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-merge-sibling-variables`, `babel-preset-minify`
+  * [#713](https://github.com/babel/minify/pull/713) Fix(merge-sibling-var): force recalc ref when concatenating for-loop vars (#485). ([@garyyeap](https://github.com/garyyeap))
+* `babel-plugin-minify-constant-folding`
+  * [#698](https://github.com/babel/minify/pull/698) Fix folding array literals - bail on spread element. ([@boopathi](https://github.com/boopathi))
+  * [#613](https://github.com/babel/minify/pull/613) constant-folding: Fix some literal types used in `.join()`, Closes [#612](https://github.com/babel/minify/issues/612). ([@goto-bus-stop](https://github.com/goto-bus-stop))
+* `babel-minify`
+  * [#675](https://github.com/babel/minify/pull/675) Fix js ext check & improve error handling for file list. ([@boopathi](https://github.com/boopathi))
+  * [#669](https://github.com/babel/minify/pull/669) CLI: reorder files/stdin/help-message. ([@boopathi](https://github.com/boopathi))
+
+#### :nail_care: Polish
+* `babel-plugin-minify-simplify`, `babel-plugin-transform-simplify-comparison-operators`
+  * [#778](https://github.com/babel/minify/pull/778) (perf) - Improve performance of simplify by removing traversal for type inference. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-minify-simplify`
+  * [#772](https://github.com/babel/minify/pull/772) (perf)avoid object.keys on hot path for performance - simplify. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-inline-consecutive-adds`
+  * [#773](https://github.com/babel/minify/pull/773) (perf) - move the collapser check before inling properties. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### :memo: Documentation
+* [#751](https://github.com/babel/minify/pull/751) Fixing typos.. ([@seanhussey](https://github.com/seanhussey))
+* [#735](https://github.com/babel/minify/pull/735) docs(contributing): move to docs directory [skip ci]. ([@boopathi](https://github.com/boopathi))
+* [#693](https://github.com/babel/minify/pull/693) docs(contrib): Update removed package scripts [skip ci]. ([@boopathi](https://github.com/boopathi))
+
+#### :house: Internal
+* Other
+  * [#786](https://github.com/babel/minify/pull/786) Replaced gulp-util dependency with fancy-log.. ([@FizzyGalacticus](https://github.com/FizzyGalacticus))
+  * [#745](https://github.com/babel/minify/pull/745) add option to skip publish from commit message. ([@boopathi](https://github.com/boopathi))
+  * [#716](https://github.com/babel/minify/pull/716) Update CI yml files. ([@boopathi](https://github.com/boopathi))
+  * [#714](https://github.com/babel/minify/pull/714) Specify *.jar as binary in gitattributes. ([@remcohaszing](https://github.com/remcohaszing))
+* `gulp-babel-minify`
+  * [#775](https://github.com/babel/minify/pull/775) Remove gulp-util dependency. ([@pieterbeulque](https://github.com/pieterbeulque))
+* `babel-plugin-transform-regexp-constructors`
+  * [#762](https://github.com/babel/minify/pull/762) refactor(tests) tests to fixtures - regexpConstructors. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-merge-sibling-variables`
+  * [#757](https://github.com/babel/minify/pull/757) refactor(tests) - Tests to fixtures - mergeSiblingVars. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-property-literals`
+  * [#760](https://github.com/babel/minify/pull/760) refactor(tests) Tests to fixtures - propertyLiterals. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-minify-booleans`
+  * [#758](https://github.com/babel/minify/pull/758) refactor(tests) Tests to fixtures - booleans. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-transform-member-expression-literals`
+  * [#729](https://github.com/babel/minify/pull/729) refactor(tests): Tests to fixtures - memberExpressionLiterals. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-transform-inline-consecutive-adds`
+  * [#723](https://github.com/babel/minify/pull/723) refactor(tests): Tests to fixtures - inlineConsecutiveAdds. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-type-constructors`
+  * [#722](https://github.com/babel/minify/pull/722) refactor(tests): Tests to fixtures - typeConstructors plugin. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`
+  * [#718](https://github.com/babel/minify/pull/718) Fixtures tests - part 2. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-builtins`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`
+  * [#717](https://github.com/babel/minify/pull/717) Fixtures. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-builtins`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-simplify`, `babel-plugin-minify-type-constructors`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-minify-booleans`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-regexp-constructors`, `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`, `babel-preset-minify`, `gulp-babel-minify`
+  * [#715](https://github.com/babel/minify/pull/715) Move test utils to packages. ([@boopathi](https://github.com/boopathi))
+* `babel-minify`
+  * [#692](https://github.com/babel/minify/pull/692) Fix lint and tests for windows. ([@boopathi](https://github.com/boopathi))
+  * [#690](https://github.com/babel/minify/pull/690) Fix build. ([@boopathi](https://github.com/boopathi))
+  * [#665](https://github.com/babel/minify/pull/665) Add npmignore to babel-minify. ([@boopathi](https://github.com/boopathi))
+
+#### Chore
+* `babel-minify`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-type-constructors`, `gulp-babel-minify`
+  * [#765](https://github.com/babel/minify/pull/765) chore(deps): upgrade deps. ([@boopathi](https://github.com/boopathi))
+
+#### Committers: 13
+- Bardi Harborow ([bardiharborow](https://github.com/bardiharborow))
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Dustin Dodson ([FizzyGalacticus](https://github.com/FizzyGalacticus))
+- Gary Yeap ([garyyeap](https://github.com/garyyeap))
+- Jake Dluhy ([JakeDluhy](https://github.com/JakeDluhy))
+- Jochen Kühner ([jogibear9988](https://github.com/jogibear9988))
+- Kevin Ball ([kball](https://github.com/kball))
+- Pieter Beulque ([pieterbeulque](https://github.com/pieterbeulque))
+- Remco Haszing ([remcohaszing](https://github.com/remcohaszing))
+- Renée Kooi ([goto-bus-stop](https://github.com/goto-bus-stop))
+- Robynn Lobo ([loborobo](https://github.com/loborobo))
+- Sean Hussey ([seanhussey](https://github.com/seanhussey))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babel-minify@0.2.0 (2017-08-14)
 
 ### Highlights
