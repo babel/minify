@@ -9,7 +9,6 @@ module.exports = function() {
 
         const normal = path.node.value.toString().replace(/^0\./, ".");
         let exponential = path.node.value.toExponential().replace(/\+/g, "");
-        const hexadecimal = `0x${path.node.value.toString(16)}`;
 
         if (exponential.indexOf(".") >= 0 && exponential.indexOf("e") >= 0) {
           const lastChar = exponential.substr(exponential.lastIndexOf("e") + 1);
@@ -29,9 +28,11 @@ module.exports = function() {
         let replacement =
           normal.length > exponential.length ? exponential : normal;
 
-        if (path.node.value > 0 && Number.isInteger(path.node.value))
+        if (path.node.value > 0 && Number.isInteger(path.node.value)) {
+          const hexadecimal = `0x${path.node.value.toString(16)}`;
           replacement =
             replacement.length > hexadecimal.length ? hexadecimal : replacement;
+        }
 
         if (path.node.extra.raw.length > replacement.length) {
           path.node.extra.raw = replacement;
