@@ -2,7 +2,7 @@
 
 ## Requirements
 
-+ node >= 4
++ node >= 6
 + [yarn](https://yarnpkg.com) >= 1.0.0 (with yarn workspaces support)
 
 ## Clone

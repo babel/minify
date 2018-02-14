@@ -1,1 +1,1 @@
-String.raw`var x = new RegExp('\\w+\\s')`;
+var x = /\w+\s/;

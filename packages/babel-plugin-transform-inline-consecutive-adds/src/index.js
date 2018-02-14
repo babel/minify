@@ -149,11 +149,11 @@ function getReferenceChecker(references) {
 function tryUseCollapser(t, collapser, varDecl, topLevel, checkReference) {
   // Returns true iff successfully used the collapser. Otherwise returns undefined.
   const [name, init, startIndex] = topLevel;
-  const body = varDecl.parentPath.get("body");
   if (!collapser.isInitTypeValid(init)) {
     return;
   }
 
+  const body = varDecl.parentPath.get("body");
   const [statements, exprs] = getContiguousStatementsAndExpressions(
     body,
     startIndex + 1,

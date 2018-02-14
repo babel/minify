@@ -24,6 +24,19 @@ module.exports = function({ types: t }) {
       const context = this;
 
       const collectVisitor = {
+        AssignmentExpression(path) {
+          const left = path.get("left");
+
+          // Should bail and not run the plugin
+          // when builtin is polyfilled
+          if (t.isMemberExpression(left) && isBuiltInComputed(left)) {
+            let parent = path;
+            do {
+              parent.stop();
+            } while ((parent = parent.parentPath));
+          }
+        },
+
         MemberExpression(path) {
           if (path.parentPath.isCallExpression()) {
             return;
@@ -46,7 +59,7 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            // computed property should be not optimized
+            // computed property should not be optimized
             // Math[max]() -> Math.max()
             if (!isComputed(callee) && isBuiltin(callee)) {
               const result = evaluate(path, { tdz: context.tdz });
@@ -113,6 +126,17 @@ module.exports = function({ types: t }) {
     if (t.isIdentifier(property)) result += property.name;
 
     return result;
+  }
+
+  function isBuiltInComputed(memberExpr) {
+    const { node } = memberExpr;
+    const { object, computed } = node;
+
+    return (
+      computed &&
+      t.isIdentifier(object) &&
+      VALID_CALLEES.indexOf(object.name) >= 0
+    );
   }
 
   function isBuiltin(memberExpr) {

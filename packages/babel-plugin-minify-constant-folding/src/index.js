@@ -51,18 +51,25 @@ module.exports = babel => {
       // but are not actually a binary expression.
       // "a" + b + "c" + "d" -> "a" + b + "cd"
       BinaryExpression(path) {
+        if (!path.isBinaryExpression({ operator: "+" })) {
+          return;
+        }
         let literal, bin;
-        if (path.get("right").isStringLiteral()) {
-          literal = path.get("right");
-          if (path.get("left").isBinaryExpression({ operator: "+" })) {
-            bin = path.get("left");
+
+        const left = path.get("left");
+        const right = path.get("right");
+
+        if (right.isStringLiteral()) {
+          literal = right;
+          if (left.isBinaryExpression({ operator: "+" })) {
+            bin = left;
           } else {
             return;
           }
-        } else if (path.get("left").isStringLiteral()) {
-          literal = path.get("left");
-          if (path.get("right").isBinaryExpression({ operator: "+" })) {
-            bin = path.get("right");
+        } else if (left.isStringLiteral()) {
+          literal = left;
+          if (right.isBinaryExpression({ operator: "+" })) {
+            bin = right;
           } else {
             return;
           }

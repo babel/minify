@@ -490,16 +490,6 @@ module.exports = ({ types: t }) => {
           return;
         }
         node.body = statements;
-
-        // this additional traversal is horrible but it's done to fix
-        // https://github.com/babel/minify/issues/323
-        // in which type annotation somehow gets messed up
-        // during sequence expression transformation
-        path.traverse({
-          Identifier: function(path) {
-            path.getTypeAnnotation();
-          }
-        });
       },
 
       BlockStatement: {

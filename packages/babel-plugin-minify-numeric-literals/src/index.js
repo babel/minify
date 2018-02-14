@@ -17,10 +17,8 @@ module.exports = function() {
             dotIndex,
             exponential.lastIndexOf("e") - dotIndex
           ).length;
-          exponential = (exponential.substr(
-            0,
-            exponential.lastIndexOf("e") + 1
-          ) +
+          exponential = (
+            exponential.substr(0, exponential.lastIndexOf("e") + 1) +
             (lastChar - subLength)
           )
             .replace(".", "")

@@ -16,6 +16,14 @@ To fix formatting and other auto-fixable eslint errors,
 yarn fix
 ```
 
+## Check Staged Files
+
+Lint and Test staged files
+
+```sh
+yarn lint-staged
+```
+
 ## Test
 
 To run all tests,

@@ -112,7 +112,8 @@ module.exports = babel => {
       /**
        * Same usage as in DCE, whichever runs first
        */
-      if (!isEvalScopesMarked(mangler.program.scope)) {
+
+      if (!isEvalScopesMarked(mangler.program)) {
         markEvalScopes(mangler.program);
       }
 
@@ -480,7 +481,9 @@ module.exports = babel => {
           } else {
             throw new Error(
               `Unexpected Rename Error: ` +
-                `Trying to replace "${node.name}": from "${oldName}" to "${newName}". ` +
+                `Trying to replace "${
+                  node.name
+                }": from "${oldName}" to "${newName}". ` +
                 `Please report it at ${newIssueUrl}`
             );
           }
