@@ -2,7 +2,7 @@ const through = require("through2");
 const chalk = require("chalk");
 const newer = require("gulp-newer");
 const babel = require("gulp-babel");
-const gutil = require("gulp-util");
+const log = require("fancy-log");
 const gulp = require("gulp");
 const path = require("path");
 
@@ -39,7 +39,7 @@ function getBuildTask({ scripts, dest }) {
     .pipe(newer(dest))
     .pipe(
       through.obj((file, enc, callback) => {
-        gutil.log("Compiling", "'" + chalk.cyan(file._path) + "'...");
+        log("Compiling", "'" + chalk.cyan(file._path) + "'...");
         callback(null, file);
       })
     )

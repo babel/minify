@@ -3,17 +3,20 @@
 const VOID_0 = t => t.unaryExpression("void", t.numericLiteral(0), true);
 
 // Types as Symbols - for comparing types
-// init must be empty object -
-// computing this involves checking object.keys() to be of length 0
-// skipped otherwise
 const types = {};
+// This is a test key which is used to avoid Object.keys check
+// Object.keys() check is really expensive
+// https://gist.github.com/vigneshshanmugam/c766550ecd02292dcdfbf0bf013b9d3d
+const testKey = "Expression";
+
 const typeSymbols = t => {
   // don't recompute
-  if (Object.keys(types).length < 1) {
-    t.TYPES.forEach(type => {
-      types[type] = Symbol.for(type);
-    });
+  if (types[testKey] !== undefined) {
+    return types;
   }
+  t.TYPES.forEach(type => {
+    types[type] = Symbol.for(type);
+  });
   return types;
 };
 

@@ -3,9 +3,9 @@ init:
 
 environment:
   matrix:
+    - nodejs_version: '9'
     - nodejs_version: '8'
     - nodejs_version: '6'
-    - nodejs_version: '4'
 
 cache:
  - "%LOCALAPPDATA%\\Yarn"
@@ -29,4 +29,4 @@ before_test:
 test_script:
   - node --version
   - yarn --version
-  - yarn test
+  - yarn test --no-cache
