@@ -1,0 +1,1 @@
+typeof 1 == "number";
