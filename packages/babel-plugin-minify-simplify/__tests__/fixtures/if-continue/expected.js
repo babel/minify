@@ -1,0 +1,1 @@
+for (var p in foo) p || bar();
