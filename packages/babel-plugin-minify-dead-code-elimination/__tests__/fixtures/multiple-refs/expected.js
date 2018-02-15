@@ -4,6 +4,7 @@ function foo() {
       y = 1;
     }
   };
+
   x();
   x();
   var y = null;

@@ -1,5 +1,4 @@
 function bar() {
   foo();
-
   bar();
 }

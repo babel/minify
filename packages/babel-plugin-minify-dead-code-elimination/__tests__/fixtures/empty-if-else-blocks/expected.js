@@ -4,9 +4,9 @@ if (!a) {
 
 if (b) {
   bar();
-}
+} // should optimize alternate after replacement
 
-// should optimize alternate after replacement
+
 if (!baz) {
   console.log("foo" + "bar");
 }

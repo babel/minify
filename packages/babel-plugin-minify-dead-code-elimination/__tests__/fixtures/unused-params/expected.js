@@ -18,25 +18,41 @@ bar();
 
 class A {
   foo() {}
-}
-new A();
 
-// except the ones with side-effects
+}
+
+new A(); // except the ones with side-effects
+
 function a(foo) {
   return foo;
 }
+
 function b(foo, bar, baz) {
   return baz;
 }
-function c(foo, { bar }) {
+
+function c(foo, {
+  bar
+}) {
   return bar;
 }
-function d({ foo }, { bar }) {
+
+function d({
+  foo
+}, {
+  bar
+}) {
   return foo;
 }
-function e({ foo }, bar = sideEffect()) {
+
+function e({
+  foo
+}, bar = sideEffect()) {
   return foo;
 }
-function e({ foo }, bar = {}) {
+
+function e({
+  foo
+}, bar = {}) {
   return foo;
 }
