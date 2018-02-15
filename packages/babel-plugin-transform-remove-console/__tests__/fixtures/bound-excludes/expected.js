@@ -5,4 +5,3 @@ function foo() {
   b("asdf");
   blah();
 }
-`
