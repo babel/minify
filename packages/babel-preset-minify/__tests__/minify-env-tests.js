@@ -1,44 +1,41 @@
 jest.autoMockOff();
 
-const es2015 = require("babel-preset-es2015");
+const envPreset = require("@babel/preset-env");
 const minifyPreset = require("../src/index");
 
 const thePlugin = require("test-transform")(null, {
   plugins: [],
   minified: false,
-  presets: [minifyPreset, es2015]
+  presets: [minifyPreset, envPreset]
 });
 
-describe("preset along with es2015", () => {
+describe("preset along with env", () => {
   thePlugin(
     "should fix issue #630",
     `
-    const obj = {cat: 'dog'};
-    let cat;
-    ({cat} = obj);
-  `,
+      const obj = {cat: 'dog'};
+      let cat;
+      ({cat} = obj);
+    `,
     `
-    'use strict';
-
-    var cat,
-        obj = { cat: 'dog' },
-        _obj = obj;
-    cat = _obj.cat, _obj;
-  `
+      var cat,
+          obj = {
+        cat: 'dog'
+      },
+          _obj = obj;
+      cat = _obj.cat, _obj;
+    `
   );
 
   thePlugin(
-    "should fix simplify with es2015 - issue#632",
+    "should fix simplify with env - issue#632",
     `
       let obj, key;
       if (1) ({k: key} = obj);
       foo();
     `,
     `
-      "use strict";
-
-      var obj,
-          key = void 0;
+      var obj, key;
       key = obj.k, foo();
     `
   );
@@ -53,8 +50,6 @@ describe("preset along with es2015", () => {
       }
     `,
     `
-      "use strict";
-
       function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
 
       function a() {
@@ -77,10 +72,9 @@ describe("preset along with es2015", () => {
       }
     `,
     `
-      "use strict";
-
       function getSum(a) {
         for (var b = 0, c = 0; c < a.length; c++) b += a[c];
+
         return b;
       }
       `
@@ -101,8 +95,6 @@ describe("preset along with es2015", () => {
       });
     `,
     `
-      "use strict";
-
       for (var tabs = [1, 2, 3, 4, 5], tabIdx = 0, i = 0; i < tabs.length; i++);
 
       console.log({
@@ -128,8 +120,6 @@ describe("preset along with es2015", () => {
       }
     `,
     `
-      'use strict';
-
       {
         var count = 0;
         setInterval(function () {
@@ -161,10 +151,7 @@ describe("preset along with es2015", () => {
       }
     `,
     `
-      'use strict';
-
       function test() {
-
         for (var a = ['a', 'b', 'c'], b = a.length, c = null, d = 0; d < b; d++) c = a[d];
 
         return c || {};
