@@ -3,6 +3,7 @@
   b--;
   var b = 10;
   a(b);
+
   function a() {
     var a = 10;
     a++;
