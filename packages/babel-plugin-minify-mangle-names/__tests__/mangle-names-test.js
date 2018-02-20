@@ -9,6 +9,7 @@ describe("mangle-names", () => {
     `
       (function () {
         var arguments = void 0;
+
         (function () {
           console.log(arguments);
         })("argument");
@@ -27,6 +28,7 @@ describe("mangle-names", () => {
     `,
     `
       function eval() {}
+
       function foo() {
         var a = 1;
         eval("...");
