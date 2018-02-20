@@ -4,6 +4,8 @@ function foo() {
   }
 
   if (bar(), !x) {
-      const { a } = b;
-    }
+    const {
+      a
+    } = b;
+  }
 }

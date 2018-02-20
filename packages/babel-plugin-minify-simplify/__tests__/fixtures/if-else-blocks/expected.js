@@ -1,5 +1,7 @@
 if (false) {
-  let { a } = foo();
+  let {
+    a
+  } = foo();
 } else if (true) {
   const x = bar();
 } else {
