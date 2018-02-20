@@ -1,1 +1,2 @@
-var foo;foo === (void 0).foo;
+var foo;
+foo === (void 0).foo;
