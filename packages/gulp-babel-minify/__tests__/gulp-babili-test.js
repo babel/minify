@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const gutil = require("gulp-util");
+const File = require("vinyl");
 const babelCore = require("babel-core");
 const minifyPreset = require("babel-preset-minify");
 
@@ -27,7 +27,7 @@ describe("gulp-babel-minify", () => {
       stream.on("error", reject);
 
       stream.write(
-        new gutil.File({
+        new File({
           path: "defaults.js",
           contents: new Buffer(source)
         })
@@ -59,7 +59,7 @@ describe("gulp-babel-minify", () => {
       stream.on("error", reject);
 
       stream.write(
-        new gutil.File({
+        new File({
           path: "options.js",
           contents: new Buffer(source)
         })
@@ -101,7 +101,7 @@ describe("gulp-babel-minify", () => {
       stream.on("error", reject);
 
       stream.write(
-        new gutil.File({
+        new File({
           path: "custom-transformers.js",
           contents: new Buffer("foo()")
         })
@@ -127,7 +127,7 @@ describe("gulp-babel-minify", () => {
     let file;
 
     beforeEach(() => {
-      file = new gutil.File({
+      file = new File({
         path: "comments.js",
         contents: new Buffer(source)
       });
@@ -223,7 +223,7 @@ describe("gulp-babel-minify", () => {
       stream.on("error", reject);
 
       stream.write(
-        new gutil.File({
+        new File({
           path: "options.js",
           contents: new Buffer(source)
         })
