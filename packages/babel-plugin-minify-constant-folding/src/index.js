@@ -152,7 +152,7 @@ module.exports = babel => {
         const res = evaluate(path, { tdz });
         if (res.confident) {
           // Avoid fractions because they can be longer than the original expression.
-          // There is also issues with number percision?
+          // There is also issues with number precision?
           if (typeof res.value === "number" && !Number.isInteger(res.value)) {
             return;
           }
