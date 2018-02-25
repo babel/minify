@@ -1,7 +1,7 @@
 jest.autoMockOff();
 
 const File = require("vinyl");
-const babelCore = require("babel-core");
+const babelCore = require("@babel/core");
 const minifyPreset = require("babel-preset-minify");
 
 const unpad = require("unpad");

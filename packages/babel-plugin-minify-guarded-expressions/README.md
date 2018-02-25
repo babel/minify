@@ -43,7 +43,7 @@ babel --plugins minify-guarded-expressions script.js
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   plugins: ["minify-guarded-expressions"]
 });
 ```

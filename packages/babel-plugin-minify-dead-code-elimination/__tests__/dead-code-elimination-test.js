@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
+const babel = require("@babel/core");
 const unpad = require("unpad");
 const deadcode = require("../src/index");
 const simplify = require("../../babel-plugin-minify-simplify/src/index");

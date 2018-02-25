@@ -53,7 +53,7 @@ babel --plugins babel-plugin-transform-remove-undefined script.js
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   plugins: ["babel-plugin-transform-remove-undefined"]
 });
 ```

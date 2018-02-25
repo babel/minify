@@ -1,4 +1,4 @@
-const babelCore = require("babel-core");
+const babelCore = require("@babel/core");
 const through2 = require("through2");
 const PluginError = require("plugin-error");
 const applySourceMap = require("vinyl-sourcemaps-apply");
