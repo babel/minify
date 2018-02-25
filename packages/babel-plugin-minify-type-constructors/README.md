@@ -53,7 +53,7 @@ babel --plugins minify-type-constructors script.js
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   plugins: ["minify-type-constructors"]
 });
 ```

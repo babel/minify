@@ -50,7 +50,7 @@ babel --plugins transform-node-env-inline script.js
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   plugins: ["transform-node-env-inline"]
 });
 ```

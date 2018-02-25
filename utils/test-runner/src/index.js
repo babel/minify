@@ -2,7 +2,7 @@
 jest.setTimeout(25000);
 const fs = require("./fs");
 const path = require("path");
-const babel = require("babel-core");
+const babel = require("@babel/core");
 const parseArgs = require("./argParser");
 
 /**

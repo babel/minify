@@ -49,7 +49,7 @@ babel script.js --presets minify
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   presets: ["minify"]
 });
 ```
