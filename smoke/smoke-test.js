@@ -38,7 +38,7 @@ class SmokeTest {
 
     this.installCommand = this.options.install
       ? `cd ${this.path} && ${this.options.install}`
-      : `cd ${this.path} && npm install`;
+      : `cd ${this.path} && npm install --no-package-lock`;
 
     this.buildCommand = this.options.build
       ? `cd ${this.path} && ${this.options.build}`
