@@ -14,7 +14,7 @@ const parseArgs = require("./argParser");
  * So we start the path with a "./"
  */
 function pathJoin(...parts) {
-  if (parts[0].startsWith("/")) {
+  if (path.isAbsolute(parts[0])) {
     return path.join(...parts);
   }
   return "." + path.sep + path.join(...parts);
