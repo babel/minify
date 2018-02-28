@@ -116,10 +116,6 @@ module.exports = babel => {
           return;
         }
 
-        // if (traverse.hasType(node, "Identifier", t.FUNCTION_TYPES)) {
-        //   return;
-        // }
-
         // -0 maybe compared via dividing and then checking against -Infinity
         // Also -X will always be -X.
         if (
