@@ -2,31 +2,48 @@
 jest.setTimeout(25000);
 const fs = require("./fs");
 const path = require("path");
-const babel = require("babel-core");
+const babel = require("@babel/core");
 const parseArgs = require("./argParser");
 
+/**
+ * Jest changes __dirname to relative path and the require of relative path
+ * that doesn't start with "." will be a module require -
+ *
+ * require("./packages/babel-plugin...") vs require("packages/babel-plugin..");
+ *
+ * So we start the path with a "./"
+ */
+function pathJoin(...parts) {
+  if (path.isAbsolute(parts[0])) {
+    return path.join(...parts);
+  }
+  return "." + path.sep + path.join(...parts);
+}
+
 function testRunner(dir) {
-  const pkgDir = path.join(dir, "../");
+  const pkgDir = pathJoin(dir, "../");
+
   const packageJson = JSON.parse(
-    fs.readFileSync(path.join(pkgDir, "package.json"))
+    fs.readFileSync(pathJoin(pkgDir, "package.json"))
   );
   const pkgName = packageJson.name;
 
-  const fixturesDir = path.join(pkgDir, "__tests__/fixtures");
+  const fixturesDir = pathJoin(pkgDir, "__tests__/fixtures");
 
   const fixtures = fs
     .readdirSync(fixturesDir)
-    .filter(dir => fs.isDirectorySync(path.join(fixturesDir, dir)));
+    .filter(dir => fs.isDirectorySync(pathJoin(fixturesDir, dir)));
 
   const flags = parseArgs(process.argv);
   const updateFixtures = Boolean(flags["update-fixtures"]);
 
   describe(pkgName, () => {
     for (const fixture of fixtures) {
-      const actualFile = path.join(fixturesDir, fixture, "actual.js");
-      const expectedFile = path.join(fixturesDir, fixture, "expected.js");
-      const skipFile = path.join(fixturesDir, fixture, "skip");
-      const optionsFile = path.join(fixturesDir, fixture, "options.json");
+      const actualFile = pathJoin(fixturesDir, fixture, "actual.js");
+      const expectedFile = pathJoin(fixturesDir, fixture, "expected.js");
+      const skipFile = pathJoin(fixturesDir, fixture, "skip");
+      const optionsFile = pathJoin(fixturesDir, fixture, "options.json");
+      const babelOptionsFile = pathJoin(fixturesDir, fixture, "babel.json");
 
       if (fs.isFileSync(skipFile)) {
         test.skip(fixture, () => {});
@@ -41,11 +58,20 @@ function testRunner(dir) {
           options = JSON.parse(await fs.readFile(optionsFile));
         }
 
-        const pluginPath = path.join(pkgDir, "src/index.js");
+        let babelOpts = {};
+        if (await fs.isFile(babelOptionsFile)) {
+          babelOpts = JSON.parse(await fs.readFile(babelOptionsFile));
+        }
 
-        const actualTransformed = babel.transform(actual, {
-          plugins: [[pluginPath, options]]
-        }).code;
+        const currentPlugin = pathJoin(pkgDir, "src/index.js");
+
+        if (Array.isArray(babelOpts.plugins)) {
+          babelOpts.plugins = [[currentPlugin, options], ...babelOpts.plugins];
+        } else {
+          babelOpts.plugins = [[currentPlugin, options]];
+        }
+
+        const actualTransformed = babel.transform(actual, babelOpts).code;
 
         if (!await fs.isFile(expectedFile)) {
           await fs.writeFile(expectedFile, actualTransformed);

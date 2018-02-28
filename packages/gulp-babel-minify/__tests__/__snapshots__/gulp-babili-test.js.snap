@@ -12,6 +12,6 @@ exports[`gulp-babel-minify comments should remove comments by default except lic
 exports[`gulp-babel-minify comments should take a custom function 1`] = `"function foo(){}bar();/* YAC - yet another comment */var a=baz();"`;
 
 exports[`gulp-babel-minify should remove comments while doing DCE and simplify 1`] = `
-"var a=function(){(function(){foo(),bar(),baz();// comments should be optimized away
-})()};"
+"var a=function(){(function(){// comments should be optimized away
+foo(),bar(),baz()})()};"
 `;

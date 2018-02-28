@@ -83,6 +83,7 @@ describe("preset", () => {
   `,
     `
     function a() {}
+
     a();
   `
   );
@@ -121,8 +122,15 @@ describe("preset", () => {
     `
     function a() {
       let a, b, c;
-
-      return ({ foo: a, bar: b, baz: c } = {}), { foo: a, bar: b, baz: c };
+      return ({
+        foo: a,
+        bar: b,
+        baz: c
+      } = {}), {
+        foo: a,
+        bar: b,
+        baz: c
+      };
     }
   `
   );
@@ -137,7 +145,6 @@ describe("preset", () => {
     `
     (function () {
       var a = Math.pi;
-
       return [a, a];
     })();
   `

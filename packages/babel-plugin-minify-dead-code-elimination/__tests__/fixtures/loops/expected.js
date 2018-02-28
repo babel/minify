@@ -1,33 +1,35 @@
-
+// while
 while (true) {
   bar();
-} // while
+}
 
 while (x) {
   baz();
-}
+} // for
 
-// for
+
 for (var i = 0; i < 8; i++) {
   foo();
 }
+
 for (;;) {
   bar();
 }
-
 
 // do_while
 do {
   foo();
 } while (1);
+
 {
   bar();
 }
+
 do {
   baz();
-} while (a);
+} while (a); // optimize confident do...while statements with break
 
-// optimize confident do...while statements with break
+
 function foo() {
   do {
     if (x) break;
@@ -54,9 +56,9 @@ function foo() {
       if (x) break bar5;
     }
   } while (false);
-}
+} // confident do...while statements with continue
 
-// confident do...while statements with continue
+
 function foo() {
   do {
     if (x) continue;

@@ -3,5 +3,6 @@ function foo() {
     if (bar) return false;
     if (baz) return false;
   }
+
   return true;
 }

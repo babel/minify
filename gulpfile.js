@@ -1,3 +1,5 @@
+"use strict";
+
 const through = require("through2");
 const chalk = require("chalk");
 const newer = require("gulp-newer");
@@ -6,9 +8,9 @@ const log = require("fancy-log");
 const gulp = require("gulp");
 const path = require("path");
 
-export const build = gulp.series(buildPackages, buildUtils);
+const build = gulp.series(buildPackages, buildUtils);
 
-export const watch = gulp.series(build, () => {
+const watch = gulp.series(build, () => {
   const scripts = [
     getBuildConfig("packages").scripts,
     getBuildConfig("utils").scripts
@@ -16,15 +18,18 @@ export const watch = gulp.series(build, () => {
   gulp.watch(scripts, { debounceDelay: 200 }, build).on("error", () => {});
 });
 
-export function buildPackages() {
+function buildPackages() {
   return getBuildTask(getBuildConfig("packages"));
 }
 
-export function buildUtils() {
+function buildUtils() {
   return getBuildTask(getBuildConfig("utils"));
 }
 
-export default build;
+exports.build = build;
+exports.watch = watch;
+exports.buildPackages = buildPackages;
+exports.buildUtils = buildUtils;
 
 function getBuildTask({ scripts, dest }) {
   return gulp

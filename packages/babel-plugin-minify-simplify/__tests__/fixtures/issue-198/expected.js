@@ -1,6 +1,8 @@
 function foo() {
   let a,
-      { b } = x;
+      {
+    b
+  } = x;
 
   for (; true;) bar(a, b);
 

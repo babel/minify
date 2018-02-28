@@ -11,7 +11,7 @@ var foo = {
   // changed
   "bar": function () {},
   "1": function () {},
-  
+
   // not changed
   "default": 1,
   [a]: 2,
@@ -59,7 +59,7 @@ babel --plugins transform-property-literals script.js
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   plugins: ["transform-property-literals"]
 });
 ```

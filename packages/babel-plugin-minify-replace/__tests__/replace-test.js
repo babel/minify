@@ -29,6 +29,7 @@ describe("replace-plugin", () => {
     if (0) {
       foo();
     }
+
     if (!0) {
       foo();
     }
@@ -56,6 +57,7 @@ describe("replace-plugin", () => {
     if (0) {
       foo();
     }
+
     if (a.__DEV__) {
       foo();
     }

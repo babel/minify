@@ -45,7 +45,7 @@ module.exports = function({ types: t }) {
           if (
             !isComputed(path) &&
             isBuiltin(path) &&
-            !path.getFunctionParent().isProgram()
+            !getFunctionParent(path).isProgram()
           ) {
             const expName = memberToString(path.node);
             addToMap(context.pathsToUpdate, expName, path);
@@ -68,7 +68,7 @@ module.exports = function({ types: t }) {
               // Math.floor(1) --> 1
               if (result.confident && hasPureArgs(path)) {
                 path.replaceWith(t.valueToNode(result.value));
-              } else if (!callee.getFunctionParent().isProgram()) {
+              } else if (!getFunctionParent(callee).isProgram()) {
                 const expName = memberToString(callee.node);
                 addToMap(context.pathsToUpdate, expName, callee);
               }
@@ -180,7 +180,7 @@ function getSegmentedSubPaths(paths) {
           segments.set(lastCommon, paths);
           return;
         } else if (
-          !(fnParent = lastCommon.getFunctionParent()).isProgram() &&
+          !(fnParent = getFunctionParent(lastCommon)).isProgram() &&
           fnParent.get("body").isBlockStatement()
         ) {
           segments.set(fnParent, paths);
@@ -224,4 +224,12 @@ function hasPureArgs(path) {
 function isComputed(path) {
   const { node } = path;
   return node.computed;
+}
+
+/**
+ * Babel-7 returns null if there is no function parent
+ * and uses getProgramParent to get Program
+ */
+function getFunctionParent(path) {
+  return (path.scope.getFunctionParent() || path.scope.getProgramParent()).path;
 }

@@ -4,5 +4,6 @@ function foo() {
     bar(count);
     return count;
   }
+
   return count;
 }

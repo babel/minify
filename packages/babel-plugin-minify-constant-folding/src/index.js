@@ -42,7 +42,7 @@ function swap(path, member, handlers, ...args) {
 module.exports = babel => {
   const replacements = require("./replacements.js")(babel);
   const seen = Symbol("seen");
-  const { types: t, traverse } = babel;
+  const { types: t } = babel;
 
   return {
     name: "minify-constant-folding",
@@ -113,12 +113,6 @@ module.exports = babel => {
         }
 
         if (!path.isPure()) {
-          return;
-        }
-
-        if (
-          traverse.hasType(node, path.scope, "Identifier", t.FUNCTION_TYPES)
-        ) {
           return;
         }
 
