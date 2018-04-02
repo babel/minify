@@ -1,4 +1,5 @@
 const FALLBACK_HANDLER = Symbol("fallback handler");
+const EMPTY_OBJECT = {};
 
 module.exports = ({ types: t }) => {
   const undef = t.unaryExpression("void", t.numericLiteral(0));
@@ -20,10 +21,70 @@ module.exports = ({ types: t }) => {
   }
 
   function hasSpread(node) {
-    return node.elements.some(el => t.isSpreadElement(el));
+    const elements = t.isObjectExpression(node)
+      ? node.properties
+      : node.elements;
+
+    return elements.some(el => t.isSpreadElement(el));
   }
 
   return {
+    ObjectExpression: {
+      canReplace() {
+        return !hasSpread(this.node);
+      },
+      members: {
+        [FALLBACK_HANDLER](key) {
+          if (hasSpread(this.node)) {
+            return;
+          }
+          if(this.node.properties.length === 0) {
+            if(key in EMPTY_OBJECT) {
+              return
+            }
+            else {
+              return undef;
+            }
+          }
+
+          let bailout = false;
+          const prop = this.node.properties
+            .slice()
+            .reverse()
+            .find(prop => {
+              if (!t.isObjectProperty(prop)) {
+                return (bailout = true);
+              }
+
+              if (t.isStringLiteral(prop.key)) {
+                return typeof key === "string" && prop.key.value === key;
+              }
+              if (t.isNumericLiteral(prop.key)) {
+                return typeof key === "number" && prop.key.value === key;
+              }
+
+              if (!prop.computed && t.isIdentifier(prop.key)) {
+                return typeof key === "string" && prop.key.name === key;
+              }
+
+              return (bailout = true);
+            });
+
+          if (!bailout) {
+            if (prop) {
+              return prop.value;
+            } else if (key in EMPTY_OBJECT) {
+              return t.memberExpression(
+                t.objectExpression([]),
+                t.identifier(key)
+              );
+            } else {
+              return undef;
+            }
+          }
+        }
+      }
+    },
     ArrayExpression: {
       canReplace() {
         return !hasSpread(this.node);
