@@ -20,7 +20,6 @@ const butternut = require("butternut");
 
 const ASSETS_DIR = path.join(__dirname, "benchmark_cache");
 const DEFAULT_ASSETS = {
-  "react.js": "https://unpkg.com/react/dist/react.js", // 120 kb
   "vue.js": "https://unpkg.com/vue/dist/vue.js", // 230 kb
   "lodash.js": "https://unpkg.com/lodash/lodash.js", // 500kb
   "three.js": "https://unpkg.com/three/build/three.js" // 1000kb
