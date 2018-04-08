@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-remove-console",
-  "version": "6.9.0",
+  "version": "6.9.1",
   "description": "Remove all console.* calls.",
   "keywords": [
     "babel-plugin"

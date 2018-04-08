@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-dead-code-elimination",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "",
   "keywords": [
     "babel-plugin"
@@ -12,9 +12,9 @@
   "main": "lib/index.js",
   "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-dead-code-elimination",
   "dependencies": {
-    "babel-helper-evaluate-path": "^0.3.0",
-    "babel-helper-mark-eval-scopes": "^0.3.0",
-    "babel-helper-remove-or-void": "^0.3.0",
+    "babel-helper-evaluate-path": "^0.4.0",
+    "babel-helper-mark-eval-scopes": "^0.4.0",
+    "babel-helper-remove-or-void": "^0.4.0",
     "lodash.some": "^4.6.0"
   }
 }
