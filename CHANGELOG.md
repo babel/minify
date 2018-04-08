@@ -1,3 +1,25 @@
+## babel-minify@0.4.0 (2018-04-08)
+
+#### :boom: Breaking Change
+* `babel-helper-mark-eval-scopes`, `babel-minify`, `babel-plugin-minify-builtins`, `babel-plugin-minify-constant-folding`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-flip-comparisons`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-infinity`, `babel-plugin-minify-mangle-names`, `babel-plugin-minify-numeric-literals`, `babel-plugin-minify-replace`, `babel-plugin-minify-simplify`, `babel-plugin-minify-type-constructors`, `babel-plugin-transform-inline-consecutive-adds`, `babel-plugin-transform-inline-environment-variables`, `babel-plugin-transform-member-expression-literals`, `babel-plugin-transform-merge-sibling-variables`, `babel-plugin-transform-minify-booleans`, `babel-plugin-transform-node-env-inline`, `babel-plugin-transform-property-literals`, `babel-plugin-transform-regexp-constructors`, `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`, `babel-preset-minify`, `gulp-babel-minify`
+  * [#487](https://github.com/babel/minify/pull/487) Upgrade to Babel 7. ([@boopathi](https://github.com/boopathi))
+
+#### :nail_care: Polish
+* `babel-plugin-minify-constant-folding`
+  * [#800](https://github.com/babel/minify/pull/800) Fix some comment typo. ([@maurobringolf](https://github.com/maurobringolf))
+
+#### :house: Internal
+* `babel-plugin-transform-remove-console`, `babel-plugin-transform-remove-debugger`, `babel-plugin-transform-remove-undefined`, `babel-plugin-transform-simplify-comparison-operators`, `babel-plugin-transform-undefined-to-void`
+  * [#798](https://github.com/babel/minify/pull/798) Refactor test case into new format. ([@sylvesteraswin](https://github.com/sylvesteraswin))
+
+#### Chore
+* [#809](https://github.com/babel/minify/pull/809) chore: upgrade deps. ([@boopathi](https://github.com/boopathi))
+
+#### Committers: 3
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Mauro Bringolf ([maurobringolf](https://github.com/maurobringolf))
+- Sylvester Aswin ([sylvesteraswin](https://github.com/sylvesteraswin))
+
 ## babel-minify@0.3.0 (2018-01-31)
 
 #### :boom: Breaking Change
