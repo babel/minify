@@ -1,5 +1,6 @@
 function boo() {
   var bar = foo || [];
+
   if (!bar || baz.length === 0) {
     return "wow";
   }

@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
+const babel = require("@babel/core");
 const unpad = require("unpad");
 const deadcode = require("../src/index");
 const simplify = require("../../babel-plugin-minify-simplify/src/index");
@@ -13,99 +13,7 @@ function transformWithSimplify(code) {
 }
 
 describe("dce-plugin", () => {
-  thePlugin(
-    "should not remove used expressions",
-    `
-    var n = 1;
-    if (foo) n;
-    console.log(n);
-
-    function bar(a) {
-      var a = a ? a : a;
-    }
-  `,
-    `
-    var n = 1;
-    if (foo) ;
-    console.log(n);
-
-    function bar(a) {
-      var a = a ? a : a;
-    }
-  `
-  );
-
-  thePlugin(
-    "should handle case blocks ",
-    `
-    function a() {
-      switch (foo) {
-        case 6:
-          return bar;
-          break;
-      }
-    }
-  `,
-    `
-    function a() {
-      switch (foo) {
-        case 6:
-          return bar;
-          break;
-      }
-    }
-  `
-  );
-
-  // NCE = Named Class Expressions
-  thePlugin(
-    "should remove names from named class expressions",
-    `
-    var Foo = class Bar {};
-  `,
-    `
-    var Foo = class {};
-  `
-  );
-
-  thePlugin(
-    "should not remove names from named class expressions when the name is used",
-    `
-    var Foo = class Bar {
-      constructor() {
-        console.log(Bar);
-      }
-    };
-  `
-  );
-
-  thePlugin(
-    "should handle variable declarations with same name as the class expression name",
-    `
-    (function () {
-      var A = class A {
-        constructor() {
-          this.class = A;
-        }
-      }
-      var B = class B {};
-      exports.A = A;
-      exports.B = B;
-    })();
-  `,
-    `
-    (function () {
-      exports.A = class A {
-        constructor() {
-          this.class = A;
-        }
-      };
-      exports.B = class {};
-    })();
-  `
-  );
-
-  thePlugin(
+  thePlugin.skip(
     "should latch on to exisiting vars",
     `
    function x(a) {
@@ -142,20 +50,6 @@ describe("dce-plugin", () => {
   `,
     `
     foo(0);
-  `
-  );
-
-  thePlugin(
-    "should not evaluate to false and remove conditional",
-    `
-    function foo(obj) {
-      return obj && typeof obj === "object" ? x() : obj;
-    }
-  `,
-    `
-    function foo(obj) {
-      return obj && typeof obj === "object" ? x() : obj;
-    }
   `
   );
 

@@ -1,7 +1,7 @@
 // basic
-function foo() {}
+function foo() {} // impure right
 
-// impure right
+
 function bar() {
   f();
 }

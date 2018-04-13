@@ -85,7 +85,7 @@ babel --plugins minify-replace script.js
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   plugins: ["minify-replace"]
 });
 ```

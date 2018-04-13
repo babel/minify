@@ -1,7 +1,5 @@
 // pures first
-
 null === a;
-
 ({}) === a;
 
 function foo() {
@@ -9,6 +7,7 @@ function foo() {
     var bar;
     bar = baz;
   }
+
   x();
   return x;
 }

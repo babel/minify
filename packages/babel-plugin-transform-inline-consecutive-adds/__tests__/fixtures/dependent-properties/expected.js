@@ -3,5 +3,4 @@ const foo = {
     console.log(3);
   }
 };
-
 foo.b = foo.a();

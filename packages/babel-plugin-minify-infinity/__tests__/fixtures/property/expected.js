@@ -1,2 +1,4 @@
-var x = { Infinity: 0 };
+var x = {
+  Infinity: 0
+};
 x.Infinity;

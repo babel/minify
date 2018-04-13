@@ -2,6 +2,7 @@ function a(b, c, d) {
   eval(";");
   return b;
 }
+
 function b(c) {
   (1, eval)(";");
   return c;
@@ -22,15 +23,15 @@ function foo(bar, baz) {
       console.log("foox1");
     }
   }
+
   function fooy() {
     console.log("fooy");
   }
-}
+} // DO NOT optimize
 
-// DO NOT optimize
+
 function quux() {
   bar();
-
   var x = 5;
   return x;
 

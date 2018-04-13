@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const babel = require("babel-core");
+const babel = require("@babel/core");
 const preset = require("../packages/babel-preset-minify");
 const fs = require("fs");
 const Table = require("cli-table");
@@ -7,15 +7,13 @@ const Table = require("cli-table");
 const hop = (o, key) => Object.hasOwnProperty.call(o, key);
 
 class Benchmark {
-  constructor(
-    {
-      now = () => process.hrtime(),
-      diff = start => {
-        const delta = process.hrtime(start);
-        return delta[0] * 1e3 + delta[1] / 1e6;
-      }
-    } = {}
-  ) {
+  constructor({
+    now = () => process.hrtime(),
+    diff = start => {
+      const delta = process.hrtime(start);
+      return delta[0] * 1e3 + delta[1] / 1e6;
+    }
+  } = {}) {
     this.events = {};
     this.visits = {};
     this.results = {};

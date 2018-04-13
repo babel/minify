@@ -13,25 +13,17 @@ module.exports = t => {
     const consequent = path.get("consequent");
     const alternate = path.get("alternate");
 
-    const { Expression: EX, LogicalExpression: LE } = h.typeSymbols(t);
+    const { Expression: EX } = h.typeSymbols(t);
 
     // Convention:
     // ===============
     // for each pattern [test, consequent, alternate, handler(expr, cons, alt)]
     const matcher = new PatternMatch([
-      [LE, true, false, e => e],
       [EX, true, false, e => notnot(e)],
-
       [EX, false, true, e => not(e)],
-
-      [LE, true, EX, (e, c, a) => or(e, a)],
       [EX, true, EX, (e, c, a) => or(notnot(e), a)],
-
       [EX, false, EX, (e, c, a) => and(not(e), a)],
-
       [EX, EX, true, (e, c) => or(not(e), c)],
-
-      [LE, EX, false, (e, c) => and(e, c)],
       [EX, EX, false, (e, c) => and(notnot(e), c)]
     ]);
 

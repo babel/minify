@@ -4,5 +4,6 @@ function foo() {
       b(a, c);
     }
   }
+
   function b() {}
 }

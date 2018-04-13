@@ -208,6 +208,14 @@ module.exports = ({ types: t, traverse }) => {
             ) {
               // `bar(function foo() {})` foo is not referenced but it's used.
               continue;
+            } else if (
+              // ClassDeclaration has binding in two scopes
+              //   1. The scope in which it is declared
+              //   2. The class's own scope
+              binding.path.isClassDeclaration() &&
+              binding.path === scope.path
+            ) {
+              continue;
             }
 
             const mutations = [];
@@ -341,9 +349,16 @@ module.exports = ({ types: t, traverse }) => {
               let bail = false;
 
               if (replacementPath.isIdentifier()) {
-                bail =
-                  refPath.scope.getBinding(replacement.name) !==
-                  scope.getBinding(replacement.name);
+                const binding = scope.getBinding(replacement.name);
+                // the reference should be in the same scope
+                // and the replacement should be a constant - this is to
+                // ensure that the duplication of replacement is not affected
+                // https://github.com/babel/minify/issues/685
+                bail = !(
+                  binding &&
+                  refPath.scope.getBinding(replacement.name) === binding &&
+                  binding.constantViolations.length === 0
+                );
               } else {
                 replacementPath.traverse({
                   Function(path) {
@@ -354,9 +369,13 @@ module.exports = ({ types: t, traverse }) => {
                     if (bail) {
                       return;
                     }
-                    bail =
-                      refPath.scope.getBinding(node.name) !==
-                      scope.getBinding(node.name);
+                    const binding = scope.getBinding(node.name);
+                    if (
+                      binding &&
+                      refPath.scope.getBinding(node.name) === binding
+                    ) {
+                      bail = binding.constantViolations.length > 0;
+                    }
                   }
                 });
               }

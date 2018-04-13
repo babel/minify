@@ -2,7 +2,6 @@
   function a() {
     {
       var a = true;
-
       {
         b();
       }

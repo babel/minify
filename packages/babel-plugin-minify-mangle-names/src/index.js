@@ -112,7 +112,7 @@ module.exports = babel => {
       /**
        * Same usage as in DCE, whichever runs first
        */
-      if (!isEvalScopesMarked(mangler.program.scope)) {
+      if (!isEvalScopesMarked(mangler.program)) {
         markEvalScopes(mangler.program);
       }
 
@@ -133,6 +133,7 @@ module.exports = babel => {
             scopeTracker.addBinding(scope.bindings[name]);
           });
         },
+
         /**
          * This is necessary because, in Babel, the scope.references
          * does NOT contain the references in that scope. Only the program
@@ -143,13 +144,17 @@ module.exports = babel => {
          * is considered as scope referencing that identifier
          */
         ReferencedIdentifier(path) {
-          if (isLabelIdentifier(path)) return;
+          if (isLabelIdentifier(path)) {
+            return;
+          }
           const { scope, node: { name } } = path;
           const binding = scope.getBinding(name);
           if (!binding) {
             // Do not collect globals as they are already available via
             // babel's API
-            if (scope.hasGlobal(name)) return;
+            if (scope.hasGlobal(name)) {
+              return;
+            }
             // This should NOT happen ultimately. Panic if this code block is
             // reached
             throw new Error(
@@ -159,54 +164,6 @@ module.exports = babel => {
             );
           } else {
             // Add it to our scope tracker if everything is fine
-            scopeTracker.addReference(scope, binding, name);
-          }
-        },
-
-        /**
-         * This is useful to detect binding ids and add them to the
-         * scopeTracker's bindings
-         *
-         * TODO:
-         *
-         * This visitor is probably unnecessary. It was added to capture the
-         * bindings that was not present in scope.bindings. But, now, it looks
-         * like the unit and smoke tests pass without this.
-         */
-        BindingIdentifier(path) {
-          if (isLabelIdentifier(path)) return;
-
-          const { scope, node: { name } } = path;
-          const binding = scope.getBinding(name);
-
-          /**
-           * We have already captured the bindings when traversing through
-           * Scopables, if a binding identifier doesn't have a binding, it
-           * probably means that another transformation created a new binding,
-           * refer https://github.com/babel/minify/issues/549 for example -
-           * binding created by plugin transform-es2015-function-name
-           *
-           * So we just don't care about bindings that do not exist
-           *
-           * TODO:
-           *
-           * this deopts in DCE as this name can be removed for this particular
-           * case (es2015-function-name)
-           */
-          if (!binding) return;
-
-          /**
-           * Detect constant violations
-           *
-           * If it's a constant violation, then add the Identifier Path as
-           * a Reference instead of Binding - This is because the ScopeTracker
-           * tracks these Re-declaration and mutation of variables as References
-           * as it is simple to rename them
-           */
-          if (binding.identifier === path.node) {
-            scopeTracker.addBinding(binding);
-          } else {
-            // constant violation
             scopeTracker.addReference(scope, binding, name);
           }
         }
@@ -272,14 +229,18 @@ module.exports = babel => {
       const { scopeTracker } = mangler;
 
       // Unsafe Scope
-      if (!mangler.eval && hasEval(scope)) return;
+      if (!mangler.eval && hasEval(scope)) {
+        return;
+      }
 
       // Already visited
       // This is because for a function, in Babel, the function and
       // the function body's BlockStatement has the same scope, and will
       // be visited twice by the Scopable handler, and we want to mangle
       // it only once
-      if (mangler.visitedScopes.has(scope)) return;
+      if (mangler.visitedScopes.has(scope)) {
+        return;
+      }
       mangler.visitedScopes.add(scope);
 
       // Helpers to generate names
@@ -378,8 +339,9 @@ module.exports = babel => {
         if (name !== oldName) continue;
         for (const idPath of bindingIds[name]) {
           if (predicate(idPath)) {
-            this.renamedNodes.add(idPath.node);
-            idPath.replaceWith(t.identifier(newName));
+            idPath.node.name = newName;
+            // babel-7 don't requeue
+            // idPath.replaceWith(t.identifier(newName));
             this.renamedNodes.add(idPath.node);
           }
         }
@@ -455,8 +417,10 @@ module.exports = babel => {
               if (actualBinding !== binding) {
                 return;
               }
-              mangler.renamedNodes.add(refPath.node);
-              refPath.replaceWith(t.identifier(newName));
+
+              refPath.node.name = newName;
+              // babel-7 don't requeue
+              // refPath.replaceWith(t.identifier(newName));
               mangler.renamedNodes.add(refPath.node);
 
               scopeTracker.updateReference(
@@ -469,8 +433,10 @@ module.exports = babel => {
           });
         } else if (!isLabelIdentifier(path)) {
           if (path.node.name === oldName) {
-            mangler.renamedNodes.add(path.node);
-            path.replaceWith(t.identifier(newName));
+            path.node.name = newName;
+
+            // babel-7 don't requeue
+            // path.replaceWith(t.identifier(newName));
             mangler.renamedNodes.add(path.node);
             scopeTracker.updateReference(path.scope, binding, oldName, newName);
           } else if (mangler.renamedNodes.has(path.node)) {
@@ -480,7 +446,9 @@ module.exports = babel => {
           } else {
             throw new Error(
               `Unexpected Rename Error: ` +
-                `Trying to replace "${node.name}": from "${oldName}" to "${newName}". ` +
+                `Trying to replace "${
+                  node.name
+                }": from "${oldName}" to "${newName}". ` +
                 `Please report it at ${newIssueUrl}`
             );
           }
@@ -488,7 +456,10 @@ module.exports = babel => {
         // else label identifier - silently ignore
       }
 
-      // update babel's scope tracking
+      // update babel's internal tracking
+      binding.identifier.name = newName;
+
+      // update babel's internal scope tracking
       const { bindings } = scope;
       bindings[newName] = binding;
       delete bindings[oldName];

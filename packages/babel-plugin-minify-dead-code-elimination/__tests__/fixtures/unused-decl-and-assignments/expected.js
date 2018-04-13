@@ -1,8 +1,9 @@
-function a() {}
+function a() {} // bail case
 
-// bail case
+
 function b() {
   var x = 1;
+
   while (a) wow = x += 1;
 }
 

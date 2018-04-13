@@ -5,8 +5,6 @@ const foo = {
   c: bar(),
   d: "str"
 };
-
-
 var bar = {
   a: 0,
   b: 2

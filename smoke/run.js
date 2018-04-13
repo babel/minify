@@ -73,7 +73,7 @@ run();
 // const otherTests = [
 //   {
 //     dir: "babel",
-//     files: "packages/babel-core/src/helpers/resolve.js",
+//     files: "packages/@babel/core/src/helpers/resolve.js",
 //     build: "make bootstrap",
 //     test: "make test-only",
 //     babelOptions: {

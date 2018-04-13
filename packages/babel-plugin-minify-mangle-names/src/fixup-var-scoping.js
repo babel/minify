@@ -7,7 +7,8 @@ module.exports = function(mangler) {
       if (path.node.kind !== "var") {
         return;
       }
-      const fnScope = path.scope.getFunctionParent();
+      const fnScope =
+        path.scope.getFunctionParent() || path.scope.getProgramParent();
       const bindingIds = path.getOuterBindingIdentifierPaths();
 
       for (const name in bindingIds) {

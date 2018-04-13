@@ -3,16 +3,16 @@ init:
 
 environment:
   matrix:
+    - nodejs_version: '9'
     - nodejs_version: '8'
     - nodejs_version: '6'
-    - nodejs_version: '4'
 
 cache:
  - "%LOCALAPPDATA%\\Yarn"
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - npm install -g yarn@1.3.2
+  - npm install -g yarn@1.5.1
   - set PATH=%APPDATA%\npm;%PATH%
   - yarn
 
@@ -29,4 +29,4 @@ before_test:
 test_script:
   - node --version
   - yarn --version
-  - yarn test
+  - yarn test --no-cache

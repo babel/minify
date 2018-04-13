@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { transform } = require("babel-core");
+const { transform } = require("@babel/core");
 const Table = require("cli-table");
 const zlib = require("zlib");
 const chalk = require("chalk");

@@ -1,0 +1,1 @@
+for (i = 1; i <= j && !bar; i++) if (wat(), x) throw 1;

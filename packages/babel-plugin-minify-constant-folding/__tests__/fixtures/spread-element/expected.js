@@ -1,6 +1,7 @@
 function foo() {
   return [...iter].length;
 }
+
 function bar() {
   return [...iter][0];
 }

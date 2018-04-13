@@ -3,17 +3,19 @@ function test1() {
     return foo;
   };
 }
+
 function test2() {
   exports.foo = function foo() {
     return foo;
   };
-}
+} // mutual recursion
 
-// mutual recursion
+
 function baz() {
   function foo() {
     return bar();
   }
+
   function bar() {
     return foo();
   }
