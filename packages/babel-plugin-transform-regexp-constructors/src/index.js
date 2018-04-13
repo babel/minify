@@ -22,6 +22,9 @@ function createRegExpLiteral(args, prettify, t) {
       .replace(/\f/g, "\\f")
       .replace(/\r/g, "\\r");
   }
+
+  pattern = pattern.replace(/\0/g, "\\0");
+
   return t.regExpLiteral(pattern, flags);
 }
 

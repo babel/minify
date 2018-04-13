@@ -1,6 +1,5 @@
 // constants first
 -1 === a;
-
 100 * x;
 x + 100;
 x - 100;

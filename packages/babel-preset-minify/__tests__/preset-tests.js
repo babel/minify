@@ -83,6 +83,7 @@ describe("preset", () => {
   `,
     `
     function a() {}
+
     a();
   `
   );
@@ -121,8 +122,15 @@ describe("preset", () => {
     `
     function a() {
       let a, b, c;
-
-      return ({ foo: a, bar: b, baz: c } = {}), { foo: a, bar: b, baz: c };
+      return ({
+        foo: a,
+        bar: b,
+        baz: c
+      } = {}), {
+        foo: a,
+        bar: b,
+        baz: c
+      };
     }
   `
   );
@@ -137,7 +145,6 @@ describe("preset", () => {
     `
     (function () {
       var a = Math.pi;
-
       return [a, a];
     })();
   `
@@ -150,6 +157,23 @@ describe("preset", () => {
         module.exports = {
           "\uD835\uDCB6": "ascr"
         };
+      }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#769 simplify + deadcode",
+    `
+      function fn(foo) {
+        if (foo && foo.length > 5) {
+          return true;
+        }
+        return false;
+      }
+    `,
+    `
+      function fn(a) {
+        return !!(a && 5 < a.length);
       }
     `
   );

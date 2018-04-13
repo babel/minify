@@ -1,4 +1,4 @@
-const babelCore = require("babel-core");
+const babelCore = require("@babel/core");
 const babelPresetMinify = require("babel-preset-minify");
 
 module.exports = function babelMinify(
@@ -9,7 +9,7 @@ module.exports = function babelMinify(
   // overrides and other options
   {
     minified = true,
-    inputSourceMap = null,
+    inputSourceMap,
     sourceMaps = false,
 
     // to override the default babelCore used

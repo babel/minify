@@ -4,5 +4,6 @@ function foo() {
   function bar() {
     bar();
   }
+
   bar.call();
 }

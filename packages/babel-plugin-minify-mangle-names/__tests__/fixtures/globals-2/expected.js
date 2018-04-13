@@ -1,5 +1,7 @@
 class A {}
+
 class B extends A {}
+
 (function () {
   class a {
     constructor() {
@@ -7,5 +9,6 @@ class B extends A {}
       new B();
       a;
     }
+
   }
 })();

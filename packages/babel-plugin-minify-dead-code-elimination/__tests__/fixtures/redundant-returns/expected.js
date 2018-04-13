@@ -11,15 +11,17 @@ function bar() {
 function baz() {
   if (a) {
     y();
+
     if (b) {}
   }
-}
+} // keep non-redundant returns
 
-// keep non-redundant returns
+
 function foo1() {
   if (a) {
     y();
     return;
   }
+
   x();
 }

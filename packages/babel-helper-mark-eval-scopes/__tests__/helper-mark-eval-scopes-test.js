@@ -1,6 +1,6 @@
 jest.autoMockOff();
 
-const babel = require("babel-core");
+const babel = require("@babel/core");
 const helper = require("../src");
 
 function getPath(source) {

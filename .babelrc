@@ -1,13 +1,17 @@
 {
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
           "node": 4
         },
-        "include": ["transform-async-to-generator"],
-        "exclude": ["transform-regenerator"]
+        "include": [
+          "transform-async-to-generator"
+        ],
+        "exclude": [
+          "transform-regenerator"
+        ]
       }
     ]
   ]

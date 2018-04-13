@@ -136,7 +136,7 @@ module.exports = class ScopeTracker {
         maybeFor.isForStatement({ init: maybeDecl.node }) ||
         maybeFor.isForXStatement({ left: maybeDecl.node });
       if (isForLoopBinding) {
-        const fnParent = maybeFor.getFunctionParent();
+        const fnParent = getFunctionParent(maybeFor);
         if (fnParent.isFunction({ body: maybeFor.parent })) {
           const parentFunctionBinding = this.bindings
             .get(fnParent.scope)
@@ -208,7 +208,7 @@ module.exports = class ScopeTracker {
   }
 
   /**
-   * Moves Binding from it's own Scope to {toScope}
+   * Moves Binding from it's own Scope to {@param toScope}
    *
    * required for fixup-var-scope
    *
@@ -241,3 +241,11 @@ module.exports = class ScopeTracker {
     bindings.delete(oldName);
   }
 };
+
+/**
+ * Babel-7 returns null if there is no function parent
+ * and uses getProgramParent to get Program
+ */
+function getFunctionParent(path) {
+  return (path.scope.getFunctionParent() || path.scope.getProgramParent()).path;
+}

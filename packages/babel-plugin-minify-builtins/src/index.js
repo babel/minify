@@ -24,6 +24,19 @@ module.exports = function({ types: t }) {
       const context = this;
 
       const collectVisitor = {
+        AssignmentExpression(path) {
+          const left = path.get("left");
+
+          // Should bail and not run the plugin
+          // when builtin is polyfilled
+          if (t.isMemberExpression(left) && isBuiltInComputed(left)) {
+            let parent = path;
+            do {
+              parent.stop();
+            } while ((parent = parent.parentPath));
+          }
+        },
+
         MemberExpression(path) {
           if (path.parentPath.isCallExpression()) {
             return;
@@ -32,7 +45,7 @@ module.exports = function({ types: t }) {
           if (
             !isComputed(path) &&
             isBuiltin(path) &&
-            !path.getFunctionParent().isProgram()
+            !getFunctionParent(path).isProgram()
           ) {
             const expName = memberToString(path.node);
             addToMap(context.pathsToUpdate, expName, path);
@@ -46,7 +59,7 @@ module.exports = function({ types: t }) {
               return;
             }
 
-            // computed property should be not optimized
+            // computed property should not be optimized
             // Math[max]() -> Math.max()
             if (!isComputed(callee) && isBuiltin(callee)) {
               const result = evaluate(path, { tdz: context.tdz });
@@ -55,7 +68,7 @@ module.exports = function({ types: t }) {
               // Math.floor(1) --> 1
               if (result.confident && hasPureArgs(path)) {
                 path.replaceWith(t.valueToNode(result.value));
-              } else if (!callee.getFunctionParent().isProgram()) {
+              } else if (!getFunctionParent(callee).isProgram()) {
                 const expName = memberToString(callee.node);
                 addToMap(context.pathsToUpdate, expName, callee);
               }
@@ -115,6 +128,17 @@ module.exports = function({ types: t }) {
     return result;
   }
 
+  function isBuiltInComputed(memberExpr) {
+    const { node } = memberExpr;
+    const { object, computed } = node;
+
+    return (
+      computed &&
+      t.isIdentifier(object) &&
+      VALID_CALLEES.indexOf(object.name) >= 0
+    );
+  }
+
   function isBuiltin(memberExpr) {
     const { object, property } = memberExpr.node;
 
@@ -156,7 +180,7 @@ function getSegmentedSubPaths(paths) {
           segments.set(lastCommon, paths);
           return;
         } else if (
-          !(fnParent = lastCommon.getFunctionParent()).isProgram() &&
+          !(fnParent = getFunctionParent(lastCommon)).isProgram() &&
           fnParent.get("body").isBlockStatement()
         ) {
           segments.set(fnParent, paths);
@@ -200,4 +224,12 @@ function hasPureArgs(path) {
 function isComputed(path) {
   const { node } = path;
   return node.computed;
+}
+
+/**
+ * Babel-7 returns null if there is no function parent
+ * and uses getProgramParent to get Program
+ */
+function getFunctionParent(path) {
+  return (path.scope.getFunctionParent() || path.scope.getProgramParent()).path;
 }

@@ -37,5 +37,5 @@ These are passed on to the minify preset. Refer https://github.com/babel/minify/
 
 Default: `{}`
 
-+ `babel`: Use a custom `babel-core`
++ `babel`: Use a custom `@babel/core`
 + `minifyPreset`: Use a custom `babel-preset-minify`

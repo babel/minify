@@ -1,10 +1,8 @@
-const babelCore = require("babel-core");
+const babelCore = require("@babel/core");
 const through2 = require("through2");
-const gutil = require("gulp-util");
+const PluginError = require("plugin-error");
 const applySourceMap = require("vinyl-sourcemaps-apply");
 const babelPresetMinify = require("babel-preset-minify");
-
-const { PluginError } = gutil;
 
 const NAME = "gulp-babel-minify";
 

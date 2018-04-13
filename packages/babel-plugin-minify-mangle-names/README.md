@@ -50,7 +50,9 @@ npm install babel-plugin-minify-mangle-names
 ```json
 // with options
 {
-  "plugins": ["minify-mangle-names", { "exclude": { "foo": true, "bar": true} }]
+  "plugins": [
+    ["minify-mangle-names", { "exclude": { "foo": true, "bar": true} }]
+  ]
 }
 ```
 
@@ -63,15 +65,15 @@ babel --plugins minify-mangle-names script.js
 ### Via Node API
 
 ```javascript
-require("babel-core").transform("code", {
+require("@babel/core").transform("code", {
   plugins: ["minify-mangle-names"]
 });
 ```
 
 ## Options
 
-+ `exclude` - A plain JS Object with keys as identifier names and values indicating whether to exclude
-+ `eval` - mangle identifiers in scopes accessible by eval
-+ `keepFnName` - prevent mangler from altering function names. Useful for code depending on `fn.name`
-+ `topLevel` - mangle topLevel Identifiers
-+ `keepClassName` - prevent mangler from altering class names.
++ `exclude` - A plain JS Object with keys as identifier names and values indicating whether to exclude (default: `{}`)
++ `eval` - mangle identifiers in scopes accessible by eval (default: `false`)
++ `keepFnName` - prevent mangler from altering function names. Useful for code depending on `fn.name` (default: `false`)
++ `topLevel` - mangle topLevel Identifiers (default: `false`)
++ `keepClassName` - prevent mangler from altering class names (default: `false`).

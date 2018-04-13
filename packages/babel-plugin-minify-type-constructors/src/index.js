@@ -106,15 +106,13 @@ function replaceObject(t, path) {
   }
 }
 
-function defaults(
-  {
-    boolean = true,
-    number = true,
-    string = true,
-    array = true,
-    object = true
-  } = {}
-) {
+function defaults({
+  boolean = true,
+  number = true,
+  string = true,
+  array = true,
+  object = true
+} = {}) {
   return {
     boolean,
     number,
