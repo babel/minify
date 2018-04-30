@@ -158,4 +158,27 @@ describe("preset along with env", () => {
       }
     `
   );
+
+  thePlugin(
+    "should fix issue#825-merge-sibling-vars",
+    `
+    (function() {
+      const blah = 71;
+
+      var start = 1, navx = '';
+      while (start < 71) {
+          navx += 'a';
+          start += 10;
+      }
+      return 'b' + navx;
+    })();
+  `,
+    `
+    (function () {
+      for (var a = 1, b = ''; 71 > a;) b += 'a', a += 10;
+
+      return 'b' + b;
+    })();
+  `
+  );
 });

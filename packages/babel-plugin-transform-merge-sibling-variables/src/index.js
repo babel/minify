@@ -57,13 +57,23 @@ module.exports = function({ types: t }) {
 
             let sibling = path.getSibling(path.key + 1);
 
+            let declarations = [];
+
             while (sibling.isVariableDeclaration({ kind: node.kind })) {
-              node.declarations = node.declarations.concat(
-                sibling.node.declarations
-              );
+              declarations = declarations.concat(sibling.node.declarations);
+
               sibling.remove();
 
               sibling = path.getSibling(path.key + 1);
+            }
+
+            if (declarations.length > 0) {
+              path.replaceWith(
+                t.variableDeclaration(node.kind, [
+                  ...node.declarations,
+                  ...declarations
+                ])
+              );
             }
           },
 
