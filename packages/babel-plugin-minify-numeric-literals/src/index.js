@@ -25,8 +25,14 @@ module.exports = function() {
             .replace(/e0/, "");
         }
 
-        const replacement =
+        let replacement =
           normal.length > exponential.length ? exponential : normal;
+
+        if (path.node.value > 0 && Number.isInteger(path.node.value)) {
+          const hexadecimal = `0x${path.node.value.toString(16)}`;
+          replacement =
+            replacement.length > hexadecimal.length ? hexadecimal : replacement;
+        }
 
         if (path.node.extra.raw.length > replacement.length) {
           path.node.extra.raw = replacement;
