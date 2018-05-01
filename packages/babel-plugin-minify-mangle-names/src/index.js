@@ -147,7 +147,10 @@ module.exports = babel => {
           if (isLabelIdentifier(path)) {
             return;
           }
-          const { scope, node: { name } } = path;
+          const {
+            scope,
+            node: { name }
+          } = path;
           const binding = scope.getBinding(name);
           if (!binding) {
             // Do not collect globals as they are already available via

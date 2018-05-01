@@ -73,7 +73,7 @@ function testRunner(dir) {
 
         const actualTransformed = babel.transform(actual, babelOpts).code;
 
-        if (!await fs.isFile(expectedFile)) {
+        if (!(await fs.isFile(expectedFile))) {
           await fs.writeFile(expectedFile, actualTransformed);
           console.warn("Created fixture's expected file - " + expectedFile);
         } else if (updateFixtures) {
