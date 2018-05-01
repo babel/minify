@@ -364,7 +364,7 @@ module.exports = babel => {
      */
     renameBindingIds(path, oldName, newName, predicate = () => true) {
       const bindingIds = path.getBindingIdentifierPaths(true, false);
-      for (const name in bindingIds) {
+      for (const name of Object.keys(bindingIds)) {
         if (name !== oldName) continue;
         for (const idPath of bindingIds[name]) {
           if (predicate(idPath)) {
