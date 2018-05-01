@@ -2,7 +2,7 @@
 
 machine:
   node:
-    version: "node"
+    version: "8"
   environment:
     PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin"
 
