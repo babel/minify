@@ -19,7 +19,7 @@ module.exports = function babelMinify(
     minifyPreset = babelPresetMinify
   } = {}
 ) {
-  return babel.transform(input, {
+  return babel.transformSync(input, {
     babelrc: false,
     presets: [[minifyPreset, options]],
     comments: false,

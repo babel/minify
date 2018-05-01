@@ -6,7 +6,7 @@
     "bootstrap": "lerna bootstrap",
     "build": "gulp build",
     "changelog": "lerna-changelog",
-    "clean": "lerna clean",
+    "clean": "rimraf packages/*/lib utils/*/lib",
     "coverage": "yarn test --coverage",
     "coverage-ci": "codecov -f coverage/coverage-final.json",
     "fix": "eslint --fix .",
@@ -58,7 +58,7 @@
   },
   "jest": {
     "transform": {
-      ".*": "<rootDir>/node_modules/babel-jest"
+      "^.+\\.js$": "babel-jest"
     },
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
