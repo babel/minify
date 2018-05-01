@@ -54,6 +54,8 @@ describe("preset along with env", () => {
 
       function a() {
         return function a() {
+          "use strict";
+
           _classCallCheck(this, a);
         };
       }

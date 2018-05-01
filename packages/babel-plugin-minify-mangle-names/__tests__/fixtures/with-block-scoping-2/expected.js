@@ -1,3 +1,5 @@
+"use strict";
+
 // #issue55, #issue57
 (function () {
   (function () {
