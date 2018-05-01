@@ -3,7 +3,7 @@ const babel = require("@babel/core");
 const unpad = require("unpad");
 
 function _transform(source, options) {
-  return babel.transform(unpad(source), options).code.trim();
+  return babel.transformSync(unpad(source), options).code.trim();
 }
 
 function makeTester(
@@ -15,19 +15,23 @@ function makeTester(
   if (!Array.isArray(plugins)) {
     plugins = [plugins];
   }
+
   const thePlugin = (name, source, expected = source, babelOpts) => {
     if (typeof expected === "object") {
       babelOpts = expected;
       expected = source;
     }
+
     const { stack } = new Error();
     const options = Object.assign(
-      { plugins, sourceType: "script" },
+      { plugins, sourceType: "script", configFile: false },
       opts,
       babelOpts
     );
+
     test(name, () => {
       const transformed = transform(source, options);
+
       try {
         check({
           transformed,
@@ -42,7 +46,9 @@ function makeTester(
       }
     });
   };
+
   thePlugin.skip = name => test.skip(name);
+
   if (excludeKeys.indexOf("inEachLine") === -1) {
     thePlugin.inEachLine = makeTester(
       plugins,
@@ -50,6 +56,11 @@ function makeTester(
       {
         test,
         transform(source, options) {
+          options.configFile = false;
+          options.sourceType = hop(options, "sourceType")
+            ? options.sourceType
+            : "script";
+
           return unpad(source)
             .split("\n")
             .map(line => _transform(line, options))
@@ -60,6 +71,7 @@ function makeTester(
       excludeKeys.concat("inEachLine")
     );
   }
+
   if (excludeKeys.indexOf("only") === -1) {
     thePlugin.only = makeTester(
       plugins,
@@ -72,6 +84,7 @@ function makeTester(
       excludeKeys.concat("only")
     );
   }
+
   return thePlugin;
 }
 
@@ -89,3 +102,7 @@ exports.snapshot = (plugins, opts) =>
       expect({ _source: source, expected: transformed }).toMatchSnapshot();
     }
   });
+
+function hop(o, key) {
+  return Object.prototype.hasOwnProperty.call(o, key);
+}

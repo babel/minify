@@ -72,10 +72,10 @@ describe("gulp-babel-minify", () => {
       const babel = Object.assign({}, babelCore);
 
       let usedTransform = false;
-      Object.defineProperty(babel, "transform", {
+      Object.defineProperty(babel, "transformSync", {
         get() {
           usedTransform = true;
-          return babelCore.transform;
+          return babelCore.transformSync;
         }
       });
 
