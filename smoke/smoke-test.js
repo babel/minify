@@ -119,8 +119,10 @@ class SmokeTest {
   }
 
   minify(contents) {
-    return babel.transform(contents, {
+    return babel.transformSync(contents, {
       minified: true,
+      sourceType: "script",
+      configFile: false,
       presets: [[minifyPreset, this.options.minifyOptions]]
     });
   }
