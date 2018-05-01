@@ -3,7 +3,7 @@ init:
 
 environment:
   matrix:
-    - nodejs_version: '9'
+    - nodejs_version: '10'
     - nodejs_version: '8'
     - nodejs_version: '6'
 
@@ -12,7 +12,7 @@ cache:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - npm install -g yarn@1.5.1
+  - npm install -g yarn@1.6.0
   - set PATH=%APPDATA%\npm;%PATH%
   - yarn
 

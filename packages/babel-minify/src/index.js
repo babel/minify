@@ -11,6 +11,7 @@ module.exports = function babelMinify(
     minified = true,
     inputSourceMap,
     sourceMaps = false,
+    sourceType = "script",
 
     // to override the default babelCore used
     babel = babelCore,
@@ -19,12 +20,14 @@ module.exports = function babelMinify(
     minifyPreset = babelPresetMinify
   } = {}
 ) {
-  return babel.transform(input, {
+  return babel.transformSync(input, {
     babelrc: false,
+    configFile: false,
     presets: [[minifyPreset, options]],
     comments: false,
     inputSourceMap,
     sourceMaps,
-    minified
+    minified,
+    sourceType
   });
 };

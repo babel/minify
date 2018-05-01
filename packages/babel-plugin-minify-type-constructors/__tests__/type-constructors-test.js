@@ -27,8 +27,9 @@ describe("type-constructors-plugin", () => {
       `
       );
       expect(
-        babel.transform(source, {
-          plugins: [[plugin, { [names[i]]: false }]]
+        babel.transformSync(source, {
+          plugins: [[plugin, { [names[i]]: false }]],
+          sourceType: "script"
         }).code
       ).toBe(source);
     }

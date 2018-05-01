@@ -7,8 +7,9 @@ const simplify = require("../../babel-plugin-minify-simplify/src/index");
 const thePlugin = require("test-transform")(deadcode);
 
 function transformWithSimplify(code) {
-  return babel.transform(code, {
-    plugins: [deadcode, simplify]
+  return babel.transformSync(code, {
+    plugins: [deadcode, simplify],
+    sourceType: "script"
   }).code;
 }
 

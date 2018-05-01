@@ -58,9 +58,16 @@ function testRunner(dir) {
           options = JSON.parse(await fs.readFile(optionsFile));
         }
 
-        let babelOpts = {};
+        let babelOpts = {
+          // set the default sourcetype to be script
+          sourceType: "script"
+        };
+
         if (await fs.isFile(babelOptionsFile)) {
-          babelOpts = JSON.parse(await fs.readFile(babelOptionsFile));
+          Object.assign(
+            babelOpts,
+            JSON.parse(await fs.readFile(babelOptionsFile))
+          );
         }
 
         const currentPlugin = pathJoin(pkgDir, "src/index.js");
@@ -71,9 +78,12 @@ function testRunner(dir) {
           babelOpts.plugins = [[currentPlugin, options]];
         }
 
-        const actualTransformed = babel.transform(actual, babelOpts).code;
+        // don't consider the project's babel.config.js
+        babelOpts.configFile = false;
 
-        if (!await fs.isFile(expectedFile)) {
+        const actualTransformed = babel.transformSync(actual, babelOpts).code;
+
+        if (!(await fs.isFile(expectedFile))) {
           await fs.writeFile(expectedFile, actualTransformed);
           console.warn("Created fixture's expected file - " + expectedFile);
         } else if (updateFixtures) {
