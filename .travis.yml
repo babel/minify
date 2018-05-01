@@ -5,7 +5,7 @@ language: node_js
 cache: yarn
 
 node_js:
-  - '9'
+  - '10'
   - '8'
   - '6'
 
@@ -33,10 +33,10 @@ stages:
 jobs:
   include:
     - stage: lint
-      node_js: '8'
+      node_js: '10'
       script: yarn lint
     - stage: publish
-      node_js: '8'
+      node_js: '10'
       script: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       deploy:
         provider: script
