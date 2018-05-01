@@ -3,6 +3,15 @@ const babel = require("@babel/core");
 const unpad = require("unpad");
 
 function _transform(source, options) {
+  // reset defaults to older babel
+  // babel-7 current beta defaults to sourceType module
+  options.sourceType = defaults(options, "sourceType", "script");
+
+  // don't use config file - babel.config.js to apply transformations
+  // this is almost never required as babel.config.js represents the
+  // project's configuration and not the config for test environment
+  options.configFile = false;
+
   return babel.transformSync(unpad(source), options).code.trim();
 }
 
@@ -24,7 +33,7 @@ function makeTester(
 
     const { stack } = new Error();
     const options = Object.assign(
-      { plugins, sourceType: "script", configFile: false },
+      { plugins, sourceType: "script" },
       opts,
       babelOpts
     );
@@ -56,11 +65,6 @@ function makeTester(
       {
         test,
         transform(source, options) {
-          options.configFile = false;
-          options.sourceType = hop(options, "sourceType")
-            ? options.sourceType
-            : "script";
-
           return unpad(source)
             .split("\n")
             .map(line => _transform(line, options))
@@ -102,6 +106,10 @@ exports.snapshot = (plugins, opts) =>
       expect({ _source: source, expected: transformed }).toMatchSnapshot();
     }
   });
+
+function defaults(o, key, def) {
+  return hop(o, key) ? o[key] : def;
+}
 
 function hop(o, key) {
   return Object.prototype.hasOwnProperty.call(o, key);
