@@ -102,7 +102,7 @@ module.exports = babel => {
 
       // TODO: look into evaluating binding too (could result in more code, but gzip?)
       Expression(path, { opts: { tdz = false } = {} }) {
-        const { node } = path;
+        const { node, parent } = path;
 
         if (node[seen]) {
           return;
@@ -113,6 +113,11 @@ module.exports = babel => {
         }
 
         if (!path.isPure()) {
+          return;
+        }
+
+        // Avoid replacing the values for identifiers in exports
+        if (t.isExportSpecifier(parent)) {
           return;
         }
 
