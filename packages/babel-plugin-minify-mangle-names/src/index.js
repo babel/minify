@@ -387,12 +387,6 @@ module.exports = babel => {
         if (violations[i].isLabeledStatement()) continue;
 
         this.renameBindingIds(violations[i], oldName, newName);
-        scopeTracker.updateReference(
-          violations[i].scope,
-          binding,
-          oldName,
-          newName
-        );
       }
 
       // update all referenced places
