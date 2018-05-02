@@ -10,17 +10,17 @@ function d3_svg_line(a) {
     var j = [],
         k = [],
         l = -1,
-        i = b.length,
-        m,
-        d = d3_functor(c);
+        m = b.length,
+        n,
+        o = d3_functor(c);
 
     function g() {
       j.push("M", f(a(k), h));
     }
 
-    while (++l < i) {
-      if (e.call(this, m = b[l], l)) {
-        k.push([+d.call(this, m, l)]);
+    while (++l < m) {
+      if (e.call(this, n = b[l], l)) {
+        k.push([+o.call(this, n, l)]);
       } else if (k.length) {
         g();
         k = [];
