@@ -1,3 +1,29 @@
+## babel-minify@0.4.1 (2018-05-03)
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-mangle-names`
+  * [#830](https://github.com/babel/minify/pull/830) fix: add constant violations to references in mangler collect phase. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-constant-folding`
+  * [#828](https://github.com/babel/minify/pull/828) fix(const-folding): do not evaluate identifier in export specifiers. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-preset-minify`
+  * [#823](https://github.com/babel/minify/pull/823) Allow options for plugins disabled by default (babel-preset-minify). ([@nemophrost](https://github.com/nemophrost))
+* `babel-plugin-transform-merge-sibling-variables`, `babel-preset-minify`
+  * [#826](https://github.com/babel/minify/pull/826) fix(merge-sibling-var): recalculate declarations when concatenating variables. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### :memo: Documentation
+* [#817](https://github.com/babel/minify/pull/817) fix: update outdated react url. ([@ganes1410](https://github.com/ganes1410))
+
+#### Chore
+
+* all packages
+  * [#827](https://github.com/babel/minify/pull/827) chore: upgrade dependencies; add node 10; remove node 9 ([@boopathi](https://github.com/boopathi))
+
+#### Committers: 4
+- Alma Madsen ([nemophrost](https://github.com/nemophrost))
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- R.Ganesh ([ganes1410](https://github.com/ganes1410))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babel-minify@0.4.0 (2018-04-08)
 
 #### :boom: Breaking Change
