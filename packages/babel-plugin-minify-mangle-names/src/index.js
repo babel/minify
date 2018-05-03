@@ -131,6 +131,11 @@ module.exports = babel => {
           // Collect bindings defined in the scope
           Object.keys(scope.bindings).forEach(name => {
             scopeTracker.addBinding(scope.bindings[name]);
+
+            // add all constant violations as references
+            scope.bindings[name].constantViolations.forEach(() => {
+              scopeTracker.addReference(scope, scope.bindings[name], name);
+            });
           });
         },
 
