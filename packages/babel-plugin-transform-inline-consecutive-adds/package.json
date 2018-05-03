@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-inline-consecutive-adds",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "This plugin inlines consecutive property assignments, array pushes, etc.",
   "keywords": [
     "babel-plugin"
