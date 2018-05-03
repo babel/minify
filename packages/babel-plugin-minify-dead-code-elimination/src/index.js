@@ -976,10 +976,14 @@ module.exports = ({ types: t, traverse }) => {
     } else {
       path.traverse({
         VariableDeclaration(varPath) {
-          if (!varPath.isVariableDeclaration({ kind: "var" })) return;
+          const { node } = varPath;
+
+          if (node.kind !== "var") {
+            return;
+          }
           if (!isSameFunctionScope(varPath, path)) return;
 
-          for (const decl of varPath.node.declarations) {
+          for (const decl of node.declarations) {
             const bindingIds = Object.keys(t.getBindingIdentifiers(decl.id));
             declarators.push(
               ...bindingIds.map(name =>

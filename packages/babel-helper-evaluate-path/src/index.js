@@ -1,12 +1,12 @@
 "use strict";
 
 module.exports = function evaluate(path, { tdz = false } = {}) {
-  if (!tdz) {
-    return baseEvaluate(path);
-  }
-
   if (path.isReferencedIdentifier()) {
     return evaluateIdentifier(path);
+  }
+
+  if (!tdz) {
+    return baseEvaluate(path);
   }
 
   const state = {
@@ -113,8 +113,12 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       return { shouldDeopt: true };
     }
 
-    let blockParent = binding.path.scope.getBlockParent().path;
     const fnParent = binding.path.getFunctionParent();
+    if (!fnParent) {
+      return { shouldDeopt: true };
+    }
+
+    let blockParent = binding.path.scope.getBlockParent().path;
 
     if (blockParent === fnParent) {
       if (!fnParent.isProgram()) blockParent = blockParent.get("body");

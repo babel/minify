@@ -2,13 +2,14 @@
 
 const h = require("./helpers");
 const PatternMatch = require("./pattern-match");
+const evaluate = require("babel-helper-evaluate-path");
 
 module.exports = t => {
   const OP_AND = input => input === "&&";
   const OP_OR = input => input === "||";
 
   function simplifyPatterns(path) {
-    // cache of path.evaluate()
+    // cache of evaluate(path)
     const evaluateMemo = new Map();
 
     const TRUTHY = input => {
@@ -22,7 +23,7 @@ module.exports = t => {
           return true;
         }
       }
-      const evalResult = input.evaluate();
+      const evalResult = evaluate(input);
       evaluateMemo.set(input, evalResult);
       return evalResult.confident && input.isPure() && evalResult.value;
     };
@@ -35,7 +36,7 @@ module.exports = t => {
           return true;
         }
       }
-      const evalResult = input.evaluate();
+      const evalResult = evaluate(input);
       evaluateMemo.set(input, evalResult);
       return evalResult.confident && input.isPure() && !evalResult.value;
     };
@@ -67,7 +68,7 @@ module.exports = t => {
       if (evaluateMemo.has(left)) {
         value = evaluateMemo.get(left).value;
       } else {
-        value = left.evaluate().value;
+        value = evaluate(left).value;
       }
       path.replaceWith(result.value(t.valueToNode(value), right.node));
     }
