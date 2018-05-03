@@ -177,4 +177,20 @@ describe("preset", () => {
       }
     `
   );
+
+  thePlugin(
+    "should fix issue#810 declaration inside different scope",
+    `
+      if (false) {
+        var bar = true;
+      }
+      if (bar) {
+        alert('bug!');
+      }
+    `,
+    `
+      var bar;
+      bar && alert('bug!');
+    `
+  );
 });

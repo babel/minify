@@ -63,7 +63,21 @@ function evaluateIdentifier(path) {
   const binding = path.scope.getBinding(node.name);
 
   if (!binding) {
-    return deopt(path);
+    const { name } = node;
+    if (!name) {
+      return deopt(path);
+    }
+
+    switch (name) {
+      case "undefined":
+        return { confident: true, value: undefined };
+      case "NaN":
+        return { confident: true, value: NaN };
+      case "Infinity":
+        return { confident: true, value: Infinity };
+      default:
+        return deopt(path);
+    }
   }
 
   if (binding.constantViolations.length > 0) {
@@ -119,6 +133,9 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     }
 
     let blockParent = binding.path.scope.getBlockParent().path;
+    if (!blockParent) {
+      return { shouldDeopt: true };
+    }
 
     if (blockParent === fnParent) {
       if (!fnParent.isProgram()) blockParent = blockParent.get("body");
