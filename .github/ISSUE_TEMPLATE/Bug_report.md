@@ -1,6 +1,6 @@
 ---
-name: "\U0001F41B Bug: Error thrown during magnification"
-about: The minifier could not complete because of a runtime error
+name: "\U0001F41B Bug report"
+about: Incorrect Output or something is not working as expected
 
 ---
 
@@ -16,7 +16,7 @@ Also have a look at the Debugging guidelines: https://github.com/babel/minify/bl
 
 **Describe the bug**
 
-<!-- A clear and concise description of what the bug is. The title of the Error -->
+<!-- A clear and concise description of what the bug is. -->
 
 **To Reproduce**
 
@@ -25,7 +25,25 @@ Minimal code to reproduce the bug
 ```js
 ```
 
+**Actual Output**
+
+If there is no Error thrown,
+
+<!-- Provide the pretty Printed output of the minified code. -->
+
+```js
+```
+
+**Expected Output**
+
+<!-- What should have been the expected output? Provide a pretty printed version of the expected output -->
+
+```js
+```
+
 **Stack Trace**
+
+If applicable,
 
 <!--
 Please provide the full stack trace of the error thrown
