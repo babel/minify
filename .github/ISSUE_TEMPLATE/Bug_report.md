@@ -1,5 +1,5 @@
 ---
-name: "\U0001F41B Bug report"
+name: "\U0001F41B Bug Report"
 about: Incorrect Output or something is not working as expected
 
 ---
