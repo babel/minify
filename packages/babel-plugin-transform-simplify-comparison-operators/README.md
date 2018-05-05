@@ -19,7 +19,7 @@ typeof foo == "object";
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-simplify-comparison-operators
+npm install babel-plugin-transform-simplify-comparison-operators --save-dev
 ```
 
 ## Usage

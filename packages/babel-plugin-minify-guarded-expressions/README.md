@@ -19,7 +19,7 @@ alert(0);
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-guarded-expressions
+npm install babel-plugin-minify-guarded-expressions --save-dev
 ```
 
 ## Usage

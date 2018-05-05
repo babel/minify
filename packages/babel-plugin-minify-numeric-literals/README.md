@@ -19,7 +19,7 @@ Shortening of numeric literals via scientific notation
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-numeric-literals
+npm install babel-plugin-minify-numeric-literals --save-dev
 ```
 
 ## Usage

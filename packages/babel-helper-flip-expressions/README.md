@@ -3,5 +3,5 @@
 ## Installation
 
 ```sh
-npm install babel-helper-flip-expressions
+npm install babel-helper-flip-expressions --save-dev
 ```

@@ -56,7 +56,7 @@ c;
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-constant-folding
+npm install babel-plugin-minify-constant-folding --save-dev
 ```
 
 ## Usage

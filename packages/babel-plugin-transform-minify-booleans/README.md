@@ -21,7 +21,7 @@ false;
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-minify-booleans
+npm install babel-plugin-transform-minify-booleans --save-dev
 ```
 
 ## Usage

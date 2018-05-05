@@ -9,7 +9,7 @@ Babel preset for all minify plugins.
 ## Install
 
 ```sh
-npm install --save-dev babel-preset-minify
+npm install babel-preset-minify --save-dev
 ```
 
 ## Usage

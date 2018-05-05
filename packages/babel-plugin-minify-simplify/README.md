@@ -51,7 +51,7 @@ foo.bar
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-simplify
+npm install babel-plugin-minify-simplify --save-dev
 ```
 
 ## Usage

@@ -20,7 +20,7 @@ process.env.NODE_ENV;
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-inline-environment-variables
+npm install babel-plugin-transform-inline-environment-variables --save-dev
 ```
 
 ## Usage
