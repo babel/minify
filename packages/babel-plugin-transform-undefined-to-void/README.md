@@ -21,7 +21,7 @@ foo === void 0;
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-undefined-to-void
+npm install babel-plugin-transform-undefined-to-void --save-dev
 ```
 
 ## Usage

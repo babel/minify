@@ -25,7 +25,7 @@ obj["var"] = "isKeyword";
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-member-expression-literals
+npm install babel-plugin-transform-member-expression-literals --save-dev
 ```
 
 ## Usage

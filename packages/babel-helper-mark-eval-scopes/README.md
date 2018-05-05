@@ -5,5 +5,5 @@ Traverse through input path and mark all scopes that contain Direct eval (`eval(
 ## Installation
 
 ```sh
-npm install babel-helper-mark-eval-scopes
+npm install babel-helper-mark-eval-scopes --save-dev
 ```

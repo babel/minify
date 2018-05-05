@@ -43,7 +43,7 @@ if (a.__DEV__) {
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-replace
+npm install babel-plugin-minify-replace --save-dev
 ```
 
 ## Usage

@@ -25,7 +25,7 @@ if (null !== bar) {
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-flip-comparisons
+npm install babel-plugin-minify-flip-comparisons --save-dev
 ```
 
 ## Usage

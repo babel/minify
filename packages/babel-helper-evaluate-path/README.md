@@ -31,5 +31,5 @@ function foo() {
 ## Installation
 
 ```sh
-npm install babel-helper-evaluate-path
+npm install babel-helper-evaluate-path --save-dev
 ```

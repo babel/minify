@@ -21,7 +21,7 @@ _Mathfloor(a) + _Mathfloor(b);
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-builtins
+npm install babel-plugin-minify-builtins --save-dev
 ```
 
 ## Usage

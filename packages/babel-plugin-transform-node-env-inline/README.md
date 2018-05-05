@@ -26,7 +26,7 @@ false;
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-node-env-inline
+npm install babel-plugin-transform-node-env-inline --save-dev
 ```
 
 ## Usage

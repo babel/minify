@@ -36,7 +36,7 @@ const bar = [1, 2];
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-inline-consecutive-adds
+npm install babel-plugin-transform-inline-consecutive-adds --save-dev
 ```
 
 ## Usage
