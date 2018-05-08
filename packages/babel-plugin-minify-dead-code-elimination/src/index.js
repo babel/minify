@@ -678,7 +678,12 @@ module.exports = ({ types: t, traverse }) => {
         if (result.value) {
           test.remove();
         } else {
-          path.remove();
+          const init = path.get("init");
+          if (init.node && !init.isPure()) {
+            path.replaceWith(init);
+          } else {
+            path.remove();
+          }
         }
       }
     },

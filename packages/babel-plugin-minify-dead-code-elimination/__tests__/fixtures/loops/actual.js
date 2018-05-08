@@ -19,6 +19,10 @@ for (; true; ) {
 for (; false; ) {
   baz();
 }
+for (var j; false; ) {
+  blah();
+}
+for (0; false; ) {}
 
 // do_while
 do {
