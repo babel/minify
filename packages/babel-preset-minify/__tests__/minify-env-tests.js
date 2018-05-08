@@ -183,4 +183,17 @@ describe("preset along with env", () => {
     })();
   `
   );
+
+  thePlugin(
+    "should fix issue#824 simplify + deadcode",
+    `
+      let foo;
+      while (0) {}
+      console.log(foo);
+    `,
+    `
+      var foo;
+      console.log(foo);
+    `
+  );
 });
