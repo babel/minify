@@ -5,6 +5,11 @@ const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
 const removeUseStrict = require("./remove-use-strict");
 const evaluate = require("babel-helper-evaluate-path");
 
+function evaluateTruthy(path) {
+  const res = evaluate(path);
+  if (res.confident) return !!res.value;
+}
+
 function prevSiblings(path) {
   const parentPath = path.parentPath;
   const siblings = [];
@@ -548,7 +553,7 @@ module.exports = ({ types: t, traverse }) => {
 
     ConditionalExpression(path) {
       const { node } = path;
-      const evaluateTest = path.get("test").evaluateTruthy();
+      const evaluateTest = evaluateTruthy(path.get("test"));
       if (evaluateTest === true) {
         path.replaceWith(node.consequent);
       } else if (evaluateTest === false) {
@@ -976,14 +981,11 @@ module.exports = ({ types: t, traverse }) => {
     } else {
       path.traverse({
         VariableDeclaration(varPath) {
-          const { node } = varPath;
+          if (!varPath.isVariableDeclaration({ kind: "var" })) return;
 
-          if (node.kind !== "var") {
-            return;
-          }
           if (!isSameFunctionScope(varPath, path)) return;
 
-          for (const decl of node.declarations) {
+          for (const decl of varPath.node.declarations) {
             const bindingIds = Object.keys(t.getBindingIdentifiers(decl.id));
             declarators.push(
               ...bindingIds.map(name =>

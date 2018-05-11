@@ -1,12 +1,14 @@
 "use strict";
 
+const t = require("@babel/types");
+
 module.exports = function evaluate(path, { tdz = false } = {}) {
-  if (path.isReferencedIdentifier()) {
-    return evaluateIdentifier(path);
+  if (!tdz && !path.isReferencedIdentifier()) {
+    return baseEvaluate(path);
   }
 
-  if (!tdz) {
-    return baseEvaluate(path);
+  if (path.isReferencedIdentifier()) {
+    return evaluateIdentifier(path);
   }
 
   const state = {
@@ -119,26 +121,27 @@ function evaluateBasedOnControlFlow(binding, refPath) {
   if (binding.kind === "var") {
     // early-exit
     const declaration = binding.path.parentPath;
+
     if (
-      declaration.parentPath.isIfStatement() ||
-      declaration.parentPath.isLoop() ||
-      declaration.parentPath.isSwitchCase()
+      t.isIfStatement(declaration.parentPath) ||
+      t.isLoop(declaration.parentPath) ||
+      t.isSwitchCase(declaration.parentPath)
     ) {
+      if (declaration.parentPath.removed) {
+        return { confident: true, value: void 0 };
+      }
       return { shouldDeopt: true };
     }
 
-    const fnParent = binding.path.getFunctionParent();
-    if (!fnParent) {
-      return { shouldDeopt: true };
-    }
+    const fnParent = (
+      binding.path.scope.getFunctionParent() ||
+      binding.path.scope.getProgramParent()
+    ).path;
 
     let blockParent = binding.path.scope.getBlockParent().path;
-    if (!blockParent) {
-      return { shouldDeopt: true };
-    }
 
-    if (blockParent === fnParent) {
-      if (!fnParent.isProgram()) blockParent = blockParent.get("body");
+    if (blockParent === fnParent && !fnParent.isProgram()) {
+      blockParent = blockParent.get("body");
     }
 
     // detect Usage Outside Init Scope
@@ -164,8 +167,6 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       ) {
         return { confident: true, value: void 0 };
       }
-
-      return { shouldDeopt: true };
     }
   } else if (binding.kind === "let" || binding.kind === "const") {
     // binding.path is the declarator

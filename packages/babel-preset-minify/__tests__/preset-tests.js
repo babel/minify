@@ -190,7 +190,6 @@ describe("preset", () => {
     `,
     `
       var bar;
-      bar && alert('bug!');
     `
   );
 });
