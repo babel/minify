@@ -145,8 +145,15 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     }
 
     // detect Usage Outside Init Scope
-    if (!blockParent.get("body").some(stmt => stmt.isAncestor(refPath))) {
-      return { shouldDeopt: true };
+    const blockBody = blockParent.get("body");
+
+    if (
+      Array.isArray(blockBody) &&
+      !blockBody.some(stmt => stmt.isAncestor(refPath))
+    ) {
+      return {
+        shouldDeopt: true
+      };
     }
 
     // Detect usage before init
