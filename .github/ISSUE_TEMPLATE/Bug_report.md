@@ -11,7 +11,7 @@ Search open/closed issues before submitting since someone might have asked the s
 
 If you have a support request or question please submit them to the #minify channel on babeljs slack: https://babeljs.slack.com/messages/minify
 
-Also have a look at the Debugging guidelines: https://github.com/babel/minify/blob/master/CONTRIBUTING.md#debugging
+Also have a look at the Debugging guidelines: https://github.com/babel/minify/blob/master/docs/debugging.md
 -->
 
 **Describe the bug**
