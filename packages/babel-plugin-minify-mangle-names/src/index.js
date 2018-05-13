@@ -140,6 +140,29 @@ module.exports = babel => {
         },
 
         /**
+         * This is required because after function name transformation
+         * plugin (part of es2015), the function name is NOT added to the
+         * scope's bindings. So to fix this issue, we simply add a hack to
+         * handle that case - fix it to the scope tree.
+         *
+         * Related:
+         * - https://github.com/babel/minify/issues/829
+         */
+        BindingIdentifier(path) {
+          const { scope } = path;
+
+          if (
+            // the parent has this id as the name
+            (path.parentPath.isFunctionExpression({ id: path.node }) ||
+              path.parentPath.isClassExpression({ id: path.node })) &&
+            // and the id isn't yet added to the scope
+            !hop.call(path.parentPath.scope.bindings, path.node.name)
+          ) {
+            path.parentPath.scope.registerBinding("local", path.parentPath);
+          }
+        },
+
+        /**
          * This is necessary because, in Babel, the scope.references
          * does NOT contain the references in that scope. Only the program
          * scope (top most level) contains all the references.
