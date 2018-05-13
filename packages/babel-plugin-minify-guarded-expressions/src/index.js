@@ -1,4 +1,10 @@
 "use strict";
+const evaluate = require("babel-helper-evaluate-path");
+
+function evaluateTruthy(path) {
+  const res = evaluate(path);
+  if (res.confident) return !!res.value;
+}
 
 module.exports = function({ types: t }) {
   const flipExpressions = require("babel-helper-flip-expressions")(t);
@@ -28,28 +34,28 @@ module.exports = function({ types: t }) {
             const shouldBail = !path.parentPath.isExpressionStatement();
 
             if (node.operator === "&&") {
-              const leftTruthy = left.evaluateTruthy();
+              const leftTruthy = evaluateTruthy(left);
               if (leftTruthy === false) {
                 // Short-circuit
                 path.replaceWith(node.left);
               } else if (leftTruthy === true && left.isPure()) {
                 path.replaceWith(node.right);
               } else if (
-                right.evaluateTruthy() === false &&
+                evaluateTruthy(right) === false &&
                 right.isPure() &&
                 !shouldBail
               ) {
                 path.replaceWith(node.left);
               }
             } else if (node.operator === "||") {
-              const leftTruthy = left.evaluateTruthy();
+              const leftTruthy = evaluateTruthy(left);
               if (leftTruthy === false && left.isPure()) {
                 path.replaceWith(node.right);
               } else if (leftTruthy === true) {
                 // Short-circuit
                 path.replaceWith(node.left);
               } else if (
-                right.evaluateTruthy() === false &&
+                evaluateTruthy(right) === false &&
                 right.isPure() &&
                 !shouldBail
               ) {

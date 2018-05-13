@@ -1,7 +1,9 @@
 "use strict";
 
+const t = require("@babel/types");
+
 module.exports = function evaluate(path, { tdz = false } = {}) {
-  if (!tdz) {
+  if (!tdz && !path.isReferencedIdentifier()) {
     return baseEvaluate(path);
   }
 
@@ -63,7 +65,21 @@ function evaluateIdentifier(path) {
   const binding = path.scope.getBinding(node.name);
 
   if (!binding) {
-    return deopt(path);
+    const { name } = node;
+    if (!name) {
+      return deopt(path);
+    }
+
+    switch (name) {
+      case "undefined":
+        return { confident: true, value: undefined };
+      case "NaN":
+        return { confident: true, value: NaN };
+      case "Infinity":
+        return { confident: true, value: Infinity };
+      default:
+        return deopt(path);
+    }
   }
 
   if (binding.constantViolations.length > 0) {
@@ -105,24 +121,39 @@ function evaluateBasedOnControlFlow(binding, refPath) {
   if (binding.kind === "var") {
     // early-exit
     const declaration = binding.path.parentPath;
+
     if (
-      declaration.parentPath.isIfStatement() ||
-      declaration.parentPath.isLoop() ||
-      declaration.parentPath.isSwitchCase()
+      t.isIfStatement(declaration.parentPath) ||
+      t.isLoop(declaration.parentPath) ||
+      t.isSwitchCase(declaration.parentPath)
     ) {
+      if (declaration.parentPath.removed) {
+        return { confident: true, value: void 0 };
+      }
       return { shouldDeopt: true };
     }
 
-    let blockParent = binding.path.scope.getBlockParent().path;
-    const fnParent = binding.path.getFunctionParent();
+    const fnParent = (
+      binding.path.scope.getFunctionParent() ||
+      binding.path.scope.getProgramParent()
+    ).path;
 
-    if (blockParent === fnParent) {
-      if (!fnParent.isProgram()) blockParent = blockParent.get("body");
+    let blockParent = binding.path.scope.getBlockParent().path;
+
+    if (blockParent === fnParent && !fnParent.isProgram()) {
+      blockParent = blockParent.get("body");
     }
 
     // detect Usage Outside Init Scope
-    if (!blockParent.get("body").some(stmt => stmt.isAncestor(refPath))) {
-      return { shouldDeopt: true };
+    const blockBody = blockParent.get("body");
+
+    if (
+      Array.isArray(blockBody) &&
+      !blockBody.some(stmt => stmt.isAncestor(refPath))
+    ) {
+      return {
+        shouldDeopt: true
+      };
     }
 
     // Detect usage before init
@@ -143,8 +174,6 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       ) {
         return { confident: true, value: void 0 };
       }
-
-      return { shouldDeopt: true };
     }
   } else if (binding.kind === "let" || binding.kind === "const") {
     // binding.path is the declarator

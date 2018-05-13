@@ -1,6 +1,7 @@
 "use strict";
 
 const VOID_0 = t => t.unaryExpression("void", t.numericLiteral(0), true);
+const evaluate = require("babel-helper-evaluate-path");
 
 // Types as Symbols - for comparing types
 const types = {};
@@ -39,7 +40,7 @@ const isPatternMatchesPath = t =>
       return patternValue(inputPath);
     }
     if (isNodeOfType(t, inputPath.node, patternValue)) return true;
-    const evalResult = inputPath.evaluate();
+    const evalResult = evaluate(inputPath);
     if (!evalResult.confident || !inputPath.isPure()) return false;
     return evalResult.value === patternValue;
   };
