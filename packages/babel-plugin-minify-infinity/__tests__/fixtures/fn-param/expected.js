@@ -5,3 +5,5 @@ function b(...Infinity) {}
 function c({
   Infinity
 }) {}
+
+function d([Infinity]) {}

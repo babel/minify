@@ -6,11 +6,18 @@ module.exports = function({ types: t }) {
     t.numericLiteral(1),
     t.numericLiteral(0)
   );
+  const badTransforms = {
+    ArrayPattern: () => true,
+    AssignmentExpression: path => path.container.left === path.node,
+    ObjectProperty: path => path.container.shorthand,
+    RestElement: () => true
+  };
   return {
     name: "minify-infinity",
     visitor: {
       // Infinity -> 1 / 0
       Identifier(path) {
+        path.isLVal();
         if (path.node.name !== "Infinity") {
           return;
         }
@@ -28,7 +35,10 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        if (path.isLVal() && !path.parentPath.isExpressionStatement()) {
+        if (
+          path.isLVal() &&
+          (badTransforms[path.parentPath.type] || (() => false))(path)
+        ) {
           return;
         }
 
