@@ -24,6 +24,7 @@ if (myFoo({
 }) !== 2) {
   const thisIs = aStatement;
 }
+
 if (myFoo({
   bar: {
     baz: {
@@ -45,6 +46,7 @@ if (myFoo({
 }) ^ 2) {
   const thisIs = aStatement;
 }
+
 if (myFoo({
   bar: {
     baz: {
