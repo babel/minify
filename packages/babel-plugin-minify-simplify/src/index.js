@@ -119,6 +119,13 @@ module.exports = ({ types: t }) => {
         ]
       },
 
+      BinaryExpression(path) {
+        if (["!=", "=="].indexOf(path.node.operator) !== -1) {
+          undefinedToNull(path.get("left"));
+          undefinedToNull(path.get("right"));
+        }
+      },
+
       LogicalExpression: {
         exit: logicalExpression.simplifyPatterns
       },
@@ -1140,5 +1147,22 @@ module.exports = ({ types: t }) => {
   // is path1 an ancestor of path2
   function isAncestor(path1, path2) {
     return !!path2.findParent(parent => parent === path1);
+  }
+
+  function isPureVoid(path) {
+    return path.isUnaryExpression({ operator: "void" }) && path.isPure();
+  }
+
+  function isGlobalUndefined(path) {
+    return (
+      path.isIdentifier({ name: "undefined" }) &&
+      !path.scope.getBinding("undefined")
+    );
+  }
+
+  function undefinedToNull(path) {
+    if (isGlobalUndefined(path) || isPureVoid(path)) {
+      path.replaceWith(t.nullLiteral());
+    }
   }
 };
