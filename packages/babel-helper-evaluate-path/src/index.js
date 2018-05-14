@@ -181,9 +181,10 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     const declaration = declarator.parentPath;
 
     if (
-      t.isIfStatement(declaration.parentPath) ||
-      t.isLoop(declaration.parentPath) ||
-      t.isSwitchCase(declaration.parentPath)
+      declaration.parentPath &&
+      (declaration.parentPath.isIfStatement() ||
+        declaration.parentPath.isLoop() ||
+        declaration.parentPath.isSwitchCase())
     ) {
       return { shouldDeopt: true };
     }
