@@ -196,4 +196,59 @@ describe("preset along with env", () => {
       console.log(foo);
     `
   );
+
+  thePlugin(
+    "should fix issue#829 mangling after function name",
+    `
+      function foo() {
+        let con = console;
+
+        return {
+          a(bar) {
+            con.log(bar);
+          }
+        };
+      }
+    `,
+    `
+      function foo() {
+        var b = console;
+        return {
+          a: function d(c) {
+            b.log(c);
+          }
+        };
+      }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#829 mangling after function name 2",
+    `
+      function bar() {
+        var b = console;
+        return {
+          a: class {
+            constructor(bar) {
+              b.log(bar);
+            }
+          }
+        };
+      }
+    `,
+    `
+      function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
+
+      function bar() {
+        var c = console;
+        return {
+          a: function b(a) {
+            "use strict";
+
+            _classCallCheck(this, b), c.log(a);
+          }
+        };
+      }
+    `
+  );
 });
