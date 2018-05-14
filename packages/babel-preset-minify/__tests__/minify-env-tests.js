@@ -251,4 +251,19 @@ describe("preset along with env", () => {
       }
     `
   );
+  thePlugin(
+    "should fix issue#844",
+    `
+      class MyComponent {
+      }
+      MyComponent.propTypes = {
+        userName: 123
+      }
+    `,
+    `
+      "use strict";
+      class a {}
+      a.propTypes = { userName: 123 };
+    `
+  );
 });

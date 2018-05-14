@@ -1,7 +1,5 @@
 "use strict";
 
-const t = require("@babel/types");
-
 module.exports = function evaluate(path, { tdz = false } = {}) {
   if (!tdz && !path.isReferencedIdentifier()) {
     return baseEvaluate(path);
@@ -122,14 +120,15 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     // early-exit
     const declaration = binding.path.parentPath;
 
+    if (declaration.parentPath.removed) {
+      return { confident: true, value: void 0 };
+    }
+
     if (
-      t.isIfStatement(declaration.parentPath) ||
-      t.isLoop(declaration.parentPath) ||
-      t.isSwitchCase(declaration.parentPath)
+      declaration.parentPath.isIfStatement() ||
+      declaration.parentPath.isLoop() ||
+      declaration.parentPath.isSwitchCase()
     ) {
-      if (declaration.parentPath.removed) {
-        return { confident: true, value: void 0 };
-      }
       return { shouldDeopt: true };
     }
 
@@ -181,9 +180,10 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     const declaration = declarator.parentPath;
 
     if (
-      declaration.parentPath.isIfStatement() ||
-      declaration.parentPath.isLoop() ||
-      declaration.parentPath.isSwitchCase()
+      declaration.parentPath &&
+      (declaration.parentPath.isIfStatement() ||
+        declaration.parentPath.isLoop() ||
+        declaration.parentPath.isSwitchCase())
     ) {
       return { shouldDeopt: true };
     }
@@ -194,7 +194,10 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     }
 
     // Detect Usage before Init
-    const stmts = scopePath.get("body");
+    let stmts = scopePath.get("body");
+    if (!Array.isArray(stmts)) {
+      stmts = [stmts];
+    }
 
     const compareResult = compareBindingAndReference({
       binding,
