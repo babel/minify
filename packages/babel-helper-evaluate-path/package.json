@@ -11,5 +11,8 @@
   "license": "MIT",
   "author": "boopathi",
   "main": "lib/index.js",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-helper-evaluate-path"
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-helper-evaluate-path",
+  "dependencies": {
+    "@babel/types": "^7.0.0-beta.46"
+  }
 }
