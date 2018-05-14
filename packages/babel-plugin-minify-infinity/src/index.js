@@ -28,8 +28,12 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        if (path.isLVal() && !path.parentPath.isExpressionStatement()) {
-          return;
+        const bindingIds = path.parentPath.getBindingIdentifierPaths();
+
+        for (const id of Object.keys(bindingIds)) {
+          if (id === "Infinity" && bindingIds[id] === path) {
+            return;
+          }
         }
 
         path.replaceWith(INFINITY);
