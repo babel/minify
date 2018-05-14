@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-constant-folding",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "",
   "keywords": [
     "babel-plugin"
@@ -12,6 +12,6 @@
   "main": "lib/index.js",
   "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-constant-folding",
   "dependencies": {
-    "babel-helper-evaluate-path": "^0.4.1"
+    "babel-helper-evaluate-path": "^0.4.2"
   }
 }
