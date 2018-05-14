@@ -27,11 +27,16 @@ module.exports = function({ types: t }) {
         if (path.parentPath.isMemberExpression()) {
           return;
         }
-
         const bindingIds = path.parentPath.getBindingIdentifierPaths();
 
         for (const id of Object.keys(bindingIds)) {
-          if (id === "Infinity" && bindingIds[id] === path) {
+          if (
+            id === "Infinity" &&
+            bindingIds[id] === path &&
+            // ObjectProperty is common for ObjectExpression and ObjectPattern and only
+            // one of them is a Binding, the other is simply a reference
+            !path.parentPath.parentPath.isObjectExpression()
+          ) {
             return;
           }
         }
