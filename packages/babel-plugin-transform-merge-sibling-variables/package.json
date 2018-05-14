@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-merge-sibling-variables",
-  "version": "6.9.3",
+  "version": "6.9.4",
   "description": "Merge sibling variables into one.",
   "keywords": [
     "babel-plugin"

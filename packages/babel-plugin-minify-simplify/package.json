@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-simplify",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "",
   "keywords": [
     "babel-plugin"
@@ -12,8 +12,8 @@
   "main": "lib/index.js",
   "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-simplify",
   "dependencies": {
-    "babel-helper-flip-expressions": "^0.4.2",
+    "babel-helper-flip-expressions": "^0.4.3",
     "babel-helper-is-nodes-equiv": "^0.0.1",
-    "babel-helper-to-multiple-sequence-expressions": "^0.4.2"
+    "babel-helper-to-multiple-sequence-expressions": "^0.4.3"
   }
 }

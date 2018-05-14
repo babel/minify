@@ -1,6 +1,6 @@
 {
   "name": "babel-helper-remove-or-void",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "",
   "keywords": [
     "babel-plugin"

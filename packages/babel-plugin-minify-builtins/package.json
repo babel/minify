@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-builtins",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Minify Standard built-in Objects",
   "keywords": [
     "babel-plugin",
@@ -13,6 +13,6 @@
   "main": "lib/index.js",
   "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-builtins",
   "dependencies": {
-    "babel-helper-evaluate-path": "^0.4.2"
+    "babel-helper-evaluate-path": "^0.4.3"
   }
 }

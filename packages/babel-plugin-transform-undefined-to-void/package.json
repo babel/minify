@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-undefined-to-void",
-  "version": "6.9.3",
+  "version": "6.9.4",
   "description": "Replace references to `undefined` with `void 0`",
   "keywords": [
     "babel-plugin"
