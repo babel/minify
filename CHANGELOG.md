@@ -1,3 +1,12 @@
+## babel-minify@0.4.3 (2018-05-14)
+
+#### :bug: Bug Fix
+* `babel-helper-evaluate-path`, `babel-plugin-minify-constant-folding`
+  * [#846](https://github.com/babel/minify/pull/846) fix: handle non array statements in evaluate helper. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### Committers: 1
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babel-minify@0.4.2 (2018-05-14)
 
 #### :rocket: New Feature
