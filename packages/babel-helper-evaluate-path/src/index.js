@@ -1,7 +1,5 @@
 "use strict";
 
-const t = require("@babel/types");
-
 module.exports = function evaluate(path, { tdz = false } = {}) {
   if (!tdz && !path.isReferencedIdentifier()) {
     return baseEvaluate(path);
@@ -122,14 +120,20 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     // early-exit
     const declaration = binding.path.parentPath;
 
+    /**
+     * Handle when binding is created inside a parent block and
+     * the corresponding parent is removed by other plugins
+     * if (false) { var a } -> var a
+     */
+    if (declaration.parentPath && declaration.parentPath.removed) {
+      return { confident: true, value: void 0 };
+    }
+
     if (
-      t.isIfStatement(declaration.parentPath) ||
-      t.isLoop(declaration.parentPath) ||
-      t.isSwitchCase(declaration.parentPath)
+      declaration.parentPath.isIfStatement() ||
+      declaration.parentPath.isLoop() ||
+      declaration.parentPath.isSwitchCase()
     ) {
-      if (declaration.parentPath.removed) {
-        return { confident: true, value: void 0 };
-      }
       return { shouldDeopt: true };
     }
 
