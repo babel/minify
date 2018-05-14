@@ -237,7 +237,7 @@ describe("preset along with env", () => {
       }
     `,
     `
-      function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError(\"Cannot call a class as a function\"); }
+      function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
 
       function bar() {
         var c = console;

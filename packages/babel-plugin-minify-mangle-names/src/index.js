@@ -149,8 +149,6 @@ module.exports = babel => {
          * - https://github.com/babel/minify/issues/829
          */
         BindingIdentifier(path) {
-          const { scope } = path;
-
           if (
             // the parent has this id as the name
             (path.parentPath.isFunctionExpression({ id: path.node }) ||
