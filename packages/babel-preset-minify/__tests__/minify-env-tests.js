@@ -251,4 +251,25 @@ describe("preset along with env", () => {
       }
     `
   );
+
+  thePlugin(
+    "should fix issue#845 - class body non array",
+    `
+      class A {}
+
+      A.B = {}
+      exports.A = A;
+    `,
+    `
+      function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
+
+      var A = function a() {
+        "use strict";
+
+        _classCallCheck(this, a);
+      };
+
+      A.B = {}, exports.A = A;
+    `
+  );
 });
