@@ -120,21 +120,27 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     // early-exit
     const declaration = binding.path.parentPath;
 
-    /**
-     * Handle when binding is created inside a parent block and
-     * the corresponding parent is removed by other plugins
-     * if (false) { var a } -> var a
-     */
-    if (declaration.parentPath && declaration.parentPath.removed) {
-      return { confident: true, value: void 0 };
-    }
-
-    if (
-      declaration.parentPath.isIfStatement() ||
-      declaration.parentPath.isLoop() ||
-      declaration.parentPath.isSwitchCase()
-    ) {
-      return { shouldDeopt: true };
+    if (declaration.parentPath) {
+      /**
+       * Handle when binding is created inside a parent block and
+       * the corresponding parent is removed by other plugins
+       * if (false) { var a } -> var a
+       */
+      if (declaration.parentPath.removed) {
+        return {
+          confident: true,
+          value: void 0
+        };
+      }
+      if (
+        declaration.parentPath.isIfStatement() ||
+        declaration.parentPath.isLoop() ||
+        declaration.parentPath.isSwitchCase()
+      ) {
+        return {
+          shouldDeopt: true
+        };
+      }
     }
 
     const fnParent = (
