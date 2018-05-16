@@ -345,7 +345,6 @@ module.exports = babel => {
         const oldName = names[i];
         const binding = bindings.get(oldName);
 
-        // Names which should NOT be mangled
         if (mangler.canMangle(oldName, binding, scope)) {
           let next;
           do {
