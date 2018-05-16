@@ -320,17 +320,12 @@ module.exports = babel => {
       }
       mangler.visitedScopes.add(scope);
 
-      // Helpers to generate names
-      let i = 0;
-      function getNext() {
-        return mangler.charset.getIdentifier(i++);
-      }
-      function resetNext() {
-        i = 0;
-      }
-
       const bindings = scopeTracker.bindings.get(scope);
       const names = [...bindings.keys()];
+
+      // A counter to generate names and reset
+      // so we can reuse removed names
+      let counter = 0;
 
       /**
        * 1. Iterate through the list of BindingIdentifiers
@@ -341,18 +336,27 @@ module.exports = babel => {
        * because (2) we rename in place and update the bindings
        * as we traverse through the keys
        */
-      for (let i = 0; i < names.length; i++) {
-        const oldName = names[i];
+      for (const oldName of names) {
         const binding = bindings.get(oldName);
 
         if (mangler.canMangle(oldName, binding, scope)) {
           let next;
           do {
-            next = getNext();
+            next = mangler.charset.getIdentifier(counter++);
           } while (!mangler.isValidName(next, binding, scope));
 
           // Reset so variables which are removed can be reused
-          resetNext();
+          //
+          // the following is an assumtion (for perf)
+          // the length 3 is an assumption that if the oldName isn't
+          // 1 or 2 characters, then probably we are not going to find
+          // a name - because for almost all usecases we have 1 or 2
+          // character new names only. And for the edge cases where
+          // one scope has lots and lots of variables, it's okay to
+          // name something with 3 characters instead of 1
+          if (oldName.length < 3) {
+            counter = 0;
+          }
 
           // Once we detected a valid `next` Identifier which could be used,
           // call the renamer
