@@ -25,7 +25,7 @@ module.exports = function({ types: t }) {
 
       const collectVisitor = {
         AssignmentExpression(path) {
-          const left = path.get("left");
+          const { left } = path.node;
 
           // Should bail and not run the plugin
           // when builtin is polyfilled
@@ -42,12 +42,14 @@ module.exports = function({ types: t }) {
             return;
           }
 
+          const { node } = path;
+
           if (
-            !isComputed(path) &&
-            isBuiltin(path) &&
+            !isComputed(node) &&
+            isBuiltin(node) &&
             !getFunctionParent(path).isProgram()
           ) {
-            const expName = memberToString(path.node);
+            const expName = memberToString(node);
             addToMap(context.pathsToUpdate, expName, path);
           }
         },
@@ -59,9 +61,11 @@ module.exports = function({ types: t }) {
               return;
             }
 
+            const { node } = callee;
+
             // computed property should not be optimized
             // Math[max]() -> Math.max()
-            if (!isComputed(callee) && isBuiltin(callee)) {
+            if (!isComputed(node) && isBuiltin(node)) {
               const result = evaluate(path, { tdz: context.tdz });
               // deopt when we have side effecty evaluate-able arguments
               // Math.max(foo(), 1) --> untouched
@@ -69,7 +73,7 @@ module.exports = function({ types: t }) {
               if (result.confident && hasPureArgs(path)) {
                 path.replaceWith(t.valueToNode(result.value));
               } else if (!getFunctionParent(callee).isProgram()) {
-                const expName = memberToString(callee.node);
+                const expName = memberToString(node);
                 addToMap(context.pathsToUpdate, expName, callee);
               }
             }
@@ -117,8 +121,8 @@ module.exports = function({ types: t }) {
     }
   };
 
-  function memberToString(memberExpr) {
-    const { object, property } = memberExpr;
+  function memberToString(memberExprNode) {
+    const { object, property } = memberExprNode;
     let result = "";
 
     if (t.isIdentifier(object)) result += object.name;
@@ -128,9 +132,8 @@ module.exports = function({ types: t }) {
     return result;
   }
 
-  function isBuiltInComputed(memberExpr) {
-    const { node } = memberExpr;
-    const { object, computed } = node;
+  function isBuiltInComputed(memberExprNode) {
+    const { object, computed } = memberExprNode;
 
     return (
       computed &&
@@ -139,8 +142,8 @@ module.exports = function({ types: t }) {
     );
   }
 
-  function isBuiltin(memberExpr) {
-    const { object, property } = memberExpr.node;
+  function isBuiltin(memberExprNode) {
+    const { object, property } = memberExprNode;
 
     if (
       t.isIdentifier(object) &&
@@ -152,6 +155,56 @@ module.exports = function({ types: t }) {
     }
     return false;
   }
+
+  // Creates a segmented map that contains the earliest common Ancestor
+  // as the key and array of subpaths that are descendats of the LCA as value
+  function getSegmentedSubPaths(paths) {
+    let segments = new Map();
+
+    // Get earliest Path in tree where paths intersect
+    paths[0].getDeepestCommonAncestorFrom(
+      paths,
+      (lastCommon, index, ancestries) => {
+        // found the LCA
+        if (!lastCommon.isProgram()) {
+          let fnParent;
+          if (
+            lastCommon.isFunction() &&
+            t.isBlockStatement(lastCommon.node.body)
+          ) {
+            segments.set(lastCommon, paths);
+            return;
+          } else if (
+            !(fnParent = getFunctionParent(lastCommon)).isProgram() &&
+            t.isBlockStatement(fnParent.node.body)
+          ) {
+            segments.set(fnParent, paths);
+            return;
+          }
+        }
+        // Deopt and construct segments otherwise
+        for (const ancestor of ancestries) {
+          const fnPath = getChildFuncion(ancestor);
+          if (fnPath === void 0) {
+            continue;
+          }
+          const validDescendants = paths.filter(p => {
+            return p.isDescendant(fnPath);
+          });
+          segments.set(fnPath, validDescendants);
+        }
+      }
+    );
+    return segments;
+  }
+
+  function getChildFuncion(ancestors = []) {
+    for (const path of ancestors) {
+      if (path.isFunction() && t.isBlockStatement(path.node.body)) {
+        return path;
+      }
+    }
+  }
 };
 
 function addToMap(map, key, value) {
@@ -159,56 +212,6 @@ function addToMap(map, key, value) {
     map.set(key, []);
   }
   map.get(key).push(value);
-}
-
-// Creates a segmented map that contains the earliest common Ancestor
-// as the key and array of subpaths that are descendats of the LCA as value
-function getSegmentedSubPaths(paths) {
-  let segments = new Map();
-
-  // Get earliest Path in tree where paths intersect
-  paths[0].getDeepestCommonAncestorFrom(
-    paths,
-    (lastCommon, index, ancestries) => {
-      // found the LCA
-      if (!lastCommon.isProgram()) {
-        let fnParent;
-        if (
-          lastCommon.isFunction() &&
-          lastCommon.get("body").isBlockStatement()
-        ) {
-          segments.set(lastCommon, paths);
-          return;
-        } else if (
-          !(fnParent = getFunctionParent(lastCommon)).isProgram() &&
-          fnParent.get("body").isBlockStatement()
-        ) {
-          segments.set(fnParent, paths);
-          return;
-        }
-      }
-      // Deopt and construct segments otherwise
-      for (const ancestor of ancestries) {
-        const fnPath = getChildFuncion(ancestor);
-        if (fnPath === void 0) {
-          continue;
-        }
-        const validDescendants = paths.filter(p => {
-          return p.isDescendant(fnPath);
-        });
-        segments.set(fnPath, validDescendants);
-      }
-    }
-  );
-  return segments;
-}
-
-function getChildFuncion(ancestors = []) {
-  for (const path of ancestors) {
-    if (path.isFunction() && path.get("body").isBlockStatement()) {
-      return path;
-    }
-  }
 }
 
 function hasPureArgs(path) {
@@ -221,8 +224,7 @@ function hasPureArgs(path) {
   return true;
 }
 
-function isComputed(path) {
-  const { node } = path;
+function isComputed(node) {
   return node.computed;
 }
 
