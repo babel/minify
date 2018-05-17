@@ -13,7 +13,7 @@ function gulpBabelMinify(
   {
     babel = babelCore,
     minifyPreset = babelPresetMinify,
-    comments = /preserve|licen(s|c)e/,
+    comments = /^\**!|@preserve|@licen(c|s)e|@cc_on/,
     sourceType = "script"
   } = {}
 ) {

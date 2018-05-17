@@ -12,7 +12,7 @@ module.exports = function babelMinify(
     inputSourceMap,
     sourceMaps = false,
     sourceType = "script",
-    comments = /^\**!|@preserve|@license|@cc_on/,
+    comments = /^\**!|@preserve|@licen(c|s)e|@cc_on/,
 
     // to override the default babelCore used
     babel = babelCore,
