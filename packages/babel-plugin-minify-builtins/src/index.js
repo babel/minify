@@ -122,17 +122,12 @@ module.exports = function({ types: t }) {
                 );
               }
 
-              if (t.isMemberExpression(prev.object)) {
-                throw new Error(
-                  `Unexpected MemberExpression in minify-builtins. ` +
-                    `Please report this at ${newIssueUrl}`
+              if (!t.isMemberExpression(prev.object)) {
+                newNode.declarations[0].init = t.memberExpression(
+                  t.memberExpression(getGlobalThis(), prev.object),
+                  prev.property
                 );
               }
-
-              newNode.declarations[0].init = t.memberExpression(
-                t.memberExpression(getGlobalThis(), prev.object),
-                prev.property
-              );
             }
           }
 
