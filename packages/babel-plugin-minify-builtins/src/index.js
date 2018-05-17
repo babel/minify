@@ -8,19 +8,12 @@ const INVALID_METHODS = ["random"];
 
 module.exports = function({ types: t }) {
   class BuiltInReplacer {
-    constructor(program, { tdz }) {
-      this.program = program;
-      this.tdz = tdz;
+    constructor() {
       // map<expr_name, path[]>;
       this.pathsToUpdate = new Map();
     }
 
-    run() {
-      this.collect();
-      this.replace();
-    }
-
-    collect() {
+    getCollectVisitor() {
       const context = this;
 
       const collectVisitor = {
@@ -55,7 +48,7 @@ module.exports = function({ types: t }) {
         },
 
         CallExpression: {
-          exit(path) {
+          exit(path, { opts: { tdz = false } = {} }) {
             const callee = path.get("callee");
             if (!callee.isMemberExpression()) {
               return;
@@ -66,7 +59,7 @@ module.exports = function({ types: t }) {
             // computed property should not be optimized
             // Math[max]() -> Math.max()
             if (!isComputed(node) && isBuiltin(node)) {
-              const result = evaluate(path, { tdz: context.tdz });
+              const result = evaluate(path, { tdz });
               // deopt when we have side effecty evaluate-able arguments
               // Math.max(foo(), 1) --> untouched
               // Math.floor(1) --> 1
@@ -81,7 +74,7 @@ module.exports = function({ types: t }) {
         }
       };
 
-      this.program.traverse(collectVisitor);
+      return collectVisitor;
     }
 
     replace() {
@@ -111,14 +104,17 @@ module.exports = function({ types: t }) {
     }
   }
 
+  const builtInReplacer = new BuiltInReplacer();
+
   return {
     name: "minify-builtins",
-    visitor: {
-      Program(path, { opts: { tdz = false } = {} }) {
-        const builtInReplacer = new BuiltInReplacer(path, { tdz });
-        builtInReplacer.run();
+    visitor: Object.assign({}, builtInReplacer.getCollectVisitor(), {
+      Program: {
+        exit() {
+          builtInReplacer.replace();
+        }
       }
-    }
+    })
   };
 
   function memberToString(memberExprNode) {
