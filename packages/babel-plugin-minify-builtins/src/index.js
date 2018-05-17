@@ -98,6 +98,18 @@ module.exports = function({ types: t }) {
           // hoist the created var to the top of the function scope
           const target = parent.get("body");
 
+          /**
+           * Here, we validate a case where there is a local binding of
+           * one of Math, String or Number. Here we have to get the
+           * global Math instead of using the local one - so we do the
+           * following transformation
+           *
+           * var _Mathmax = Math.max;
+           *
+           * to
+           *
+           * var _Mathmax = (0, eval)("this").Math.max;
+           */
           for (const builtin of VALID_CALLEES) {
             if (target.scope.getBinding(builtin)) {
               const prev = newNode.declarations[0].init;
@@ -228,6 +240,11 @@ module.exports = function({ types: t }) {
     }
   }
 
+  /**
+   * returns
+   *
+   * (0, eval)("this")
+   */
   function getGlobalThis() {
     return t.callExpression(
       t.sequenceExpression([t.valueToNode(0), t.identifier("eval")]),
