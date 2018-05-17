@@ -39,3 +39,4 @@ Default: `{}`
 
 + `babel`: Use a custom `@babel/core`
 + `minifyPreset`: Use a custom `babel-preset-minify`
++ `comments`: [Function | RegExp | Boolean]

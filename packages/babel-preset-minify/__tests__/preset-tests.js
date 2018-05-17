@@ -34,28 +34,6 @@ describe("preset", () => {
   );
 
   thePlugin(
-    "should fix remove comments",
-    `
-    var asdf = 1; // test
-  `,
-    `
-    var asdf = 1;
-  `
-  );
-
-  thePlugin(
-    "should keep license/preserve annotated comments",
-    `
-    /* @license */
-    var asdf = 1;
-  `,
-    `
-    /* @license */
-    var asdf = 1;
-  `
-  );
-
-  thePlugin(
     "should fix issue#385 - impure if statements with Sequence and DCE",
     `
     a = b;
