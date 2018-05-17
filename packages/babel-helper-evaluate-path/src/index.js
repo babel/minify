@@ -148,18 +148,19 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       binding.path.scope.getProgramParent()
     ).path;
 
-    let blockParent = binding.path.scope.getBlockParent().path;
+    let blockParentPath = binding.path.scope.getBlockParent().path;
+    let blockParent = blockParentPath.node;
 
-    if (blockParent === fnParent && !fnParent.isProgram()) {
-      blockParent = blockParent.get("body");
+    if (blockParentPath === fnParent && !fnParent.isProgram()) {
+      blockParent = blockParent.body;
     }
 
     // detect Usage Outside Init Scope
-    const blockBody = blockParent.get("body");
+    const blockBody = blockParent.body;
 
     if (
       Array.isArray(blockBody) &&
-      !blockBody.some(stmt => stmt.isAncestor(refPath))
+      !blockBody.some(stmt => isAncestor(stmt, refPath))
     ) {
       return {
         shouldDeopt: true
@@ -168,8 +169,8 @@ function evaluateBasedOnControlFlow(binding, refPath) {
 
     // Detect usage before init
     const stmts = fnParent.isProgram()
-      ? fnParent.get("body")
-      : fnParent.get("body").get("body");
+      ? fnParent.node.body
+      : fnParent.node.body.body;
 
     const compareResult = compareBindingAndReference({
       binding,
@@ -199,13 +200,15 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       return { shouldDeopt: true };
     }
 
-    let scopePath = declarator.scope.path;
+    const scopePath = declarator.scope.path;
+    let scopeNode = scopePath.node;
+
     if (scopePath.isFunction() || scopePath.isCatchClause()) {
-      scopePath = scopePath.get("body");
+      scopeNode = scopeNode.body;
     }
 
     // Detect Usage before Init
-    let stmts = scopePath.get("body");
+    let stmts = scopeNode.body;
     if (!Array.isArray(stmts)) {
       stmts = [stmts];
     }
@@ -242,11 +245,12 @@ function compareBindingAndReference({ binding, refPath, stmts }) {
   };
 
   for (const [idx, stmt] of stmts.entries()) {
-    if (stmt.isAncestor(binding.path)) {
+    if (isAncestor(stmt, binding.path)) {
       state.binding = { idx };
     }
+
     for (const ref of binding.referencePaths) {
-      if (ref === refPath && stmt.isAncestor(ref)) {
+      if (ref === refPath && isAncestor(stmt, ref)) {
         state.reference = {
           idx,
           scope: binding.path.scope === ref.scope ? "current" : "other"
@@ -264,4 +268,11 @@ function deopt(deoptPath) {
     confident: false,
     deoptPath
   };
+}
+
+/**
+ * is nodeParent an ancestor of path
+ */
+function isAncestor(nodeParent, path) {
+  return !!path.findParent(parent => parent.node === nodeParent);
 }
