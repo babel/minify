@@ -1,26 +1,20 @@
 "use strict";
 
-const evaluate = require("babel-helper-evaluate-path");
 // Assuming all the static methods from below array are side effect free evaluation
 // except Math.random
 const VALID_CALLEES = ["String", "Number", "Math"];
 const INVALID_METHODS = ["random"];
 
+const newIssueUrl = "https://github.com/babel/minify/issues/new";
+
 module.exports = function({ types: t }) {
   class BuiltInReplacer {
-    constructor(program, { tdz }) {
-      this.program = program;
-      this.tdz = tdz;
+    constructor() {
       // map<expr_name, path[]>;
       this.pathsToUpdate = new Map();
     }
 
-    run() {
-      this.collect();
-      this.replace();
-    }
-
-    collect() {
+    getCollectVisitor() {
       const context = this;
 
       const collectVisitor = {
@@ -65,23 +59,19 @@ module.exports = function({ types: t }) {
 
             // computed property should not be optimized
             // Math[max]() -> Math.max()
-            if (!isComputed(node) && isBuiltin(node)) {
-              const result = evaluate(path, { tdz: context.tdz });
-              // deopt when we have side effecty evaluate-able arguments
-              // Math.max(foo(), 1) --> untouched
-              // Math.floor(1) --> 1
-              if (result.confident && hasPureArgs(path)) {
-                path.replaceWith(t.valueToNode(result.value));
-              } else if (!getFunctionParent(callee).isProgram()) {
-                const expName = memberToString(node);
-                addToMap(context.pathsToUpdate, expName, callee);
-              }
+            if (
+              !isComputed(node) &&
+              isBuiltin(node) &&
+              !getFunctionParent(callee).isProgram()
+            ) {
+              const expName = memberToString(node);
+              addToMap(context.pathsToUpdate, expName, callee);
             }
           }
         }
       };
 
-      this.program.traverse(collectVisitor);
+      return collectVisitor;
     }
 
     replace() {
@@ -104,21 +94,60 @@ module.exports = function({ types: t }) {
           for (const path of subpaths) {
             path.replaceWith(t.clone(uniqueIdentifier));
           }
+
           // hoist the created var to the top of the function scope
-          parent.get("body").unshiftContainer("body", newNode);
+          const target = parent.get("body");
+
+          /**
+           * Here, we validate a case where there is a local binding of
+           * one of Math, String or Number. Here we have to get the
+           * global Math instead of using the local one - so we do the
+           * following transformation
+           *
+           * var _Mathmax = Math.max;
+           *
+           * to
+           *
+           * var _Mathmax = (0, eval)("this").Math.max;
+           */
+          for (const builtin of VALID_CALLEES) {
+            if (target.scope.getBinding(builtin)) {
+              const prev = newNode.declarations[0].init;
+
+              if (!t.isMemberExpression(prev)) {
+                throw new Error(
+                  `minify-builtins expected a MemberExpression. ` +
+                    `Found ${prev.type}. ` +
+                    `Please report this at ${newIssueUrl}`
+                );
+              }
+
+              if (!t.isMemberExpression(prev.object)) {
+                newNode.declarations[0].init = t.memberExpression(
+                  t.memberExpression(getGlobalThis(), prev.object),
+                  prev.property
+                );
+              }
+            }
+          }
+
+          target.unshiftContainer("body", newNode);
         }
       }
     }
   }
 
+  const builtInReplacer = new BuiltInReplacer();
+
   return {
     name: "minify-builtins",
-    visitor: {
-      Program(path, { opts: { tdz = false } = {} }) {
-        const builtInReplacer = new BuiltInReplacer(path, { tdz });
-        builtInReplacer.run();
+    visitor: Object.assign({}, builtInReplacer.getCollectVisitor(), {
+      Program: {
+        exit() {
+          builtInReplacer.replace();
+        }
       }
-    }
+    })
   };
 
   function memberToString(memberExprNode) {
@@ -205,6 +234,18 @@ module.exports = function({ types: t }) {
       }
     }
   }
+
+  /**
+   * returns
+   *
+   * (0, eval)("this")
+   */
+  function getGlobalThis() {
+    return t.callExpression(
+      t.sequenceExpression([t.valueToNode(0), t.identifier("eval")]),
+      [t.valueToNode("this")]
+    );
+  }
 };
 
 function addToMap(map, key, value) {
@@ -212,16 +253,6 @@ function addToMap(map, key, value) {
     map.set(key, []);
   }
   map.get(key).push(value);
-}
-
-function hasPureArgs(path) {
-  const args = path.get("arguments");
-  for (const arg of args) {
-    if (!arg.isPure()) {
-      return false;
-    }
-  }
-  return true;
 }
 
 function isComputed(node) {

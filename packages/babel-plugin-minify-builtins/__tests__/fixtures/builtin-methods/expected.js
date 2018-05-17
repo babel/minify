@@ -1,7 +1,7 @@
 function c() {
   var _Mathmax = Math.max;
   let a = 10;
-  const d = false;
+  const d = Number.isNaN(a);
   _Mathmax(a, b) + _Mathmax(b, a);
-  return d && true;
+  return d && Number.isFinite(a);
 }
