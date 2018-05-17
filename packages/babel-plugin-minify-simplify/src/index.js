@@ -946,47 +946,54 @@ module.exports = ({ types: t }) => {
   }
 
   function earlyReturnTransform(path) {
-    const { node } = path;
+    const block = path.get("body");
 
-    if (!t.isBlockStatement(node.body)) {
+    if (!block.isBlockStatement()) {
       return;
     }
 
-    for (let i = node.body.body.length; i >= 0; i--) {
-      const statement = node.body.body[i];
+    const body = block.get("body");
+
+    for (let i = body.length - 1; i >= 0; i--) {
+      const statement = body[i];
       if (
-        t.isIfStatement(statement) &&
-        !statement.alternate &&
-        t.isReturnStatement(statement.consequent) &&
-        !statement.consequent.argument
+        t.isIfStatement(statement.node) &&
+        !statement.node.alternate &&
+        t.isReturnStatement(statement.node.consequent) &&
+        !statement.node.consequent.argument
       ) {
-        genericEarlyExitTransform(path.get("body").get("body")[i]);
+        genericEarlyExitTransform(statement);
       }
     }
   }
 
   function earlyContinueTransform(path) {
-    const { node } = path;
+    const block = path.get("body");
 
-    if (!t.isBlockStatement(node.body)) {
+    if (!block.isBlockStatement()) {
       return;
     }
 
-    for (let i = node.body.body.length; i >= 0; i--) {
-      const statement = node.body.body[i];
+    let body = block.get("body");
+
+    for (let i = body.length - 1; i >= 0; i--) {
+      const statement = body[i];
       if (
-        t.isIfStatement(statement) &&
-        !statement.alternate &&
-        t.isContinueStatement(statement.consequent) &&
-        !statement.consequent.label
+        t.isIfStatement(statement.node) &&
+        !statement.node.alternate &&
+        t.isContinueStatement(statement.node.consequent) &&
+        !statement.node.consequent.label
       ) {
-        genericEarlyExitTransform(path.get("body").get("body")[i]);
+        genericEarlyExitTransform(statement);
       }
     }
 
+    // because we might have folded or removed statements
+    body = block.get("body");
+
     // We may have reduced the body to a single statement.
-    if (node.body.body.length === 1 && !needsBlock(node.body, node)) {
-      path.get("body").replaceWith(node.body.body[0]);
+    if (body.length === 1 && !needsBlock(block.node, path.node)) {
+      block.replaceWith(body[0].node);
     }
   }
 
