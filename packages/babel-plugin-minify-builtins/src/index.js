@@ -5,6 +5,8 @@
 const VALID_CALLEES = ["String", "Number", "Math"];
 const INVALID_METHODS = ["random"];
 
+const newIssueUrl = "https://github.com/babel/minify/issues/new";
+
 module.exports = function({ types: t }) {
   class BuiltInReplacer {
     constructor() {
@@ -92,8 +94,37 @@ module.exports = function({ types: t }) {
           for (const path of subpaths) {
             path.replaceWith(t.clone(uniqueIdentifier));
           }
+
           // hoist the created var to the top of the function scope
-          parent.get("body").unshiftContainer("body", newNode);
+          const target = parent.get("body");
+
+          for (const builtin of VALID_CALLEES) {
+            if (target.scope.getBinding(builtin)) {
+              const prev = newNode.declarations[0].init;
+
+              if (!t.isMemberExpression(prev)) {
+                throw new Error(
+                  `minify-builtins expected a MemberExpression. ` +
+                    `Found ${prev.type}. ` +
+                    `Please report this at ${newIssueUrl}`
+                );
+              }
+
+              if (t.isMemberExpression(prev.object)) {
+                throw new Error(
+                  `Unexpected MemberExpression in minify-builtins. ` +
+                    `Please report this at ${newIssueUrl}`
+                );
+              }
+
+              newNode.declarations[0].init = t.memberExpression(
+                t.memberExpression(getGlobalThis(), prev.object),
+                prev.property
+              );
+            }
+          }
+
+          target.unshiftContainer("body", newNode);
         }
       }
     }
@@ -195,6 +226,13 @@ module.exports = function({ types: t }) {
         return path;
       }
     }
+  }
+
+  function getGlobalThis() {
+    return t.callExpression(
+      t.sequenceExpression([t.valueToNode(0), t.identifier("eval")]),
+      [t.valueToNode("this")]
+    );
   }
 };
 
