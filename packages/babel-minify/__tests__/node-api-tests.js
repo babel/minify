@@ -28,4 +28,28 @@ describe("babel-minify Node API", () => {
     const minifyOpts = { mangle: { keepFnName: false } };
     expect(minify(sampleInput, minifyOpts).code).toMatchSnapshot();
   });
+
+  it("preserve default comments", () => {
+    const code = `
+      /* @license MIT */
+      (function() {
+        /*! mylib.js */
+        function a() {}
+        a();
+      })();
+    `;
+
+    expect(minify(code, {}).code).toMatchSnapshot();
+  });
+
+  it("remove comments ", () => {
+    const code = `
+      /* foo */
+      var a = 10;
+
+      !function(){}() // blah
+    `;
+
+    expect(minify(code, {}).code).toMatchSnapshot();
+  });
 });

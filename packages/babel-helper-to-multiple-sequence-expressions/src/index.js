@@ -26,6 +26,7 @@ module.exports = function(t) {
 
     function convert(nodes) {
       const exprs = [];
+      const comments = [];
 
       for (let i = 0; i < nodes.length; i++) {
         const bail = () => {
@@ -47,6 +48,9 @@ module.exports = function(t) {
         if (t.isExpression(node)) {
           exprs.push(node);
         } else if (t.isExpressionStatement(node)) {
+          if (node.leadingComments) {
+            comments.push(...node.leadingComments);
+          }
           if (node.expression) exprs.push(node.expression);
         } else if (t.isIfStatement(node)) {
           let consequent;
@@ -95,6 +99,14 @@ module.exports = function(t) {
         seq = exprs[0];
       } else if (exprs.length) {
         seq = t.sequenceExpression(exprs);
+      }
+
+      /**
+       * collect all the comment ast nodes that are before expression
+       * statments and add it to the new generated node
+       */
+      if (seq) {
+        seq.leadingComments = comments;
       }
 
       /* eslint-disable no-self-assign */

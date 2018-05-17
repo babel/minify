@@ -4,4 +4,8 @@ exports[`babel-minify Node API override default minify options 1`] = `"function 
 
 exports[`babel-minify Node API override nested minify options 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;
 
+exports[`babel-minify Node API preserve default comments 1`] = `"/* @license MIT */(function(){/*! mylib.js */(function(){})()})();"`;
+
+exports[`babel-minify Node API remove comments  1`] = `"var a=10;!function(){}();"`;
+
 exports[`babel-minify Node API simple usage 1`] = `"function foo(){const a=x(1),b=y(2);return z(a,b)}"`;

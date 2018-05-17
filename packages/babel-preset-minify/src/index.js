@@ -99,7 +99,6 @@ function preset(context, _opts = {}) {
 
   return {
     minified: true,
-    comments: false,
     presets: [{ plugins }],
     passPerPreset: true
   };
