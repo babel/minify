@@ -1,6 +1,5 @@
 "use strict";
 
-const evaluate = require("babel-helper-evaluate-path");
 // Assuming all the static methods from below array are side effect free evaluation
 // except Math.random
 const VALID_CALLEES = ["String", "Number", "Math"];
@@ -48,7 +47,7 @@ module.exports = function({ types: t }) {
         },
 
         CallExpression: {
-          exit(path, { opts: { tdz = false } = {} }) {
+          exit(path) {
             const callee = path.get("callee");
             if (!callee.isMemberExpression()) {
               return;
@@ -58,17 +57,13 @@ module.exports = function({ types: t }) {
 
             // computed property should not be optimized
             // Math[max]() -> Math.max()
-            if (!isComputed(node) && isBuiltin(node)) {
-              const result = evaluate(path, { tdz });
-              // deopt when we have side effecty evaluate-able arguments
-              // Math.max(foo(), 1) --> untouched
-              // Math.floor(1) --> 1
-              if (result.confident && hasPureArgs(path)) {
-                path.replaceWith(t.valueToNode(result.value));
-              } else if (!getFunctionParent(callee).isProgram()) {
-                const expName = memberToString(node);
-                addToMap(context.pathsToUpdate, expName, callee);
-              }
+            if (
+              !isComputed(node) &&
+              isBuiltin(node) &&
+              !getFunctionParent(callee).isProgram()
+            ) {
+              const expName = memberToString(node);
+              addToMap(context.pathsToUpdate, expName, callee);
             }
           }
         }
@@ -208,16 +203,6 @@ function addToMap(map, key, value) {
     map.set(key, []);
   }
   map.get(key).push(value);
-}
-
-function hasPureArgs(path) {
-  const args = path.get("arguments");
-  for (const arg of args) {
-    if (!arg.isPure()) {
-      return false;
-    }
-  }
-  return true;
 }
 
 function isComputed(node) {

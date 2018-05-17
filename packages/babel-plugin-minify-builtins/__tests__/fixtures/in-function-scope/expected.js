@@ -8,7 +8,7 @@ var a = () => {
   c: () => {
     _Mathfloor(d);
 
-    2;
+    Math.max(2, 1);
   };
 };
 
