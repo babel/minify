@@ -39,6 +39,7 @@ module.exports = class ScopeTracker {
   addReference(scope, binding, name) {
     let parent = scope;
     do {
+      this.addScope(parent);
       this.references.get(parent).add(name);
       if (!binding) {
         throw new Error(
