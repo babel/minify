@@ -38,11 +38,10 @@ module.exports = ({ types: t }) => {
           if (hasSpread(this.node)) {
             return;
           }
-          if(this.node.properties.length === 0) {
-            if(key in EMPTY_OBJECT) {
-              return
-            }
-            else {
+          if (this.node.properties.length === 0) {
+            if (key in EMPTY_OBJECT) {
+              return;
+            } else {
               return undef;
             }
           }
