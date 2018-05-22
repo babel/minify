@@ -13,6 +13,24 @@ Object {
 }
 `;
 
+exports[`babel-minify CLI should handle comments 1`] = `
+Array [
+  Object {
+    "stderr": "",
+    "stdout": "import Foo from\\"foo\\";import pick from\\"lodash.pick\\";export const items=pick(Foo.all,[\\"a\\",\\"b\\",\\"c\\"]);export default Foo(items);",
+  },
+  Object {
+    "stderr": "",
+    "stdout": "// comment 1
+import Foo from\\"foo\\";// comment 2
+import pick from\\"lodash.pick\\";export const items/* comment 3 */=pick(Foo.all,[// comment 4
+\\"a\\",// comment 5
+\\"b\\",// comment 6
+\\"c\\"]);export default Foo(items);",
+  },
+]
+`;
+
 exports[`babel-minify CLI should throw on all invalid options 1`] = `
 Object {
   "code": 1,
