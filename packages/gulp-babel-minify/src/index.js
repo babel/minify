@@ -63,6 +63,9 @@ function gulpBabelMinify(
     if (success) {
       file.contents = new Buffer(result.code);
       if (file.sourceMap) {
+        if (!result.map.hasOwnProperty("file")) {
+          result.map.file = file.sourceMap.file;
+	} 
         applySourceMap(file, result.map);
       }
       return callback(null, file);
