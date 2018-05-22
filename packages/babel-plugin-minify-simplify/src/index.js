@@ -138,7 +138,7 @@ module.exports = ({ types: t }) => {
           // foo !== 'lol' ? 'foo' : 'bar' -> foo === 'lol' ? 'bar' : 'foo'
           function flipIfOrConditional(path) {
             const { node } = path;
-            if (!path.get("test").isLogicalExpression()) {
+            if (!t.isLogicalExpression(node.test)) {
               flipNegation(node);
               return;
             }
@@ -188,21 +188,21 @@ module.exports = ({ types: t }) => {
               if (
                 !path.isAssignmentExpression() ||
                 !(
-                  path.get("left").isIdentifier() ||
-                  path.get("left").isMemberExpression()
+                  t.isIdentifier(path.node.left) ||
+                  t.isMemberExpression(path.node.left)
                 )
               ) {
                 return true;
               }
 
-              const left = path.get("left").node;
+              const left = path.node.left;
               if (firstLeft == null) {
                 firstLeft = left;
               } else if (!t.isNodesEquivalent(left, firstLeft)) {
                 return true;
               }
 
-              mutations.push(() => path.replaceWith(path.get("right").node));
+              mutations.push(() => path.replaceWith(path.node.right));
             }
 
             const bail = visit(topPath);
@@ -388,8 +388,8 @@ module.exports = ({ types: t }) => {
             return;
           }
 
-          if (!path.get("body").isBlockStatement()) {
-            const bodyNode = path.get("body").node;
+          if (!t.isBlockStatement(node.body)) {
+            const bodyNode = node.body;
             if (!t.isIfStatement(bodyNode)) {
               return;
             }
