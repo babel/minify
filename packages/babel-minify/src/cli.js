@@ -2,6 +2,7 @@ const yargsParser = require("yargs-parser");
 const optionsParser = require("./options-parser");
 const { version } = require("../package.json");
 const { handleStdin, handleFile, handleArgs, isFile } = require("./fs");
+const pick = require("lodash.pick");
 
 const plugins = [
   "booleans",
@@ -53,8 +54,8 @@ const typeConsOpts = [
   "typeConstructors.string"
 ];
 
-const cliBooleanOpts = ["help", "version"];
-const cliOpts = ["out-file", "out-dir"];
+const cliBooleanOpts = ["help", "version", "comments"];
+const cliOpts = ["out-file", "out-dir", "sourceType"];
 const alias = {
   outFile: "o",
   outDir: "d",
@@ -75,6 +76,12 @@ function printHelpInfo({ exitCode = 0 } = {}) {
   IO Options:
     --out-file, -o          Output to a specific file
     --out-dir, -d           Output to a specific directory
+
+  Parser/Generator options
+    --sourceType            Indicate the mode the code should be parsed in. Valid options
+                            are "script" | "module" | "unambiguous"
+    --comments              Enable/Disable comments in the output. For more specific control,
+                            use the Node API
 
   Transform Options:
     --mangle                Context and scope aware variable renaming
@@ -198,8 +205,13 @@ function getMinifyOpts(argv) {
   delete options["out-file"];
   delete options.outFile;
   delete options.outDir;
+  delete options.sourceType;
+  delete options["source-type"];
+  delete options.comments;
 
-  return options;
+  const babelOptions = pick(inputOpts, ["sourceType", "comments"]);
+
+  return { options, babelOptions };
 }
 
 function validate(opts) {
@@ -220,30 +232,30 @@ function validate(opts) {
   );
 }
 
-function runStdin(argv, options) {
+function runStdin(argv, options, babelOptions) {
   if (argv._.length > 0) {
     throw new Error("Reading input from STDIN. Cannot take file params");
   }
 
-  return handleStdin(argv.outFile, options);
+  return handleStdin(argv.outFile, options, babelOptions);
 }
 
-function runFile(argv, options) {
+function runFile(argv, options, babelOptions) {
   const file = argv._[0];
 
   // prefer outFile
   if (argv.outFile) {
-    return handleFile(file, argv.outFile, options);
+    return handleFile(file, argv.outFile, options, babelOptions);
   } else if (argv.outDir) {
-    return handleArgs([file], argv.outDir, options);
+    return handleArgs([file], argv.outDir, options, babelOptions);
   } else {
     // prints to STDOUT
-    return handleFile(file, void 0, options);
+    return handleFile(file, void 0, options, babelOptions);
   }
 }
 
-function runArgs(argv, options) {
-  return handleArgs(argv._, argv.outDir, options);
+function runArgs(argv, options, babelOptions) {
+  return handleArgs(argv._, argv.outDir, options, babelOptions);
 }
 
 async function run(args) {
@@ -253,18 +265,18 @@ async function run(args) {
   if (argv.help) printHelpInfo();
   if (argv.V) log(version);
 
-  const options = getMinifyOpts(argv);
+  const { options, babelOptions } = getMinifyOpts(argv);
 
   if (argv._.length <= 0) {
     if (!process.stdin.isTTY) {
-      return runStdin(argv, options);
+      return runStdin(argv, options, babelOptions);
     } else {
       return printHelpInfo({ exitCode: 1 });
     }
   } else if (argv._.length === 1 && (await isFile(argv._[0]))) {
-    return runFile(argv, options);
+    return runFile(argv, options, babelOptions);
   } else {
-    return runArgs(argv, options);
+    return runArgs(argv, options, babelOptions);
   }
 }
 
