@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/babel-minify"><img alt="NPM Version" src="https://img.shields.io/npm/v/babel-minify.svg?style=flat"/></a>
-  <a href="https://travis-ci.org/babel/minify"><img alt="Travis Status" src="https://img.shields.io/travis/babel/minify/master.svg?label=travis&maxAge=43200"/></a>
+  <a href="https://travis-ci.com/babel/minify"><img alt="Travis Status" src="https://travis-ci.com/babel/minify.svg?branch=master"/></a>
   <a href="https://circleci.com/gh/babel/minify"><img alt="CircleCI Status" src="https://img.shields.io/circleci/project/github/babel/minify/master.svg?label=circle&maxAge=43200"/></a>
   <a href="https://ci.appveyor.com/project/boopathi/minify/branch/master"><img alt="AppveyorCI Status" src="https://ci.appveyor.com/api/projects/status/github/babel/minify?branch=master&svg=true"/></a>
   <a href="https://codecov.io/github/babel/minify"><img alt="Code Coverage" src="https://img.shields.io/codecov/c/github/babel/minify/master.svg?maxAge=43200"/></a>
