@@ -1,5 +1,6 @@
 git:
   depth: 10
+  submodules: false
 sudo: false
 language: node_js
 cache: yarn

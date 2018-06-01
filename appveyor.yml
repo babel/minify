@@ -12,7 +12,7 @@ cache:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - npm install -g yarn@1.6.0
+  - npm install -g yarn@1.7.0
   - set PATH=%APPDATA%\npm;%PATH%
   - yarn
 
