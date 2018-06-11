@@ -99,7 +99,7 @@ describe("simplify-plugin", () => {
   `,
     `
     a = false;
-    a = NaN;
+    a = 0 / 0;
     a = 0;
     a = undefined;
     a = 0;
@@ -199,7 +199,7 @@ describe("simplify-plugin", () => {
     `
     a = foo;
     a = console.log("asdf");
-    a = NaN;
+    a = 0 / 0;
     a = undefined;
     a = 5 << foo;
   `

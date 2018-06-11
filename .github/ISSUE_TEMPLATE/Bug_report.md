@@ -72,9 +72,9 @@ State how you're using babel-minify.
 
 `babel-minify CLI`
 
-babel-minify version: `0.4.1`
+babel-minify version: `0.4.3`
 
-babel version : `7.0.0-beta.46`
+babel version : `7.0.0-beta.49`
 
 babel-minify-config:
 
