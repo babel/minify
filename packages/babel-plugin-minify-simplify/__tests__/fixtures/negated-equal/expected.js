@@ -58,6 +58,7 @@ if (myFoo({
   const thisIs = aStatement;
 } // --------------------------------------
 
+
 foo !== 2 && an.expression(), foo === 2 && an.expression(), foo ^ 2 && an.expression(), foo == 2 && an.expression(), myFoo({
   bar: {
     baz: {
