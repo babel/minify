@@ -35,7 +35,7 @@ var foo = {
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-property-literals
+npm install babel-plugin-transform-property-literals --save-dev
 ```
 
 ## Usage

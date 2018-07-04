@@ -66,6 +66,8 @@ function preset(context, _opts = {}) {
   // handle plugins and their options
   for (const [name] of PLUGINS) {
     if (isPlainObject(opts[name])) {
+      // for plugins disabled by default
+      pluginsMap[name].enabled = true;
       pluginsMap[name].options = opts[name];
     } else if (opts[name] !== void 0) {
       pluginsMap[name].enabled = !!opts[name];
@@ -97,7 +99,6 @@ function preset(context, _opts = {}) {
 
   return {
     minified: true,
-    comments: false,
     presets: [{ plugins }],
     passPerPreset: true
   };

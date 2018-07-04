@@ -28,7 +28,14 @@ module.exports = function({ types: t }) {
           return;
         }
 
-        if (path.isLVal() && !path.parentPath.isExpressionStatement()) {
+        const bindingIds = path.parentPath.getBindingIdentifierPaths();
+
+        if (
+          bindingIds["Infinity"] === path &&
+          // ObjectProperty is common for ObjectExpression and ObjectPattern and only
+          // one of them is a Binding, the other is simply a reference
+          !path.parentPath.parentPath.isObjectExpression()
+        ) {
           return;
         }
 

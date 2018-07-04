@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-builtins",
-  "version": "0.4.0",
+  "version": "0.4.3",
   "description": "Minify Standard built-in Objects",
   "keywords": [
     "babel-plugin",
@@ -11,8 +11,5 @@
   "license": "MIT",
   "author": "Vignesh Shanmugam <vignesh.shanmugam22@gmail.com> (https://vigneshh.in)",
   "main": "lib/index.js",
-  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-builtins",
-  "dependencies": {
-    "babel-helper-evaluate-path": "^0.4.0"
-  }
+  "repository": "https://github.com/babel/minify/tree/master/packages/babel-plugin-minify-builtins"
 }

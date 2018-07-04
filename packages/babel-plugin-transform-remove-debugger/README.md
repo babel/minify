@@ -18,7 +18,7 @@ debugger;
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-remove-debugger
+npm install babel-plugin-transform-remove-debugger --save-dev
 ```
 
 ## Usage

@@ -54,6 +54,8 @@ describe("preset along with env", () => {
 
       function a() {
         return function a() {
+          "use strict";
+
           _classCallCheck(this, a);
         };
       }
@@ -156,6 +158,118 @@ describe("preset along with env", () => {
 
         return c || {};
       }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#825-merge-sibling-vars",
+    `
+    (function() {
+      const blah = 71;
+
+      var start = 1, navx = '';
+      while (start < 71) {
+          navx += 'a';
+          start += 10;
+      }
+      return 'b' + navx;
+    })();
+  `,
+    `
+    (function () {
+      for (var a = 1, b = ''; 71 > a;) b += 'a', a += 10;
+
+      return 'b' + b;
+    })();
+  `
+  );
+
+  thePlugin(
+    "should fix issue#824 simplify + deadcode",
+    `
+      let foo;
+      while (0) {}
+      console.log(foo);
+    `,
+    `
+      var foo;
+      console.log(foo);
+    `
+  );
+
+  thePlugin(
+    "should fix issue#829 mangling after function name",
+    `
+      function foo() {
+        let con = console;
+
+        return {
+          a(bar) {
+            con.log(bar);
+          }
+        };
+      }
+    `,
+    `
+      function foo() {
+        var b = console;
+        return {
+          a: function d(c) {
+            b.log(c);
+          }
+        };
+      }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#829 mangling after function name 2",
+    `
+      function bar() {
+        var b = console;
+        return {
+          a: class {
+            constructor(bar) {
+              b.log(bar);
+            }
+          }
+        };
+      }
+    `,
+    `
+      function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
+
+      function bar() {
+        var c = console;
+        return {
+          a: function b(a) {
+            "use strict";
+
+            _classCallCheck(this, b), c.log(a);
+          }
+        };
+      }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#845 - class body non array",
+    `
+      class A {}
+
+      A.B = {}
+      exports.A = A;
+    `,
+    `
+      function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
+
+      var A = function a() {
+        "use strict";
+
+        _classCallCheck(this, a);
+      };
+
+      A.B = {}, exports.A = A;
     `
   );
 });

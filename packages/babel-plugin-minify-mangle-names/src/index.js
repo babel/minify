@@ -131,7 +131,33 @@ module.exports = babel => {
           // Collect bindings defined in the scope
           Object.keys(scope.bindings).forEach(name => {
             scopeTracker.addBinding(scope.bindings[name]);
+
+            // add all constant violations as references
+            scope.bindings[name].constantViolations.forEach(() => {
+              scopeTracker.addReference(scope, scope.bindings[name], name);
+            });
           });
+        },
+
+        /**
+         * This is required because after function name transformation
+         * plugin (part of es2015), the function name is NOT added to the
+         * scope's bindings. So to fix this issue, we simply add a hack to
+         * handle that case - fix it to the scope tree.
+         *
+         * Related:
+         * - https://github.com/babel/minify/issues/829
+         */
+        BindingIdentifier(path) {
+          if (
+            // the parent has this id as the name
+            (path.parentPath.isFunctionExpression({ id: path.node }) ||
+              path.parentPath.isClassExpression({ id: path.node })) &&
+            // and the id isn't yet added to the scope
+            !hop.call(path.parentPath.scope.bindings, path.node.name)
+          ) {
+            path.parentPath.scope.registerBinding("local", path.parentPath);
+          }
         },
 
         /**
@@ -147,7 +173,10 @@ module.exports = babel => {
           if (isLabelIdentifier(path)) {
             return;
           }
-          const { scope, node: { name } } = path;
+          const {
+            scope,
+            node: { name }
+          } = path;
           const binding = scope.getBinding(name);
           if (!binding) {
             // Do not collect globals as they are already available via
@@ -221,6 +250,54 @@ module.exports = babel => {
     }
 
     /**
+     * Tells if the name can be mangled in the current observed scope with
+     * the input binding
+     *
+     * @param {string} oldName the old name that needs to be mangled
+     * @param {Binding} binding Binding of the name
+     * @param {Scope} scope The current scope the mangler is run
+     */
+    canMangle(oldName, binding, scope) {
+      const cannotMangle =
+        // arguments - for non-strict mode
+        oldName === "arguments" ||
+        // labels
+        binding.path.isLabeledStatement() ||
+        // ClassDeclaration has binding in two scopes
+        //   1. The scope in which it is declared
+        //   2. The class's own scope
+        (binding.path.isClassDeclaration() && binding.path === scope.path) ||
+        // excluded
+        this.isExcluded(oldName) ||
+        // function names
+        (this.keepFnName ? isFunction(binding.path) : false) ||
+        // class names
+        (this.keepClassName ? isClass(binding.path) : false) ||
+        // named export
+        this.isExportedWithName(binding);
+
+      return !cannotMangle;
+    }
+
+    /**
+     * Tells if the newName can be used as a valid name for the input binding
+     * in the input scope
+     *
+     * @param {string} newName the old name that needs to be mangled
+     * @param {Binding} binding Binding of the name that this new name will replace
+     * @param {Scope} scope The current scope the mangler is run
+     */
+    isValidName(newName, binding, scope) {
+      return (
+        t.isValidIdentifier(newName) &&
+        !this.scopeTracker.hasBinding(scope, newName) &&
+        !scope.hasGlobal(newName) &&
+        !this.scopeTracker.hasReference(scope, newName) &&
+        this.scopeTracker.canUseInReferencedScopes(binding, newName)
+      );
+    }
+
+    /**
      * Mangle the scope
      * @param {Scope} scope
      */
@@ -243,66 +320,48 @@ module.exports = babel => {
       }
       mangler.visitedScopes.add(scope);
 
-      // Helpers to generate names
-      let i = 0;
-      function getNext() {
-        return mangler.charset.getIdentifier(i++);
-      }
-      function resetNext() {
-        i = 0;
-      }
-
       const bindings = scopeTracker.bindings.get(scope);
       const names = [...bindings.keys()];
+
+      // A counter to generate names and reset
+      // so we can reuse removed names
+      let counter = 0;
 
       /**
        * 1. Iterate through the list of BindingIdentifiers
        * 2. Rename each of them in-place
        * 3. Update the scope tree.
+       *
+       * We cannot use a for..of loop over bindings.keys()
+       * because (2) we rename in place and update the bindings
+       * as we traverse through the keys
        */
-      for (let i = 0; i < names.length; i++) {
-        const oldName = names[i];
+      for (const oldName of names) {
         const binding = bindings.get(oldName);
 
-        // Names which should NOT be mangled
-        if (
-          // arguments - for non-strict mode
-          oldName === "arguments" ||
-          // labels
-          binding.path.isLabeledStatement() ||
-          // ClassDeclaration has binding in two scopes
-          //   1. The scope in which it is declared
-          //   2. The class's own scope
-          (binding.path.isClassDeclaration() && binding.path === scope.path) ||
-          // excluded
-          mangler.isExcluded(oldName) ||
-          // function names
-          (mangler.keepFnName ? isFunction(binding.path) : false) ||
-          // class names
-          (mangler.keepClassName ? isClass(binding.path) : false) ||
-          // named export
-          mangler.isExportedWithName(binding)
-        ) {
-          continue;
+        if (mangler.canMangle(oldName, binding, scope)) {
+          let next;
+          do {
+            next = mangler.charset.getIdentifier(counter++);
+          } while (!mangler.isValidName(next, binding, scope));
+
+          // Reset so variables which are removed can be reused
+          //
+          // the following is an assumtion (for perf)
+          // the length 3 is an assumption that if the oldName isn't
+          // 1 or 2 characters, then probably we are not going to find
+          // a name - because for almost all usecases we have 1 or 2
+          // character new names only. And for the edge cases where
+          // one scope has lots and lots of variables, it's okay to
+          // name something with 3 characters instead of 1
+          if (oldName.length < 3) {
+            counter = 0;
+          }
+
+          // Once we detected a valid `next` Identifier which could be used,
+          // call the renamer
+          mangler.rename(scope, binding, oldName, next);
         }
-
-        let next;
-        do {
-          next = getNext();
-        } while (
-          !t.isValidIdentifier(next) ||
-          scopeTracker.hasBinding(scope, next) ||
-          scope.hasGlobal(next) ||
-          scopeTracker.hasReference(scope, next) ||
-          !scopeTracker.canUseInReferencedScopes(binding, next)
-        );
-
-        // Reset so variables which are removed can be reused
-        resetNext();
-
-        // Once we detected a valid `next` Identifier which could be used,
-        // call the renamer
-        mangler.rename(scope, binding, oldName, next);
       }
     }
 

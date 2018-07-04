@@ -70,6 +70,7 @@ module.exports = function({ types: t }) {
       BinaryExpression(path) {
         const { node } = path;
         const op = node.operator;
+
         if (op !== "===" && op !== "!==") {
           return;
         }

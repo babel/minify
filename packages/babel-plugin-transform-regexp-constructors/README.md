@@ -21,7 +21,7 @@ var a = /ab+c/i;
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-regexp-constructors
+npm install babel-plugin-transform-regexp-constructors --save-dev
 ```
 
 ## Usage

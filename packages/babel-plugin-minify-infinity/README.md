@@ -17,7 +17,7 @@ Infinity;
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-infinity
+npm install babel-plugin-minify-infinity --save-dev
 ```
 
 ## Usage

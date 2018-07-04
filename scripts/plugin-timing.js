@@ -50,8 +50,12 @@ run(process.argv[2]);
 
 function run(file) {
   const b = new Benchmark();
-  babel.transform(fs.readFileSync(file).toString(), {
+  babel.transformSync(fs.readFileSync(file).toString(), {
     presets: [preset],
+    babelrc: false,
+    configFile: false,
+    minified: true,
+    compact: true,
     wrapPluginVisitorMethod(pluginAlias, visitorType, callback) {
       return function(...args) {
         b.push(pluginAlias);

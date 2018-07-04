@@ -29,7 +29,7 @@ function foo() {
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-remove-undefined
+npm install babel-plugin-transform-remove-undefined --save-dev
 ```
 
 ## Usage

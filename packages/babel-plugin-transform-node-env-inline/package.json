@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-node-env-inline",
-  "version": "0.4.0",
+  "version": "0.4.3",
   "description": "Inline the `NODE_ENV` environment variable and evaluate it if possible",
   "keywords": [
     "babel-plugin"

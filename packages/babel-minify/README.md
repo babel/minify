@@ -50,6 +50,7 @@ Refer [babel-preset-minify options](https://github.com/babel/minify/tree/master/
 + `minifyPreset`: Custom minify preset
 + `inputSourceMap`: Input Sourcemap
 + `sourceMaps`: [Boolean]
++ `comments`: [Function | RegExp | Boolean]
 
 ## CLI Options
 

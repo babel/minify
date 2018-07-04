@@ -1,3 +1,63 @@
+## babel-minify@0.4.3 (2018-05-14)
+
+#### :bug: Bug Fix
+* `babel-helper-evaluate-path`, `babel-plugin-minify-constant-folding`
+  * [#846](https://github.com/babel/minify/pull/846) fix: handle non array statements in evaluate helper. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### Committers: 1
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+## babel-minify@0.4.2 (2018-05-14)
+
+#### :rocket: New Feature
+* `babel-plugin-minify-simplify`, `babel-plugin-transform-simplify-comparison-operators`
+  * [#572](https://github.com/babel/minify/pull/572) Replace `x != undefined` with `x != null`. ([@j-f1](https://github.com/j-f1))
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-mangle-names`, `babel-preset-minify`
+  * [#842](https://github.com/babel/minify/pull/842) fix(mangle): handle inferred names for functions. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-infinity`
+  * [#841](https://github.com/babel/minify/pull/841) fix: minify infinity in expressions. ([@boopathi](https://github.com/boopathi))
+* `babel-helper-evaluate-path`, `babel-plugin-minify-dead-code-elimination`, `babel-plugin-minify-guarded-expressions`, `babel-plugin-minify-simplify`, `babel-preset-minify`
+  * [#831](https://github.com/babel/minify/pull/831) fix: account for different scopes during path evaluation. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-plugin-minify-dead-code-elimination`, `babel-preset-minify`
+  * [#834](https://github.com/babel/minify/pull/834) fix(deadcode): account for impure paths inside for statements. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### Chore
+* [#838](https://github.com/babel/minify/pull/838) (chore): fix links to debugging section [skip ci]. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* [#837](https://github.com/babel/minify/pull/837) (chore) change line endings from crlf to lf. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### Committers: 3
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- Jed Fox ([j-f1](https://github.com/j-f1))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+## babel-minify@0.4.1 (2018-05-03)
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-mangle-names`
+  * [#830](https://github.com/babel/minify/pull/830) fix: add constant violations to references in mangler collect phase. ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-constant-folding`
+  * [#828](https://github.com/babel/minify/pull/828) fix(const-folding): do not evaluate identifier in export specifiers. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-preset-minify`
+  * [#823](https://github.com/babel/minify/pull/823) Allow options for plugins disabled by default (babel-preset-minify). ([@nemophrost](https://github.com/nemophrost))
+* `babel-plugin-transform-merge-sibling-variables`, `babel-preset-minify`
+  * [#826](https://github.com/babel/minify/pull/826) fix(merge-sibling-var): recalculate declarations when concatenating variables. ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### :memo: Documentation
+* [#817](https://github.com/babel/minify/pull/817) fix: update outdated react url. ([@ganes1410](https://github.com/ganes1410))
+
+#### Chore
+
+* all packages
+  * [#827](https://github.com/babel/minify/pull/827) chore: upgrade dependencies; add node 10; remove node 9 ([@boopathi](https://github.com/boopathi))
+
+#### Committers: 4
+- Alma Madsen ([nemophrost](https://github.com/nemophrost))
+- Boopathi Rajaa ([boopathi](https://github.com/boopathi))
+- R.Ganesh ([ganes1410](https://github.com/ganes1410))
+- Vignesh Shanmugam ([vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babel-minify@0.4.0 (2018-04-08)
 
 #### :boom: Breaking Change

@@ -13,7 +13,8 @@ function gulpBabelMinify(
   {
     babel = babelCore,
     minifyPreset = babelPresetMinify,
-    comments = /preserve|licen(s|c)e/
+    comments = /^\**!|@preserve|@licen[sc]e|@cc_on/,
+    sourceType = "script"
   } = {}
 ) {
   return through2.obj(function(file, enc, callback) {
@@ -34,6 +35,8 @@ function gulpBabelMinify(
       minified: true,
       babelrc: false,
       ast: false,
+
+      sourceType,
 
       /* preset */
       presets: [[minifyPreset, minifyOpts]],
@@ -60,6 +63,9 @@ function gulpBabelMinify(
     if (success) {
       file.contents = new Buffer(result.code);
       if (file.sourceMap) {
+        if (!result.map.hasOwnProperty("file")) {
+          result.map.file = file.sourceMap.file;
+        }
         applySourceMap(file, result.map);
       }
       return callback(null, file);
@@ -73,7 +79,7 @@ function transform({ babel, input, babelOpts }) {
   try {
     return {
       success: true,
-      result: babel.transform(input, babelOpts)
+      result: babel.transformSync(input, babelOpts)
     };
   } catch (e) {
     return {

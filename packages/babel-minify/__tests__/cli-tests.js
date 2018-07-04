@@ -46,6 +46,7 @@ function foo() {
 
 const sampleInputFile = path.join(__dirname, "fixtures/out-file/foo.js");
 const sampleInputDir = path.join(__dirname, "fixtures/out-dir/a");
+const sampleInputModule = path.join(__dirname, "fixtures/module/mod.js");
 
 const tempOutFile = path.join(__dirname, "fixtures/out-file/foo.min.js");
 const tempOutDir = path.join(__dirname, "fixtures/out-dir/min");
@@ -100,5 +101,18 @@ describe("babel-minify CLI", () => {
   it("input dir + outdir", async () => {
     await runCli([sampleInputDir, "--out-dir", tempOutDir]);
     expect(await readFile(tempOutDirFile)).toMatchSnapshot();
+  });
+
+  it("should handle source type", async () => {
+    return expect(runCli([sampleInputModule, "--sourceType module"])).resolves;
+  });
+
+  it("should handle comments", async () => {
+    return expect(
+      Promise.all([
+        runCli([sampleInputModule, "--sourceType module", "--comments false"]),
+        runCli([sampleInputModule, "--sourceType module", "--comments true"])
+      ])
+    ).resolves.toMatchSnapshot();
   });
 });

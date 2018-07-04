@@ -31,7 +31,7 @@ function foo() {
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-mangle-names
+npm install babel-plugin-minify-mangle-names --save-dev
 ```
 
 ## Usage

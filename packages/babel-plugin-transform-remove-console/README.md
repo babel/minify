@@ -19,7 +19,7 @@ console.error("bar");
 ## Installation
 
 ```sh
-npm install babel-plugin-transform-remove-console
+npm install babel-plugin-transform-remove-console --save-dev
 ```
 
 ## Usage

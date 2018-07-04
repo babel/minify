@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { transform } = require("@babel/core");
+const { transformSync } = require("@babel/core");
 const Table = require("cli-table");
 const zlib = require("zlib");
 const chalk = require("chalk");
@@ -29,8 +29,10 @@ function run(inputFile) {
     )
   );
 
-  const baseOutput = transform(input, {
+  const baseOutput = transformSync(input, {
     minified: true,
+    babelrc: false,
+    configFile: false,
     compact: true,
     comments: false
   }).code;
@@ -45,9 +47,11 @@ function run(inputFile) {
   plugins.forEach(({ name, plugin }) => {
     process.stdout.write(`Plugin ${current++}/${plugins.length}\r`);
 
-    const output = transform(baseOutput, {
+    const output = transformSync(baseOutput, {
       plugins: [plugin],
       minified: true,
+      babelrc: false,
+      configFile: false,
       compact: true,
       comments: false
     }).code;

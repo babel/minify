@@ -29,7 +29,7 @@ x + "";
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-type-constructors
+npm install babel-plugin-minify-type-constructors --save-dev
 ```
 
 ## Usage

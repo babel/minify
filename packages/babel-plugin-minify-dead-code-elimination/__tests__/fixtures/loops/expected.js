@@ -16,6 +16,8 @@ for (;;) {
   bar();
 }
 
+var j;
+
 // do_while
 do {
   foo();

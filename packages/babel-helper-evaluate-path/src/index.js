@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = function evaluate(path, { tdz = false } = {}) {
-  if (!tdz) {
+  if (!tdz && !path.isReferencedIdentifier()) {
     return baseEvaluate(path);
   }
 
@@ -63,7 +63,21 @@ function evaluateIdentifier(path) {
   const binding = path.scope.getBinding(node.name);
 
   if (!binding) {
-    return deopt(path);
+    const { name } = node;
+    if (!name) {
+      return deopt(path);
+    }
+
+    switch (name) {
+      case "undefined":
+        return { confident: true, value: undefined };
+      case "NaN":
+        return { confident: true, value: NaN };
+      case "Infinity":
+        return { confident: true, value: Infinity };
+      default:
+        return deopt(path);
+    }
   }
 
   if (binding.constantViolations.length > 0) {
@@ -105,30 +119,58 @@ function evaluateBasedOnControlFlow(binding, refPath) {
   if (binding.kind === "var") {
     // early-exit
     const declaration = binding.path.parentPath;
-    if (
-      declaration.parentPath.isIfStatement() ||
-      declaration.parentPath.isLoop() ||
-      declaration.parentPath.isSwitchCase()
-    ) {
-      return { shouldDeopt: true };
+
+    if (declaration.parentPath) {
+      /**
+       * Handle when binding is created inside a parent block and
+       * the corresponding parent is removed by other plugins
+       * if (false) { var a } -> var a
+       */
+      if (declaration.parentPath.removed) {
+        return {
+          confident: true,
+          value: void 0
+        };
+      }
+      if (
+        declaration.parentPath.isIfStatement() ||
+        declaration.parentPath.isLoop() ||
+        declaration.parentPath.isSwitchCase()
+      ) {
+        return {
+          shouldDeopt: true
+        };
+      }
     }
 
-    let blockParent = binding.path.scope.getBlockParent().path;
-    const fnParent = binding.path.getFunctionParent();
+    const fnParent = (
+      binding.path.scope.getFunctionParent() ||
+      binding.path.scope.getProgramParent()
+    ).path;
 
-    if (blockParent === fnParent) {
-      if (!fnParent.isProgram()) blockParent = blockParent.get("body");
+    let blockParentPath = binding.path.scope.getBlockParent().path;
+    let blockParent = blockParentPath.node;
+
+    if (blockParentPath === fnParent && !fnParent.isProgram()) {
+      blockParent = blockParent.body;
     }
 
     // detect Usage Outside Init Scope
-    if (!blockParent.get("body").some(stmt => stmt.isAncestor(refPath))) {
-      return { shouldDeopt: true };
+    const blockBody = blockParent.body;
+
+    if (
+      Array.isArray(blockBody) &&
+      !blockBody.some(stmt => isAncestor(stmt, refPath))
+    ) {
+      return {
+        shouldDeopt: true
+      };
     }
 
     // Detect usage before init
     const stmts = fnParent.isProgram()
-      ? fnParent.get("body")
-      : fnParent.get("body").get("body");
+      ? fnParent.node.body
+      : fnParent.node.body.body;
 
     const compareResult = compareBindingAndReference({
       binding,
@@ -143,8 +185,6 @@ function evaluateBasedOnControlFlow(binding, refPath) {
       ) {
         return { confident: true, value: void 0 };
       }
-
-      return { shouldDeopt: true };
     }
   } else if (binding.kind === "let" || binding.kind === "const") {
     // binding.path is the declarator
@@ -152,20 +192,26 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     const declaration = declarator.parentPath;
 
     if (
-      declaration.parentPath.isIfStatement() ||
-      declaration.parentPath.isLoop() ||
-      declaration.parentPath.isSwitchCase()
+      declaration.parentPath &&
+      (declaration.parentPath.isIfStatement() ||
+        declaration.parentPath.isLoop() ||
+        declaration.parentPath.isSwitchCase())
     ) {
       return { shouldDeopt: true };
     }
 
-    let scopePath = declarator.scope.path;
+    const scopePath = declarator.scope.path;
+    let scopeNode = scopePath.node;
+
     if (scopePath.isFunction() || scopePath.isCatchClause()) {
-      scopePath = scopePath.get("body");
+      scopeNode = scopeNode.body;
     }
 
     // Detect Usage before Init
-    const stmts = scopePath.get("body");
+    let stmts = scopeNode.body;
+    if (!Array.isArray(stmts)) {
+      stmts = [stmts];
+    }
 
     const compareResult = compareBindingAndReference({
       binding,
@@ -199,11 +245,12 @@ function compareBindingAndReference({ binding, refPath, stmts }) {
   };
 
   for (const [idx, stmt] of stmts.entries()) {
-    if (stmt.isAncestor(binding.path)) {
+    if (isAncestor(stmt, binding.path)) {
       state.binding = { idx };
     }
+
     for (const ref of binding.referencePaths) {
-      if (ref === refPath && stmt.isAncestor(ref)) {
+      if (ref === refPath && isAncestor(stmt, ref)) {
         state.reference = {
           idx,
           scope: binding.path.scope === ref.scope ? "current" : "other"
@@ -221,4 +268,11 @@ function deopt(deoptPath) {
     confident: false,
     deoptPath
   };
+}
+
+/**
+ * is nodeParent an ancestor of path
+ */
+function isAncestor(nodeParent, path) {
+  return !!path.findParent(parent => parent.node === nodeParent);
 }

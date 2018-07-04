@@ -3,5 +3,5 @@
 ## Installation
 
 ```sh
-npm install babel-helper-to-multiple-sequence-expressions
+npm install babel-helper-to-multiple-sequence-expressions --save-dev
 ```

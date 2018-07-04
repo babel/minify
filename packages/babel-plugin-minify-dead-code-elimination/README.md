@@ -31,7 +31,7 @@ function baz() {
 ## Installation
 
 ```sh
-npm install babel-plugin-minify-dead-code-elimination
+npm install babel-plugin-minify-dead-code-elimination --save-dev
 ```
 
 ## Usage

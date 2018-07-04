@@ -60,8 +60,8 @@ async function readStdin() {
   });
 }
 
-async function handleStdin(outputFilename, options) {
-  const { code } = minify(await readStdin(), options);
+async function handleStdin(outputFilename, options, babelOptions) {
+  const { code } = minify(await readStdin(), options, babelOptions);
   if (outputFilename) {
     await writeFile(outputFilename, code);
   } else {
@@ -69,8 +69,8 @@ async function handleStdin(outputFilename, options) {
   }
 }
 
-async function handleFile(filename, outputFilename, options) {
-  const { code } = minify(await readFile(filename), options);
+async function handleFile(filename, outputFilename, options, babelOptions) {
+  const { code } = minify(await readFile(filename), options, babelOptions);
   if (outputFilename) {
     await writeFile(outputFilename, code);
   } else {
@@ -78,7 +78,7 @@ async function handleFile(filename, outputFilename, options) {
   }
 }
 
-async function handleFiles(files, outputDir, options) {
+async function handleFiles(files, outputDir, options, babelOptions) {
   if (!outputDir) {
     throw new TypeError(`outputDir is falsy. Got "${outputDir}"`);
   }
@@ -87,13 +87,13 @@ async function handleFiles(files, outputDir, options) {
     files.map(file => {
       const outputFilename = path.join(outputDir, path.basename(file));
       return mkdirp(path.dirname(outputFilename))
-        .then(() => handleFile(file, outputFilename, options))
+        .then(() => handleFile(file, outputFilename, options, babelOptions))
         .catch(e => Promise.reject(new MinifyFileError(e.message, { file })));
     })
   );
 }
 
-async function handleDir(dir, outputDir, options) {
+async function handleDir(dir, outputDir, options, babelOptions) {
   if (!outputDir) {
     throw new TypeError(`outputDir is falsy`);
   }
@@ -107,7 +107,9 @@ async function handleDir(dir, outputDir, options) {
       const inputFilename = path.join(dir, file);
 
       return mkdirp(path.dirname(outputFilename))
-        .then(() => handleFile(inputFilename, outputFilename, options))
+        .then(() =>
+          handleFile(inputFilename, outputFilename, options, babelOptions)
+        )
         .catch(e =>
           Promise.reject(
             new MinifyFileError(e.message, { file: inputFilename })
@@ -117,7 +119,7 @@ async function handleDir(dir, outputDir, options) {
   );
 }
 
-async function handleArgs(args, outputDir, options) {
+async function handleArgs(args, outputDir, options, babelOptions) {
   const files = [];
   const dirs = [];
 
@@ -136,8 +138,8 @@ async function handleArgs(args, outputDir, options) {
   }
 
   return Promise.all([
-    handleFiles(files, outputDir, options),
-    ...dirs.map(dir => handleDir(dir, outputDir, options))
+    handleFiles(files, outputDir, options, babelOptions),
+    ...dirs.map(dir => handleDir(dir, outputDir, options, babelOptions))
   ]);
 }
 

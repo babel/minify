@@ -34,28 +34,6 @@ describe("preset", () => {
   );
 
   thePlugin(
-    "should fix remove comments",
-    `
-    var asdf = 1; // test
-  `,
-    `
-    var asdf = 1;
-  `
-  );
-
-  thePlugin(
-    "should keep license/preserve annotated comments",
-    `
-    /* @license */
-    var asdf = 1;
-  `,
-    `
-    /* @license */
-    var asdf = 1;
-  `
-  );
-
-  thePlugin(
     "should fix issue#385 - impure if statements with Sequence and DCE",
     `
     a = b;
@@ -175,6 +153,21 @@ describe("preset", () => {
       function fn(a) {
         return !!(a && 5 < a.length);
       }
+    `
+  );
+
+  thePlugin(
+    "should fix issue#810 declaration inside different scope",
+    `
+      if (false) {
+        var bar = true;
+      }
+      if (bar) {
+        alert('bug!');
+      }
+    `,
+    `
+      var bar;
     `
   );
 });
