@@ -573,7 +573,7 @@ module.exports = ({ types: t, traverse }) => {
         // bailing out of impure path, we collect the impurities of it's
         // a sequence expression and bail out if the primary test itself
         // is impure
-        let beforeTest = null;
+        let beforeTest = [];
         if (t.isSequenceExpression(discriminantPath.node)) {
           const expressions = discriminantPath.get("expressions");
           const lastExpression = expressions[expressions.length - 1];
@@ -581,9 +581,15 @@ module.exports = ({ types: t, traverse }) => {
             return;
           }
 
-          beforeTest = t.sequenceExpression(
-            expressions.slice(0, expressions.length - 1).map(path => path.node)
-          );
+          beforeTest = [
+            t.expressionStatement(
+              t.sequenceExpression(
+                expressions
+                  .slice(0, expressions.length - 1)
+                  .map(path => path.node)
+              )
+            )
+          ];
         } else if (!discriminantPath.isPure()) {
           return;
         }
@@ -638,7 +644,7 @@ module.exports = ({ types: t, traverse }) => {
         // will be again removed by DCE
         replaceSwitch([
           ...extractVars(path),
-          t.expressionStatement(beforeTest),
+          ...beforeTest,
           ...result.statements
         ]);
 
