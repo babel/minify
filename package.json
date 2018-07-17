@@ -48,6 +48,7 @@
     "prettier": "^1.12.1",
     "request": "^2.85.0",
     "rimraf": "^2.6.2",
+    "terser": "^3.8.0",
     "through2": "^2.0.3",
     "uglify-js": "^3.3.23",
     "util.promisify": "^1.0.0"

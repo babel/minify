@@ -4,6 +4,7 @@
 Error.stackTraceLimit = Infinity;
 
 const uglify = require("uglify-js");
+const terser = require("terser");
 const MDTable = require("markdown-table");
 const CLITable = require("cli-table");
 const child = require("child_process");
@@ -16,7 +17,6 @@ const path = require("path");
 const request = require("request");
 const program = require("commander");
 const compile = require("google-closure-compiler-js").compile;
-const butternut = require("butternut");
 
 const ASSETS_DIR = path.join(__dirname, "benchmark_cache");
 const DEFAULT_ASSETS = {
@@ -56,10 +56,10 @@ class Benchmark {
       filename,
       items: [
         this.test(this["babel-minify"], code),
+        this.test(this["terser"], code),
         this.test(this["uglify"], code),
         this.test(this["closure-compiler"], filename, false),
-        this.test(this["closure-compiler-js"], code),
-        this.test(this["butternut"], code)
+        this.test(this["closure-compiler-js"], code)
       ]
     };
 
@@ -110,6 +110,9 @@ class Benchmark {
   uglify(code) {
     return uglify.minify(code).code;
   }
+  terser(code) {
+    return terser.minify(code).code;
+  }
   "closure-compiler"(filename) {
     return child
       .execSync(
@@ -128,9 +131,7 @@ class Benchmark {
     const out = compile(flags);
     return out.compiledCode;
   }
-  butternut(code) {
-    return butternut.squash(code, { sourceMap: false }).code;
-  }
+
   getParseTime(code) {
     const start = process.hrtime();
     exports.DUMMY = new Function(code);
