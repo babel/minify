@@ -563,9 +563,36 @@ module.exports = ({ types: t, traverse }) => {
 
     SwitchStatement: {
       exit(path) {
-        const evaluated = evaluate(path.get("discriminant"), { tdz: this.tdz });
+        const discriminantPath = path.get("discriminant");
+        const evaluated = evaluate(discriminantPath, { tdz: this.tdz });
 
         if (!evaluated.confident) return;
+
+        // the simplify transformation might have brought in the previous
+        // expressions into the switch's test expression and instead of
+        // bailing out of impure path, we collect the impurities of it's
+        // a sequence expression and bail out if the primary test itself
+        // is impure
+        let beforeTest = [];
+        if (t.isSequenceExpression(discriminantPath.node)) {
+          const expressions = discriminantPath.get("expressions");
+          const lastExpression = expressions[expressions.length - 1];
+          if (!lastExpression.isPure()) {
+            return;
+          }
+
+          beforeTest = [
+            t.expressionStatement(
+              t.sequenceExpression(
+                expressions
+                  .slice(0, expressions.length - 1)
+                  .map(path => path.node)
+              )
+            )
+          ];
+        } else if (!discriminantPath.isPure()) {
+          return;
+        }
 
         const discriminant = evaluated.value;
         const cases = path.get("cases");
@@ -582,7 +609,9 @@ module.exports = ({ types: t, traverse }) => {
             continue;
           }
 
-          const testResult = evaluate(test, { tdz: this.tdz });
+          const testResult = evaluate(test, {
+            tdz: this.tdz
+          });
 
           // if we are not able to deternine a test during
           // compile time, we terminate immediately
@@ -613,13 +642,14 @@ module.exports = ({ types: t, traverse }) => {
         // we extract vars from the entire switch statement
         // and there will be duplicates which
         // will be again removed by DCE
-        replaceSwitch([...extractVars(path), ...result.statements]);
+        replaceSwitch([
+          ...extractVars(path),
+          ...beforeTest,
+          ...result.statements
+        ]);
 
         function getStatementsUntilBreak(start) {
-          const result = {
-            bail: false,
-            statements: []
-          };
+          const result = { bail: false, statements: [] };
 
           for (let i = start; i < cases.length; i++) {
             const consequent = cases[i].get("consequent");
