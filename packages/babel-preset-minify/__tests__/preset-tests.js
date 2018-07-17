@@ -170,4 +170,39 @@ describe("preset", () => {
       var bar;
     `
   );
+
+  thePlugin(
+    "should fix issue#880 - switch test in deadcode after simplify",
+    `
+      (function () {
+        const test = 2;
+
+        console.log("before switch");
+
+        switch (test) {
+            case 1:
+                console.log("case 1");
+                break;
+
+            case 2:
+                console.log("case 2");
+                break;
+
+            case 3:
+            default:
+                console.log("case 3");
+                break;
+        }
+
+        console.log("after switch");
+      })();
+    `,
+    `
+      (function () {
+        console.log("before switch");
+        console.log("case 2");
+        console.log("after switch");
+      })();
+    `
+  );
 });
