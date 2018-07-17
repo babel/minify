@@ -235,10 +235,17 @@ module.exports = ({ types: t, traverse }) => {
                 bail = true;
               }
 
-              if (p.isAssignmentExpression() && !p.get("right").isPure()) {
-                mutations.push(() => p.replaceWith(p.get("right")));
-              } else {
-                mutations.push(() => removeOrVoid(p));
+              if (p.isAssignmentExpression()) {
+                if (
+                  t.isArrayPattern(p.node.left) ||
+                  t.isObjectPattern(p.node.left)
+                ) {
+                  bail = true;
+                } else if (p.get("right").isPure()) {
+                  mutations.push(() => removeOrVoid(p));
+                } else {
+                  mutations.push(() => p.replaceWith(p.get("right")));
+                }
               }
             });
 
