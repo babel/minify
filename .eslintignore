@@ -4,3 +4,4 @@ scripts/benchmark_cache
 smoke/assets
 coverage
 fixtures
+/packages
