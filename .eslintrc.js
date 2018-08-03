@@ -2,7 +2,7 @@ const OFF = "off";
 
 module.exports = {
   root: true,
-  extends: "eslint:recommended",
+  extends: ["eslint:recommended"],
   parserOptions: {
     ecmaVersion: 2017,
     sourceType: "module"
@@ -12,11 +12,19 @@ module.exports = {
     es6: true,
     node: true
   },
-  plugins: ["prettier"],
+  plugins: ["prettier", "import"],
   rules: {
     "linebreak-style": ["error", "unix"],
     "no-cond-assign": OFF,
     "no-case-declarations": OFF,
-    "prettier/prettier": ["error", { printWidth: 80 }]
-  }
+    "prettier/prettier": ["error", { printWidth: 80 }],
+  },
+  "overrides": [
+    {
+      "files": ["packages/**/*.js"],
+      "rules": {
+        "import/no-extraneous-dependencies": ["error", {"packageDir": "."}]
+      }
+    }
+  ]
 };
