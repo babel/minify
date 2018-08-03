@@ -80,6 +80,10 @@ function evaluateIdentifier(path) {
     }
   }
 
+  if (binding.kind === "const") {
+    return path.evaluate();
+  }
+
   if (binding.constantViolations.length > 0) {
     return deopt(binding.path);
   }
