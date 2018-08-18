@@ -80,10 +80,6 @@ function evaluateIdentifier(path) {
     }
   }
 
-  if (binding.kind === "const") {
-    return path.evaluate();
-  }
-
   if (binding.constantViolations.length > 0) {
     return deopt(binding.path);
   }
@@ -113,9 +109,14 @@ function evaluateIdentifier(path) {
 // if the binding is in program scope
 // all it's references inside a different function should be deopted
 function shouldDeoptBasedOnScope(binding, refPath) {
+  if (binding.kind === "const") {
+    return false;
+  }
+
   if (binding.scope.path.isProgram() && refPath.scope !== binding.scope) {
     return true;
   }
+
   return false;
 }
 
@@ -233,10 +234,17 @@ function evaluateBasedOnControlFlow(binding, refPath) {
             `${binding.kind} binding before declaration`
         );
       }
-      if (compareResult.reference.scope === "other") {
+      if (
+        binding.kind !== "const" &&
+        compareResult.reference.scope === "other"
+      ) {
         return { shouldDeopt: true };
       }
     }
+  }
+
+  if (binding.kind === "const") {
+    return { shouldDeopt: false };
   }
 
   return { confident: false, shouldDeopt: false };
