@@ -12,7 +12,7 @@
     "fix": "eslint --fix .",
     "lint": "eslint .",
     "publish": "git pull origin master --rebase && npm run build && npm test && lerna publish",
-    "publish-master": "lerna publish -c --yes -m 'chore(canary): publish %s'",
+    "publish-master": "lerna publish -c minor --npm-client npm --yes -m 'chore(canary): publish %s'",
     "test": "jest",
     "test-ci": "npm run bootstrap && npm run build && npm run coverage",
     "updated": "lerna updated",
