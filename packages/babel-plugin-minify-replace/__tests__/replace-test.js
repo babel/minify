@@ -12,7 +12,7 @@ function thePlugin(name, source, expected, ...replacements) {
     plugins: [[replacer, { replacements }]]
   });
 }
-thePlugin.skip = theTester.skip();
+thePlugin.skip = theTester.skip;
 
 describe("replace-plugin", () => {
   thePlugin(
