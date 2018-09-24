@@ -241,9 +241,9 @@ class Printer {
     return [
       item.name,
       bytes(item.output.length),
-      Math.round(100 - 100 * item.output.length / res.input.length) + "%",
+      Math.round(100 - (100 * item.output.length) / res.input.length) + "%",
       bytes(item.gzipped.length),
-      Math.round(100 - 100 * item.gzipped.length / res.gzipped.length) + "%",
+      Math.round(100 - (100 * item.gzipped.length) / res.gzipped.length) + "%",
       item.parseTime.toFixed(2),
       item.time.toFixed(2)
     ];
