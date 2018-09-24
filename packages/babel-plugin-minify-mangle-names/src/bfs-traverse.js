@@ -1,5 +1,7 @@
 "use strict";
 
+const Denque = require("denque");
+
 module.exports = function bfsTraverseCreator({ types: t, traverse }) {
   function getFields(path) {
     return t.VISITOR_KEYS[path.type];
@@ -11,7 +13,7 @@ module.exports = function bfsTraverseCreator({ types: t, traverse }) {
     }
     const visitor = traverse.explode(_visitor);
 
-    const queue = [path];
+    const queue = new Denque([path]);
     let current;
 
     while (queue.length > 0) {
