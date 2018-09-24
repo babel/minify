@@ -1,6 +1,6 @@
 {
   "name": "babel-helper-evaluate-path",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "path.evaluate wrapped in a try catch",
   "keywords": [
     "babel-minify",
