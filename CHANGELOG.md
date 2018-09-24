@@ -1,3 +1,57 @@
+## babel-minify@0.5.0 (2018-09-24)
+
+#### :rocket: New Feature
+* `babel-minify`
+  * [#861](https://github.com/babel/minify/pull/861) feat(cli): add sourceType and comments ([@boopathi](https://github.com/boopathi))
+
+#### :bug: Bug Fix
+* `babel-plugin-minify-dead-code-elimination`
+  * [#882](https://github.com/babel/minify/pull/882) fix(dce): handle array and object patterns in assignment expressions ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-dead-code-elimination`, `babel-preset-minify`
+  * [#881](https://github.com/babel/minify/pull/881) fix(deadcode): sequence expressions in switch discriminant ([@boopathi](https://github.com/boopathi))
+* `gulp-babel-minify`
+  * [#863](https://github.com/babel/minify/pull/863) Fix issue #862 ([@egasato](https://github.com/egasato))
+* `babel-helper-to-multiple-sequence-expressions`, `babel-minify`, `babel-plugin-minify-simplify`, `babel-preset-minify`, `gulp-babel-minify`
+  * [#855](https://github.com/babel/minify/pull/855) fix: improve comments handling in presets + api + gulp ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-helper-evaluate-path`, `babel-preset-minify`
+  * [#848](https://github.com/babel/minify/pull/848) fix(evaluate): handle when parentpath is removed ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
+#### :racehorse: Performance Improvements
+* `babel-plugin-minify-builtins`
+  * [#859](https://github.com/babel/minify/pull/859) perf(builtins): run builtins transform on multi pass ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+  * [#857](https://github.com/babel/minify/pull/857) perf(builtins): remove path.get calls ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+* `babel-helper-evaluate-path`
+  * [#856](https://github.com/babel/minify/pull/856) perf(evaluate): convert paths to nodes as path.get is slow ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-mangle-names`
+  * [#854](https://github.com/babel/minify/pull/854) perf(mangler): improve mangleScope perf ([@boopathi](https://github.com/boopathi))
+
+#### :memo: Documentation
+* [#888](https://github.com/babel/minify/pull/888) Update link to babili blog post ([@pradyumna-smpx](https://github.com/pradyumna-smpx))
+
+#### :house: Internal
+* Other
+  * [#883](https://github.com/babel/minify/pull/883) feat(bench): add terser. remove butternut ([@boopathi](https://github.com/boopathi))
+  * [#852](https://github.com/babel/minify/pull/852) refactor: update scripts to use transformSync and disable babel.config.js ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-simplify`
+  * [#858](https://github.com/babel/minify/pull/858) refactor(simplify): hoist path.get calls ([@boopathi](https://github.com/boopathi))
+* `babel-plugin-minify-mangle-names`
+  * [#853](https://github.com/babel/minify/pull/853) refactor: split mangleScope logic to smaller functions ([@boopathi](https://github.com/boopathi))
+
+#### Chore
+* `babel-minify`, `gulp-babel-minify`
+  * [#887](https://github.com/babel/minify/pull/887) chore: update to babel 7.0.0-beta.54 ([@christophehurpeau](https://github.com/christophehurpeau))
+* `babel-minify`, `babel-plugin-minify-simplify`, `gulp-babel-minify`
+  * [#872](https://github.com/babel/minify/pull/872) chore: Update babel to 7.0.0-beta.49 ([@pmdartus](https://github.com/pmdartus))
+
+#### Committers: 7
+- Boopathi Rajaa ([@boopathi](https://github.com/boopathi))
+- Christophe Hurpeau ([@christophehurpeau](https://github.com/christophehurpeau))
+- Esaú García Sánchez-Torija ([@egasato](https://github.com/egasato))
+- Pavan Kumar Sunkara ([@pksunkara](https://github.com/pksunkara))
+- Pierre-Marie Dartus ([@pmdartus](https://github.com/pmdartus))
+- Pradyumna Newalkar ([@pradyumna-smpx](https://github.com/pradyumna-smpx))
+- Vignesh Shanmugam ([@vigneshshanmugam](https://github.com/vigneshshanmugam))
+
 ## babel-minify@0.4.3 (2018-05-14)
 
 #### :bug: Bug Fix
