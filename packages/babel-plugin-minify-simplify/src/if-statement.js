@@ -266,35 +266,34 @@ module.exports = t => {
   // Remove else for if-return
   function removeUnnecessaryElse(path) {
     const { node } = path;
-    const consequent = path.get("consequent");
-    const alternate = path.get("alternate");
+    const { consequent, alternate } = node;
 
-    if (
-      consequent.node &&
-      alternate.node &&
-      (consequent.isReturnStatement() ||
-        (consequent.isBlockStatement() &&
-          t.isReturnStatement(
-            consequent.node.body[consequent.node.body.length - 1]
-          ))) &&
-      // don't hoist declarations
-      // TODO: validate declarations after fixing scope issues
-      (alternate.isBlockStatement()
-        ? !alternate
-            .get("body")
-            .some(
-              stmt =>
-                stmt.isVariableDeclaration({ kind: "let" }) ||
-                stmt.isVariableDeclaration({ kind: "const" })
-            )
-        : true)
-    ) {
+    const isConsequentCompleting =
+      t.isReturnStatement(consequent) ||
+      (t.isBlockStatement(consequent) &&
+        t.isReturnStatement(consequent.body[consequent.body.length - 1]));
+
+    // don't hoist declarations
+    // TODO: validate declarations after fixing scope issues
+    const isSafeAlternate = !(
+      t.isBlockStatement(alternate) &&
+      alternate.body.some(
+        stmt =>
+          t.isVariableDeclaration(stmt, { kind: "let" }) ||
+          t.isVariableDeclaration(stmt, { kind: "const" })
+      )
+    );
+
+    if (consequent && alternate && isConsequentCompleting && isSafeAlternate) {
       path.insertAfter(
-        alternate.isBlockStatement()
-          ? alternate.node.body.map(el => t.clone(el))
-          : t.clone(alternate.node)
+        t.isBlockStatement(alternate)
+          ? alternate.body.map(el => t.clone(el))
+          : t.clone(alternate)
       );
+
+      // we don't do path.remove() because it will call maximum call stack
       node.alternate = null;
+
       return REPLACED;
     }
   }

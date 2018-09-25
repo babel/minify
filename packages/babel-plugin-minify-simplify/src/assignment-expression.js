@@ -19,37 +19,37 @@ const updateOperators = new Set(["+", "-"]);
 
 module.exports = t => {
   function simplify(path) {
-    const rightExpr = path.get("right");
-    const leftExpr = path.get("left");
+    const rightExpr = path.node.right;
+    const leftExpr = path.node.left;
 
     if (path.node.operator !== "=") {
       return;
     }
 
     const canBeUpdateExpression =
-      rightExpr.get("right").isNumericLiteral() &&
-      rightExpr.get("right").node.value === 1 &&
-      updateOperators.has(rightExpr.node.operator);
+      t.isNumericLiteral(rightExpr.right) &&
+      rightExpr.right.value === 1 &&
+      updateOperators.has(rightExpr.operator);
 
-    if (leftExpr.isMemberExpression()) {
+    if (t.isMemberExpression(leftExpr)) {
       const leftPropNames = getPropNames(leftExpr);
-      const rightPropNames = getPropNames(rightExpr.get("left"));
+      const rightPropNames = getPropNames(rightExpr.left);
 
       if (
         !leftPropNames ||
         leftPropNames.indexOf(undefined) > -1 ||
         !rightPropNames ||
         rightPropNames.indexOf(undefined) > -1 ||
-        !operators.has(rightExpr.node.operator) ||
+        !operators.has(rightExpr.operator) ||
         !areArraysEqual(leftPropNames, rightPropNames)
       ) {
         return;
       }
     } else {
       if (
-        !rightExpr.isBinaryExpression() ||
-        !operators.has(rightExpr.node.operator) ||
-        leftExpr.node.name !== rightExpr.node.left.name
+        !t.isBinaryExpression(rightExpr) ||
+        !operators.has(rightExpr.operator) ||
+        leftExpr.name !== rightExpr.left.name
       ) {
         return;
       }
@@ -60,19 +60,59 @@ module.exports = t => {
     // special case x=x+1 --> ++x
     if (canBeUpdateExpression) {
       newExpression = t.updateExpression(
-        rightExpr.node.operator + rightExpr.node.operator,
-        t.clone(leftExpr.node),
+        rightExpr.operator + rightExpr.operator,
+        t.clone(leftExpr),
         true /* prefix */
       );
     } else {
       newExpression = t.assignmentExpression(
-        rightExpr.node.operator + "=",
-        t.clone(leftExpr.node),
-        t.clone(rightExpr.node.right)
+        rightExpr.operator + "=",
+        t.clone(leftExpr),
+        t.clone(rightExpr.right)
       );
     }
 
     path.replaceWith(newExpression);
+  }
+
+  function getPropNames(node) {
+    if (!t.isMemberExpression(node)) {
+      return;
+    }
+
+    const prop = node.property;
+    const propNames = [getName(prop)];
+
+    let obj = node.object;
+
+    while (t.isMemberExpression(obj)) {
+      const currentNode = obj.property;
+      if (currentNode) {
+        propNames.push(getName(currentNode));
+      }
+      obj = obj.object;
+    }
+
+    propNames.push(getName(obj));
+
+    return propNames;
+  }
+
+  function getName(node) {
+    if (t.isThisExpression(node)) {
+      return "this";
+    }
+    if (t.isSuper(node)) {
+      return "super";
+    }
+    if (t.isNullLiteral(node)) {
+      return "null";
+    }
+
+    // augment identifiers so that they don't match
+    // string/number literals
+    // but still match against each other
+    return node.name ? node.name + "_" : node.value /* Literal */;
   }
 
   return {
@@ -84,42 +124,4 @@ function areArraysEqual(arr1, arr2) {
   return arr1.every((value, index) => {
     return String(value) === String(arr2[index]);
   });
-}
-
-function getPropNames(path) {
-  if (!path.isMemberExpression()) {
-    return;
-  }
-
-  let obj = path.get("object");
-
-  const prop = path.get("property");
-  const propNames = [getName(prop.node)];
-
-  while (obj.type === "MemberExpression") {
-    const node = obj.get("property").node;
-    if (node) {
-      propNames.push(getName(node));
-    }
-    obj = obj.get("object");
-  }
-  propNames.push(getName(obj.node));
-
-  return propNames;
-}
-
-function getName(node) {
-  if (node.type === "ThisExpression") {
-    return "this";
-  }
-  if (node.type === "Super") {
-    return "super";
-  }
-  if (node.type === "NullLiteral") {
-    return "null";
-  }
-  // augment identifiers so that they don't match
-  // string/number literals
-  // but still match against each other
-  return node.name ? node.name + "_" : node.value /* Literal */;
 }
