@@ -1,10 +1,9 @@
 git:
-  depth: 10
+  depth: false
   submodules: false
 sudo: false
 language: node_js
 cache: yarn
-
 node_js:
   - "10"
   - "8"
