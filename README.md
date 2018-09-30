@@ -36,7 +36,7 @@ Babili has been now renamed to Babel-Minify :).
 
 ## Requirements
 
-- node >= 4
+- node >= 6
 - babel >= 6.20.0
 
 ## Why
