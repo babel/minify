@@ -879,12 +879,20 @@ module.exports = ({ types: t, traverse }) => {
           }
 
           // we can check if a test will be truthy 100% and if so then we can inline
-          // the consequent and completely ignore the alternate
+          // the consequent, completely ignore the alternate and remove subsequent nodes
           //
           //   if (true) { foo; } -> { foo; }
           //   if ("foo") { foo; } -> { foo; }
           //
           if (evalResult.confident && evalResult.value) {
+            if (path.parentPath.isBlockStatement()) {
+              let i = 1;
+              while (path.key + i < path.container.length) {
+                path.getSibling(path.key + 1).remove();
+                i++;
+              }
+            }
+
             path.replaceWithMultiple([
               ...replacements,
               ...toStatements(consequent),
