@@ -885,7 +885,12 @@ module.exports = ({ types: t, traverse }) => {
           //   if ("foo") { foo; } -> { foo; }
           //
           if (evalResult.confident && evalResult.value) {
-            if (path.parentPath.isBlockStatement()) {
+            const consequentBody = path.get("consequent").get("body");
+            const hasReturnStatement = Array.isArray(consequentBody)
+              ? consequentBody.some(t.isReturnStatement)
+              : false;
+
+            if (path.parentPath.isBlockStatement() && hasReturnStatement) {
               let i = 1;
               while (path.key + i < path.container.length) {
                 path.getSibling(path.key + 1).remove();
