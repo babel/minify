@@ -1,6 +1,6 @@
 "use strict";
 
-const some = require("lodash.some");
+const some = require("lodash/some");
 const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
 const removeUseStrict = require("./remove-use-strict");
 const evaluate = require("babel-helper-evaluate-path");

@@ -15,6 +15,6 @@
     "babel-helper-evaluate-path": "^0.5.0",
     "babel-helper-mark-eval-scopes": "^0.4.3",
     "babel-helper-remove-or-void": "^0.4.3",
-    "lodash.some": "^4.6.0"
+    "lodash": "^4.17.11"
   }
 }
