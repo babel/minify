@@ -891,11 +891,20 @@ module.exports = ({ types: t, traverse }) => {
               : false;
 
             if (path.parentPath.isBlockStatement() && hasReturnStatement) {
-              let i = 1;
-              while (path.key + i < path.container.length) {
-                path.getSibling(path.key + 1).remove();
-                i++;
+              const nodesToBeRemoved = [];
+
+              // loop through all subsequent siblings,
+              // leave variable declarations and functions,
+              // remove any other nodes
+              for (let i = path.key; i < path.container.length; i++) {
+                const sibling = path.getSibling(i + 1);
+                if (t.isVariableDeclaration(sibling)) {
+                  sibling.replaceWithMultiple(extractVars(sibling.parentPath));
+                } else if (!t.isFunctionDeclaration(sibling)) {
+                  nodesToBeRemoved.push(sibling);
+                }
               }
+              nodesToBeRemoved.forEach(node => node.remove());
             }
 
             path.replaceWithMultiple([
