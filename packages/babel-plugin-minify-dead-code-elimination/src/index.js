@@ -847,6 +847,15 @@ module.exports = ({ types: t, traverse }) => {
     }
   };
 
+  function removeNonHoistable(path) {
+    const vars = extractVars(path);
+    if (vars.length) {
+      path.replaceWithMultiple(...vars);
+    } else {
+      path.remove();
+    }
+  }
+
   return {
     name: "minify-dead-code-elimination",
     visitor: {
@@ -886,25 +895,32 @@ module.exports = ({ types: t, traverse }) => {
           //
           if (evalResult.confident && evalResult.value) {
             const consequentBody = path.get("consequent").get("body");
-            const hasReturnStatement = Array.isArray(consequentBody)
+            const consequentHasReturnStatement = Array.isArray(consequentBody)
               ? consequentBody.some(t.isReturnStatement)
               : false;
 
-            if (path.parentPath.isBlockStatement() && hasReturnStatement) {
-              const nodesToBeRemoved = [];
-
-              // loop through all subsequent siblings,
-              // leave variable declarations and functions,
-              // remove any other nodes
-              for (let i = path.key; i < path.container.length; i++) {
-                const sibling = path.getSibling(i + 1);
-                if (t.isVariableDeclaration(sibling)) {
-                  sibling.replaceWithMultiple(extractVars(sibling.parentPath));
-                } else if (!t.isFunctionDeclaration(sibling)) {
-                  nodesToBeRemoved.push(sibling);
+            consequent.traverse({
+              ReturnStatement(returnPath) {
+                const siblings = [];
+                for (
+                  let i = returnPath.key;
+                  i < returnPath.container.length;
+                  i++
+                ) {
+                  siblings.push(returnPath.getSibling(i + 1));
                 }
+                siblings.forEach(removeNonHoistable);
               }
-              nodesToBeRemoved.forEach(node => node.remove());
+            });
+
+            if (consequentHasReturnStatement) {
+              const siblings = [];
+              for (let i = path.key; i < path.container.length; i++) {
+                siblings.push(path.getSibling(i + 1));
+              }
+              siblings
+                .filter(s => !t.isFunctionDeclaration(s))
+                .forEach(removeNonHoistable);
             }
 
             path.replaceWithMultiple([

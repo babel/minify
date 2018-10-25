@@ -34,20 +34,40 @@ function f() {
   console.log('hi');
 }
 
-var v = 43;
-function s() {
-  s.func = func;
+function i() {
+  var i1 = ' ';
+  _i += i1 + i2 + i3 + i4 + i5 + i6 + i7;
   if (true) {
     return;
+    var i2 = 2;
+  } else {
+    var i3 = 3;
   }
-  console.log('no-hi');
-
-  var v = (console.log('no-hi2'), 42);
-  function func() {
-    v = (v | 0) + 1;
-    console.log('v is ' + v);
+  var i4 = 4;
+  var i5 = 5;
+  while (true) {
+    var i6 = 6;
+    if (false) {
+      var i7 = 7;
+    }
   }
-  console.log('test2');
 }
-s();
-s.func();
+
+function g() {
+  // preserve function
+  g.func = func;
+  if (true) {
+    return 1;
+  }
+  function func() {}
+}
+
+var variableToBeUsed = 1;
+function h() {
+  // leave used variables
+  h.variableToBeUsed = variableToBeUsed;
+  if (true) {
+    return 1;
+    var variableToBeUsed = 2;
+  }
+}

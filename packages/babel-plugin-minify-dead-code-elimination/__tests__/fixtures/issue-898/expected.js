@@ -11,17 +11,21 @@ function f() {
   console.log('hi');
 }
 
-var v = 43;
-
-function s() {
-  s.func = func;
-  var v;
-
-  function func() {
-    v = (v | 0) + 1;
-    console.log('v is ' + v);
-  }
+function i() {
+  _i += ' ' + void 0 + void 0 + void 0 + void 0 + void 0 + void 0;
 }
 
-s();
-s.func();
+function g() {
+  // preserve function
+  g.func = function () {};
+
+  return 1;
+}
+
+var variableToBeUsed = 1;
+
+function h() {
+  // leave used variables
+  h.variableToBeUsed = void 0;
+  return 1;
+}
