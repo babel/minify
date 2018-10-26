@@ -1,4 +1,3 @@
-// while
 while (true) {
   bar();
 }
