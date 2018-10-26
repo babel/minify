@@ -930,9 +930,9 @@ module.exports = ({ types: t, traverse }) => {
                 ? alternateBody.some(t.isReturnStatement)
                 : false;
 
-              // if (alternateHasReturnStatement) {
-              removeSubsequentSiblings(path);
-              // }
+              if (alternateHasReturnStatement) {
+                removeSubsequentSiblings(path);
+              }
 
               path.replaceWithMultiple([
                 ...replacements,

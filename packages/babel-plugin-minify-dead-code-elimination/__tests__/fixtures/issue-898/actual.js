@@ -18,12 +18,17 @@ function c() {
   return c;
 }
 
-function d() {
-  if (true) {
-    if (false) {
-      return;
-    }
-  }
+function noReturnIf() {
+  if (true) {}
+
+  var c = b();
+  return c;
+}
+
+function noReturnElse() {
+  if (false) {
+    return;
+  } else {}
 
   var c = b();
   return c;

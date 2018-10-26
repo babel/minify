@@ -2,7 +2,12 @@ function a() {}
 
 function c() {}
 
-function d() {
+function noReturnIf() {
+  var c = b();
+  return c;
+}
+
+function noReturnElse() {
   var c = b();
   return c;
 }
