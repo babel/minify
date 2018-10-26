@@ -15,6 +15,10 @@ function i() {
   _i += ' ' + void 0 + void 0 + void 0 + void 0 + void 0 + void 0;
 }
 
+function j() {
+  _i += ' ' + void 0 + void 0 + void 0 + void 0 + void 0 + void 0;
+}
+
 function g() {
   // preserve function
   g.func = function () {};

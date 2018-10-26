@@ -53,6 +53,25 @@ function i() {
   }
 }
 
+function j() {
+  var i1 = ' ';
+  _i += i1 + i2 + i3 + i4 + i5 + i6 + i7;
+  if (false) {
+    var i3 = 3;
+  } else {
+    return;
+    var i2 = 2;
+  }
+  var i4 = 4;
+  var i5 = 5;
+  while (true) {
+    var i6 = 6;
+    if (false) {
+      var i7 = 7;
+    }
+  }
+}
+
 function g() {
   // preserve function
   g.func = func;

@@ -894,7 +894,7 @@ module.exports = ({ types: t, traverse }) => {
           //   if ("foo") { foo; } -> { foo; }
           //
           if (evalResult.confident && evalResult.value) {
-            const consequentBody = path.get("consequent").get("body");
+            const consequentBody = consequent.get("body");
             const consequentHasReturnStatement = Array.isArray(consequentBody)
               ? consequentBody.some(t.isReturnStatement)
               : false;
@@ -939,6 +939,35 @@ module.exports = ({ types: t, traverse }) => {
           //
           if (evalResult.confident && !evalResult.value) {
             if (alternate.node) {
+              const alternateBody = alternate.get("body");
+              const alternateHasReturnStatement = Array.isArray(alternateBody)
+                ? alternateBody.some(t.isReturnStatement)
+                : false;
+
+              alternate.traverse({
+                ReturnStatement(returnPath) {
+                  const siblings = [];
+                  for (
+                    let i = returnPath.key;
+                    i < returnPath.container.length;
+                    i++
+                  ) {
+                    siblings.push(returnPath.getSibling(i + 1));
+                  }
+                  siblings.forEach(removeNonHoistable);
+                }
+              });
+
+              if (alternateHasReturnStatement) {
+                const siblings = [];
+                for (let i = path.key; i < path.container.length; i++) {
+                  siblings.push(path.getSibling(i + 1));
+                }
+                siblings
+                  .filter(s => !t.isFunctionDeclaration(s))
+                  .forEach(removeNonHoistable);
+              }
+
               path.replaceWithMultiple([
                 ...replacements,
                 ...toStatements(alternate),
