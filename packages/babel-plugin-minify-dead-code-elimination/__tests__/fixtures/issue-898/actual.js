@@ -29,47 +29,24 @@ function d() {
   return c;
 }
 
-function f() {
-  if (true) {}
-  console.log('hi');
-}
-
-function i() {
-  var i1 = ' ';
-  _i += i1 + i2 + i3 + i4 + i5 + i6 + i7;
+function removeSubsequentIf() {
+  // remove if's subsequent siblings
   if (true) {
-    return;
-    var i2 = 2;
-  } else {
-    var i3 = 3;
+    return 1;
   }
-  var i4 = 4;
-  var i5 = 5;
-  while (true) {
-    var i6 = 6;
-    if (false) {
-      var i7 = 7;
-    }
-  }
+  var v = 2;
+  console.log(v);
 }
 
-function j() {
-  var i1 = ' ';
-  _i += i1 + i2 + i3 + i4 + i5 + i6 + i7;
+function removeSubsequentElse() {
+  // remove else's subsequent siblings
   if (false) {
-    var i3 = 3;
-  } else {
     return;
-    var i2 = 2;
+  } else {
+    return 1;
   }
-  var i4 = 4;
-  var i5 = 5;
-  while (true) {
-    var i6 = 6;
-    if (false) {
-      var i7 = 7;
-    }
-  }
+  var v = 2;
+  console.log(v);
 }
 
 function g() {
@@ -113,4 +90,66 @@ function blockLocalElse() {
     return a;
     function a() {}
   }
+}
+
+function i() {
+  var i1 = ' ';
+  _i += i1 + i2 + i3 + i4 + i5 + i6 + i7;
+  if (true) {
+    return;
+    var i2 = 2;
+  } else {
+    var i3 = 3;
+  }
+  var i4 = 4;
+  var i5 = 5;
+  while (true) {
+    var i6 = 6;
+    if (false) {
+      var i7 = 7;
+    }
+  }
+}
+
+function j() {
+  var i1 = ' ';
+  _i += i1 + i2 + i3 + i4 + i5 + i6 + i7;
+  if (false) {
+    var i3 = 3;
+  } else {
+    return;
+    var i2 = 2;
+  }
+  var i4 = 4;
+  var i5 = 5;
+  while (true) {
+    var i6 = 6;
+    if (false) {
+      var i7 = 7;
+    }
+  }
+}
+
+function k() {
+  var v = 43;
+  var _ss = 3;
+  function s() {
+    s.func = func;
+    s._s = _s;
+    s._ss = _ss;
+    if (true) {
+      return 1;
+      var _s = 1;
+    }
+    console.log('no-hi');
+    var unusedToBeRemoved = 2;
+    var v = (console.log('no-hi2'), 42);
+    function func() {
+      v = (v | 0) + 1;
+      console.log('v is ' + v);
+    }
+    console.log('test2');
+  }
+  s();
+  s.func();
 }

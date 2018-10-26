@@ -918,7 +918,7 @@ module.exports = ({ types: t, traverse }) => {
           }
 
           // we can check if a test will be falsy 100% and if so we can inline the
-          // alternate if there is one and completely remove the consequent
+          // alternate if there is one, completely remove the consequent and remove subsequent nodes
           //
           //   if ("") { bar; } else { foo; } -> { foo; }
           //   if ("") { bar; } ->
@@ -930,9 +930,9 @@ module.exports = ({ types: t, traverse }) => {
                 ? alternateBody.some(t.isReturnStatement)
                 : false;
 
-              if (alternateHasReturnStatement) {
-                removeSubsequentSiblings(path);
-              }
+              // if (alternateHasReturnStatement) {
+              removeSubsequentSiblings(path);
+              // }
 
               path.replaceWithMultiple([
                 ...replacements,

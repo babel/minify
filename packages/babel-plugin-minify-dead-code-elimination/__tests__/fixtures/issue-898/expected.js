@@ -7,16 +7,14 @@ function d() {
   return c;
 }
 
-function f() {
-  console.log('hi');
+function removeSubsequentIf() {
+  // remove if's subsequent siblings
+  return 1;
 }
 
-function i() {
-  _i += ' ' + void 0 + void 0 + void 0 + void 0 + void 0 + void 0;
-}
-
-function j() {
-  _i += ' ' + void 0 + void 0 + void 0 + void 0 + void 0 + void 0;
+function removeSubsequentElse() {
+  // remove else's subsequent siblings
+  return 1;
 }
 
 function g() {
@@ -54,4 +52,30 @@ function blockLocalElse() {
 
     function a() {}
   }
+}
+
+function i() {
+  _i += ' ' + void 0 + void 0 + void 0 + void 0 + void 0 + void 0;
+}
+
+function j() {
+  _i += ' ' + void 0 + void 0 + void 0 + void 0 + void 0 + void 0;
+}
+
+function k() {
+  function s() {
+    s.func = func;
+    s._s = void 0;
+    s._ss = 3;
+    return 1;
+    var v;
+
+    function func() {
+      v = (v | 0) + 1;
+      console.log('v is ' + v);
+    }
+  }
+
+  s();
+  s.func();
 }
