@@ -847,6 +847,16 @@ module.exports = ({ types: t, traverse }) => {
     }
   };
 
+  function removeSubsequentSiblings(path) {
+    const siblings = [];
+    for (let i = path.key; i < path.container.length; i++) {
+      siblings.push(path.getSibling(i + 1));
+    }
+    siblings
+      .filter(s => !t.isFunctionDeclaration(s))
+      .forEach(removeNonHoistable);
+  }
+
   function removeNonHoistable(path) {
     const vars = extractVars(path);
     if (vars.length) {
@@ -899,28 +909,8 @@ module.exports = ({ types: t, traverse }) => {
               ? consequentBody.some(t.isReturnStatement)
               : false;
 
-            consequent.traverse({
-              ReturnStatement(returnPath) {
-                const siblings = [];
-                for (
-                  let i = returnPath.key;
-                  i < returnPath.container.length;
-                  i++
-                ) {
-                  siblings.push(returnPath.getSibling(i + 1));
-                }
-                siblings.forEach(removeNonHoistable);
-              }
-            });
-
             if (consequentHasReturnStatement) {
-              const siblings = [];
-              for (let i = path.key; i < path.container.length; i++) {
-                siblings.push(path.getSibling(i + 1));
-              }
-              siblings
-                .filter(s => !t.isFunctionDeclaration(s))
-                .forEach(removeNonHoistable);
+              removeSubsequentSiblings(path);
             }
 
             path.replaceWithMultiple([
@@ -944,28 +934,8 @@ module.exports = ({ types: t, traverse }) => {
                 ? alternateBody.some(t.isReturnStatement)
                 : false;
 
-              alternate.traverse({
-                ReturnStatement(returnPath) {
-                  const siblings = [];
-                  for (
-                    let i = returnPath.key;
-                    i < returnPath.container.length;
-                    i++
-                  ) {
-                    siblings.push(returnPath.getSibling(i + 1));
-                  }
-                  siblings.forEach(removeNonHoistable);
-                }
-              });
-
               if (alternateHasReturnStatement) {
-                const siblings = [];
-                for (let i = path.key; i < path.container.length; i++) {
-                  siblings.push(path.getSibling(i + 1));
-                }
-                siblings
-                  .filter(s => !t.isFunctionDeclaration(s))
-                  .forEach(removeNonHoistable);
+                removeSubsequentSiblings(path);
               }
 
               path.replaceWithMultiple([

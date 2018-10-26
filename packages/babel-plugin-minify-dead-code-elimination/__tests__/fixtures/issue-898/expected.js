@@ -33,3 +33,23 @@ function h() {
   h.variableToBeUsed = void 0;
   return 1;
 }
+
+function blockLocal1() {
+  foo.a = 1;
+  {
+    a();
+    return a;
+
+    function a() {}
+  }
+}
+
+function blockLocal2() {
+  foo.a = 1;
+  {
+    a();
+    return a;
+
+    function a() {}
+  }
+}

@@ -90,3 +90,25 @@ function h() {
     var variableToBeUsed = 2;
   }
 }
+
+function blockLocal1() {
+  var a = 1;
+  foo.a = a;
+  if (true) {
+    a();
+    return a;
+    function a() {}
+  }
+}
+
+function blockLocal2() {
+  var a = 1;
+  foo.a = a;
+  if (false) {
+    return;
+  } else {
+    a();
+    return a;
+    function a() {}
+  }
+}
