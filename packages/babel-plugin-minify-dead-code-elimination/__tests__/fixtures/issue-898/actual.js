@@ -91,7 +91,8 @@ function h() {
   }
 }
 
-function blockLocal1() {
+function blockLocalIf() {
+  // preserve block-local function declared inside „consequent” block
   var a = 1;
   foo.a = a;
   if (true) {
@@ -101,7 +102,8 @@ function blockLocal1() {
   }
 }
 
-function blockLocal2() {
+function blockLocalElse() {
+  // preserve block-local function declared inside „alternate” block
   var a = 1;
   foo.a = a;
   if (false) {

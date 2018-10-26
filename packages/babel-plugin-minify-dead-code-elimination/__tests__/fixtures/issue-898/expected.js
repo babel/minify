@@ -34,7 +34,8 @@ function h() {
   return 1;
 }
 
-function blockLocal1() {
+function blockLocalIf() {
+  // preserve block-local function declared inside „consequent” block
   foo.a = 1;
   {
     a();
@@ -44,7 +45,8 @@ function blockLocal1() {
   }
 }
 
-function blockLocal2() {
+function blockLocalElse() {
+  // preserve block-local function declared inside „alternate” block
   foo.a = 1;
   {
     a();

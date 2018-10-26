@@ -852,18 +852,14 @@ module.exports = ({ types: t, traverse }) => {
     for (let i = path.key; i < path.container.length; i++) {
       siblings.push(path.getSibling(i + 1));
     }
-    siblings
-      .filter(s => !t.isFunctionDeclaration(s))
-      .forEach(removeNonHoistable);
-  }
-
-  function removeNonHoistable(path) {
-    const vars = extractVars(path);
-    if (vars.length) {
-      path.replaceWithMultiple(...vars);
-    } else {
-      path.remove();
-    }
+    siblings.filter(s => !t.isFunctionDeclaration(s)).forEach(sibling => {
+      const vars = extractVars(sibling);
+      if (vars.length) {
+        sibling.replaceWithMultiple(...vars);
+      } else {
+        sibling.remove();
+      }
+    });
   }
 
   return {
