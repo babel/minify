@@ -84,3 +84,17 @@ function k() {
   s();
   s.func();
 }
+
+function l() {
+  i++;
+  j++;
+  var i;
+  var j;
+}
+
+function m() {
+  i++;
+  j++;
+  var i;
+  var j;
+}

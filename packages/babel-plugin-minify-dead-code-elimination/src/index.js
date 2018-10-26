@@ -906,6 +906,12 @@ module.exports = ({ types: t, traverse }) => {
               : false;
 
             if (consequentHasReturnStatement) {
+              consequent.traverse({
+                ReturnStatement(returnPath) {
+                  removeSubsequentSiblings(returnPath);
+                }
+              });
+
               removeSubsequentSiblings(path);
             }
 
@@ -931,6 +937,12 @@ module.exports = ({ types: t, traverse }) => {
                 : false;
 
               if (alternateHasReturnStatement) {
+                alternate.traverse({
+                  ReturnStatement(returnPath) {
+                    removeSubsequentSiblings(returnPath);
+                  }
+                });
+
                 removeSubsequentSiblings(path);
               }
 

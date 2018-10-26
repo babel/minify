@@ -158,3 +158,29 @@ function k() {
   s();
   s.func();
 }
+
+function l() {
+  i++;
+  j++;
+  if (true) {
+    return;
+    var i = meow();
+    for(;;) {
+      var j = 2;
+    }
+  }
+}
+
+function m() {
+  i++;
+  j++;
+  if (false) {
+    return 2;
+  } else {
+    return;
+    var i = meow();
+    for(;;) {
+      var j = 2;
+    }
+  }
+}
