@@ -1,4 +1,4 @@
-const isPlainObject = require("lodash.isplainobject");
+const isPlainObject = require("lodash/isPlainObject");
 
 // the flat plugin map
 // This is to prevent dynamic requires - require('babel-plugin-' + name);
