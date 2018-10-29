@@ -707,7 +707,7 @@ module.exports = ({ types: t, traverse }) => {
       const test = path.get("test");
       const result = evaluate(test, { tdz: this.tdz });
       if (result.confident && test.isPure() && !result.value) {
-        path.remove();
+        path.replaceWithMultiple(extractVars(path.get("body")));
       }
     },
 
