@@ -1,6 +1,6 @@
 "use strict";
 
-const some = require("lodash.some");
+const some = require("lodash/some");
 const { markEvalScopes, hasEval } = require("babel-helper-mark-eval-scopes");
 const removeUseStrict = require("./remove-use-strict");
 const evaluate = require("babel-helper-evaluate-path");
@@ -707,7 +707,7 @@ module.exports = ({ types: t, traverse }) => {
       const test = path.get("test");
       const result = evaluate(test, { tdz: this.tdz });
       if (result.confident && test.isPure() && !result.value) {
-        path.remove();
+        path.replaceWithMultiple(extractVars(path.get("body")));
       }
     },
 

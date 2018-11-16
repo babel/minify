@@ -56,7 +56,7 @@ function makeTester(
     });
   };
 
-  thePlugin.skip = name => test.skip(name);
+  thePlugin.skip = name => test.skip(name, () => {});
 
   if (excludeKeys.indexOf("inEachLine") === -1) {
     thePlugin.inEachLine = makeTester(

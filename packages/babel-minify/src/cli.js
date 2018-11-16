@@ -2,7 +2,7 @@ const yargsParser = require("yargs-parser");
 const optionsParser = require("./options-parser");
 const { version } = require("../package.json");
 const { handleStdin, handleFile, handleArgs, isFile } = require("./fs");
-const pick = require("lodash.pick");
+const pick = require("lodash/pick");
 
 const plugins = [
   "booleans",

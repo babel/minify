@@ -1,11 +1,11 @@
 {
-  "lerna": "2.0.0",
   "version": "independent",
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "commands": {
+  "registry": "https://registry.npmjs.org",
+  "command": {
     "publish": {
-      "ignore": [
+      "ignoreChanges": [
         "*.md",
         "__tests__"
       ]
@@ -24,8 +24,5 @@
       "Tag: Internal": ":house: Internal",
       "Tag: Chore": "Chore"
     }
-  },
-  "packages": [
-    "packages/*"
-  ]
+  }
 }
