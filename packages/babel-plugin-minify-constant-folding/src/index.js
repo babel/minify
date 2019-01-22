@@ -175,6 +175,13 @@ module.exports = babel => {
             return;
           }
 
+          // Some ponyfill's use native functions if available by grabbing
+          // a function reference from a constant.  t.valueToNode throws an
+          // exception if the argument is a function.
+          if (typeof res.value === "function") {
+            return;
+          }
+
           const node = t.valueToNode(res.value);
           node[seen] = true;
           path.replaceWith(node);
