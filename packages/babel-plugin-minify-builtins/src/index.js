@@ -23,7 +23,7 @@ module.exports = function({ types: t }) {
 
           // Should bail and not run the plugin
           // when builtin is polyfilled
-          if (t.isMemberExpression(left) && isBuiltInComputed(left)) {
+          if (t.isMemberExpression(left)) {
             let parent = path;
             do {
               parent.stop();
@@ -159,16 +159,6 @@ module.exports = function({ types: t }) {
     if (t.isIdentifier(property)) result += property.name;
 
     return result;
-  }
-
-  function isBuiltInComputed(memberExprNode) {
-    const { object, computed } = memberExprNode;
-
-    return (
-      computed &&
-      t.isIdentifier(object) &&
-      VALID_CALLEES.indexOf(object.name) >= 0
-    );
   }
 
   function isBuiltin(memberExprNode) {
