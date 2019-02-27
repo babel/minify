@@ -1,4 +1,4 @@
-<h1 align="center">babel-minify</h1>
+<h1 align="center">babel-minify (beta)</h1>
 
 <p align="center">
   <strong>An ES6+ aware minifier based on the Babel toolchain.</strong>
@@ -14,15 +14,15 @@
   <a href="https://www.npmjs.com/package/babel-preset-minify"><img alt="NPM Downloads" src="https://img.shields.io/npm/dm/babel-preset-minify.svg"/></a>
 </p>
 
-- Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
+- `babel-minify` is an experimental project that attempts to use Babel's toolchain (for compilation) to do something in a similar vein, minification. Currently in 0.x, so we don't recommend using it in production.
 
-- Babel-Minify is consumable via API, CLI, or Babel preset.
+- We are currently still looking for maintainers, checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
+
+- `babel-minify` is consumable via API, CLI, or Babel preset.
 
 - Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false&lineWrap=false&presets=react%2Cstage-2&code=%2F%2F%20Example%20ES2015%20Code%0Aclass%20Mangler%20%7B%0A%20%20constructor(program)%20%7B%0A%20%20%20%20this.program%20%3D%20program%3B%0A%20%20%7D%0A%7D%0Anew%20Mangler()%3B%20%2F%2F%20without%20this%20it%20would%20just%20output%20nothing%20since%20Mangler%20isn%27t%20used)
 
-## Note
-
-Babili has been now renamed to Babel-Minify :).
+> Historical note: babel-minify was renamed from babili.
 
 ## Table of Contents
 
@@ -102,7 +102,9 @@ npm install babel-preset-minify --save-dev
 
 ### Usage
 
-You'll most likely want to use it only in the production environment. Check out the [env docs](http://babeljs.io/docs/usage/babelrc/#env-option) for more help.
+> note: minify is still in beta, so we don't recommend using it for production code but rather the production environment.
+
+When testing, it's recommended to run minifiers for production so less code is sent to end-users vs. in development where it can be an issue for readability when debugging. Check out the [env docs](http://babeljs.io/docs/usage/babelrc/#env-option) for more help.
 
 > Options specific to a certain environment are merged into and overwrite non-env specific options.
 
