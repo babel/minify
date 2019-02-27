@@ -14,18 +14,13 @@
   <a href="https://www.npmjs.com/package/babel-preset-minify"><img alt="NPM Downloads" src="https://img.shields.io/npm/dm/babel-preset-minify.svg"/></a>
 </p>
 
-- `babel-minify` is an experimental project that attempts to use Babel's toolchain (for compilation) to do something in a similar vein, minification. Currently in 0.x, so we don't recommend using it in production.
-
-- We are currently still looking for maintainers, checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
-
-- `babel-minify` is consumable via API, CLI, or Babel preset.
-
-- Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false&lineWrap=false&presets=react%2Cstage-2&code=%2F%2F%20Example%20ES2015%20Code%0Aclass%20Mangler%20%7B%0A%20%20constructor(program)%20%7B%0A%20%20%20%20this.program%20%3D%20program%3B%0A%20%20%7D%0A%7D%0Anew%20Mangler()%3B%20%2F%2F%20without%20this%20it%20would%20just%20output%20nothing%20since%20Mangler%20isn%27t%20used)
+- `babel-minify` is consumable via API, CLI, or Babel preset. Try it online - [babeljs.io/repl](http://babeljs.io/repl/#?babili=true&evaluate=false&lineWrap=false&presets=react%2Cstage-2&code=%2F%2F%20Example%20ES2015%20Code%0Aclass%20Mangler%20%7B%0A%20%20constructor(program)%20%7B%0A%20%20%20%20this.program%20%3D%20program%3B%0A%20%20%7D%0A%7D%0Anew%20Mangler()%3B%20%2F%2F%20without%20this%20it%20would%20just%20output%20nothing%20since%20Mangler%20isn%27t%20used)
 
 > Historical note: babel-minify was renamed from babili.
 
 ## Table of Contents
 
+- [Experimental](#experimental)
 - [Requirements](#requirements)
 - [Why](#why)
 - [CLI](#cli)
@@ -33,6 +28,12 @@
 - [Individual Plugins](#individual-plugins)
 - [Benchmarks](#benchmarks)
 - [Team](#team)
+
+## Experimental
+
+`babel-minify` is an experimental project that attempts to use Babel's toolchain (for compilation) to do something in a similar vein, minification. It's currently in 0.x, so we don't recommend using it in production.
+
+Checkout our [CONTRIBUTING.md](/CONTRIBUTING.md) if you want to help out!
 
 ## Requirements
 
