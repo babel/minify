@@ -24,6 +24,16 @@ describe("inline-env-plugin", () => {
   );
 
   thePlugin(
+    "should not inline environment variables if it is on left side of assigment expression",
+    `
+    process.env.NODE_ENV = "development";
+  `,
+    `
+    process.env.NODE_ENV = "development";
+  `
+  );
+
+  thePlugin(
     "should inline environment vars in computed forms",
     `
       process.env["NODE_ENV"]
