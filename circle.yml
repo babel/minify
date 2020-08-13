@@ -1,25 +1,43 @@
----
-
-machine:
-  node:
-    version: "node"
-  environment:
-    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin"
-
-checkout:
-  post:
-    - git submodule sync
-    - git submodule update --init --recursive
-
-dependencies:
-  override:
-    - yarn
-  cache_directories:
-    - ~/.cache/yarn
-  post:
-    - yarn build
-
-test:
-  override:
-    - ./smoke/circleci.sh:
-        parallel: true
+version: 2
+jobs:
+  build:
+    working_directory: ~/babel/minify
+    parallelism: 4
+    shell: /bin/bash --login
+    environment:
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+      CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
+      PATH: ${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin
+    docker:
+      - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
+        command: /sbin/init
+    steps:
+      - run: git submodule sync
+      - run: git submodule update --init --recursive
+      - restore_cache:
+          keys:
+            # This branch if available
+            - v1-dep-{{ .Branch }}-
+            # Default branch if not
+            - v1-dep-master-
+            # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
+            - v1-dep-
+      - run: yarn
+      - run: yarn build
+      # Save dependency cache
+      - save_cache:
+          key: v1-dep-{{ .Branch }}-{{ epoch }}
+          paths:
+            - ~/.cache/yarn
+            - ./node_modules
+      # Test
+      - run: ./smoke/circleci.sh
+      # Teardown
+      # Save test results
+      - store_test_results:
+          path: /tmp/circleci-test-results
+      # Save artifacts
+      - store_artifacts:
+          path: /tmp/circleci-artifacts
+      - store_artifacts:
+          path: /tmp/circleci-test-results
