@@ -1,15 +1,20 @@
-version: 2
+version: 2.1
+
+executors:
+  node-executor:
+    docker:
+      - image: circleci/node:latest
+    working_directory: ~/babel/minify
+
 jobs:
   build:
-    working_directory: ~/babel/minify
+    executor: node-executor
     parallelism: 4
     shell: /bin/bash --login
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
       PATH: ${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin
-    docker:
-      - image: circleci/node:latest
     steps:
       - run: git submodule sync
       - run: git submodule update --init --recursive
