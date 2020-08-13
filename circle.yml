@@ -45,7 +45,6 @@ jobs:
       - save_cache: *save-yarn-cache
       # Test
       - run: ./smoke/circleci.sh
-      # Teardown
       # Save test results
       - store_test_results:
           path: /tmp/circleci-test-results
