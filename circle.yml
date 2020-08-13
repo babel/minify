@@ -10,7 +10,6 @@ jobs:
       PATH: ${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin
     docker:
       - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
-        command: /sbin/init
     steps:
       - run: git submodule sync
       - run: git submodule update --init --recursive
