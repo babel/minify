@@ -1,5 +1,26 @@
 version: 2.1
 
+aliases:
+  - &restore-node-modules-cache
+    keys:
+      - v1-yarn-deps-{{ checksum "yarn.lock" }}
+      - v1-yarn-deps-
+
+  - &restore-yarn-cache
+    keys:
+      - v1-1-yarn-cache-{{ checksum "yarn.lock" }}
+      - v1-1-yarn-cache-
+
+  - &save-node-modules-cache
+    paths:
+      - node_modules
+    key: v1-yarn-deps-{{ checksum "yarn.lock" }}
+
+  - &save-yarn-cache
+    paths:
+      - ~/.cache/yarn
+    key: v1-1-yarn-cache-{{ checksum "yarn.lock" }}
+
 executors:
   node-executor:
     docker:
@@ -10,30 +31,19 @@ jobs:
   build:
     executor: node-executor
     parallelism: 4
-    shell: /bin/bash --login
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
       PATH: ${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin
     steps:
-      - run: git submodule sync
-      - run: git submodule update --init --recursive
-      - restore_cache:
-          keys:
-            # This branch if available
-            - v1-dep-{{ .Branch }}-
-            # Default branch if not
-            - v1-dep-master-
-            # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
-            - v1-dep-
+      - checkout
+      - restore_cache: *restore-yarn-cache
+      - restore_cache: *restore-node-modules-cache
       - run: yarn
       - run: yarn build
       # Save dependency cache
-      - save_cache:
-          key: v1-dep-{{ .Branch }}-{{ epoch }}
-          paths:
-            - ~/.cache/yarn
-            - ./node_modules
+      - save_cache: *save-node-modules-cache
+      - save_cache: *save-yarn-cache
       # Test
       - run: ./smoke/circleci.sh
       # Teardown
