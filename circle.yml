@@ -1,25 +1,45 @@
----
+version: 2.1
 
-machine:
-  node:
-    version: "node"
-  environment:
-    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:./node_modules/.bin"
+aliases:
+  - &restore-node-modules-cache
+    keys:
+      - v1-yarn-deps-{{ checksum "yarn.lock" }}
+      - v1-yarn-deps-
 
-checkout:
-  post:
-    - git submodule sync
-    - git submodule update --init --recursive
+  - &restore-yarn-cache
+    keys:
+      - v1-1-yarn-cache-{{ checksum "yarn.lock" }}
+      - v1-1-yarn-cache-
 
-dependencies:
-  override:
-    - yarn
-  cache_directories:
-    - ~/.cache/yarn
-  post:
-    - yarn build
+  - &save-node-modules-cache
+    paths:
+      - node_modules
+    key: v1-yarn-deps-{{ checksum "yarn.lock" }}
 
-test:
-  override:
-    - ./smoke/circleci.sh:
-        parallel: true
+  - &save-yarn-cache
+    paths:
+      - ~/.cache/yarn
+    key: v1-1-yarn-cache-{{ checksum "yarn.lock" }}
+
+executors:
+  node-executor:
+    docker:
+      - image: circleci/node:latest
+    working_directory: ~/babel/minify
+
+jobs:
+  build:
+    executor: node-executor
+    parallelism: 4
+    steps:
+      - checkout
+      - run:
+          name: "Pull Submodules"
+          command: git submodule update --init --recursive
+      - restore_cache: *restore-yarn-cache
+      - restore_cache: *restore-node-modules-cache
+      - run: yarn
+      - run: yarn build
+      - save_cache: *save-node-modules-cache
+      - save_cache: *save-yarn-cache
+      - run: ./smoke/circleci.sh

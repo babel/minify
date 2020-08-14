@@ -5,14 +5,14 @@ const TESTS = [
   {
     dir: "html-minifier",
     files: "src/htmlminifier.js",
-    build: "grunt dist",
-    test: "grunt qunit"
+    build: "npm run dist",
+    test: "./node_modules/grunt/bin/grunt qunit"
   },
   {
     dir: "jquery",
     files: "dist/jquery.js",
     build: "npm run build",
-    test: "grunt test"
+    test: "./node_modules/grunt/bin/grunt test:slow"
   },
   {
     dir: "lodash",
