@@ -12,7 +12,7 @@ const TESTS = [
     dir: "jquery",
     files: "dist/jquery.js",
     build: "npm run build",
-    test: "npm run test:browserless"
+    test: "./node_modules/grunt/bin/grunt test:slow"
   },
   {
     dir: "lodash",
