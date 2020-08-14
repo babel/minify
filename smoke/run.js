@@ -5,30 +5,30 @@ const TESTS = [
   {
     dir: "html-minifier",
     files: "src/htmlminifier.js",
-    build: "grunt dist",
-    test: "grunt qunit"
+    build: "npm run dist",
+    test: "npm run test",
   },
   {
     dir: "jquery",
     files: "dist/jquery.js",
     build: "npm run build",
-    test: "grunt test"
+    test: "npm run test",
   },
   {
     dir: "lodash",
     files: "lodash.js",
     test: "npm run test:main",
     minifyOptions: {
-      keepFnName: true
-    }
-  }
+      keepFnName: true,
+    },
+  },
 ];
 
 function run() {
   let inputTests = [];
   program
     .usage("[options] [inputTests...]")
-    .action(_inputTests => (inputTests = _inputTests))
+    .action((_inputTests) => (inputTests = _inputTests))
     .option("-i --skip-install", "Skip Install Step")
     .option("-b --skip-build", "Skip Build step")
     .option("-c --skip-cleanup", "Skip cleanup step")
@@ -52,13 +52,13 @@ function run() {
     smoke(test, {
       skipInstall: program.skipInstall,
       skipBuild: program.skipBuild,
-      verbose: !program.quiet
+      verbose: !program.quiet,
     })
       .then(() => {
         const test = testsToRun.pop();
         test && tick(test);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         process.exit(1);
       });
