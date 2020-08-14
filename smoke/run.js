@@ -6,7 +6,7 @@ const TESTS = [
     dir: "html-minifier",
     files: "src/htmlminifier.js",
     build: "npm run dist",
-    test: "npm run test"
+    test: "./node_modules/grunt/bin/grunt qunit"
   },
   {
     dir: "jquery",
