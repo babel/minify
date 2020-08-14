@@ -12,7 +12,7 @@ const TESTS = [
     dir: "jquery",
     files: "dist/jquery.js",
     build: "npm run build",
-    test: "npm run test"
+    test: "npm run test:browserless"
   },
   {
     dir: "lodash",
