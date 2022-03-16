@@ -39,7 +39,7 @@ module.exports = class ScopeTracker {
   addReference(scope, binding, name) {
     let parent = scope;
     do {
-      this.references.get(parent).add(name);
+      (this.references.get(parent) || this.references.get(parent.parent)).add(name);
       if (!binding) {
         throw new Error(
           `Binding Not Found for ${name} during scopeTracker.addRefernce. ` +
@@ -60,7 +60,7 @@ module.exports = class ScopeTracker {
    * @param {String} name
    */
   hasReference(scope, name) {
-    return this.references.get(scope).has(name);
+    return (this.references.get(scope) || this.references.get(scope.parent)).has(name);
   }
 
   /**
@@ -75,7 +75,7 @@ module.exports = class ScopeTracker {
   updateReference(scope, binding, oldName, newName) {
     let parent = scope;
     do {
-      const ref = this.references.get(parent);
+      const ref = this.references.get(parent) || this.references.get(parent.parent);
 
       ref.delete(oldName);
       ref.add(newName);
@@ -193,7 +193,7 @@ module.exports = class ScopeTracker {
       return;
     }
 
-    const bindings = this.bindings.get(binding.scope);
+    const bindings = this.bindings.get(binding.scope) || this.bindings.get(binding.scope.parent);
     const existingBinding = bindings.get(binding.identifier.name);
 
     if (existingBinding && existingBinding !== binding) {
@@ -216,8 +216,8 @@ module.exports = class ScopeTracker {
    * @param {Scope} toScope
    */
   moveBinding(binding, toScope) {
-    this.bindings.get(binding.scope).delete(binding.identifier.name);
-    this.bindings.get(toScope).set(binding.identifier.name, binding);
+    (this.bindings.get(binding.scope) || this.bindings.get(binding.scope.parent)).delete(binding.identifier.name);
+    (this.bindings.get(toScope) || this.bindings.get(toScope.parent)).set(binding.identifier.name, binding);
   }
 
   /**
@@ -226,7 +226,7 @@ module.exports = class ScopeTracker {
    * @param {String} name
    */
   hasBinding(scope, name) {
-    return this.bindings.get(scope).has(name);
+    return (this.bindings.get(scope) || this.bindings.get(scope.parent)).has(name);
   }
 
   /**
@@ -236,7 +236,7 @@ module.exports = class ScopeTracker {
    * @param {String} newName
    */
   renameBinding(scope, oldName, newName) {
-    const bindings = this.bindings.get(scope);
+    const bindings = this.bindings.get(scope) || this.bindings.get(scope.parent);
     bindings.set(newName, bindings.get(oldName));
     bindings.delete(oldName);
   }
