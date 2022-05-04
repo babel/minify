@@ -1,12 +1,12 @@
 (function () {
   class Foo {}
 
-  const b = class Bar extends Foo {};
-  var c = class Baz {};
+  const a = class Bar extends Foo {};
+  var b = class Baz {};
 
-  function a() {
-    new c();
+  function c() {
+    new b();
   }
 
-  a();
+  c();
 })();

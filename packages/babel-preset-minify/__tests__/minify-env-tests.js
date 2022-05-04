@@ -50,14 +50,20 @@ describe("preset along with env", () => {
       }
     `,
     `
+      function _defineProperties(a, b) { for (var c, d = 0; d < b.length; d++) c = b[d], c.enumerable = c.enumerable || !1, c.configurable = !0, "value" in c && (c.writable = !0), Object.defineProperty(a, c.key, c); }
+
+      function _createClass(a, b, c) { return b && _defineProperties(a.prototype, b), c && _defineProperties(a, c), Object.defineProperty(a, "prototype", { writable: !1 }), a; }
+
       function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
 
       function a() {
-        return function a() {
+        var a = /*#__PURE__*/_createClass(function a() {
           "use strict";
 
           _classCallCheck(this, a);
-        };
+        });
+
+        return a;
       }
     `
   );
@@ -237,16 +243,20 @@ describe("preset along with env", () => {
       }
     `,
     `
+      function _defineProperties(a, b) { for (var c, d = 0; d < b.length; d++) c = b[d], c.enumerable = c.enumerable || !1, c.configurable = !0, "value" in c && (c.writable = !0), Object.defineProperty(a, c.key, c); }
+
+      function _createClass(a, b, c) { return b && _defineProperties(a.prototype, b), c && _defineProperties(a, c), Object.defineProperty(a, "prototype", { writable: !1 }), a; }
+
       function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
 
       function bar() {
         var c = console;
         return {
-          a: function b(a) {
+          a: /*#__PURE__*/_createClass(function d(b) {
             "use strict";
 
-            _classCallCheck(this, b), c.log(a);
-          }
+            _classCallCheck(this, d), c.log(b);
+          })
         };
       }
     `
@@ -261,13 +271,17 @@ describe("preset along with env", () => {
       exports.A = A;
     `,
     `
+      function _defineProperties(a, b) { for (var c, d = 0; d < b.length; d++) c = b[d], c.enumerable = c.enumerable || !1, c.configurable = !0, "value" in c && (c.writable = !0), Object.defineProperty(a, c.key, c); }
+
+      function _createClass(a, b, c) { return b && _defineProperties(a.prototype, b), c && _defineProperties(a, c), Object.defineProperty(a, "prototype", { writable: !1 }), a; }
+
       function _classCallCheck(a, b) { if (!(a instanceof b)) throw new TypeError("Cannot call a class as a function"); }
 
-      var A = function a() {
+      var A = /*#__PURE__*/_createClass(function a() {
         "use strict";
 
         _classCallCheck(this, a);
-      };
+      });
 
       A.B = {}, exports.A = A;
     `

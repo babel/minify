@@ -1,35 +1,35 @@
 function d3_svg_line(a) {
-  var c = d3_geom_pointX,
-      d = d3_geom_pointY,
+  var b = d3_geom_pointX,
+      c = d3_geom_pointY,
       e = d3_true,
       f = d3_svg_lineLinear,
       g = f.key,
       h = 0.7;
 
-  function b(b) {
-    var j = [],
-        k = [],
-        l = -1,
-        m = b.length,
-        n,
-        o = d3_functor(c);
+  function i(c) {
+    var g = [],
+        j = [],
+        k = -1,
+        l = c.length,
+        m,
+        n = d3_functor(b);
 
-    function g() {
-      j.push("M", f(a(k), h));
+    function o() {
+      g.push("M", f(a(j), h));
     }
 
-    while (++l < m) {
-      if (e.call(this, n = b[l], l)) {
-        k.push([+o.call(this, n, l)]);
-      } else if (k.length) {
-        g();
-        k = [];
+    while (++k < l) {
+      if (e.call(this, m = c[k], k)) {
+        j.push([+n.call(this, m, k)]);
+      } else if (j.length) {
+        o();
+        j = [];
       }
     }
 
-    if (k.length) g();
-    return j.length ? j.join("") : null;
+    if (j.length) o();
+    return g.length ? g.join("") : null;
   }
 
-  return b;
+  return i;
 }
