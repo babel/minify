@@ -19,9 +19,9 @@
     "watch": "gulp watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/plugin-transform-block-scoping": "^7.8.3",
-    "@babel/preset-env": "^7.9.0",
+    "@babel/core": "^7.17.0",
+    "@babel/plugin-transform-block-scoping": "^7.16.7",
+    "@babel/preset-env": "^7.17.10",
     "babel-jest": "^24.9.0",
     "butternut": "^0.4.6",
     "bytes": "^3.0.0",
