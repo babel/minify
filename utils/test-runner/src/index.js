@@ -35,7 +35,7 @@ function testRunner(dir) {
     .filter(dir => fs.isDirectorySync(pathJoin(fixturesDir, dir)));
 
   const flags = parseArgs(process.argv);
-  const updateFixtures = Boolean(flags["update-fixtures"]);
+  const updateFixtures = !!process.env.OVERWRITE || Boolean(flags["update-fixtures"]);
 
   describe(pkgName, () => {
     for (const fixture of fixtures) {

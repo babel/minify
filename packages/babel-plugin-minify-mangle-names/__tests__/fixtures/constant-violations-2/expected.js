@@ -1,10 +1,10 @@
 !function () {
-  var b = 1;
-  b--;
-  var b = 10;
-  a(b);
+  var a = 1;
+  a--;
+  var a = 10;
+  b(a);
 
-  function a() {
+  function b() {
     var a = 10;
     a++;
     var a = 20;

@@ -371,22 +371,29 @@ module.exports = ({ types: t, traverse }) => {
                   refPath.scope.getBinding(replacement.name) === binding &&
                   binding.constantViolations.length === 0
                 );
+              } else if (replacementPath.isThisExpression()) {
+                bail = true;
               } else {
                 replacementPath.traverse({
                   Function(path) {
                     path.skip();
                   },
 
+                  ThisExpression(path) {
+                    bail = true;
+                    path.stop();
+                  },
+
                   ReferencedIdentifier({ node }) {
-                    if (bail) {
-                      return;
-                    }
                     const binding = scope.getBinding(node.name);
                     if (
                       binding &&
                       refPath.scope.getBinding(node.name) === binding
                     ) {
                       bail = binding.constantViolations.length > 0;
+                      if (bail) {
+                        path.stop();
+                      }
                     }
                   }
                 });

@@ -25,13 +25,10 @@ function foo() {
     set a(b) {}
 
   };
-
-  class A {
+  return new class {
     set c(d) {
       x.a = 5;
     }
 
-  }
-
-  return new A();
+  }();
 }
