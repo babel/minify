@@ -21,9 +21,9 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: lib
-          path:
-            - packages/*/lib/**/*
-            - utils/*/lib/**
+          path: |
+            packages/*/lib/**/*
+            utils/*/lib/**
 
   lint:
     name: Lint
