@@ -434,7 +434,7 @@ module.exports = ({ types: t, traverse }) => {
               const isReplacementObj =
                 isObj(replacement) || some(replacement, isObj);
 
-              if (!sharesRoot || (isReplacementObj && mayLoop)) {
+              if (this.keepVarName || !sharesRoot || (isReplacementObj && mayLoop)) {
                 continue;
               }
 
@@ -966,6 +966,7 @@ module.exports = ({ types: t, traverse }) => {
             opts: {
               // set defaults
               optimizeRawSize = false,
+              keepVarName = false,
               keepFnName = false,
               keepClassName = false,
               keepFnArgs = false,
@@ -982,6 +983,7 @@ module.exports = ({ types: t, traverse }) => {
           path.traverse(main, {
             functionToBindings: new Map(),
             optimizeRawSize,
+            keepVarName,
             keepFnName,
             keepClassName,
             keepFnArgs,
