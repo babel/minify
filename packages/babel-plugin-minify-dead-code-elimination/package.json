@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-minify-dead-code-elimination",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "",
   "keywords": [
     "babel-plugin"
