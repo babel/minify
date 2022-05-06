@@ -57,7 +57,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
       - name: Install
-        run: yarn
+        run: yarn && yarn bootstrap
       - uses: actions/download-artifact@v3
         with:
           name: lib
