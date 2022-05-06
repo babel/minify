@@ -486,6 +486,15 @@ module.exports = ({ types: t, traverse }) => {
       }
     },
 
+    // Remove unused imports
+    ImportSpecifier(path) {
+      removeImportSpecifier(path);
+    },
+
+    ImportDefaultSpecifier(path) {
+      removeImportSpecifier(path);
+    },
+
     // Remove unreachable code.
     BlockStatement(path) {
       const paths = path.get("body");
@@ -1168,6 +1177,16 @@ module.exports = ({ types: t, traverse }) => {
     // Check if shadowed or is not referenced.
     if (binding && (binding.path.node !== node || !binding.referenced)) {
       node.id = null;
+    }
+  }
+
+  function removeImportSpecifier(path) {
+    const { node, scope } = path;
+    const binding = scope.getBinding(node.local.name);
+
+    // Check if shadowed or is not referenced.
+    if (binding && (binding.path.node !== node || !binding.referenced)) {
+      path.remove();
     }
   }
 
