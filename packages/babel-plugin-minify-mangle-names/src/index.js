@@ -458,7 +458,7 @@ module.exports = babel => {
 
         const { node } = path;
 
-        if (!path.isIdentifier()) {
+        if (!path.isIdentifier() && !path.isJSXIdentifier()) {
           // Ideally, this should not happen
           // it happens in these places now -
           // case 1: Export Statements

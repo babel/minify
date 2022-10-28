@@ -1,7 +1,7 @@
 "use strict";
 
 const CHARSET = (
-  "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ$_"
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz$_"
 ).split("");
 
 module.exports = class Charset {
