@@ -168,7 +168,7 @@ function evaluateBasedOnControlFlow(binding, refPath) {
     }
 
     // Detect usage before init
-    const stmts = fnParent.isProgram()
+    const stmts = fnParent.isProgram() || fnParent.isStaticBlock()
       ? fnParent.node.body
       : fnParent.node.body.body;
 
