@@ -55,11 +55,15 @@ module.exports = function({ types: t }) {
 
             const { node } = path;
 
+            node.declarations.forEach(d => d.loc = d.loc || node.loc);
+
             let sibling = path.getSibling(path.key + 1);
 
             let declarations = [];
 
             while (sibling.isVariableDeclaration({ kind: node.kind })) {
+              sibling.node.declarations.forEach(d => d.loc = d.loc || sibling.node.loc);
+
               declarations = declarations.concat(sibling.node.declarations);
 
               sibling.remove();
